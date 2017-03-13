@@ -382,6 +382,8 @@ CXMLElement* CHost::FindGroup(void)
     CSmallString info;
     info << "hostname: " << Hostname;
     ES_WARNING(info);
+    info << "personal: " << personal;
+    ES_WARNING(info);
 
     CXMLElement* p_gele = Hosts.GetChildElementByPath("config/groups/group");
     while( p_gele != NULL ){
