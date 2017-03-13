@@ -115,10 +115,11 @@ bool CSiteCmd::Run(void)
     Host.InitGlobalSetup();
     User.InitGlobalSetup();
 
+    // initialize hosts -----------------------------
+    Host.InitHostFile();
+    Host.InitHost();
+
     if( GlobalConfig.GetActiveSiteID() != NULL ){
-        // initialize hosts -----------------------------
-        Host.InitHostFile(GlobalConfig.GetActiveSiteID());
-        Host.InitHost();
 
         // initialize user -----------------------------
         User.InitUserFile(GlobalConfig.GetActiveSiteID());

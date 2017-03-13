@@ -109,7 +109,7 @@ bool CModuleCmd::Run(void)
     User.InitGlobalSetup();
 
     // initialize hosts -----------------------------
-    Host.InitHostFile(GlobalConfig.GetActiveSiteID());
+    Host.InitHostFile();
     Host.InitHost();
 
     // initialize user ------------------------------

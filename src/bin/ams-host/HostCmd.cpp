@@ -84,14 +84,9 @@ bool CHostCmd::Run(void)
     Host.InitGlobalSetup();
     User.InitGlobalSetup();
 
-    if( GlobalConfig.GetActiveSiteID() != NULL ){
-
-        // initialize hosts -----------------------------
-        Host.InitHostFile(GlobalConfig.GetActiveSiteID());
-        Host.InitHost(Options.GetOptNoCache());
-    } else {
-        ES_WARNING("no site is active");
-    }
+    // initialize hosts -----------------------------
+    Host.InitHostFile();
+    Host.InitHost(Options.GetOptNoCache());
 
     vout << low;
     if( Options.GetOptPrintHWSpec() == false ){

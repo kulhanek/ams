@@ -193,14 +193,14 @@ bool Run(void)
     Host.InitGlobalSetup();
     User.InitGlobalSetup();
 
+    // initialize hosts -----------------------------
+    Host.InitHostFile();
+    Host.InitHost();
+
     if( GlobalConfig.GetActiveSiteID() != NULL ){
         // initialize user -----------------------------
         User.InitUserFile(GlobalConfig.GetActiveSiteID());
         User.InitUser();
-
-        // initialize hosts -----------------------------
-        Host.InitHostFile(GlobalConfig.GetActiveSiteID());
-        Host.InitHost();
     }
 
     // load user config

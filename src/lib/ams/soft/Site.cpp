@@ -463,7 +463,7 @@ void CSite::PrintShortSiteInfo(ostream& vout)
 
     vout << endl;
     vout << "# ";
-    for(int n=4; n < 80 - version.GetLength(); n++) vout << "~";
+    for(unsigned int n=4; n < 80 - version.GetLength(); n++) vout << "~";
     vout << version << "~~" << endl;
 
     int  n1 = (80 - 8 - status.GetLength() - name.GetLength())/2;
@@ -567,7 +567,7 @@ bool CSite::ActivateSite(void)
     }
 
     // initialize hosts -----------------------------
-    Host.InitHostFile(SiteID);
+    Host.InitHostFile();
     Host.InitHost();
 
     User.InitUserFile(SiteID);

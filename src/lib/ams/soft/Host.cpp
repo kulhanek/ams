@@ -123,27 +123,23 @@ void CHost::InitGlobalSetup(void)
 
 //------------------------------------------------------------------------------
 
-void CHost::InitHostFile(const CSmallString& site_sid)
+void CHost::InitHostFile(void)
 {
-    SiteSID = site_sid;
     CFileName    config_name;
 
-    // first try site config
-    config_name = CFileName(ETCDIR) / "sites" / site_sid / "host.xml";
-    if( CFileSystem::IsFile(config_name) == false ) {
-        // then global config
-        config_name = CFileName(ETCDIR) / "default" / "host.xml";
-    } else {
-        SiteConfigInUse = site_sid;
-    }
-
+    config_name = CFileName(ETCDIR) / "default" / "hosts.xml";
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&Hosts);
 
     if( xml_parser.Parse(config_name) == false ) {
         CSmallString    error;
-        error << "unable to load '" << config_name << "' file for site '" << site_sid << "'";
+        error << "unable to load '" << config_name << "'";
         RUNTIME_ERROR(error);
+    }
+
+    CXMLElement* p_mele = Hosts.GetFirstChildElement("config");
+    if( p_mele ){
+        p_mele->GetAttribute("key",ConfigKey);
     }
 }
 
@@ -183,8 +179,8 @@ void CHost::ClearAll(void)
     CPUInfoNumOfHostCPUs = 0;
     TorqueNCPUs = 0;
 
-    SiteSID = NULL;
-    SiteConfigInUse  = NULL;
+    ConfigRealm  = NULL;
+    ConfigKey = NULL;
 
     CacheLoaded = false;
     CacheTime = 0;
@@ -200,7 +196,7 @@ void CHost::LoadCache(void)
     CXMLDocument xml_document;
 
     // try to load cache
-    CFileName file_name = "/tmp/ams_cache." + User.GetName() + "." + SiteSID;
+    CFileName file_name = "/tmp/ams_cache." + User.GetName();
 
     if( CFileSystem::IsFile(file_name) == false ){
         // no cache file
@@ -223,25 +219,13 @@ void CHost::LoadCache(void)
     CXMLElement* p_ele = xml_document.GetFirstChildElement("cache");
     if( p_ele == NULL ) return;
 
-// master ID ------------
-    // cache site ID - always active site
-    CSmallString sid;
-    p_ele->GetAttribute("sid",sid);
-    if( sid != GlobalConfig.GetActiveSiteID() ){
-        ES_WARNING("site ID mismatch");
-        return;
-    }
-
+// master ID -----------
     // this is id from the host file
-    int master_id = 0;
-    int cmaster_id = 0;
-    CXMLElement* p_mele = Hosts.GetFirstChildElement("config");
-    if( p_mele ){
-        p_mele->GetAttribute("cache_mid",master_id);
-    }
-    p_ele->GetAttribute("mid",cmaster_id);
-    if( cmaster_id != master_id ){
-        ES_WARNING("master ID mismatch");
+    CSmallString cache_key;
+
+    p_ele->GetAttribute("key",cache_key);
+    if( cache_key != ConfigKey ){
+        ES_WARNING("master/cache keys mismatch");
         return;
     }
 
@@ -323,17 +307,9 @@ void CHost::SaveCache(void)
     xml_document.CreateChildComment("AMS host cache file");
     CXMLElement* p_ele = xml_document.CreateChildElement("cache");
 
-// master ID ------------
-    // cache site ID - always active site
-    p_ele->SetAttribute("sid",GlobalConfig.GetActiveSiteID());
-
+// master key ------------
     // this is id from the host file
-    int master_id = 0;
-    CXMLElement* p_mele = Hosts.GetFirstChildElement("config");
-    if( p_mele ){
-        p_mele->GetAttribute("cache_mid",master_id);
-    }
-    p_ele->SetAttribute("mid",master_id);
+    p_ele->SetAttribute("key",ConfigKey);
 
     // this is current time
     CSmallTimeAndDate current_time;
@@ -377,7 +353,7 @@ void CHost::SaveCache(void)
     p_dele->SetAttribute("tks",join(NetTokens,"#"));
 
     // save cache
-    CFileName file_name = "/tmp/ams_cache." + User.GetName() + "." + SiteSID;
+    CFileName file_name = "/tmp/ams_cache." + User.GetName();
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&xml_document);
@@ -399,6 +375,32 @@ void CHost::InitHost(int ncpus,int ngpus)
 
 //------------------------------------------------------------------------------
 
+CXMLElement* CHost::FindGroup(void)
+{
+    bool personal = CShell::GetSystemVariable("AMS_PERSONAL") == "ON" ;
+
+    CXMLElement* p_gele = Hosts.GetChildElementByPath("config/groups/group");
+    while( p_gele != NULL ){
+        CXMLElement* p_host = p_gele->GetChildElementByPath("hosts/host");
+        while( p_host != NULL ){
+            CSmallString name;
+            p_host->GetAttribute("name",name);
+            if( personal ){
+                if( name == "personal" ) return(p_gele);
+            } else {
+                if( fnmatch(name,Hostname,0) == 0) return(p_gele);
+            }
+            p_host = p_host->GetNextSiblingElement();
+        }
+
+        p_gele = p_gele->GetNextSiblingElement();
+    }
+
+    return(p_gele);
+}
+
+//------------------------------------------------------------------------------
+
 void CHost::InitHost(bool nocache)
 {
     CPUModelName="unknown";
@@ -407,9 +409,26 @@ void CHost::InitHost(bool nocache)
     if( nocache == false) LoadCache();
 
     // parse config file -------------------------
-    CXMLElement* p_ele = Hosts.GetFirstChildElement("config");
-    if( p_ele ){
-        p_ele = p_ele->GetFirstChildElement();
+    CXMLElement* p_aele = NULL;
+
+    // try to load group specific setup
+    CXMLElement* p_gele = FindGroup();
+    if( p_gele != NULL ){
+        p_gele->GetAttribute("name",ConfigRealm);
+        if( ConfigRealm == NULL ) ConfigRealm = "group-specific";
+        p_aele = p_gele->GetChildElementByPath("archs");
+    }
+
+    // if not exists then use default
+    if( p_aele == NULL ){
+        // use default
+        p_aele = Hosts.GetChildElementByPath("config/archs");
+        ConfigRealm = NULL;
+    }
+
+    CXMLElement* p_ele = NULL;
+    if( p_aele != NULL ){
+        p_ele = p_aele->GetFirstChildElement();
     }
 
     while( p_ele ){
@@ -441,7 +460,7 @@ void CHost::InitHost(bool nocache)
         p_ele = p_ele->GetNextSiblingElement();
     }
 
-    InitCompatibilityTokens();
+    InitCompatibilityTokens(p_aele);
 
     // merge all tokens
     for(size_t i=0; i < DefaultTokens.size(); i++){
@@ -806,7 +825,7 @@ void CHost::InitTorqueTokens(CXMLElement* p_ele)
 
 //------------------------------------------------------------------------------
 
-void CHost::InitCompatibilityTokens(void)
+void CHost::InitCompatibilityTokens(CXMLElement* p_cele)
 {
     std::list<string>  all_tokens;
 
@@ -834,7 +853,10 @@ void CHost::InitCompatibilityTokens(void)
     while( it != ie ){
 
         // try to find arch
-        CXMLElement* p_arch = Hosts.GetChildElementByPath("config/archs/arch");
+        CXMLElement* p_arch = NULL;
+        if( p_cele != NULL ){
+            p_arch = p_cele->GetChildElementByPath("compat/arch");
+        }
         while( p_arch ){
             string arch_name;
             p_arch->GetAttribute("name",arch_name);
@@ -1193,11 +1215,30 @@ const CSmallString CHost::GetSecTokens(std::set<std::string>& list)
 
 void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
 {
+    // parse config file -------------------------
+    CXMLElement* p_aele = NULL;
+
+    // try to load group specific setup
+    CXMLElement* p_gele = FindGroup();
+    if( p_gele != NULL ){
+        p_gele->GetAttribute("name",ConfigRealm);
+        if( ConfigRealm == NULL ) ConfigRealm = "group-specific";
+        p_aele = p_gele->GetChildElementByPath("archs");
+    }
+
+    // if not exists then use default
+    if( p_aele == NULL ){
+        // use default
+        p_aele = Hosts.GetChildElementByPath("config/archs");
+        ConfigRealm = NULL;
+    }
+
+
     vout << endl;
     vout << "Full host name      : " << GetHostName() << endl;
-    vout << "Site ID             : " << SiteSID << endl;
-    if( SiteConfigInUse != NULL ){
-    vout << "Configuration realm : " << SiteConfigInUse << endl;
+    vout << "Config key          : " << ConfigKey << endl;
+    if( ConfigRealm != NULL ){
+    vout << "Configuration realm : " << ConfigRealm << endl;
     } else {
     vout << "Configuration realm : default" << endl;
     }
@@ -1210,10 +1251,9 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     }
     vout << "===================================================================" << endl;
 
-    // parse config file -------------------------
-    CXMLElement* p_ele = Hosts.GetFirstChildElement("config");
-    if( p_ele ){
-        p_ele = p_ele->GetFirstChildElement();
+    CXMLElement* p_ele = NULL;
+    if( p_aele != NULL ){
+        p_ele = p_aele->GetFirstChildElement();
     }
 
     int pri = 0;

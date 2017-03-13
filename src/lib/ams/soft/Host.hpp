@@ -62,7 +62,7 @@ public:
 
 // input methods ---------------------------------------------------------------
     /// load hosts configuration file
-    void InitHostFile(const CSmallString& site_sid);
+    void InitHostFile(void);
 
     /// init global setup
     void InitGlobalSetup(void);
@@ -137,13 +137,16 @@ public:
     /// print host HW specification
     void PrintHWSpec(CVerboseStr& vout);
 
+    /// find host group
+    CXMLElement* FindGroup(void);
+
 // section of private date -----------------------------------------------------
 private:
-    CSmallString                SiteSID;                // site id
     CXMLDocument                Hosts;                  // host configuration
     CSmallString                Hostname;               // hostname
     bool                        AlienHost;              // hostname is overwritten
-    CSmallString                SiteConfigInUse;        // site or default configuration in use
+    CSmallString                ConfigRealm;            // group or default config
+    CSmallString                ConfigKey;              // config key
 
     long int                    CacheTime;              // when the cache was created
     bool                        CacheLoaded;            // if cache is loaded it is not saved
@@ -208,7 +211,7 @@ private:
     void InitTorqueTokens(CXMLElement* p_ele);
 
     /// init compatibility tokens
-    void InitCompatibilityTokens(void);
+    void InitCompatibilityTokens(CXMLElement* p_ele);
 
     /// init GPU info tokens
     void InitGPUInfoTokens(CXMLElement* p_ele);

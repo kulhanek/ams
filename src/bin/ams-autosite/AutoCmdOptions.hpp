@@ -37,7 +37,7 @@ public:
     CSO_PROG_NAME_END
 
     CSO_PROG_DESC_BEGIN
-    "Print the name of default site for the host."
+    "Print the name of the default site for the host."
     CSO_PROG_DESC_END
 
     CSO_PROG_VERS_BEGIN
@@ -47,21 +47,31 @@ public:
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
     // options ------------------------------
+    CSO_OPT(CSmallString,TransferSite)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
-    CSO_OPT(bool,Verbose)
+    CSO_OPT(bool,Verbose)  
     CSO_LIST_END
 
     CSO_MAP_BEGIN
     // description of options -----------------------------------------------------
+    CSO_MAP_OPT(CSmallString,                           /* option type */
+                TransferSite,                        /* option name */
+                "",                          /* default value */
+                false,                          /* is option mandatory */
+                't',                           /* short option name */
+                "transfer",                      /* long option name */
+                "SITE",                           /* parametr name */
+                "name/SID of transferred site")   /* option description */
+    //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */
                 false,                          /* default value */
                 false,                          /* is option mandatory */
-                'v',                           /* short option name */
+                '\0',                           /* short option name */
                 "verbose",                      /* long option name */
                 NULL,                           /* parametr name */
-                "increase output verbosity")   /* option description */
+                "verbose output")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Version,                        /* option name */

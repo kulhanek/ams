@@ -30,10 +30,16 @@
 #include "prefix.h"
 #include <iomanip>
 #include <User.hpp>
+#include <Utils.hpp>
+#include <XMLElement.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
+using namespace boost;
+using namespace boost::algorithm;
 
 //------------------------------------------------------------------------------
 
@@ -100,68 +106,72 @@ bool CAutoCmd::Run(void)
     Host.InitGlobalSetup();
     User.InitGlobalSetup();
 
-    if( GlobalConfig.GetActiveSiteID() != NULL ){
-        // initialize hosts -----------------------------
-        Host.InitHostFile(GlobalConfig.GetActiveSiteID());
-        Host.InitHost();
-    }
+    // initialize hosts -----------------------------
+    Host.InitHostFile();
+    Host.InitHost();
 
     vout << high;
+        vout << "Host               : " << Host.GetHostName() << endl;
 
-    // make list of all available sites -------------
-    CDirectoryEnum      dir_enum(BR_ETCDIR("/sites"));
-    CFileName           site_sid;
-    std::list<CSiteRec> sites;
+    CSmallString primary,transferable,others;
 
-    dir_enum.StartFindFile("{*}");
-
-    while( dir_enum.FindFile(site_sid) ) {
-        CAmsUUID    site_id;
-        vout << endl;
-        if( site_id.LoadFromString(site_sid) == false ) continue;
-        vout << ">>> site: " << site_id.GetFullStringForm() << endl;
-
-        CSite site;
-        if( site.LoadConfig(site_sid) == false ) {
-            vout << "    unable load config" << endl;
-            continue;
+    CXMLElement* p_gele = Host.FindGroup();
+    if( p_gele != NULL ){
+        CSmallString gname;
+        p_gele->GetAttribute("name",gname);
+        vout << "Group              : " << gname << endl;
+        CXMLElement* p_sele = p_gele->GetFirstChildElement("sites");
+        if( p_sele != NULL ){
+            p_sele->GetAttribute("primary",primary);
+            p_sele->GetAttribute("transferable",transferable);
+            if( transferable == NULL ) transferable="-none-";
+            p_sele->GetAttribute("others",others);
+            if( others == NULL ) others="-none-";
+        vout << "Primary site       : " << primary << endl;
+        vout << "Transferable sites : " << transferable << endl;
+        vout << "Other sites        : " << others << endl;
+        } else{
+        vout << ">> INFO: <sites></sites> element not found in the hosts.xml file!" << endl;
         }
-            vout << "    Name     : " << site.GetName() << endl;
-        int priority = 0;
-        if( site.CanBeActivated(priority,true) ){
-            vout << "    Priority : " << priority << endl;
-            CSiteRec srec;
-            srec.Name = site.GetName();
-            srec.Priority = priority;
-            sites.push_back(srec);
+    } else {
+        vout << "Group              : - not found-" << endl;
+    }
+
+    CSmallString best_site;
+
+    if( Options.IsOptTransferSiteSet() == true ){
+        CSmallString tname;
+        if( ! CUtils::IsSiteIDValid(Options.GetOptTransferSite()) ){
+            tname = Options.GetOptTransferSite();
+        vout << "Transferred site   : " << tname << endl;
         } else {
-            vout << "    Priority : -not allowed on this host-" << endl;
+            tname = CUtils::GetSiteName(Options.GetOptTransferSite());
+        vout << "Transferred site   : " << Options.GetOptTransferSite() << " (" << tname << ")" << endl;
+        }
+
+        string stransferrable(transferable);
+        // split string into tokens
+        std::vector<std::string> transferrables;
+        split(transferrables,stransferrable,is_any_of(","));
+
+        // is it allowed?
+        if(std::find(transferrables.begin(), transferrables.end(), string(tname)) != transferrables.end()) {
+            best_site =  tname;
+        } else {
+            vout << ">> INFO: The transferred site is not allowed - using default!" << endl;
         }
     }
-    dir_enum.EndFindFile();
-    vout << endl;
 
-    // sort allowed sites by their priorities
-    sites.sort(SitePriorityCompare);
-
-    std::list<CSiteRec>::iterator it = sites.begin();
-    std::list<CSiteRec>::iterator ie = sites.end();
-
-    vout << "*** Allowed sites ***" << endl;
-    while( it != ie ){
-        vout << setw(5) << (*it).Priority << " " << (*it).Name << endl;
-        it++;
+    if( best_site == NULL ){
+        // default site
+        best_site = primary;
     }
-    vout << endl;
 
     // print best site
+        vout << "Selected site      : ";
     vout << low;
-    if( ! sites.empty() ){
-        vout << sites.front().Name;
-    }
-
+    vout << best_site;
     vout << high;
-    vout << endl;
 
     return(true);
 }
@@ -182,7 +192,9 @@ void CAutoCmd::Finalize(void)
     if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
         ErrorSystem.PrintErrors(vout);       
         vout << endl;
-    }   
+    } else {
+        vout << endl;
+    }
 }
 
 //==============================================================================

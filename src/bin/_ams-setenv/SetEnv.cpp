@@ -92,7 +92,7 @@ bool CSetEnv::Run(void)
     User.InitGlobalSetup();
 
     // initialize hosts -----------------------------
-    Host.InitHostFile(GlobalConfig.GetActiveSiteID());
+    Host.InitHostFile();
 
     // determine number of host CPUs and GPUs
     Host.InitHost(Options.GetOptNCPUs(),Options.GetOptNGPUs());

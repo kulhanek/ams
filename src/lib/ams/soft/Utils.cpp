@@ -26,6 +26,7 @@
 #include <Site.hpp>
 #include <DirectoryEnum.hpp>
 #include <FileName.hpp>
+#include <FileSystem.hpp>
 #include <AmsUUID.hpp>
 #include <prefix.h>
 #include <errno.h>
@@ -87,6 +88,11 @@ const CSmallString CUtils::GetSiteName(const CSmallString& site_sid)
 
 bool CUtils::IsSiteIDValid(const CSmallString& site_id)
 {
+    CFileName config_path = ETCDIR;
+    config_path = config_path / "sites" / site_id / "site.xml";
+
+    if( CFileSystem::IsFile(config_path) == false ) return(false);
+
     CSite   site;
     return(site.LoadConfig(site_id));
 }
