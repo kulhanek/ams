@@ -112,7 +112,7 @@ function read_profile()
     fi
 
     export AMS_SYNC_ACTION="`grep ACTION $PROFILE | awk '{print $2;}'`"
-    if[ -n  "$AMS_SYNC_ACTION" ]; then
+    if [ -n  "$AMS_SYNC_ACTION" ]; then
         echo "  Action             :    $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
             "amscore" | "softrepo" | "all" )
