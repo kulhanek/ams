@@ -14,3 +14,6 @@ sed -e "s/GITREVS/$GITREVS/g" -e "s/GITHASH/$GITHASH/g" -e "s/DATE/$DATE/g" \
     src/lib/ams/AMSMainHeader.hpp > src/lib/ams/AMSMainHeader_.hpp
 
 mv -f src/lib/ams/AMSMainHeader_.hpp src/lib/ams/AMSMainHeader.hpp
+
+echo "AMS Revision: 8.$GITHASH.$GITREVS ($DATE)"
+
