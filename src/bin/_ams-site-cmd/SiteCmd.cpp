@@ -399,12 +399,13 @@ int CSiteCmd::ActivateSite(void)
     }
 
     // reinit user and host
-    // init global host and user data
-    Host.ClearAll();
-    Host.InitGlobalSetup();
+    // CANNOT BE HERE - moved to Site.ActivateSite()
+//    // init global host and user data
+//    Host.ClearAll();
+//    Host.InitGlobalSetup();
 
-    User.ClearAll();
-    User.InitGlobalSetup();
+//    User.ClearAll();
+//    User.InitGlobalSetup();
 
     if( Site.ActivateSite() == false ) {
         CSmallString error;

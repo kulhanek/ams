@@ -537,6 +537,12 @@ bool CSite::ActivateSite(void)
     }
 
     // initialize hosts -----------------------------
+    Host.ClearAll();
+    Host.InitGlobalSetup();
+
+    User.ClearAll();
+    User.InitGlobalSetup();
+
     Host.InitHostFile();
     Host.InitHost();
 

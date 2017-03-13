@@ -379,9 +379,9 @@ CXMLElement* CHost::FindGroup(void)
 {
     bool personal = CShell::GetSystemVariable("AMS_PERSONAL") == "ON" ;
 
-    CSmallString info;
-    info << "hostname: " << Hostname;
-    ES_WARNING(info);
+//    CSmallString info;
+//    info << "hostname: " << Hostname;
+//    ES_WARNING(info);
 
     CXMLElement* p_gele = Hosts.GetChildElementByPath("config/groups/group");
     while( p_gele != NULL ){
@@ -401,9 +401,9 @@ CXMLElement* CHost::FindGroup(void)
                 if( name == "personal" ) return(p_gele);
             } else {
                 if( fnmatch(name,Hostname,0) == 0){
-                    CSmallString info;
-                    info << "HIT: " << name;
-                    ES_WARNING(info);
+//                    CSmallString info;
+//                    info << "HIT: " << name;
+//                    ES_WARNING(info);
                     return(p_gele);
                 }
             }
