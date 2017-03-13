@@ -1068,6 +1068,7 @@ void CHost::InitNetworkTokens(CXMLElement* p_ele)
 
 CXMLElement* CHost::GetRootParallelModes(void)
 {
+    // FIX ME - check if site does not have own specification
     CXMLElement* p_mele = Hosts.GetChildElementByPath("config/modes");
     if( p_mele == NULL ){
         RUNTIME_ERROR("unable to open hosts config/modes element");
