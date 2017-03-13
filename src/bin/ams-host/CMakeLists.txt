@@ -10,6 +10,7 @@ SET(PROG_SRC
 
 # final build ------------------------------------------------------------------
 ADD_EXECUTABLE(ams-host ${PROG_SRC})
+ADD_DEPENDENCIES(ams-host ams_shared)
 
 TARGET_LINK_LIBRARIES(ams-host ${AMS_LIBS})
 

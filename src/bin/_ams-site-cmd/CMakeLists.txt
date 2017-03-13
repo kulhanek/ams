@@ -10,6 +10,7 @@ SET(PROG_SRC
 
 # final build ------------------------------------------------------------------
 ADD_EXECUTABLE(_ams-site-cmd ${PROG_SRC})
+ADD_DEPENDENCIES(_ams-site-cmd ams_shared)
 
 TARGET_LINK_LIBRARIES(_ams-site-cmd ${AMS_LIBS})
 

@@ -11,6 +11,7 @@ SET(CMD_SRC
 
 # final build ------------------------------------------------------------------
 ADD_EXECUTABLE(ams-repoindex-create ${CMD_SRC})
+ADD_DEPENDENCIES(ams-repoindex-create ams_shared)
 
 TARGET_LINK_LIBRARIES(ams-repoindex-create ${AMS_LIBS})
 

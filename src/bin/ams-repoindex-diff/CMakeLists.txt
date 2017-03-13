@@ -10,6 +10,7 @@ SET(CMD_SRC
 
 # final build ------------------------------------------------------------------
 ADD_EXECUTABLE(ams-repoindex-diff ${CMD_SRC})
+ADD_DEPENDENCIES(ams-repoindex-diff ams_shared)
 
 TARGET_LINK_LIBRARIES(ams-repoindex-diff ${AMS_LIBS})
 
