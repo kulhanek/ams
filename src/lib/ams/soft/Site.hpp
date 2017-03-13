@@ -116,10 +116,7 @@ public:
     bool IsActive(void);
 
     /// can be site activated on this computer?
-    bool CanBeActivated(bool allow_localhost=false,bool track_rules=false);
-
-    /// can be site activated on this computer?
-    bool CanBeActivated(int& priority,bool allow_localhost,bool track_rules=false);
+    bool CanBeActivated(void);
 
     // print information about site -----------------------------------------------
     /// print short info about site

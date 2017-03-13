@@ -43,10 +43,14 @@
 #include <Host.hpp>
 #include <iomanip>
 #include <boost/format.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
+using namespace boost;
+using namespace boost::algorithm;
 
 //------------------------------------------------------------------------------
 
@@ -351,87 +355,47 @@ bool CSite::IsSiteAdaptive(void)
 
 //------------------------------------------------------------------------------
 
-bool CSite::CanBeActivated(bool allow_localhost,bool track_rules)
+bool CSite::CanBeActivated(void)
 {
-    int priority;
-    return(CanBeActivated(priority,allow_localhost,track_rules));
-}
-
-//------------------------------------------------------------------------------
-
-bool CSite::CanBeActivated(int& priority,bool allow_localhost,bool track_rules)
-{
-    priority = 0;
-
-    CXMLElement* p_ele = SiteConfig.GetChildElementByPath("site/computers");
-    if( p_ele == NULL ) {
-        ES_ERROR("unable to open site/computers path");
-        return(false);
-    }
-
-    // handle personal site
-    if( GetName() == "personal" ){
-        if( CShell::GetSystemVariable("AMS_PERSONAL") == "ON" ){
-            if( Host.GetHostName() != CShell::GetSystemVariable("HOSTNAME") ){
-                ES_TRACE_ERROR("site is 'personal', AMS_PERSONAL is 'ON', but the host is not HOSTNAME");
-                return(false);
-            }
-            if( track_rules ) ES_WARNING("site is allowed - the site is 'personal' and AMS_PERSONAL is 'ON'");
-            priority = 1000;
-            return(true);
-        }
-        ES_ERROR("site is 'personal' but AMS_PERSONAL variable is not set to 'ON'");
-        return(false);
-    }
-
-    // go through the list computers
-    CXMLIterator I(p_ele);
-    CXMLElement* p_comp;
     CSmallString host_name = Host.GetHostName();
+    CXMLElement* p_ele = Host.FindGroup();
+    if( p_ele == NULL ){
+        CSmallString error;
+        error << "no host group found - site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
+        ES_ERROR(error);
+        return(false);
+    }
+    CSmallString name;
+    p_ele->GetAttribute("name",name);
 
-    while( (p_comp = I.GetNextChildElement()) != NULL ) {
-        if( (p_comp->GetName() == "computer") || (p_comp->GetName() == "allow") ){
-            CSmallString comp_name;
-            if( p_comp->GetAttribute("name",comp_name) == false ) {
-                ES_ERROR("unable to get computer name");
-                return(false);
-            }
-            CSmallString warning;
-            warning << "testing host : '" << comp_name << "'";
-            if( track_rules ) ES_WARNING(warning);
-            if( (comp_name == "localhost") && allow_localhost ){
-                p_comp->GetAttribute("priority",priority);
-                if( track_rules ) ES_WARNING("site is allowed - the comp is 'localhost' and localhost is allowed");
-                return(true);
-            }
-            if( fnmatch(comp_name,host_name,0) == 0 ) {
-                CSmallString warning;
-                warning << "allow: computer name '" << comp_name << "' match hostname '" << host_name << "'";
-                if( track_rules ) ES_WARNING(warning);
-                p_comp->GetAttribute("priority",priority);
-                return(true);
-            }
-        }
-        if( p_comp->GetName() == "deny" ){
-            CSmallString comp_name;
-            if( p_comp->GetAttribute("name",comp_name) == false ) {
-                ES_ERROR("unable to get computer name");
-                return(false);
-            }
-            if( fnmatch(comp_name,host_name,0) == 0 ) {
-                CSmallString warning;
-                warning << "deny: computer name '" << comp_name << "' match hostname '" << host_name << "'";
-                if( track_rules ) ES_WARNING(warning);
-                return(false);
-            }
-        }
-
+    CXMLElement* p_sele = p_ele->GetFirstChildElement("sites");
+    if( p_sele == NULL ){
+        CSmallString error;
+        error << "no 'sites'' element found for the group '" << name << "' - site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
+        ES_ERROR(error);
+        return(false);
     }
 
-    CSmallString error;
-    error << "site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
-    ES_ERROR(error);
-    return(false);
+    string primary,transferable,others;
+    p_sele->GetAttribute("primary",primary);
+    p_sele->GetAttribute("transferable",transferable);
+    p_sele->GetAttribute("others",others);
+
+    // split into tokens
+    std::vector<std::string> sites;
+    split(sites,primary,is_any_of(","));
+    split(sites,transferable,is_any_of(","));
+    split(sites,others,is_any_of(","));
+
+    // is allowed?
+    if(std::find(sites.begin(), sites.end(), string(GetName())) == sites.end()) {
+        CSmallString error;
+        error << "site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    return(true);
 }
 
 //------------------------------------------------------------------------------
@@ -550,7 +514,7 @@ void CSite::PrintFullSiteInfo(std::ostream& vout)
 
 bool CSite::ActivateSite(void)
 {
-    if( CanBeActivated(true) == false ) {
+    if( CanBeActivated() == false ) {
         CSmallString error;
         error << "site (" << GetName() << ") is not allowed to be activated on this computer (";
         error << Host.GetHostName() << ")";

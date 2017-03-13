@@ -48,11 +48,6 @@ unset MY_UMASK
 
 REACTIVATE=1
 
-# determine default site name - zero string -> auto mode
-if [ -z "$DEFAULT_SITE_NAME" ]; then
-    DEFAULT_SITE_NAME="`site default 2>&1`"
-fi
-
 # use either user or system defaults ...
 if [ -z "$DEFAULT_SITE_NAME" ]; then
     SITE_NAME=`ams-autosite`

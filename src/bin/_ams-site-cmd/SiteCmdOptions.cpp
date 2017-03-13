@@ -77,7 +77,6 @@ int CSiteCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "info" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "active" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "priorities" ) return(SO_CONTINUE);
         if( (GetProgArg(0) == "activate") ||
                 (GetProgArg(0) == "isactive") ||
                 (GetProgArg(0) == "isallowed") ||
@@ -121,15 +120,6 @@ int CSiteCmdOptions::CheckArguments(void)
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
                 fprintf(stderr,"%s: action 'actname' cannot be specified with site name\n",
-                        (const char*)GetProgramName());
-                IsError = true;
-            }
-            return(SO_OPTS_ERROR);
-        }
-        if( GetProgArg(0) == "default" ) {
-            if( IsVerbose() ) {
-                if( IsError == false ) fprintf(stderr,"\n");
-                fprintf(stderr,"%s: action 'default' cannot be specified with site name\n",
                         (const char*)GetProgramName());
                 IsError = true;
             }

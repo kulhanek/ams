@@ -303,12 +303,6 @@ bool CSiteCmd::Run(void)
         return(true);
     }
     // ----------------------------------------------
-    else if( Options.GetArgAction() == "priorities" ) {
-        SoftConfig.LoadUserConfig();
-        fprintf(stderr,"%s",(const char*)SoftConfig.GetSitePriorities());
-        return(true);
-    }
-    // ----------------------------------------------
     else {
         ES_ERROR("not implemented");
         return(false);
@@ -400,7 +394,7 @@ int CSiteCmd::ActivateSite(void)
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
 
-    if( Site.CanBeActivated(true) == false ) {
+    if( Site.CanBeActivated() == false ) {
         return(SITE_ERROR_NOT_ALLOWED);
     }
 
@@ -549,7 +543,7 @@ bool CSiteCmd::IsAllowed(void)
         return(false);
     }
 
-    return( Site.CanBeActivated(false,true) );
+    return( Site.CanBeActivated() );
 }
 
 //==============================================================================

@@ -60,7 +60,6 @@ public:
     "   <green>isactive</green>    return zero if the site is active\n"
     "   <green>isallowed</green>   return zero if the site can be activated on the computer\n"
     "   <green>id</green>          return site id\n"
-    "   <green>priorities</green>  print user site priorities\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

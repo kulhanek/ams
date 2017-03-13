@@ -35,6 +35,14 @@ CAutoCmdOptions::CAutoCmdOptions(void)
 
 int CAutoCmdOptions::CheckOptions(void)
 {
+    if( (IsOptIsTransferableSet() == true) && (IsOptTransferSiteSet() == false) ){
+        if( IsVerbose() ) {
+            if( IsError == false ) fprintf(stderr,"\n");
+            fprintf(stderr,"%s: the 'istransferable'' option requires the 'transfer' option", (const char*)GetProgramName());
+            IsError = true;
+        }
+        return(SO_OPTS_ERROR);
+    }
     return(SO_CONTINUE);
 }
 
