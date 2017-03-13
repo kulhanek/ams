@@ -1,0 +1,40 @@
+#!/bin/bash
+# ==============================================================================
+# Infinity
+# (c) 2011, Petr Kulhanek, kulhanek@chemi.muni.cz
+# ==============================================================================
+
+# initialize wrapper functions -------------------------------------------------
+
+amsmodule(){
+ AMS_EXIT_CODE=0
+ eval `_ams-module-cmd $*`
+ return $AMS_EXIT_CODE
+}
+
+site(){
+ AMS_EXIT_CODE=0
+ eval `_ams-site-cmd $*`
+ return $AMS_EXIT_CODE
+}
+
+# in dash the name cannot contain -, it is the same for the newest version of bash
+amssetenv() {
+ AMS_EXIT_CODE=0
+ eval `_ams-setenv $*`
+ return $AMS_EXIT_CODE
+}
+
+export -f amsmodule
+export -f site
+export -f amssetenv
+
+# name completion --------------------------------------------------------------
+COMP_WORDBREAKS=" \"'@><=;|&("    # : removed from the list
+
+complete -o nospace -C _ams-cgen amsmodule
+complete -o nospace -C _ams-cgen site
+complete -o nospace -C _ams-cgen ams-cache
+complete -o nospace -C _ams-cgen ams-map-manip
+
+
