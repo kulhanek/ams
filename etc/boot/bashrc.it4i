@@ -8,7 +8,7 @@ if [ -n "$AMS_SKIP_ME" ]; then return; fi
 
 # standard AMS core path
 if [ -z "$AMS_ROOT" ]; then
-    AMS_ROOT=/home/kulhanek/ASoftware/softmods/7.0
+    AMS_ROOT=/home/kulhanek/ASoftware/softmods/8.0
     export AMS_ROOT
 fi
 
