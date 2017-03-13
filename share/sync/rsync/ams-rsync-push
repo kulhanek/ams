@@ -133,7 +133,7 @@ rsync_amscore()
         return 0
     else
         echo "AMS core synchronization [FAILED]"
-        return 1
+        exit 1
     fi
 }
 
@@ -173,7 +173,7 @@ rsync_softrepo()
 
         if ! [ -d "$SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
             echo " - [ERROR] - package directory does not exists: $SOFTREPO/$AMS_PACKAGE_DIR/"
-            return 1
+            exit 1
         fi
 
     # get list of root app directories and their setup (permision and group)

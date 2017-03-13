@@ -116,7 +116,7 @@ bool CAutoCmd::Run(void)
         vout << "Transferable sites : " << transferable << endl;
         vout << "Other sites        : " << others << endl;
         } else{
-        vout << ">> INFO: <sites></sites> element not found in the hosts.xml file!" << endl;
+        vout << ">>> INFO: <sites></sites> element not found in the hosts.xml file!" << endl;
         }
     } else {
         vout << "Group              : - not found-" << endl;
@@ -143,17 +143,15 @@ bool CAutoCmd::Run(void)
         if(std::find(transferrables.begin(), transferrables.end(), string(tname)) != transferrables.end()) {
             if( Options.GetOptIsTransferable() == true ){
                 vout << low;
-                vout << endl;
-                vout << ">> INFO: The source site '" << tname << "' is allowed to be transfered to this host ..." << endl;
+                vout << ">>> INFO: The source site '" << tname << "' is allowed to be transfered to this host ..." << endl;
             }
             best_site =  tname;
         } else {
             if( Options.GetOptIsTransferable() == false ){
-                vout << ">> INFO: The transferred site is not allowed - using default!" << endl;
+                vout << ">>> INFO: The transferred site is not allowed - using default!" << endl;
             } else {
                 vout << low;
-                vout << endl;
-                vout << ">> INFO: The source site '" << tname << "' is not allowed to be transfered to this host, using default ..." << endl;
+                vout << ">>> INFO: The source site '" << tname << "' is not allowed to be transfered to this host, using default ..." << endl;
             }
         }
     }
