@@ -48,6 +48,7 @@ public:
     CSO_LIST_BEGIN
     // options ------------------------------
     CSO_OPT(CSmallString,TransferSite)
+    CSO_OPT(bool,IsTransferable)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)  
@@ -63,6 +64,15 @@ public:
                 "transfer",                      /* long option name */
                 "SITE",                           /* parametr name */
                 "name/SID of transferred site")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                IsTransferable,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                0,                           /* short option name */
+                "istransferable",                      /* long option name */
+                NULL,                           /* parametr name */
+                "is SITE transferable?")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */

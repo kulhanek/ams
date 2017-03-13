@@ -85,21 +85,6 @@ int CAutoCmd::Init(int argc, char* argv[])
 
 //------------------------------------------------------------------------------
 
-class CSiteRec {
-    public:
-    CSmallString    Name;
-    int             Priority;
-};
-
-//------------------------------------------------------------------------------
-
-bool SitePriorityCompare(const CSiteRec& left,const CSiteRec& right)
-{
-    return( left.Priority >= right.Priority );
-}
-
-//------------------------------------------------------------------------------
-
 bool CAutoCmd::Run(void)
 {
     // init global host and user data
@@ -156,9 +141,20 @@ bool CAutoCmd::Run(void)
 
         // is it allowed?
         if(std::find(transferrables.begin(), transferrables.end(), string(tname)) != transferrables.end()) {
+            if( Options.GetOptIsTransferable() == true ){
+                vout << low;
+                vout << endl;
+                vout << ">> INFO: The source site '" << tname << "' is allowed to be transfered to this host ..." << endl;
+            }
             best_site =  tname;
         } else {
-            vout << ">> INFO: The transferred site is not allowed - using default!" << endl;
+            if( Options.GetOptIsTransferable() == false ){
+                vout << ">> INFO: The transferred site is not allowed - using default!" << endl;
+            } else {
+                vout << low;
+                vout << endl;
+                vout << ">> INFO: The source site '" << tname << "' is not allowed to be transfered to this host, using default ..." << endl;
+            }
         }
     }
 
@@ -168,10 +164,12 @@ bool CAutoCmd::Run(void)
     }
 
     // print best site
+    if( Options.GetOptIsTransferable() == false ){
         vout << "Selected site      : ";
-    vout << low;
-    vout << best_site;
-    vout << high;
+        vout << low;
+        vout << best_site;
+        vout << high;
+    }
 
     return(true);
 }
