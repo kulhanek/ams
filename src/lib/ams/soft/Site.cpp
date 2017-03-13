@@ -362,7 +362,7 @@ bool CSite::CanBeActivated(void)
     if( p_ele == NULL ){
         CSmallString error;
         error << "no host group found - site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         return(false);
     }
     CSmallString name;
@@ -372,7 +372,7 @@ bool CSite::CanBeActivated(void)
     if( p_sele == NULL ){
         CSmallString error;
         error << "no 'sites'' element found for the group '" << name << "' - site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         return(false);
     }
 
@@ -397,7 +397,7 @@ bool CSite::CanBeActivated(void)
     if(std::find(sites.begin(), sites.end(), string(GetName())) == sites.end()) {
         CSmallString error;
         error << "site '" << GetName() << "' is not allowed on host '" << host_name <<"'";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         return(false);
     }
 

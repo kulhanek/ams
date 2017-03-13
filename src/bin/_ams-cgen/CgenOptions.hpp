@@ -51,7 +51,7 @@ class CCgenOptions : public CSimpleOptions {
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN
-        AMS_VERSION
+        LibBuildVersion_AMS
     CSO_PROG_VERS_END
 
  // list of all options and arguments ------------------------------------------

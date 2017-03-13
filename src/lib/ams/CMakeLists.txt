@@ -42,7 +42,7 @@ ADD_LIBRARY(ams_shared SHARED ${AMS_SRC})
 SET_TARGET_PROPERTIES(ams_shared PROPERTIES
                         OUTPUT_NAME ams
                         CLEAN_DIRECT_OUTPUT 1
-                        VERSION ${AMS_VERSION})
+                        VERSION ${LibBuildVersion_AMS})
 INSTALL(TARGETS
             ams_shared
         LIBRARY DESTINATION

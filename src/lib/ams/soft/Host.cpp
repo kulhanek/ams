@@ -381,10 +381,18 @@ CXMLElement* CHost::FindGroup(void)
 
     CXMLElement* p_gele = Hosts.GetChildElementByPath("config/groups/group");
     while( p_gele != NULL ){
+        CSmallString name;
+        p_gele->GetAttribute("name",name);
+        CSmallString info;
+        info << "group: " << name;
+        ES_WARNING(info);
         CXMLElement* p_host = p_gele->GetChildElementByPath("hosts/host");
         while( p_host != NULL ){
             CSmallString name;
             p_host->GetAttribute("name",name);
+            CSmallString info;
+            info << "  host: " << name;
+            ES_WARNING(info);
             if( personal ){
                 if( name == "personal" ) return(p_gele);
             } else {

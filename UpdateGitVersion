@@ -11,9 +11,9 @@ GITHASH=`git rev-parse --short HEAD`
 DATE=`date +"%Y-%m-%d %H:%M"`
 
 sed -e "s/GITREVS/$GITREVS/g" -e "s/GITHASH/$GITHASH/g" -e "s/DATE/$DATE/g" \
-    src/lib/ams/AMSMainHeader.hpp > src/lib/ams/AMSMainHeader_.hpp
+    src/lib/ams/AMSMainHeader.cpp > src/lib/ams/AMSMainHeader_.cpp
 
-mv -f src/lib/ams/AMSMainHeader_.hpp src/lib/ams/AMSMainHeader.hpp
+mv -f src/lib/ams/AMSMainHeader_.cpp src/lib/ams/AMSMainHeader.cpp
 
 echo ""
 echo "AMS Revision: 8.$GITREVS.$GITHASH ($DATE)"
