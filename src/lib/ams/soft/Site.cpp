@@ -384,8 +384,8 @@ bool CSite::CanBeActivated(void)
     // split into tokens
     std::vector<std::string> sites;
     split(sites,primary,is_any_of(","));
-    split(sites,transferable,is_any_of(","));
-    split(sites,others,is_any_of(","));
+    //split(sites,transferable,is_any_of(","));
+    //split(sites,others,is_any_of(","));
 
     // is allowed?
     if(std::find(sites.begin(), sites.end(), string(GetName())) == sites.end()) {
