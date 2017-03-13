@@ -1,0 +1,258 @@
+#!/bin/bash
+# =============================================================================
+# AMS - Advanced Module System
+# (c) 2010,2016 Petr Kulhanek
+# -----------------------------------------------------------------------------
+# ams-rsync-push - synchronize software repository in push mode
+#
+# ams-rsync-push [action] [build]
+#
+# actions: all amscore softrepo build final-core
+#
+# required setup
+#
+# AMS_SYNC_PROFILE
+# AMS_DST_HOST
+# AMS_DST_SOFTMODS
+# AMS_DST_SOFTREPO
+# AMS_SYNC_SITES
+# AMS_RSYNC_OPTS - optional
+
+# we have piped commands and all must succeed
+set -o pipefail
+
+# -----------------------------------------------------------------------------
+
+if [ -z "$AMS_SYNC_PROFILE" ]; then
+    echo ">>> ERROR: AMS_SYNC_PROFILE is not set!" 1>&2
+    exit 1
+fi
+if [ -z "$AMS_DST_HOST" ]; then
+    echo ">>> ERROR: AMS_DST_HOST is not set!" 1>&2
+    exit 1
+fi
+if [ -z "$AMS_DST_SOFTMODS" ]; then
+    echo ">>> ERROR: AMS_DST_SOFTMODS is not set!" 1>&2
+    exit 1
+fi
+if [ -z "$AMS_DST_SOFTREPO" ]; then
+    echo ">>> ERROR: AMS_DST_SOFTREPO is not set!" 1>&2
+    exit 1
+fi
+if [ -z "$AMS_SYNC_SITES" ]; then
+    echo ">>> ERROR: AMS_SYNC_SITES is not set!" 1>&2
+    exit 1
+fi
+
+# ------------------------------------------------------------------------------
+
+# check if AMS_ROOT is set -----------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# check if SOFTREPO is set -----------------------
+
+if [ -z "$SOFTREPO" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: SOFTREPO is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+mkdir -p "$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/logs"
+if [ $? -ne 0 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Unable to create $AMS_ROOT/var/$AMS_SYNC_PROFILE/logs directory!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# log file
+LOG_FILE="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
+
+echo ""
+echo ">>> Log file: $LOG_FILE"
+
+# indexes
+NEW_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.new"
+OLD_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.old"
+if ! [ -f "$OLD_INDEX" ]; then touch "$OLD_INDEX"; fi
+
+ACTION=$1
+if [ -z "$ACTION" ]; then ACTION="all"; fi;
+
+# -------------------------------------------------------------------------------------
+
+test_password_less_ssh()
+{
+    ssh -x -o "BatchMode yes" "$AMS_DST_HOST" "/bin/echo" &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Passwordless ssh connection with $AMS_DST_HOST is not available!"  1>&2
+        echo "           Setup appropriate authorized_keys." 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+}
+
+# -------------------------------------------------------------------------------------
+
+rsync_amscore_cache()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS core - update site caches" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
+    $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall | tee -a $LOG_FILE
+    if [ $? -ne 0 ]; then exit 1; fi;
+
+}
+
+# -------------------------------------------------------------------------------------
+
+rsync_amscore()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS core - sync data" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    ssh -x $AMS_DST_HOST "if ! [ -d "$AMS_DST_SOFTMODS" ]; then mkdir -p "$AMS_DST_SOFTMODS" ; fi;" >> $LOG_FILE 2>&1
+    if [ $? -ne 0 ]; then exit 1; fi
+
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --exclude-from=$AMS_ROOT/share/sync/rsync/ams-core-exclude-rules \
+         "$AMS_ROOT/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "AMS core synchronization [OK]"
+        return 0
+    else
+        echo "AMS core synchronization [FAILED]"
+        return 1
+    fi
+}
+
+# -------------------------------------------------------------------------------------
+
+rsync_softrepo()
+{
+# create new index file
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS softrepo - generating new repository index" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
+    $AMS_ROOT/bin/ams-repoindex-create --sites "$SITES" "$NEW_INDEX" --verbose | tee -a $LOG_FILE
+    if [ $? -ne 0 ]; then exit 1; fi;
+
+    echo "# Changed builds ..." | tee -a $LOG_FILE
+    $AMS_ROOT/bin/ams-repoindex-diff "$OLD_INDEX" "$NEW_INDEX" | tee -a $LOG_FILE
+    if [ $? -ne 0 ]; then exit 1; fi;
+
+    NCHANGES="`$AMS_ROOT/bin/ams-repoindex-diff "$OLD_INDEX" "$NEW_INDEX" | wc -l`"
+    if [ "$NCHANGES" -eq 0 ]; then
+        echo "> No changed builds were detected ..."
+        rm -f "$NEW_INDEX"
+        return
+    fi
+
+# propagate changes
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS softrepo - sync data" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    $AMS_ROOT/bin/ams-repoindex-diff --skipremoved "$OLD_INDEX" "$NEW_INDEX" | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
+        (
+        printf "%-60s " "$BUILD"
+        echo "==== $BUILD" >> $LOG_FILE
+
+        if ! [ -d "$SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
+            echo " - [ERROR] - package directory does not exists: $SOFTREPO/$AMS_PACKAGE_DIR/"
+            return 1
+        fi
+
+    # get list of root app directories and their setup (permision and group)
+        BACKUP_PWD=$PWD
+        cd $SOFTREPO
+        echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do
+            stat --format="%n %G %a" $A
+            cd $A
+        done > /tmp/perms.$$ 2>> $LOG_FILE
+        cd $BACKUP_PWD
+
+    # create app root directory
+        APP_DIR="$AMS_DST_SOFTREPO"
+        cat /tmp/perms.$$ | ssh -x $AMS_DST_HOST "cd $AMS_DST_SOFTREPO; while read NAME GROUP PERM; do mkdir -p \$NAME; chmod \$PERM \$NAME; chgrp \$GROUP \$NAME; cd \$NAME; done" >> $LOG_FILE 2>&1
+        rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
+
+    # copy data
+        rsync -e "ssh -x" --timeout=50000 -av --delete $AMS_RSYNC_OPTS "$SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
+        if [ $? -ne 0 ]; then
+            echo "             [FAILED]"
+            echo ""
+            exit 1
+        else
+            echo "             [SYNC]"
+        fi
+        ) < /dev/null
+    done
+
+# commit changes
+    mv "$NEW_INDEX" "$OLD_INDEX"
+}
+
+# -------------------------------------------------------------------------------------
+
+rsync_build()
+{
+    # TODO
+    echo "dsdsa"
+}
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# ==============================================================================
+
+test_password_less_ssh
+
+case $ACTION in
+    "amscore")
+        rsync_amscore_cache
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_amscore
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
+    "softrepo")
+        rsync_amscore_cache
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_softrepo
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
+    "build")
+        rsync_amscore_cache
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_build $2
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
+    "all")
+        rsync_amscore_cache
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_softrepo
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_amscore
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
+esac
+
+echo ""
+echo "Log file is in: $LOG_FILE"
+echo ""
+
+exit 0
+
+# -------------------------------------------------------------------------------------

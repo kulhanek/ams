@@ -1,0 +1,40 @@
+<!-- site configuration file -->
+<site name="infinity" id="{INFINITY:06499e6a-dae4-4111-a793-44f50224e3c3}">
+    <!-- detailed site description -->
+    <description>
+	<group>Others</group>
+        <organization url="http://lcc.ncbr.muni.cz">Laboratory of Computational Chemistry, Masaryk University</organization>
+        <support email="infinity@lcc.ncbr.muni.cz">Infinity mailing list (you must be subscribed)</support>
+        <documentation url="https://lcc.ncbr.muni.cz/whitezone/development/infinity/">Infinity software and job management system</documentation>
+        <text>
+            The Infinity site manages software and computational resources available on the infinity computer.
+        </text>
+    </description>
+
+    <!-- this site is allowed from followig computers -->
+    <computers>
+	<computer name="infinity.ncbr.muni.cz" priority="10"/>
+	<computer name="*.vbox.inet"/>
+    </computers>
+
+    <!-- basic environment update with site activation -->
+    <environment>
+	<setup>
+	    <variable name="INF_ADMIN_CONTACT" value="kulhanek@chemi.muni.cz" operation="set"/>
+    	    <variable name="SOFTREPO" value="/software/ncbr/softrepo" operation="set"/>
+	</setup>
+    </environment>
+
+    <!-- autoloaded modules -->
+    <autoload>
+        <module name="compat-ia32:4.0" export="false"/>
+        <module name="compat-amd64:4.0" export="false"/>
+	<module name="torque" 	  export="false"/>
+	<module name="infinity"   export="false"/>
+    </autoload>
+
+    <!-- additional tasks associated with module actions -->
+    <actions>
+        <action name="add" command="module-add-stat" args="lcc.ncbr.muni.cz" type="child" />
+    </actions>
+</site>

@@ -1,0 +1,17 @@
+// =============================================================================
+// AMS - Advanced Module System
+// -----------------------------------------------------------------------------
+
+Following color codes are recognized by the print engine of Advanced Module System (AMS):
+
+code color
+---- -----
+-1   default
+ 0   black
+ 1   red
+ 2   green
+ 3   brown
+ 4   blue
+ 5   magenta
+ 6   cyan
+ 7   white

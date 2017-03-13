@@ -1,0 +1,37 @@
+// =============================================================================
+// AMS - Advanced Module System
+// -----------------------------------------------------------------------------
+
+Following environment variables are used by Advanced Module System (AMS):
+
+variable                meaning
+----------------------  -------
+# required system variables
+USER                    user name
+HOME                    user home directory
+HOSTNAME                full hostname of machine
+
+# essential variables
+AMS_SITE                site ID in form {NAME:uuid}
+AMS_NCPU                number of requested CPUs if not specified then 1 by default
+AMS_NHOSTCPU            number of host CPUs
+AMS_NGPU                number of requested GPUs if not specified then 0 by default
+AMS_NHOSTGPU            number of host GPUs
+AMS_NACC                number of requested accelerators if not specified then 0 by default
+AMS_NHOSTACCE           number of host accelerators
+AMS_NNODE               number of requested nodes
+AMS_ACTIVE_MODULES      list of activeted module names separated by |
+AMS_EXPORTED_MODULES    list of exported module names separated by |
+SOFTREPO                path to software repository
+
+# optional variables
+AMS_USER_CONFIG_DIR     path to user config directory (if not specified then $HOME/.ams is used)
+AMS_NODE_TYPE           node type, for example UI, WN, etc....
+
+# dynamic variables for module-cmd and site-cmd
+AMS_ROOT                prefix of module installation directory (set by module-cmd and site-cmd)
+AMS_EXIT_CODE           exit code from module-cmd and site-cmd commands
+
+# package management in grid environments - set by module
+AMS_PACKAGE_DIR         package directory relative to SOFTREPO
+AMS_PACKAGE_TYPE        none, excluded
