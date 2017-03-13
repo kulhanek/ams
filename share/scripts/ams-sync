@@ -280,7 +280,7 @@ function sync_profile() {
                 echo "" 1>&2
                 exit 1
             fi
-            if[ -n "$AMS_SYNC_ACTION" ]; then
+            if [ -n "$AMS_SYNC_ACTION" ]; then
                 $AMS_ROOT/share/sync/rsync/ams-rsync-push "$AMS_SYNC_ACTION"
             else
                 $AMS_ROOT/share/sync/rsync/ams-rsync-push "$2" "$3"
