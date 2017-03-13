@@ -58,7 +58,7 @@ public:
     "   <green>disp</green>        deeper info about site\n"
     "   <green>active</green>      the name of active site\n"
     "   <green>isactive</green>    return zero if the site is active\n"
-    "   <green>isallowed</green>   return zero if the site can be activated on the computer\n"
+    "   <green>isallowed</green>   return zero if the site can be activated on the host\n"
     "   <green>id</green>          return site id\n"
     CSO_PROG_ARGS_LONG_DESC_END
 

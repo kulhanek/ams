@@ -516,7 +516,7 @@ bool CSite::ActivateSite(void)
 {
     if( CanBeActivated() == false ) {
         CSmallString error;
-        error << "site (" << GetName() << ") is not allowed to be activated on this computer (";
+        error << "site (" << GetName() << ") is not allowed to be activated on this host (";
         error << Host.GetHostName() << ")";
         ES_TRACE_ERROR(error);
         return(false);

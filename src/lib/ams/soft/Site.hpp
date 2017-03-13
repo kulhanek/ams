@@ -115,7 +115,7 @@ public:
     /// is site active?
     bool IsActive(void);
 
-    /// can be site activated on this computer?
+    /// can be site activated on this host?
     bool CanBeActivated(void);
 
     // print information about site -----------------------------------------------
