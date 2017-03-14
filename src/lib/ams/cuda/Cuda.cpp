@@ -52,12 +52,12 @@ CCuda::~CCuda(void)
 
 bool CCuda::Init(const CSmallString& cudalibname)
 {
-    CudaLibName = cudalibname;
+    CudaRTLibName = cudalibname;
 
     // test if file exist
-    if( CFileSystem::IsFile(CudaLibName) == false ){
+    if( CFileSystem::IsFile(CudaRTLibName) == false ){
         CSmallString warning;
-        warning << "'" << CudaLibName << "' does not exist";
+        warning << "'" << CudaRTLibName << "' does not exist";
         ES_WARNING(warning);
         return(false);
     }
@@ -75,7 +75,7 @@ bool CCuda::Init(const CSmallString& cudalibname)
 
 bool CCuda::InitSymbols(void)
 {
-    if( CudaLib.Open(CudaLibName) == false ){
+    if( CudaRTLib.Open(CudaRTLibName) == false ){
         ES_ERROR("unable to load cuda library");
         return(false);
     }
@@ -83,42 +83,22 @@ bool CCuda::InitSymbols(void)
     // load symbols
     bool status = true;
 
-    cuInit = (CUInit)CudaLib.GetProcAddress("cuInit");
-    if( cuInit == NULL ){
-        ES_ERROR("unable to bind to cuInit");
+    cudaDeviceGetCount = (CUDADeviceGetCount)CudaRTLib.GetProcAddress("cudaDeviceGetCount");
+    if( cudaDeviceGetCount == NULL ){
+        ES_ERROR("unable to bind to cudaDeviceGetCount");
         status = false;
     }
 
-    cuDeviceGetCount = (CUDeviceGetCount)CudaLib.GetProcAddress("cuDeviceGetCount");
-    if( cuDeviceGetCount == NULL ){
-        ES_ERROR("unable to bind to cuDeviceGetCount");
+    cudaSetDevice = (CUDASetDevice)CudaRTLib.GetProcAddress("cudaSetDevice");
+    if( cudaSetDevice == NULL ){
+        ES_ERROR("unable to bind to cudaSetDevice");
         status = false;
     }
 
-    cuDeviceGet = (CUDeviceGet)CudaLib.GetProcAddress("cuDeviceGet");
-    if( cuDeviceGet == NULL ){
-        ES_ERROR("unable to bind to cuDeviceGet");
+    cudaGetDeviceProperties = (CUDAGetDeviceProperties)CudaRTLib.GetProcAddress("cudaGetDeviceProperties");
+    if( cudaGetDeviceProperties == NULL ){
+        ES_ERROR("unable to bind to cudaGetDeviceProperties");
         status = false;
-    }
-
-    cuDeviceGetName = (CUDeviceGetName)CudaLib.GetProcAddress("cuDeviceGetName");
-    if( cuDeviceGetName == NULL ){
-        ES_ERROR("unable to bind to cuDeviceGetName");
-        status = false;
-    }
-
-    cuDeviceTotalMem = (CUDeviceTotalMem)CudaLib.GetProcAddress("cuDeviceTotalMem");
-    if( cuDeviceTotalMem == NULL ){
-        ES_ERROR("unable to bind to cuDeviceTotalMem");
-        status = false;
-    }
-
-    // init driver
-    if( cuInit ){
-        if( cuInit(0) != CUDA_SUCCESS ){
-            ES_WARNING("cuInit(0) failed");
-            status = false;
-        }
     }
 
     return(status);
@@ -130,9 +110,9 @@ bool CCuda::InitSymbols(void)
 
 int CCuda::GetNumOfGPUs(void)
 {
-    if( cuDeviceGetCount == NULL ) return(0);
+    if( cudaDeviceGetCount == NULL ) return(0);
     int ngpus = 0;
-    if( cuDeviceGetCount(&ngpus) == CUDA_SUCCESS ){
+    if( cudaDeviceGetCount(&ngpus) == CUDA_SUCCESS ){
         return(ngpus);
     }
     return(false);
@@ -143,50 +123,30 @@ int CCuda::GetNumOfGPUs(void)
 void CCuda::GetGPUInfo(std::vector<std::string>& list)
 {
     list.clear();
-    if( cuDeviceGetCount == NULL ) return;
-    if( cuDeviceGet == NULL ) return;
-    if( cuDeviceGetName == NULL ) return;
-    if( cuDeviceTotalMem == NULL ) return;
+    if( cudaDeviceGetCount == NULL ) return;
+    if( cudaSetDevice == NULL ) return;
+    if( cudaGetDeviceProperties == NULL ) return;
 
     int ngpus = 0;
-    if( cuDeviceGetCount(&ngpus) != CUDA_SUCCESS ){
+    if( cudaDeviceGetCount(&ngpus) != CUDA_SUCCESS ){
         ES_ERROR("unable to get number of devices");
         return;
     }
 
     for(int devid=0; devid < ngpus; devid++){
-        CUdevice dev;
-        // get device
-        if( cuDeviceGet(&dev,devid) != CUDA_SUCCESS ){
-            CSmallString error;
-            error << "unable to get device #" << devid;
-            ES_ERROR(error);
-            continue;
-        }
 
-        // get device name
-        char buffer[255];
-        if( cuDeviceGetName(buffer,255,dev) != CUDA_SUCCESS ){
-            CSmallString error;
-            error << "unable to get name of device #" << devid;
-            ES_ERROR(error);
-            continue;
-        }
-        buffer[254] = '\0';
-        CSmallString gpudev_name(buffer);
+        cudaSetDevice(devid);
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, devid);
 
-        // get device memory
-        size_t mem = 0;
-        if( cuDeviceTotalMem(&mem,dev) != CUDA_SUCCESS ){
-            CSmallString warning;
-            warning << "unable to get total memory of device #" << devid;
-            ES_WARNING(warning);
-        }
+        deviceProp.name[255] = '\0';
+        CSmallString gpudev_name(deviceProp.name);
 
         CSmallString final_name;
+        // name
         final_name << gpudev_name;
-
-        double dmem = (double)mem;
+        // memory
+        double dmem = (double)deviceProp.totalGlobalMem;
         stringstream str;
         dmem = dmem / 1024 / 1024 ; // bytes -> MB
         if( dmem < 1024 ){
