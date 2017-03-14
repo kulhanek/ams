@@ -33,38 +33,11 @@ enum cudaError_enum {
 typedef enum cudaError_enum CUresult;
 typedef int CUdevice;
 
-struct cudaDeviceProp {
-     char name[256];
-     size_t totalGlobalMem;
-     size_t sharedMemPerBlock;
-     int regsPerBlock;
-     int warpSize;
-     size_t memPitch;
-     int maxThreadsPerBlock;
-     int maxThreadsDim[3];
-     int maxGridSize[3];
-     size_t totalConstMem;
-     int major;
-     int minor;
-     int clockRate;
-     size_t textureAlignment;
-     int deviceOverlap;
-     int multiProcessorCount;
-     int kernelExecTimeoutEnabled;
-     int integrated;
-     int canMapHostMemory;
-     int computeMode;
-     int concurrentKernels;
-     int ECCEnabled;
-     int pciBusID;
-     int pciDeviceID;
-     int tccDriver;
- };
-
 typedef CUresult (*CUInit)(unsigned int Flags);
 typedef CUresult (*CUDeviceGetCount)(int* count);
 typedef CUresult (*CUDeviceGet)(CUdevice* device,int ordinal);
-typedef CUresult (*CudaGetDeviceProperties)(struct cudaDeviceProp* prop,CUdevice dev);
+typedef CUresult (*CUDeviceGetName)(char* name,int len,CUdevice dev);
+typedef CUresult (*CUDeviceTotalMem)(size_t* bytes,CUdevice dev);
 
 // -----------------------------------------------------------------------------
 
@@ -94,10 +67,11 @@ private:
     bool InitSymbols(void);
 
     // cuda api symbols
-    CUInit                  cuInit;
-    CUDeviceGetCount        cuDeviceGetCount;
-    CUDeviceGet             cuDeviceGet;
-    CudaGetDeviceProperties cudaGetDeviceProperties;
+    CUInit              cuInit;
+    CUDeviceGetCount    cuDeviceGetCount;
+    CUDeviceGet         cuDeviceGet;
+    CUDeviceGetName     cuDeviceGetName;
+    CUDeviceTotalMem    cuDeviceTotalMem;
 };
 
 // -----------------------------------------------------------------------------
