@@ -98,9 +98,9 @@ public:
 
     // section of private data ----------------------------------------------------
 private:
-    CXMLDocument    SystemConfig;
-    CXMLDocument    UserConfig;
-    CXMLDocument    CommonConfig;
+    // FIX ME - shall we allow setup per site?
+    // CXMLDocument    SiteConfig;     // user site config
+    CXMLDocument    CommonConfig;   // user global config
 };
 
 //------------------------------------------------------------------------------

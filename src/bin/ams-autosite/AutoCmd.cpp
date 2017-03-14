@@ -161,6 +161,10 @@ bool CAutoCmd::Run(void)
         best_site = primary;
     }
 
+    if( best_site == NULL ){
+        best_site = "none";     // return something that is recognized by the site command as a no-site case
+    }
+
     // print best site
     if( Options.GetOptIsTransferable() == false ){
         vout << "Selected site      : ";

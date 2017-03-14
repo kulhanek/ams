@@ -128,6 +128,8 @@ bool CSiteCmd::Run(void)
 
     // ----------------------------------------------
     if( Options.GetArgAction() == "activate" ) {
+
+
         int error = ActivateSite();
 
         if( error > 0 ) {
@@ -351,6 +353,9 @@ void CSiteCmd::Finalize(void)
 
 int CSiteCmd::ActivateSite(void)
 {
+    // special case from ams-autosite - ignore
+    if( Options.GetArgSite() == "none" ) return(SITE_STATUS_OK);
+
     // deactivate current site
     if( GlobalConfig.GetActiveSiteID() != NULL ) {
 

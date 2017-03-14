@@ -237,7 +237,7 @@ bool Finalize(void)
 void PrintHeader(void)
 {
     printf("\n");
-    printf("           ***  AMS Configuration Centre ***           \n");
+    printf("           ***  AMS Configuration Centre ***                \n");
     printf("          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~         \n");
     printf("------------------------------------------------------------\n");
     printf("\n");
@@ -250,13 +250,17 @@ void PrintMainMenu(void)
     printf("\n");
     printf(" Main menu\n");
     printf("------------------------------------------------------------\n");
+    printf("             GLOBAL SETUP (valid for all sites)             \n");
+    printf("------------------------------------------------------------\n");
     printf(" 1   - configure visualization (colors, delimiters, etc.)\n");
     printf(" 2   - configure auto-restored modules\n");
     printf(" 3   - configure user details (umask)\n");
+// FIX ME
+/*
     printf(" 4   - configure site priorities\n");
     printf(" 5   - configure module priorities\n");
+*/
     printf("------------------------------------------------------------\n");
-    printf(" i   - site info\n");
     printf(" s   - save changes\n");
     printf(" p   - print this menu once again\n");
     printf(" q/r - quit program\n");
@@ -286,22 +290,15 @@ void MainMenu(void)
             UserSetupMenu();
             PrintMainMenu();
             break;
-        case '4':
+ // FIX ME
+ /*       case '4':
             SitePrioritiesMenu();
             PrintMainMenu();
             break;
         case '5':
             ModulePrioritiesMenu();
             PrintMainMenu();
-            break;
-
-        case 'i': {
-            CTerminalStr vout;
-            vout.Attach(stdout);
-            Site.PrintShortSiteInfo(vout);
-            PrintMainMenu();
-            }
-            break;
+            break; */
 
         case 's': {
             bool result = true;

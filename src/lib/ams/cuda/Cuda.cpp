@@ -101,15 +101,9 @@ bool CCuda::InitSymbols(void)
         status = false;
     }
 
-    cuDeviceGetName = (CUDeviceGetName)CudaLib.GetProcAddress("cuDeviceGetName");
-    if( cuDeviceGetName == NULL ){
-        ES_ERROR("unable to bind to cuDeviceGetName");
-        status = false;
-    }
-
-    cuDeviceTotalMem = (CUDeviceTotalMem)CudaLib.GetProcAddress("cuDeviceTotalMem");
-    if( cuDeviceTotalMem == NULL ){
-        ES_ERROR("unable to bind to cuDeviceTotalMem");
+    cudaGetDeviceProperties = (CudaGetDeviceProperties)CudaLib.GetProcAddress("cudaGetDeviceProperties");
+    if( cudaGetDeviceProperties == NULL ){
+        ES_ERROR("unable to bind to cudaGetDeviceProperties");
         status = false;
     }
 
@@ -145,8 +139,7 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list)
     list.clear();
     if( cuDeviceGetCount == NULL ) return;
     if( cuDeviceGet == NULL ) return;
-    if( cuDeviceGetName == NULL ) return;
-    if( cuDeviceTotalMem == NULL ) return;
+    if( cudaGetDeviceProperties == NULL ) return;
 
     int ngpus = 0;
     if( cuDeviceGetCount(&ngpus) != CUDA_SUCCESS ){
@@ -164,24 +157,34 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list)
             continue;
         }
 
-        // get device name
-        char buffer[255];
-        if( cuDeviceGetName(buffer,255,dev) != CUDA_SUCCESS ){
-            CSmallString error;
-            error << "unable to get name of device #" << devid;
-            ES_ERROR(error);
-            continue;
-        }
-        buffer[254] = '\0';
-        CSmallString gpudev_name(buffer);
+// replaced by cudaGetDeviceProperties()
+//        // get device name
+//        char buffer[255];
+//        if( cuDeviceGetName(buffer,255,dev) != CUDA_SUCCESS ){
+//            CSmallString error;
+//            error << "unable to get name of device #" << devid;
+//            ES_ERROR(error);
+//            continue;
+//        }
+//        buffer[254] = '\0';
+//        CSmallString gpudev_name(buffer);
 
         // get device memory
         size_t mem = 0;
-        if( cuDeviceTotalMem(&mem,dev) != CUDA_SUCCESS ){
-            CSmallString warning;
-            warning << "unable to get total memory of device #" << devid;
-            ES_WARNING(warning);
-        }
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, dev);
+
+        deviceProp.name[255] = '\0';
+        CSmallString gpudev_name(deviceProp.name);
+        mem = deviceProp.totalGlobalMem;
+
+// this repoports only half of memory
+//        size_t mem = 0;
+//        if( cuDeviceTotalMem(&mem,dev) != CUDA_SUCCESS ){
+//            CSmallString warning;
+//            warning << "unable to get total memory of device #" << devid;
+//            ES_WARNING(warning);
+//        }
 
         CSmallString final_name;
         final_name << gpudev_name;

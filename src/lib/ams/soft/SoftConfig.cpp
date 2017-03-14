@@ -79,33 +79,34 @@ void CSoftConfig::LoadUserConfig(void)
         }
     }
 
+// FIX ME
     // load site config ---------------------------------------
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
-        // no user config
-        UserConfig.CreateChildDeclaration();
-        UserConfig.CreateChildComment("AMS User Configuration");
-        UserConfig.CreateChildElement("user");
-        return;
-    }
+//    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+//        // no user config
+//        SiteConfig.CreateChildDeclaration();
+//        SiteConfig.CreateChildComment("AMS User Configuration");
+//        SiteConfig.CreateChildElement("user");
+//        return;
+//    }
 
-    // then try site config
-    config_name = GlobalConfig.GetUserConfigDir(GlobalConfig.GetActiveSiteID()) / "ams.xml";
-    if( CFileSystem::IsFile(config_name) == false ) {
-        // no user config
-        UserConfig.CreateChildDeclaration();
-        UserConfig.CreateChildComment("AMS User Configuration");
-        UserConfig.CreateChildElement("user");
-        return;
-    }
+//    // then try site config
+//    config_name = GlobalConfig.GetUserSiteConfigDir() / "ams.xml";
+//    if( CFileSystem::IsFile(config_name) == false ) {
+//        // no user config
+//        SiteConfig.CreateChildDeclaration();
+//        SiteConfig.CreateChildComment("AMS User Configuration");
+//        SiteConfig.CreateChildElement("user");
+//        return;
+//    }
 
-    CXMLParser xml_parser;
-    xml_parser.SetOutputXMLNode(&UserConfig);
+//    CXMLParser xml_parser;
+//    xml_parser.SetOutputXMLNode(&SiteConfig);
 
-    if( xml_parser.Parse(config_name) == false ) {
-        CSmallString error;
-        error << "unable to load user config (" << config_name <<")";
-        RUNTIME_ERROR(error);
-    }
+//    if( xml_parser.Parse(config_name) == false ) {
+//        CSmallString error;
+//        error << "unable to load user config (" << config_name <<")";
+//        RUNTIME_ERROR(error);
+//    }
 
 }
 
@@ -129,22 +130,23 @@ bool CSoftConfig::SaveUserConfig(void)
         return(false);
     }
 
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
-        ES_ERROR("no site is active");
-        return(false);
-    }
+// FIX ME
+//    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+//        ES_ERROR("no site is active");
+//        return(false);
+//    }
 
-    // save site config
-    config_name = GlobalConfig.GetUserConfigDir(GlobalConfig.GetActiveSiteID()) / "ams.xml";
+//    // save site config
+//    config_name = GlobalConfig.GetUserSiteConfigDir() / "ams.xml";
 
-    xml_printer.SetPrintedXMLNode(&UserConfig);
+//    xml_printer.SetPrintedXMLNode(&SiteConfig);
 
-    if( xml_printer.Print(config_name) == false ) {
-        CSmallString error;
-        error << "unable to save user config (" << config_name <<")";
-        ES_ERROR(error);
-        return(false);
-    }
+//    if( xml_printer.Print(config_name) == false ) {
+//        CSmallString error;
+//        error << "unable to save user config (" << config_name <<")";
+//        ES_ERROR(error);
+//        return(false);
+//    }
 
     return(true);
 }
@@ -153,7 +155,7 @@ bool CSoftConfig::SaveUserConfig(void)
 
 void CSoftConfig::ClearAutorestoredConfig(void)
 {
-    CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/autoload");
+    CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) return;
     delete p_ele;
 }
@@ -170,7 +172,7 @@ bool CSoftConfig::AreSystemAutoloadedModulesDisabled(void)
 
     if( CFileSystem::IsFile(config_name) == true ) {
         // user does not want system modules for all sites
-        ES_WARNING("user has _disable_system_modules config file for a sites");
+        ES_WARNING("user has _disable_system_modules config file for the active site");
         return(true);
     }
 
@@ -191,7 +193,7 @@ bool CSoftConfig::AreSystemAutoloadedModulesDisabled(void)
 
 CXMLElement* CSoftConfig::GetAutoloadedModules(void)
 {
-    CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/autoload");
+    CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
         ES_WARNING("unable to open user/autoload path");
         return(NULL);
@@ -207,7 +209,7 @@ bool CSoftConfig::PrintAutorestoredModules(FILE* fout)
         fout = stdout;
     }
 
-    CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/autoload");
+    CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
         ES_WARNING("unable to open user/autoload path");
     }
@@ -234,7 +236,7 @@ bool CSoftConfig::PrintAutorestoredModules(FILE* fout)
 
 void CSoftConfig::AddAutorestoredModule(const CSmallString& module)
 {
-    CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/autoload",true);
+    CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload",true);
     CXMLElement* p_mele = p_ele->CreateChildElement("module");
     p_mele->SetAttribute("name",module);
 }
@@ -243,7 +245,7 @@ void CSoftConfig::AddAutorestoredModule(const CSmallString& module)
 
 bool CSoftConfig::RemoveAutorestoredModule(const CSmallString& module)
 {
-    CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/autoload");
+    CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
         ES_ERROR("unable to open user/autoload path");
         return(false);
@@ -279,7 +281,7 @@ bool CSoftConfig::RemoveAutorestoredModule(const CSmallString& module)
 
 bool CSoftConfig::IsAutorestoredModule(const CSmallString& module)
 {
-    CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/autoload");
+    CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
         ES_WARNING("unable to open user/autoload path");
         return(false);

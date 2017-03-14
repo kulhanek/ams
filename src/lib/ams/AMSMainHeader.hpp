@@ -27,10 +27,7 @@
 
 //------------------------------------------------------------------------------
 
-
-
-//------------------------------------------------------------------------------
-
+extern const char* LibConfigVersion_AMS;
 extern const char* LibBuildVersion_AMS;
 extern const char* LibBuildVersion_AMS_NoDate;
 extern const char* LibBuildVersion_AMS_Web;

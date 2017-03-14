@@ -23,11 +23,14 @@
 
 #include <AMSMainHeader.hpp>
 
-#define AMS_VERSION     "8.GITREVS.GITHASH"
-#define AMS_BUILDTIME   "DATE"
+
+#define AMS_CONFIG_VERSION  "8.x"
+#define AMS_VERSION         "8.GITREVS.GITHASH"
+#define AMS_BUILDTIME       "DATE"
 
 //------------------------------------------------------------------------------
 
+const char* LibConfigVersion_AMS    = AMS_CONFIG_VERSION;
 const char* LibBuildVersion_AMS     = AMS_VERSION "(" AMS_BUILDTIME ") [AMS]";
 const char* LibBuildVersion_AMS_Web = AMS_VERSION;
 const char* LibBuildVersion_AMS_NoDate = AMS_VERSION;

@@ -89,19 +89,6 @@ const CFileName CGlobalConfig::GetAMSRootDir(void)
 
 //------------------------------------------------------------------------------
 
-const CFileName CGlobalConfig::GetSystemSiteConfigDir(void)
-{
-    CFileName      config_name;
-    CSmallString   ams_site;
-
-    ams_site = GlobalConfig.GetActiveSiteID();
-    config_name = CFileName(ETCDIR) / "sites" / ams_site / "aliases.xml";
-
-    return(config_name);
-}
-
-//------------------------------------------------------------------------------
-
 const CFileName CGlobalConfig::GetUserSiteConfigDir(void)
 {
     return( GetUserConfigDir(GlobalConfig.GetActiveSiteID()) );
@@ -123,7 +110,7 @@ const CFileName CGlobalConfig::GetUserConfigDir(const CFileName& sub_dir)
 
     if( user_config_dir == NULL ) {
         user_config_dir = CShell::GetSystemVariable("HOME");
-        user_config_dir = user_config_dir / ".infinity" ;
+        user_config_dir = user_config_dir / ".ams" / LibConfigVersion_AMS ;
     }
 
     if( sub_dir != NULL ) user_config_dir = user_config_dir / sub_dir;

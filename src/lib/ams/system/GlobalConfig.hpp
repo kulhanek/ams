@@ -51,9 +51,6 @@ public:
     /// return infinity root directory
     const CFileName GetAMSRootDir(void);
 
-    /// return system site config
-    const CFileName GetSystemSiteConfigDir(void);
-
 // user config -----------------------------------------------------------------
     /// return the name of user config directory for active site
     const CFileName GetUserSiteConfigDir(void);
