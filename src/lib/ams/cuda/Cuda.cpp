@@ -83,9 +83,9 @@ bool CCuda::InitSymbols(void)
     // load symbols
     bool status = true;
 
-    cudaDeviceGetCount = (CUDADeviceGetCount)CudaRTLib.GetProcAddress("cudaDeviceGetCount");
-    if( cudaDeviceGetCount == NULL ){
-        ES_ERROR("unable to bind to cudaDeviceGetCount");
+    cudaGetDeviceCount = (CUDAGetDeviceCount)CudaRTLib.GetProcAddress("cudaGetDeviceCount");
+    if( cudaGetDeviceCount == NULL ){
+        ES_ERROR("unable to bind to cudaGetDeviceCount");
         status = false;
     }
 
@@ -110,9 +110,9 @@ bool CCuda::InitSymbols(void)
 
 int CCuda::GetNumOfGPUs(void)
 {
-    if( cudaDeviceGetCount == NULL ) return(0);
+    if( cudaGetDeviceCount == NULL ) return(0);
     int ngpus = 0;
-    if( cudaDeviceGetCount(&ngpus) == CUDA_SUCCESS ){
+    if( cudaGetDeviceCount(&ngpus) == CUDA_SUCCESS ){
         return(ngpus);
     }
     return(false);
@@ -123,12 +123,12 @@ int CCuda::GetNumOfGPUs(void)
 void CCuda::GetGPUInfo(std::vector<std::string>& list)
 {
     list.clear();
-    if( cudaDeviceGetCount == NULL ) return;
+    if( cudaGetDeviceCount == NULL ) return;
     if( cudaSetDevice == NULL ) return;
     if( cudaGetDeviceProperties == NULL ) return;
 
     int ngpus = 0;
-    if( cudaDeviceGetCount(&ngpus) != CUDA_SUCCESS ){
+    if( cudaGetDeviceCount(&ngpus) != CUDA_SUCCESS ){
         ES_ERROR("unable to get number of devices");
         return;
     }

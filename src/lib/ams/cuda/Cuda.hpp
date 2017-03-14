@@ -106,7 +106,7 @@ struct cudaDeviceProp {
 
 // -----------------------------------------------------------------------------
 
-typedef CUDAresult (*CUDADeviceGetCount)(int* count);
+typedef CUDAresult (*CUDAGetDeviceCount)(int* count);
 typedef CUDAresult (*CUDASetDevice)(int  device);
 typedef CUDAresult (*CUDAGetDeviceProperties)(cudaDeviceProp* prop, int  device);
 
@@ -138,7 +138,7 @@ private:
     bool InitSymbols(void);
 
     // cuda api symbols
-    CUDADeviceGetCount      cudaDeviceGetCount;
+    CUDAGetDeviceCount      cudaGetDeviceCount;
     CUDASetDevice           cudaSetDevice;
     CUDAGetDeviceProperties cudaGetDeviceProperties;
 
