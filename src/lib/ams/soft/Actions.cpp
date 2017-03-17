@@ -89,10 +89,10 @@ int  CActions::GetFlags(void)
 void CActions::ReactivateModules(CVerboseStr& vout)
 {
     CSmallString active_modules;
-    active_modules = GlobalConfig.GetActiveModules();
+    active_modules = AMSGlobalConfig.GetActiveModules();
 
     CSmallString exported_modules;
-    exported_modules = GlobalConfig.GetExportedModules();
+    exported_modules = AMSGlobalConfig.GetExportedModules();
 
     char* p_str;
     char* p_strtok = NULL;
@@ -108,7 +108,7 @@ void CActions::ReactivateModules(CVerboseStr& vout)
     }
 
     // keep only those modules that were exported previously
-    GlobalConfig.SetExportedModules(exported_modules);
+    AMSGlobalConfig.SetExportedModules(exported_modules);
 
     if( exported_modules != NULL ) {
         ShellProcessor.SetVariable("AMS_EXPORTED_MODULES",exported_modules);
@@ -122,7 +122,7 @@ void CActions::ReactivateModules(CVerboseStr& vout)
 bool CActions::PurgeModules(CVerboseStr& vout)
 {
     CSmallString active_modules;
-    active_modules = GlobalConfig.GetActiveModules();
+    active_modules = AMSGlobalConfig.GetActiveModules();
 
     std::list<CSmallString> modules;
 
@@ -240,7 +240,7 @@ EActionError CActions::AddModule(CVerboseStr& vout,const CSmallString& module,bo
 
     bool reactivating = false;
 
-    if( GlobalConfig.IsModuleActive(name) == true ) {
+    if( AMSGlobalConfig.IsModuleActive(name) == true ) {
         if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
             vout << "  INFO:    Module is active, reactivating .. " << endl;
         }
@@ -380,7 +380,7 @@ EActionError CActions::RemoveModule(CVerboseStr& vout,const CSmallString& module
         return(EAE_MODULE_NOT_FOUND);
     }
 
-    if( GlobalConfig.IsModuleActive(name) == false ) {
+    if( AMSGlobalConfig.IsModuleActive(name) == false ) {
         CSmallString error;
         error << "unable to remove module '" << name << "' because it is not active";
         ES_ERROR(error);
@@ -389,10 +389,10 @@ EActionError CActions::RemoveModule(CVerboseStr& vout,const CSmallString& module
     }
 
     CSmallString   complete_module;
-    complete_module = GlobalConfig.GetActiveModuleSpecification(name);
+    complete_module = AMSGlobalConfig.GetActiveModuleSpecification(name);
 
     CSmallString exported_module;
-    exported_module = GlobalConfig.GetExportedModuleSpecification(name);
+    exported_module = AMSGlobalConfig.GetExportedModuleSpecification(name);
 
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
         vout << "  Module build : " << complete_module << endl;
@@ -467,7 +467,7 @@ bool CActions::SolveModuleDependencies(CVerboseStr& vout,CXMLElement* p_dep_cont
         if( p_sele->GetName() == "conflict" ) {
             CSmallString lmodule;
             p_sele->GetAttribute("module",lmodule);
-            if( GlobalConfig.IsModuleActive(lmodule) == true ) {
+            if( AMSGlobalConfig.IsModuleActive(lmodule) == true ) {
                 if( GlobalPrintLevel != EAPL_NONE ) {
                     vout << "  WARNING: active module in conflict, unloading ... " << endl;
                 }
@@ -629,19 +629,19 @@ bool CActions::PrepareModuleEnvironment(CXMLElement* p_build,
 
     if( add_module == true ) {
         ShellProcessor.AppendValueToVariable("AMS_ACTIVE_MODULES",complete_module,"|");
-        GlobalConfig.UpdateActiveModules(complete_module,true);
+        AMSGlobalConfig.UpdateActiveModules(complete_module,true);
 
         if( (ModuleExportFlag == true) && (exported_module != NULL) ) {
             ShellProcessor.AppendValueToVariable("AMS_EXPORTED_MODULES",exported_module,"|");
-            GlobalConfig.UpdateExportedModules(exported_module,true);
+            AMSGlobalConfig.UpdateExportedModules(exported_module,true);
         }
     } else {
         ShellProcessor.RemoveValueFromVariable("AMS_ACTIVE_MODULES",complete_module,"|");
-        GlobalConfig.UpdateActiveModules(complete_module,false);
+        AMSGlobalConfig.UpdateActiveModules(complete_module,false);
 
         if( exported_module != NULL ) {
             ShellProcessor.RemoveValueFromVariable("AMS_EXPORTED_MODULES",exported_module,"|");
-            GlobalConfig.UpdateExportedModules(exported_module,false);
+            AMSGlobalConfig.UpdateExportedModules(exported_module,false);
         }
     }
 

@@ -227,7 +227,7 @@ bool CRepoIndexCreate::ListSiteBuilds(const CSmallString& site_name)
         return(false);
     }
 
-    GlobalConfig.SetActiveSiteID(site_id);
+    AMSGlobalConfig.SetActiveSiteID(site_id);
     if( Cache.LoadCache(false) == false ){
         CSmallString error;
         error << "unable to load cache for " << site_name;

@@ -77,12 +77,12 @@ CSite::~CSite(void)
 
 bool CSite::LoadConfig(void)
 {
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         ES_ERROR("no site is active");
         return(false);
     }
 
-    return(LoadConfig(GlobalConfig.GetActiveSiteID()));
+    return(LoadConfig(AMSGlobalConfig.GetActiveSiteID()));
 }
 
 //------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ bool CSite::IsSiteVisible(void)
 bool CSite::IsActive(void)
 {
     // get active site id
-    CSmallString active_site = GlobalConfig.GetActiveSiteID();
+    CSmallString active_site = AMSGlobalConfig.GetActiveSiteID();
 
     // compare with site id
     return((active_site == GetID()) && (active_site.GetLength() > 0));
@@ -529,7 +529,7 @@ bool CSite::ActivateSite(void)
     }
 
     // set active site id ---------------------------
-    GlobalConfig.SetActiveSiteID(SiteID);
+    AMSGlobalConfig.SetActiveSiteID(SiteID);
     ShellProcessor.SetVariable("AMS_SITE",SiteID);
 
     if( GetSupportEMail() != NULL ) {
@@ -626,7 +626,7 @@ bool CSite::ActivateSite(void)
 
 bool CSite::DeactivateSite(void)
 {
-    if( SiteID != GlobalConfig.GetActiveSiteID() ) {
+    if( SiteID != AMSGlobalConfig.GetActiveSiteID() ) {
         ES_ERROR("only active site can be deactivated");
         return(false);
     }
@@ -638,7 +638,7 @@ bool CSite::DeactivateSite(void)
     }
 
     // unload active modules ------------------------
-    CSmallString tmp(GlobalConfig.GetActiveModules());
+    CSmallString tmp(AMSGlobalConfig.GetActiveModules());
 
     Actions.SetActionPrintLevel(EAPL_NONE);
 
@@ -697,7 +697,7 @@ bool CSite::DeactivateSite(void)
         }
     }
 
-    GlobalConfig.SetActiveSiteID("");
+    AMSGlobalConfig.SetActiveSiteID("");
     ShellProcessor.UnsetVariable("AMS_SITE");
 
     return(true);

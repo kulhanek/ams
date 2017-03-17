@@ -119,10 +119,10 @@ bool CSiteCmd::Run(void)
     Host.InitHostFile();
     Host.InitHost();
 
-    if( GlobalConfig.GetActiveSiteID() != NULL ){
+    if( AMSGlobalConfig.GetActiveSiteID() != NULL ){
 
         // initialize user -----------------------------
-        User.InitUserFile(GlobalConfig.GetActiveSiteID());
+        User.InitUserFile(AMSGlobalConfig.GetActiveSiteID());
         User.InitUser();
     }
 
@@ -155,7 +155,7 @@ bool CSiteCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "info" ) {
 
-        if( (Options.GetArgSite() == NULL) && (GlobalConfig.GetActiveSiteID() == NULL) ){
+        if( (Options.GetArgSite() == NULL) && (AMSGlobalConfig.GetActiveSiteID() == NULL) ){
             vout << low;
             vout << endl;
             vout << "<red>>>> ERROR:</red> No site is active!" << endl;
@@ -184,7 +184,7 @@ bool CSiteCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "disp" ) {
 
-        if( (Options.GetArgSite() == NULL) && (GlobalConfig.GetActiveSiteID() == NULL) ){
+        if( (Options.GetArgSite() == NULL) && (AMSGlobalConfig.GetActiveSiteID() == NULL) ){
             vout << low;
             vout << endl;
             vout << "<red>>>> ERROR:</red> No site is active!" << endl;
@@ -214,7 +214,7 @@ bool CSiteCmd::Run(void)
     else if( Options.GetArgAction() == "active" ) {
         CSmallString site_sid;
 
-        site_sid = GlobalConfig.GetActiveSiteID();
+        site_sid = AMSGlobalConfig.GetActiveSiteID();
 
         if( site_sid == NULL ) {
             CSmallString error;
@@ -284,7 +284,7 @@ bool CSiteCmd::Run(void)
                 site_sid = CUtils::GetSiteID(Options.GetArgSite());
             }
         } else {
-            site_sid = GlobalConfig.GetActiveSiteID();
+            site_sid = AMSGlobalConfig.GetActiveSiteID();
         }
 
         if( site_sid == NULL ) {
@@ -357,18 +357,18 @@ int CSiteCmd::ActivateSite(void)
     if( Options.GetArgSite() == "none" ) return(SITE_STATUS_OK);
 
     // deactivate current site
-    if( GlobalConfig.GetActiveSiteID() != NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() != NULL ) {
 
         if( Site.LoadConfig() == false ) {
             CSmallString error;
-            error << "unable to load site '" << GlobalConfig.GetActiveSiteID() << "' config";
+            error << "unable to load site '" << AMSGlobalConfig.GetActiveSiteID() << "' config";
             ES_TRACE_ERROR(error);
             return(SITE_ERROR_CONFIG_PROBLEM);
         }
 
         if( Site.DeactivateSite() == false ) {
             CSmallString error;
-            error << "unable to deactivate site '" << GlobalConfig.GetActiveSiteID() << "'";
+            error << "unable to deactivate site '" << AMSGlobalConfig.GetActiveSiteID() << "'";
             ES_TRACE_ERROR(error);
             return(SITE_ERROR_CONFIG_PROBLEM);
         }
@@ -441,7 +441,7 @@ int CSiteCmd::DispSite(void)
             site_sid = CUtils::GetSiteID(Options.GetArgSite());
         }
     } else {
-        site_sid = GlobalConfig.GetActiveSiteID();
+        site_sid = AMSGlobalConfig.GetActiveSiteID();
     }
 
     if( CUtils::IsSiteIDValid(site_sid) == false ) {
@@ -475,7 +475,7 @@ int CSiteCmd::InfoSite(void)
             site_sid = CUtils::GetSiteID(Options.GetArgSite());
         }
     } else {
-        site_sid = GlobalConfig.GetActiveSiteID();
+        site_sid = AMSGlobalConfig.GetActiveSiteID();
     }
 
     if( CUtils::IsSiteIDValid(site_sid) == false ) {
@@ -502,7 +502,7 @@ bool CSiteCmd::IsActive(void)
 {
     CSmallString site_sid;
 
-    site_sid = GlobalConfig.GetActiveSiteID();
+    site_sid = AMSGlobalConfig.GetActiveSiteID();
 
     if( site_sid == NULL ) {
         CSmallString error;

@@ -91,7 +91,7 @@ int CModuleCmd::Init(int argc, char* argv[])
 bool CModuleCmd::Run(void)
 {
     // check if site is active
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         vout << low;
         vout << endl;
         vout << "<red>>>> ERROR:</red> No site is active!" << endl;
@@ -113,7 +113,7 @@ bool CModuleCmd::Run(void)
     Host.InitHost();
 
     // initialize user ------------------------------
-    User.InitUserFile(GlobalConfig.GetActiveSiteID());
+    User.InitUserFile(AMSGlobalConfig.GetActiveSiteID());
     User.InitUser();
 
     // set module flags
@@ -282,7 +282,7 @@ bool CModuleCmd::Run(void)
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
             CSmallString warning;
             warning << "module '" << Options.GetProgArg(i) << "' is ";
-            if( GlobalConfig.IsModuleActive(Options.GetProgArg(i)) == true ) {
+            if( AMSGlobalConfig.IsModuleActive(Options.GetProgArg(i)) == true ) {
                 warning << "active";
                 result &= true;
             } else {
@@ -297,7 +297,7 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "getactver" ) {
         CSmallString actver;
-        if( GlobalConfig.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
+        if( AMSGlobalConfig.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
             CSmallString warning;
             warning << "module '" << Options.GetProgArg(1) << "' is no active";
             ES_WARNING(warning);

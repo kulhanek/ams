@@ -72,7 +72,7 @@ bool CCache::LoadCache(bool loadbig)
 {
     Cache.RemoveAllChildNodes();
 
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         ES_ERROR("no site is active");
         return(false);
     }
@@ -81,9 +81,9 @@ bool CCache::LoadCache(bool loadbig)
 
     config_path = ETCDIR;
     if( loadbig ){
-        config_path = config_path / "sites" / GlobalConfig.GetActiveSiteID() / "cache_big.xml";
+        config_path = config_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "cache_big.xml";
     } else {
-        config_path = config_path / "sites" / GlobalConfig.GetActiveSiteID() / "cache.xml";
+        config_path = config_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "cache.xml";
     }
 
     if( CFileSystem::IsFile(config_path) ) {
@@ -95,9 +95,9 @@ bool CCache::LoadCache(bool loadbig)
         if( xml_parser.Parse(config_path) == false ) {
             CSmallString error;
             if( loadbig ){
-                error << "unable to load site '" << GlobalConfig.GetActiveSiteID() << "' cache_big";
+                error << "unable to load site '" << AMSGlobalConfig.GetActiveSiteID() << "' cache_big";
             } else {
-                error << "unable to load site '" << GlobalConfig.GetActiveSiteID() << "' cache";
+                error << "unable to load site '" << AMSGlobalConfig.GetActiveSiteID() << "' cache";
             }
             ES_ERROR(error);
             return(false);
@@ -151,7 +151,7 @@ bool CCache::LoadCache(const CSmallString& site_sid,bool loadbig)
 
 bool CCache::SaveCache(bool savebig)
 {
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         ES_ERROR("no site is active");
         return(false);
     }
@@ -160,9 +160,9 @@ bool CCache::SaveCache(bool savebig)
 
     config_path = ETCDIR;
     if( savebig ){
-        config_path = config_path / "sites" / GlobalConfig.GetActiveSiteID() / "cache_big.xml";
+        config_path = config_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "cache_big.xml";
     } else {
-        config_path = config_path / "sites" / GlobalConfig.GetActiveSiteID() / "cache.xml";
+        config_path = config_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "cache.xml";
     }
 
     CXMLPrinter xml_printer;
@@ -173,9 +173,9 @@ bool CCache::SaveCache(bool savebig)
     if( xml_printer.Print(config_path) == false ) {
         CSmallString error;
         if( savebig ){
-            error << "unable to save site '" << GlobalConfig.GetActiveSiteID() << "' cache_big";
+            error << "unable to save site '" << AMSGlobalConfig.GetActiveSiteID() << "' cache_big";
         } else {
-            error << "unable to save site '" << GlobalConfig.GetActiveSiteID() << "' cache";
+            error << "unable to save site '" << AMSGlobalConfig.GetActiveSiteID() << "' cache";
         }
         ES_ERROR(error);
         return(false);
@@ -221,7 +221,7 @@ bool CCache::CheckCacheSyntax(CVerboseStr& vout)
 
 bool CCache::RebuildCache(CVerboseStr& vout,bool as_it_is)
 {
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         ES_ERROR("no site is active");
         return(false);
     }
@@ -257,7 +257,7 @@ bool CCache::RebuildCache(CVerboseStr& vout,bool as_it_is)
     CFileName    modules_path;
 
     modules_path = ETCDIR;
-    modules_path = modules_path / "sites" / GlobalConfig.GetActiveSiteID() / "modules";
+    modules_path = modules_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "modules";
 
     bool result = RebuildCacheFromDirectory(vout,p_mele,modules_path,as_it_is);
 

@@ -111,12 +111,12 @@ bool CCacheCmd::Run(void)
             ES_ERROR(error);
             return(false);
         }
-        GlobalConfig.SetActiveSiteID(site_sid);
+        AMSGlobalConfig.SetActiveSiteID(site_sid);
     }
 
     if( (Options.GetArgAction() != "rebuildall") &&
             (Options.GetArgAction() != "syntaxall") ) {
-        if( GlobalConfig.GetActiveSiteID() == NULL ) {
+        if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
             ES_ERROR("no site is active");
             return(false);
         }
@@ -165,7 +165,7 @@ bool CCacheCmd::Run(void)
         vout << endl;
 
         // rebuild cache
-        vout << "#  Building the AMS cache for the site : " << GlobalConfig.GetActiveSiteName() << endl;
+        vout << "#  Building the AMS cache for the site : " << AMSGlobalConfig.GetActiveSiteName() << endl;
         if( Cache.RebuildCache(vout,false) == false) return(false);
         vout << endl;
 
@@ -281,7 +281,7 @@ bool CCacheCmd::Run(void)
                 return(false);
             }
 
-            GlobalConfig.SetActiveSiteID(site_id);
+            AMSGlobalConfig.SetActiveSiteID(site_id);
 
             if( Site.LoadConfig() == false ) {
                 CSmallString error;
@@ -353,7 +353,7 @@ bool CCacheCmd::Run(void)
                 return(false);
             }
 
-            GlobalConfig.SetActiveSiteID(site_sid);
+            AMSGlobalConfig.SetActiveSiteID(site_sid);
 
             if( Site.LoadConfig() == false ) {
                 CSmallString error;

@@ -80,7 +80,7 @@ int CSetEnv::Init(int argc, char* argv[])
 bool CSetEnv::Run(void)
 {
     // check if site is active
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         vout << low;
         vout << endl;
         vout << "<red>>>> ERROR:</red> No site is active!" << endl;

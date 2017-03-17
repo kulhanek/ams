@@ -178,7 +178,7 @@ bool CListDirsCmd::ScanUserSiteBuilds(const CSmallString& sites)
 
 void CListDirsCmd::ScanSiteBuilds(const CSite& site)
 {
-    GlobalConfig.SetActiveSiteID(site.GetID());
+    AMSGlobalConfig.SetActiveSiteID(site.GetID());
     Cache.LoadCache(false);
 
     CXMLElement* p_mele = Cache.GetRootElementOfCache();

@@ -84,9 +84,9 @@ bool CUserCmd::Run(void)
     // init global host data
     User.InitGlobalSetup();
 
-    if( GlobalConfig.GetActiveSiteID() != NULL ){
+    if( AMSGlobalConfig.GetActiveSiteID() != NULL ){
         // initialize user -----------------------------
-        User.InitUserFile(GlobalConfig.GetActiveSiteID());
+        User.InitUserFile(AMSGlobalConfig.GetActiveSiteID());
         User.InitUser();
     } else {
         ES_WARNING("no site active");

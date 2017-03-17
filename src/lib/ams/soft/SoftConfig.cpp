@@ -62,7 +62,7 @@ void CSoftConfig::LoadUserConfig(void)
     CFileName    config_name;
 
     // common config
-    config_name = GlobalConfig.GetUserGlobalConfigDir() / "ams.xml";
+    config_name = AMSGlobalConfig.GetUserGlobalConfigDir() / "ams.xml";
     if( CFileSystem::IsFile(config_name) == false ) {
         // no user common config
         CommonConfig.CreateChildDeclaration();
@@ -118,7 +118,7 @@ bool CSoftConfig::SaveUserConfig(void)
     CFileName    config_name;
 
     // save common config
-    config_name = GlobalConfig.GetUserGlobalConfigDir() / "ams.xml";
+    config_name = AMSGlobalConfig.GetUserGlobalConfigDir() / "ams.xml";
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&CommonConfig);
@@ -168,7 +168,7 @@ bool CSoftConfig::AreSystemAutoloadedModulesDisabled(void)
 {
     // global setup
     CFileName    config_name;
-    config_name = GlobalConfig.GetUserSiteConfigDir() / "_disable_system_modules";
+    config_name = AMSGlobalConfig.GetUserSiteConfigDir() / "_disable_system_modules";
 
     if( CFileSystem::IsFile(config_name) == true ) {
         // user does not want system modules for all sites
@@ -177,7 +177,7 @@ bool CSoftConfig::AreSystemAutoloadedModulesDisabled(void)
     }
 
     // global setup
-    config_name = GlobalConfig.GetUserGlobalConfigDir() / "_disable_system_modules";
+    config_name = AMSGlobalConfig.GetUserGlobalConfigDir() / "_disable_system_modules";
 
     if( CFileSystem::IsFile(config_name) == true ) {
         // user does not want system modules for particular

@@ -84,10 +84,10 @@ int CCgen::Init(int argc, char* argv[])
 bool CCgen::Run(void)
 {
     // init completion system
-    if( Completion.InitCompletion() == false ) return(false);
+    if( AMSCompletion.InitCompletion() == false ) return(false);
 
     // load module cache only if site is active
-    if( GlobalConfig.GetActiveSiteID() != NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() != NULL ) {
         if( Cache.LoadCache() == false) return(-1);
         // do not load user config for PrintEngine
         // because PrintEngine is used only for ams-print, which
@@ -96,11 +96,11 @@ bool CCgen::Run(void)
 
         // initialize user -----------------------------
         User.InitGlobalSetup();
-        User.InitUserFile(GlobalConfig.GetActiveSiteID());
+        User.InitUserFile(AMSGlobalConfig.GetActiveSiteID());
         User.InitUser();
     }
 
-    Completion.GetSuggestions();
+    AMSCompletion.GetSuggestions();
 
     return(true);
 }

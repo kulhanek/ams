@@ -33,7 +33,7 @@
 
 //------------------------------------------------------------------------------
 
-CAMSGlobalConfig GlobalConfig;
+CAMSGlobalConfig AMSGlobalConfig;
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ const CFileName CAMSGlobalConfig::GetAMSRootDir(void)
 
 const CFileName CAMSGlobalConfig::GetUserSiteConfigDir(void)
 {
-    return( GetUserConfigDir(GlobalConfig.GetActiveSiteID()) );
+    return( GetUserConfigDir(AMSGlobalConfig.GetActiveSiteID()) );
 }
 
 //------------------------------------------------------------------------------

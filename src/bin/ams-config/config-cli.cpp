@@ -172,7 +172,7 @@ int Init(int argc, char* argv[])
 bool Run(void)
 {
     // check if site is active
-    if( GlobalConfig.GetActiveSiteID() == NULL ) {
+    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
         ES_ERROR("no site is active");
         return(false);
     }
@@ -197,9 +197,9 @@ bool Run(void)
     Host.InitHostFile();
     Host.InitHost();
 
-    if( GlobalConfig.GetActiveSiteID() != NULL ){
+    if( AMSGlobalConfig.GetActiveSiteID() != NULL ){
         // initialize user -----------------------------
-        User.InitUserFile(GlobalConfig.GetActiveSiteID());
+        User.InitUserFile(AMSGlobalConfig.GetActiveSiteID());
         User.InitUser();
     }
 

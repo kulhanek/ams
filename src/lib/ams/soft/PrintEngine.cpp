@@ -85,8 +85,8 @@ bool CPrintEngine::LoadSystemConfig(void)
     CFileName    config_name;
 
     // first try site config
-    if( GlobalConfig.GetActiveSiteID() != NULL ) {
-        config_name = CFileName(ETCDIR) / "sites" / GlobalConfig.GetActiveSiteID() / "print.xml";
+    if( AMSGlobalConfig.GetActiveSiteID() != NULL ) {
+        config_name = CFileName(ETCDIR) / "sites" / AMSGlobalConfig.GetActiveSiteID() / "print.xml";
         if( CFileSystem::IsFile(config_name) == false ) {
             // then global config
             config_name = CFileName(ETCDIR) / "default" / "print.xml";
@@ -100,7 +100,7 @@ bool CPrintEngine::LoadSystemConfig(void)
 
     if( xml_parser.Parse(config_name) == false ) {
         CSmallString error;
-        error << "unable to load site '" << GlobalConfig.GetActiveSiteID()
+        error << "unable to load site '" << AMSGlobalConfig.GetActiveSiteID()
               << "' print config (" << config_name <<")";
         ES_ERROR(error);
         return(false);
@@ -781,7 +781,7 @@ bool CPrintEngine::PrintModModuleInfo(const CSmallString& mod_name)
 
     vout << endl;
 
-    if( GlobalConfig.IsModuleActive(name) == true ) {
+    if( AMSGlobalConfig.IsModuleActive(name) == true ) {
         vout << " INFO:     Module is active, it will be reactivated if 'add' action is used .. " << endl;
         vout << endl;
     }
@@ -800,7 +800,7 @@ bool CPrintEngine::PrintModModuleInfo(const CSmallString& mod_name)
             if( p_sele->GetName() == "conflict" ) {
                 CSmallString lmodule;
                 p_sele->GetAttribute("module",lmodule);
-                if( GlobalConfig.IsModuleActive(lmodule) == true ) {
+                if( AMSGlobalConfig.IsModuleActive(lmodule) == true ) {
                     vout << " WARNING: active module in conflict, it will be unloaded if 'add' action is used ... " << endl;
                 }
             }
@@ -868,7 +868,7 @@ void CPrintEngine::PrintModActiveModules(CTerminal& terminal)
     int maxmodlen = Cache.GetSizeOfLongestModuleSpecification();
 
     // print active modules
-    CSmallString tmp = GlobalConfig.GetActiveModules();
+    CSmallString tmp = AMSGlobalConfig.GetActiveModules();
 
     char*   p_module = strtok(tmp.GetBuffer(),"|");
     int     count = 0;
@@ -909,7 +909,7 @@ void CPrintEngine::PrintModExportedModules(CTerminal& terminal)
     int maxmodlen = Cache.GetSizeOfLongestModuleSpecification();
 
     // print active modules
-    CSmallString tmp = GlobalConfig.GetExportedModules();
+    CSmallString tmp = AMSGlobalConfig.GetExportedModules();
 
     char*   p_module = strtok(tmp.GetBuffer(),"|");
     int     count = 0;

@@ -93,7 +93,7 @@ bool CMapManip::Run(void)
         if( Options.IsOptPrefixSet() ){
             if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
         } else {
-            if( Map.LoadAutoPrefixes(GlobalConfig.GetActiveSiteName()) == false ) return(false);
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
         }
         if( Map.AddBuildsForSites(vout,Options.GetProgArg(1),Options.GetProgArg(2)) == false ) {
             ES_TRACE_ERROR("unable to distribute builds");
