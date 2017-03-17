@@ -24,7 +24,7 @@
 #include <ostream>
 #include <SmallTimeAndDate.hpp>
 #include <ShellProcessor.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Host.hpp>
 #include <iomanip>
 #include <User.hpp>

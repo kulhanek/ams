@@ -22,7 +22,7 @@
 #include "CacheCmd.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Cache.hpp>
 #include <Utils.hpp>
 #include <PrintEngine.hpp>

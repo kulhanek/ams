@@ -23,8 +23,8 @@
 #include <SmallTimeAndDate.hpp>
 #include <Cache.hpp>
 #include <PrintEngine.hpp>
-#include <Completion.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSCompletion.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <User.hpp>
 #include "Cgen.hpp"
 

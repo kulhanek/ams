@@ -32,7 +32,7 @@
 #include <XMLIterator.hpp>
 #include <ErrorSystem.hpp>
 #include <prefix.h>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <DirectoryEnum.hpp>
 #include <FileSystem.hpp>
 #include <Shell.hpp>

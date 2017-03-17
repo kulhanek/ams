@@ -22,7 +22,7 @@
 #include "MapManip.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Map.hpp>
 #include <Site.hpp>
 #include <Cache.hpp>

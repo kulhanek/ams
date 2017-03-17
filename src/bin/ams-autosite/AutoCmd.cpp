@@ -22,7 +22,7 @@
 #include "AutoCmd.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Site.hpp>
 #include <Host.hpp>
 #include <DirectoryEnum.hpp>

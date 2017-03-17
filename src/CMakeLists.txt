@@ -2,7 +2,6 @@
 # AMS CMake File
 # ==============================================================================
 
-INCLUDE_DIRECTORIES(lib/plusula SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/system SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/soft SYSTEM)

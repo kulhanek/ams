@@ -28,7 +28,7 @@
 #include <XMLElement.hpp>
 #include <ErrorSystem.hpp>
 #include <Shell.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <XMLIterator.hpp>
 #include <fnmatch.h>
 #include <XMLText.hpp>

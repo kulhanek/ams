@@ -22,7 +22,7 @@
 #include "SiteCmd.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <ShellProcessor.hpp>
 #include <PrintEngine.hpp>
 #include <Site.hpp>

@@ -22,7 +22,7 @@
 #include "UserCmd.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <User.hpp>
 #include <SoftConfig.hpp>
 

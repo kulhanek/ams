@@ -31,7 +31,7 @@
 #include <XMLElement.hpp>
 #include <XMLIterator.hpp>
 #include <Terminal.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <prefix.h>
 #include <Cache.hpp>
 #include <AmsUUID.hpp>

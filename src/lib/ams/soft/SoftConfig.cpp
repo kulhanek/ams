@@ -31,7 +31,7 @@
 #include <Utils.hpp>
 #include <string.h>
 #include <vector>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <FileSystem.hpp>
 #include <PrintEngine.hpp>
 #include <XMLIterator.hpp>

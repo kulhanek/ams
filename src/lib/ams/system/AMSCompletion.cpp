@@ -20,7 +20,7 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include <Completion.hpp>
+#include <AMSCompletion.hpp>
 #include <ctype.h>
 #include <ErrorSystem.hpp>
 #include <XMLParser.hpp>
@@ -38,13 +38,13 @@
 
 //------------------------------------------------------------------------------
 
-CCompletion Completion;
+CAMSCompletion Completion;
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CCompletion::CCompletion(void)
+CAMSCompletion::CAMSCompletion(void)
 {
     RelPartCompleted = 0;
     CGenPosition = 0;
@@ -56,7 +56,7 @@ CCompletion::CCompletion(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CCompletion::InitCompletion(void)
+bool CAMSCompletion::InitCompletion(void)
 {
     // get completion data --------------------------
     CommandLine = CShell::GetSystemVariable("COMP_LINE");
@@ -90,7 +90,7 @@ bool CCompletion::InitCompletion(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CCompletion::GetSuggestions(void)
+bool CAMSCompletion::GetSuggestions(void)
 {
     // if any option then do not provide any suggestion
     if( AnyOption() == true ) return(true);
@@ -182,7 +182,7 @@ bool CCompletion::GetSuggestions(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CSmallString CCompletion::GetCommand(void)
+CSmallString CAMSCompletion::GetCommand(void)
 {
     if( Words.size() >= 1 ) return(Words[0]);
     return("");
@@ -190,7 +190,7 @@ CSmallString CCompletion::GetCommand(void)
 
 //------------------------------------------------------------------------------
 
-CSmallString CCompletion::GetAction(void)
+CSmallString CAMSCompletion::GetAction(void)
 {
     if( Words.size() >= 2 ) return(Words[1]);
     return("");
@@ -198,7 +198,7 @@ CSmallString CCompletion::GetAction(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::AnyOption(void)
+bool CAMSCompletion::AnyOption(void)
 {
     for(unsigned int i=0; i < Words.size(); i++) {
         // all words are non-empty (due to usage of strtok)
@@ -209,7 +209,7 @@ bool CCompletion::AnyOption(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::FilterSuggestions(void)
+bool CAMSCompletion::FilterSuggestions(void)
 {
     // build filter ---------------------------------
     CSmallString filter;
@@ -233,7 +233,7 @@ bool CCompletion::FilterSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::PrintSuggestions(void)
+bool CAMSCompletion::PrintSuggestions(void)
 {
     // count number of suggestions
     int scount = 0;
@@ -269,7 +269,7 @@ bool CCompletion::PrintSuggestions(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CCompletion::AddSuggestions(const CSmallString& list)
+bool CAMSCompletion::AddSuggestions(const CSmallString& list)
 {
     CSmallString tmp = list;
     char* p_saveptr = NULL;
@@ -286,7 +286,7 @@ bool CCompletion::AddSuggestions(const CSmallString& list)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::AddSiteSuggestions(void)
+bool CAMSCompletion::AddSiteSuggestions(void)
 {
     // make list of all available sites -------------
     CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
@@ -308,7 +308,7 @@ bool CCompletion::AddSiteSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::AddModuleSuggestions(void)
+bool CAMSCompletion::AddModuleSuggestions(void)
 {
     CXMLElement*     p_mele = Cache.GetRootElementOfCache();
     CXMLElement*     p_ele;
@@ -373,7 +373,7 @@ bool CCompletion::AddModuleSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::AddSyncSuggestions(void)
+bool CAMSCompletion::AddSyncSuggestions(void)
 {
     Suggestions.push_back("all");
     Suggestions.push_back("amscore");
@@ -382,7 +382,7 @@ bool CCompletion::AddSyncSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::AddRealizationSuggestions(void)
+bool CAMSCompletion::AddRealizationSuggestions(void)
 {
     CXMLElement*     p_mele = Cache.GetRootElementOfCache();
     CXMLElement*     p_ele;
@@ -417,7 +417,7 @@ bool CCompletion::AddRealizationSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CCompletion::AddCategorySuggestions(void)
+bool CAMSCompletion::AddCategorySuggestions(void)
 {
     CXMLElement* p_iele = PrintEngine.GetRootElementOfConfig();
 
@@ -440,7 +440,7 @@ bool CCompletion::AddCategorySuggestions(void)
 
 //------------------------------------------------------------------------------
 
-unsigned int CCompletion::WhatRealizationPart(void)
+unsigned int CAMSCompletion::WhatRealizationPart(void)
 {
     // count number of semicolon in current builds
     unsigned int numsem = 0;

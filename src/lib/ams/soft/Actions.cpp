@@ -24,7 +24,7 @@
 #include <string.h>
 #include <Actions.hpp>
 #include <Cache.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <ShellProcessor.hpp>
 #include <XMLIterator.hpp>
 #include <ErrorSystem.hpp>

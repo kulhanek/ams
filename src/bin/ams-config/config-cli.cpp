@@ -25,7 +25,7 @@
 #include <TerminalStr.hpp>
 #include <Shell.hpp>
 #include <ctype.h>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Cache.hpp>
 #include <PrintEngine.hpp>
 #include <SoftConfig.hpp>

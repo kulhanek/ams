@@ -22,7 +22,7 @@
 #include "HostCmd.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Host.hpp>
 #include <User.hpp>
 

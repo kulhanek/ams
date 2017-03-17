@@ -31,7 +31,7 @@
 #include <ShellProcessor.hpp>
 #include <prefix.h>
 #include <fnmatch.h>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <FileSystem.hpp>
 #include <Shell.hpp>
 #include <Cuda.hpp>

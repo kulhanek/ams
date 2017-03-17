@@ -22,7 +22,7 @@
 #include "ModuleCmd.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Cache.hpp>
 #include <PrintEngine.hpp>
 #include <ShellProcessor.hpp>

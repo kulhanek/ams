@@ -21,7 +21,7 @@
 #include "RepoIndexCreate.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <Cache.hpp>
 #include <AmsUUID.hpp>
 #include <DirectoryEnum.hpp>

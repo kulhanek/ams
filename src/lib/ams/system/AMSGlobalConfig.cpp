@@ -20,7 +20,7 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <XMLParser.hpp>
 #include <prefix.h>
 #include <ErrorSystem.hpp>
@@ -33,13 +33,13 @@
 
 //------------------------------------------------------------------------------
 
-CGlobalConfig GlobalConfig;
+CAMSGlobalConfig GlobalConfig;
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CGlobalConfig::CGlobalConfig(void)
+CAMSGlobalConfig::CAMSGlobalConfig(void)
 {
     ActiveSiteID       = CShell::GetSystemVariable("AMS_SITE");
     ActiveSiteName     = CUtils::GetSiteName(ActiveSiteID);
@@ -51,21 +51,21 @@ CGlobalConfig::CGlobalConfig(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CSmallString& CGlobalConfig::GetActiveSiteID(void)
+const CSmallString& CAMSGlobalConfig::GetActiveSiteID(void)
 {
     return(ActiveSiteID);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CGlobalConfig::GetActiveSiteName(void)
+const CSmallString CAMSGlobalConfig::GetActiveSiteName(void)
 {
     return(ActiveSiteName);
 }
 
 //------------------------------------------------------------------------------
 
-void CGlobalConfig::SetActiveSiteID(const CSmallString &site_id)
+void CAMSGlobalConfig::SetActiveSiteID(const CSmallString &site_id)
 {
     ActiveSiteID    = site_id;
     ActiveSiteName  = CUtils::GetSiteName(ActiveSiteID);
@@ -73,7 +73,7 @@ void CGlobalConfig::SetActiveSiteID(const CSmallString &site_id)
 
 //------------------------------------------------------------------------------
 
-void CGlobalConfig::SetActiveSiteID(const CAmsUUID& site_id)
+void CAMSGlobalConfig::SetActiveSiteID(const CAmsUUID& site_id)
 {
     SetActiveSiteID(site_id.GetFullStringForm());
 }
@@ -82,28 +82,28 @@ void CGlobalConfig::SetActiveSiteID(const CAmsUUID& site_id)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CFileName CGlobalConfig::GetAMSRootDir(void)
+const CFileName CAMSGlobalConfig::GetAMSRootDir(void)
 {
     return( CFileName(PREFIX) );
 }
 
 //------------------------------------------------------------------------------
 
-const CFileName CGlobalConfig::GetUserSiteConfigDir(void)
+const CFileName CAMSGlobalConfig::GetUserSiteConfigDir(void)
 {
     return( GetUserConfigDir(GlobalConfig.GetActiveSiteID()) );
 }
 
 //------------------------------------------------------------------------------
 
-const CFileName CGlobalConfig::GetUserGlobalConfigDir(void)
+const CFileName CAMSGlobalConfig::GetUserGlobalConfigDir(void)
 {
     return( GetUserConfigDir("") );
 }
 
 //------------------------------------------------------------------------------
 
-const CFileName CGlobalConfig::GetUserConfigDir(const CFileName& sub_dir)
+const CFileName CAMSGlobalConfig::GetUserConfigDir(const CFileName& sub_dir)
 {
     CFileName user_config_dir;
     user_config_dir = CShell::GetSystemVariable("AMS_USER_CONFIG_DIR");
@@ -140,7 +140,7 @@ const CFileName CGlobalConfig::GetUserConfigDir(const CFileName& sub_dir)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CGlobalConfig::IsModuleActive(const CSmallString& module)
+bool CAMSGlobalConfig::IsModuleActive(const CSmallString& module)
 {
     char* p_lvar;
     if( ActiveModules == NULL ) return(false);
@@ -184,7 +184,7 @@ bool CGlobalConfig::IsModuleActive(const CSmallString& module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CGlobalConfig::GetActiveModuleVersion(const CSmallString& module,
+bool CAMSGlobalConfig::GetActiveModuleVersion(const CSmallString& module,
         CSmallString& actver)
 {
     char* p_lvar;
@@ -240,21 +240,21 @@ bool CGlobalConfig::GetActiveModuleVersion(const CSmallString& module,
 
 //------------------------------------------------------------------------------
 
-const CSmallString& CGlobalConfig::GetActiveModules(void)
+const CSmallString& CAMSGlobalConfig::GetActiveModules(void)
 {
     return(ActiveModules);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString& CGlobalConfig::GetExportedModules(void)
+const CSmallString& CAMSGlobalConfig::GetExportedModules(void)
 {
     return(ExportedModules);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CGlobalConfig::GetActiveModuleSpecification(
+const CSmallString CAMSGlobalConfig::GetActiveModuleSpecification(
     const CSmallString& name)
 {
     if( ActiveModules == NULL ) return("");
@@ -277,7 +277,7 @@ const CSmallString CGlobalConfig::GetActiveModuleSpecification(
 
 //------------------------------------------------------------------------------
 
-const CSmallString CGlobalConfig::GetExportedModuleSpecification(
+const CSmallString CAMSGlobalConfig::GetExportedModuleSpecification(
     const CSmallString& name)
 {
     if( ExportedModules == NULL ) return("");
@@ -300,7 +300,7 @@ const CSmallString CGlobalConfig::GetExportedModuleSpecification(
 
 //-----------------------------------------------------------------------------
 
-void CGlobalConfig::UpdateActiveModules(const CSmallString& module,
+void CAMSGlobalConfig::UpdateActiveModules(const CSmallString& module,
         bool add_module)
 {
     ActiveModules = CShell::RemoveValue(ActiveModules,module,"|");
@@ -309,7 +309,7 @@ void CGlobalConfig::UpdateActiveModules(const CSmallString& module,
 
 //-----------------------------------------------------------------------------
 
-void CGlobalConfig::UpdateExportedModules(const CSmallString& module,
+void CAMSGlobalConfig::UpdateExportedModules(const CSmallString& module,
         bool add_module)
 {
     ExportedModules = CShell::RemoveValue(ExportedModules,module,"|");
@@ -318,7 +318,7 @@ void CGlobalConfig::UpdateExportedModules(const CSmallString& module,
 
 //-----------------------------------------------------------------------------
 
-void CGlobalConfig::SetExportedModules(const CSmallString& modules)
+void CAMSGlobalConfig::SetExportedModules(const CSmallString& modules)
 {
     ExportedModules = modules;
 }

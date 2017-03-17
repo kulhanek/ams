@@ -1,5 +1,5 @@
-#ifndef CompletionH
-#define CompletionH
+#ifndef AMSCompletionH
+#define AMSCompletionH
 // =============================================================================
 //  AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -29,10 +29,10 @@
 
 //------------------------------------------------------------------------------
 
-class AMS_PACKAGE CCompletion {
+class AMS_PACKAGE CAMSCompletion {
 public:
     // constructor and destructors ------------------------------------------------
-    CCompletion(void);
+    CAMSCompletion(void);
 
     // input methods --------------------------------------------------------------
     /// load completion configuration file and command line
@@ -92,7 +92,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-extern  CCompletion Completion;
+extern  CAMSCompletion Completion;
 
 //------------------------------------------------------------------------------
 

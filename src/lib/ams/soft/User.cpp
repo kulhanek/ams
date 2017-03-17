@@ -36,7 +36,7 @@
 #include "prefix.h"
 #include <FileSystem.hpp>
 #include <XMLElement.hpp>
-#include <GlobalConfig.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>

@@ -1,5 +1,5 @@
-#ifndef GlobalConfigH
-#define GlobalConfigH
+#ifndef AMSGlobalConfigH
+#define AMSGlobalConfigH
 // =============================================================================
 //  AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -29,10 +29,10 @@
 
 //------------------------------------------------------------------------------
 
-class AMS_PACKAGE CGlobalConfig {
+class AMS_PACKAGE CAMSGlobalConfig {
 public:
     // constructor and destructor -------------------------------------------------
-    CGlobalConfig(void);
+    CAMSGlobalConfig(void);
 
 // information about active site ----------------------------------------------
     /// get ID of active site
@@ -107,7 +107,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-extern CGlobalConfig GlobalConfig;
+extern CAMSGlobalConfig GlobalConfig;
 
 //------------------------------------------------------------------------------
 
