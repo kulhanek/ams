@@ -143,15 +143,17 @@ bool CAutoCmd::Run(void)
         if(std::find(transferrables.begin(), transferrables.end(), string(tname)) != transferrables.end()) {
             if( Options.GetOptIsTransferable() == true ){
                 vout << low;
-                vout << ">>> INFO: The source site '" << tname << "' is allowed to be transfered to this host ..." << endl;
+                vout << ">>> INFO: The source site '" << tname << "' will be transferred to this host ..." << endl;
             }
             best_site =  tname;
         } else {
             if( Options.GetOptIsTransferable() == false ){
-                vout << ">>> INFO: The transferred site is not allowed - using default!" << endl;
+                vout << ">>> INFO: The transferred site is not allowed!" << endl;
+                vout << "          The default site will be activated." << endl;
             } else {
                 vout << low;
-                vout << ">>> INFO: The source site '" << tname << "' is not allowed to be transfered to this host, using default ..." << endl;
+                vout << ">>> INFO: The source site '" << tname << "' is not allowed to be transferred to this host!" << endl;
+                vout << "          The default site will be activated." << endl;
             }
         }
     }
