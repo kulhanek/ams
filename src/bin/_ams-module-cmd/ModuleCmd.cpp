@@ -28,7 +28,7 @@
 #include <ShellProcessor.hpp>
 #include <Site.hpp>
 #include <Actions.hpp>
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 #include <Shell.hpp>
 #include <Host.hpp>
 #include <User.hpp>
@@ -159,7 +159,7 @@ bool CModuleCmd::Run(void)
         PrintEngine.SetOutputStream(vout);
 
         // load user config
-        SoftConfig.LoadUserConfig();
+        AMSUserConfig.LoadUserConfig();
     }
 
     // ----------------------------------------------
@@ -341,8 +341,8 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "autoload" ) {
         ForcePrintErrors = true;
-        SoftConfig.LoadUserConfig();
-        CXMLElement* p_mod_ele = SoftConfig.GetAutoloadedModules();
+        AMSUserConfig.LoadUserConfig();
+        CXMLElement* p_mod_ele = AMSUserConfig.GetAutoloadedModules();
         Actions.SetFlags(Actions.GetFlags() ^ MFB_SYS_AUTOLOADED);
         Actions.SetFlags(Actions.GetFlags() | MFB_USER_AUTOLOADED);
         if( CSite::ActivateAutoloadedModules(p_mod_ele) == false ) {

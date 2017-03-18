@@ -24,7 +24,7 @@
 #include <SmallTimeAndDate.hpp>
 #include <AMSGlobalConfig.hpp>
 #include <User.hpp>
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ bool CUserCmd::Run(void)
     }
 
     if ( Options.GetOptUMask() ) {
-        SoftConfig.LoadUserConfig();
+        AMSUserConfig.LoadUserConfig();
         vout << User.GetRequestedUserUMask();
     } else {
         // print info

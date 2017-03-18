@@ -41,7 +41,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -566,7 +566,7 @@ bool CUser::IsPosixGroup(const CSmallString& group)
 
 const CSmallString CUser::GetRequestedUserUMask(void)
 {
-    return( SoftConfig.GetUserUMask() );
+    return( AMSUserConfig.GetUserUMask() );
 }
 
 //==============================================================================

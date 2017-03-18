@@ -1,5 +1,5 @@
-#ifndef SoftConfigH
-#define SoftConfigH
+#ifndef AMSUserConfigH
+#define AMSUserConfigH
 // =============================================================================
 //  AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -32,10 +32,10 @@
 
 //------------------------------------------------------------------------------
 
-class AMS_PACKAGE CSoftConfig {
+class AMS_PACKAGE CAMSUserConfig {
 public:
 // constructor and destructor -------------------------------------------------
-    CSoftConfig(void);
+    CAMSUserConfig(void);
 
 // input/output methods -------------------------------------------------------
     /// load user config
@@ -105,7 +105,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-extern CSoftConfig SoftConfig;
+extern CAMSUserConfig AMSUserConfig;
 
 //------------------------------------------------------------------------------
 

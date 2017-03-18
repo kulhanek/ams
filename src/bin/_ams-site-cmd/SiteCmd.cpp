@@ -27,7 +27,7 @@
 #include <PrintEngine.hpp>
 #include <Site.hpp>
 #include <Utils.hpp>
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 #include <Actions.hpp>
 #include <Shell.hpp>
 #include <User.hpp>
@@ -259,7 +259,7 @@ bool CSiteCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "avail" ) {
         // load user config
-        SoftConfig.LoadUserConfig();
+        AMSUserConfig.LoadUserConfig();
 
         // initialze AMS print engine
         if( PrintEngine.LoadConfig() == false) {

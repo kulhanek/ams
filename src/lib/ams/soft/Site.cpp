@@ -38,7 +38,7 @@
 #include <string.h>
 #include <Terminal.hpp>
 #include <Utils.hpp>
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 #include <User.hpp>
 #include <Host.hpp>
 #include <iomanip>
@@ -586,7 +586,7 @@ bool CSite::ActivateSite(void)
     // initialize user config
     // it is not possible to load user config because paths to the setup might be set
     // by created above and thus not yet available
-    // SoftConfig.LoadUserConfig();
+    // AMSUserConfig.LoadUserConfig();
 
     // initial setup - no module is active
     ShellProcessor.UnsetVariable("AMS_ACTIVE_MODULES");
@@ -600,7 +600,7 @@ bool CSite::ActivateSite(void)
     // load automodules -----------------------------
     CXMLElement* p_mod_ele;
     // this can be performed here - setup is in site config file
-    if( SoftConfig.AreSystemAutoloadedModulesDisabled() == false ) {
+    if( AMSUserConfig.AreSystemAutoloadedModulesDisabled() == false ) {
         p_mod_ele = SiteConfig.GetChildElementByPath("site/autoload");
         Actions.SetFlags(Actions.GetFlags() | MFB_SYS_AUTOLOADED);
         if( ActivateAutoloadedModules(p_mod_ele) == false ) {
@@ -609,7 +609,7 @@ bool CSite::ActivateSite(void)
         }
     }
 
-//    p_mod_ele = SoftConfig.GetAutoloadedModules();
+//    p_mod_ele = AMSUserConfig.GetAutoloadedModules();
 //    Actions.SetFlags(Actions.GetFlags() ^ MFB_SYS_AUTOLOADED);
 //    Actions.SetFlags(Actions.GetFlags() | MFB_USER_AUTOLOADED);
 //    if( ActivateAutoloadedModules(p_mod_ele) == false ) {

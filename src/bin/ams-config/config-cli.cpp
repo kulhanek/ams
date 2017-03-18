@@ -28,7 +28,7 @@
 #include <AMSGlobalConfig.hpp>
 #include <Cache.hpp>
 #include <PrintEngine.hpp>
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 #include <Site.hpp>
 #include <Host.hpp>
 #include <User.hpp>
@@ -204,7 +204,7 @@ bool Run(void)
     }
 
     // load user config
-    SoftConfig.LoadUserConfig();
+    AMSUserConfig.LoadUserConfig();
 
     // load site config
     if( Site.LoadConfig() == false) {
@@ -307,7 +307,7 @@ void MainMenu(void)
                 result = PrintEngine.SaveUserConfig();
             }
             if( AutorestoredModuleChanged || UserSetupChanged || SitePrioritiesChanged || ModulePrioritiesChanged ){
-                result = SoftConfig.SaveUserConfig();
+                result = AMSUserConfig.SaveUserConfig();
             }
             if( result == true ) {
                 VisualizationChanged = false;
@@ -373,7 +373,7 @@ bool QuitProgram(void)
                 result = PrintEngine.SaveUserConfig();
             }
             if( AutorestoredModuleChanged || UserSetupChanged || SitePrioritiesChanged || ModulePrioritiesChanged ){
-                result = SoftConfig.SaveUserConfig();
+                result = AMSUserConfig.SaveUserConfig();
             }
             if( result == true ) {
                 VisualizationChanged = false;
@@ -1020,7 +1020,7 @@ void ListAutorestoredModules(void)
     printf("============================================================\n");
     printf(" List of Auto-restored Modules\n");
     printf("============================================================\n");
-    SoftConfig.PrintAutorestoredModules();
+    AMSUserConfig.PrintAutorestoredModules();
     printf("\n");
 }
 
@@ -1084,14 +1084,14 @@ bool AddAutorestoredModule(const CSmallString& module)
         return(false);
     }
 
-    if( SoftConfig.IsAutorestoredModule(name) ){
+    if( AMSUserConfig.IsAutorestoredModule(name) ){
         printf("\n");
         printf(" >>> ERROR: Specified module is already in the list of autorestored modules!\n");
         printf("\n");
         return(false);
     }
 
-    SoftConfig.AddAutorestoredModule(module);
+    AMSUserConfig.AddAutorestoredModule(module);
     return(true);
 }
 
@@ -1126,14 +1126,14 @@ void RemoveAutorestoredModule(void)
 
 bool RemoveAutorestoredModule(const CSmallString& module)
 {
-    if( SoftConfig.IsAutorestoredModule(module) == false ){
+    if( AMSUserConfig.IsAutorestoredModule(module) == false ){
         printf("\n");
         printf(" >>> ERROR: Specified module is not in the list of autorestored modules!\n");
         printf("\n");
         return(false);
     }
 
-    SoftConfig.RemoveAutorestoredModule(module);
+    AMSUserConfig.RemoveAutorestoredModule(module);
     return(true);
 }
 
@@ -1154,7 +1154,7 @@ void RemoveAllAutorestoredModules(void)
         if( strcmp(buffer,"skip") == 0 ) return;
 
         if( strcmp(buffer,"yes") == 0 ) {
-            SoftConfig.ClearAutorestoredConfig();
+            AMSUserConfig.ClearAutorestoredConfig();
             printf(" >>> All auto-restored modules were successfully removed.\n");
             AutorestoredModuleChanged = true;
             return;
@@ -1241,7 +1241,7 @@ void UserSetupMenu(void)
 void PrintUserUMask(void)
 {
     printf("\n");
-    printf(" >>> User umask is : %s\n",(const char*)SoftConfig.GetUserUMask());
+    printf(" >>> User umask is : %s\n",(const char*)AMSUserConfig.GetUserUMask());
     printf("\n");
 }
 
@@ -1278,7 +1278,7 @@ void ChangeUserUMask(void)
         }
         if( error ) continue;
 
-        SoftConfig.SetUserUMask(buffer);
+        AMSUserConfig.SetUserUMask(buffer);
         printf(" >>> The umask was successfully set!\n");
         printf("\n");
         UserSetupChanged = true;
@@ -1359,10 +1359,10 @@ void SitePrioritiesMenu(void)
 void PrintSitePriorities(void)
 {
     printf("\n");
-    if( SoftConfig.GetSitePriorities() == NULL ){
+    if( AMSUserConfig.GetSitePriorities() == NULL ){
         printf(" >>> Site priorities are : -automatically determined-\n");
     } else {
-        printf(" >>> Site priorities are  : %s\n",(const char*)SoftConfig.GetSitePriorities());
+        printf(" >>> Site priorities are  : %s\n",(const char*)AMSUserConfig.GetSitePriorities());
     }
     printf("\n");
 }
@@ -1383,14 +1383,14 @@ void ChangeSitePriorities(void)
 
         if( strcmp(buffer,"") == 0 ) return;
 
-        if( SoftConfig.IsAvailableSite(buffer) == false ){
+        if( AMSUserConfig.IsAvailableSite(buffer) == false ){
             printf("\n");
             printf(" >>> ERROR: Specified site name is not on the list of available sites!\n");
             printf("\n");
             continue;
         }
 
-        SoftConfig.SetSitePriorities(buffer);
+        AMSUserConfig.SetSitePriorities(buffer);
         printf(" >>> The site priorities were successfully set!\n");
         printf("\n");
         SitePrioritiesChanged = true;
@@ -1402,7 +1402,7 @@ void ChangeSitePriorities(void)
 
 void UseDefaultSitePriorities(void)
 {
-    SoftConfig.SetSitePriorities("");
+    AMSUserConfig.SetSitePriorities("");
     printf("\n");
     printf(" >>> Default site priorities will be used by AMS!\n");
     printf("\n");
@@ -1490,10 +1490,10 @@ void ModulePrioritiesMenu(void)
 void PrintModulePriorities(void)
 {
     printf("\n");
-    if( SoftConfig.GetModulePriorities() == NULL ){
-        printf(" >>> Module priorities are : %s (-system default-)\n",(const char*)SoftConfig.GetDefaultModulePriorities());
+    if( AMSUserConfig.GetModulePriorities() == NULL ){
+        printf(" >>> Module priorities are : %s (-system default-)\n",(const char*)AMSUserConfig.GetDefaultModulePriorities());
     } else {
-        printf(" >>> Module priorities are : %s\n",(const char*)SoftConfig.GetModulePriorities());
+        printf(" >>> Module priorities are : %s\n",(const char*)AMSUserConfig.GetModulePriorities());
     }
     printf("\n");
 }
@@ -1525,7 +1525,7 @@ void ChangeModulePriorities(void)
             continue;
         }
 
-        SoftConfig.SetModulePriorities(buffer);
+        AMSUserConfig.SetModulePriorities(buffer);
         printf(" >>> The module priorities were successfully set!\n");
         printf("\n");
         ModulePrioritiesChanged = true;
@@ -1537,7 +1537,7 @@ void ChangeModulePriorities(void)
 
 void UseDefaultModulePriorities(void)
 {
-    SoftConfig.SetModulePriorities("");
+    AMSUserConfig.SetModulePriorities("");
     printf("\n");
     printf(" >>> Default module priorities will be used by AMS!\n");
     printf("\n");

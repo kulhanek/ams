@@ -13,7 +13,7 @@ SET(AMS_SRC
         system/AMSCompletion.cpp
 
     # software -----------------------------------
-        soft/SoftConfig.cpp
+        soft/AMSUserConfig.cpp
         soft/SoftStat.cpp
         soft/Actions.cpp
         soft/AmsUUID.cpp

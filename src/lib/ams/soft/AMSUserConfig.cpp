@@ -21,7 +21,7 @@
 //     Boston, MA  02110-1301  USA
 // =============================================================================
 
-#include <SoftConfig.hpp>
+#include <AMSUserConfig.hpp>
 #include <XMLParser.hpp>
 #include <XMLPrinter.hpp>
 #include <prefix.h>
@@ -41,13 +41,13 @@
 
 //------------------------------------------------------------------------------
 
-CSoftConfig SoftConfig;
+CAMSUserConfig AMSUserConfig;
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CSoftConfig::CSoftConfig(void)
+CAMSUserConfig::CAMSUserConfig(void)
 {
 
 }
@@ -56,7 +56,7 @@ CSoftConfig::CSoftConfig(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CSoftConfig::LoadUserConfig(void)
+void CAMSUserConfig::LoadUserConfig(void)
 {
     // load common config ----------------------------------
     CFileName    config_name;
@@ -112,7 +112,7 @@ void CSoftConfig::LoadUserConfig(void)
 
 //------------------------------------------------------------------------------
 
-bool CSoftConfig::SaveUserConfig(void)
+bool CAMSUserConfig::SaveUserConfig(void)
 {
     // save config ----------------------------------
     CFileName    config_name;
@@ -153,7 +153,7 @@ bool CSoftConfig::SaveUserConfig(void)
 
 //------------------------------------------------------------------------------
 
-void CSoftConfig::ClearAutorestoredConfig(void)
+void CAMSUserConfig::ClearAutorestoredConfig(void)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) return;
@@ -164,7 +164,7 @@ void CSoftConfig::ClearAutorestoredConfig(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CSoftConfig::AreSystemAutoloadedModulesDisabled(void)
+bool CAMSUserConfig::AreSystemAutoloadedModulesDisabled(void)
 {
     // global setup
     CFileName    config_name;
@@ -191,7 +191,7 @@ bool CSoftConfig::AreSystemAutoloadedModulesDisabled(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CXMLElement* CSoftConfig::GetAutoloadedModules(void)
+CXMLElement* CAMSUserConfig::GetAutoloadedModules(void)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
@@ -203,7 +203,7 @@ CXMLElement* CSoftConfig::GetAutoloadedModules(void)
 
 //------------------------------------------------------------------------------
 
-bool CSoftConfig::PrintAutorestoredModules(FILE* fout)
+bool CAMSUserConfig::PrintAutorestoredModules(FILE* fout)
 {
     if( fout == NULL ) {
         fout = stdout;
@@ -234,7 +234,7 @@ bool CSoftConfig::PrintAutorestoredModules(FILE* fout)
 
 //------------------------------------------------------------------------------
 
-void CSoftConfig::AddAutorestoredModule(const CSmallString& module)
+void CAMSUserConfig::AddAutorestoredModule(const CSmallString& module)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload",true);
     CXMLElement* p_mele = p_ele->CreateChildElement("module");
@@ -243,7 +243,7 @@ void CSoftConfig::AddAutorestoredModule(const CSmallString& module)
 
 //------------------------------------------------------------------------------
 
-bool CSoftConfig::RemoveAutorestoredModule(const CSmallString& module)
+bool CAMSUserConfig::RemoveAutorestoredModule(const CSmallString& module)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
@@ -279,7 +279,7 @@ bool CSoftConfig::RemoveAutorestoredModule(const CSmallString& module)
 
 //------------------------------------------------------------------------------
 
-bool CSoftConfig::IsAutorestoredModule(const CSmallString& module)
+bool CAMSUserConfig::IsAutorestoredModule(const CSmallString& module)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user/autoload");
     if( p_ele == NULL ) {
@@ -314,7 +314,7 @@ bool CSoftConfig::IsAutorestoredModule(const CSmallString& module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CSmallString CSoftConfig::GetUserGroup(void)
+const CSmallString CAMSUserConfig::GetUserGroup(void)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     CSmallString group;
@@ -324,7 +324,7 @@ const CSmallString CSoftConfig::GetUserGroup(void)
 
 //------------------------------------------------------------------------------
 
-void CSoftConfig::SetUserGroup(const CSmallString& group)
+void CAMSUserConfig::SetUserGroup(const CSmallString& group)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     p_ele->SetAttribute("group",group);
@@ -332,7 +332,7 @@ void CSoftConfig::SetUserGroup(const CSmallString& group)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CSoftConfig::GetUserUMask(void)
+const CSmallString CAMSUserConfig::GetUserUMask(void)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     CSmallString umask;
@@ -345,7 +345,7 @@ const CSmallString CSoftConfig::GetUserUMask(void)
 
 //------------------------------------------------------------------------------
 
-void CSoftConfig::SetUserUMask(const CSmallString& umask)
+void CAMSUserConfig::SetUserUMask(const CSmallString& umask)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     p_ele->SetAttribute("umask",umask);
@@ -354,7 +354,7 @@ void CSoftConfig::SetUserUMask(const CSmallString& umask)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CSoftConfig::GetSitePriorities(void)
+const CSmallString CAMSUserConfig::GetSitePriorities(void)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     CSmallString pri;
@@ -364,7 +364,7 @@ const CSmallString CSoftConfig::GetSitePriorities(void)
 
 //------------------------------------------------------------------------------
 
-void CSoftConfig::SetSitePriorities(const CSmallString& pri)
+void CAMSUserConfig::SetSitePriorities(const CSmallString& pri)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     p_ele->SetAttribute("sitepri",pri);
@@ -372,7 +372,7 @@ void CSoftConfig::SetSitePriorities(const CSmallString& pri)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CSoftConfig::GetDefaultModulePriorities(void)
+const CSmallString CAMSUserConfig::GetDefaultModulePriorities(void)
 {
     CSmallString pri;
     CShell::SetSystemVariable("AMS_DEFAULT_MODPRI",pri);
@@ -384,7 +384,7 @@ const CSmallString CSoftConfig::GetDefaultModulePriorities(void)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CSoftConfig::GetModulePriorities(void)
+const CSmallString CAMSUserConfig::GetModulePriorities(void)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     CSmallString pri;
@@ -394,7 +394,7 @@ const CSmallString CSoftConfig::GetModulePriorities(void)
 
 //------------------------------------------------------------------------------
 
-void CSoftConfig::SetModulePriorities(const CSmallString& pri)
+void CAMSUserConfig::SetModulePriorities(const CSmallString& pri)
 {
     CXMLElement* p_ele = CommonConfig.GetChildElementByPath("user",true);
     p_ele->SetAttribute("modpri",pri);
@@ -402,7 +402,7 @@ void CSoftConfig::SetModulePriorities(const CSmallString& pri)
 
 //------------------------------------------------------------------------------
 
-bool CSoftConfig::IsAvailableSite(const CSmallString& name)
+bool CAMSUserConfig::IsAvailableSite(const CSmallString& name)
 {
     CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
 
