@@ -21,7 +21,6 @@
 #include <Cuda.hpp>
 #include <ErrorSystem.hpp>
 #include <iostream>
-#include <pbs_ifl.h>
 #include <stdlib.h>
 #include <FileSystem.hpp>
 #include <iomanip>

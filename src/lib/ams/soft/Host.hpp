@@ -180,14 +180,6 @@ private:
     std::vector<std::string>    CPUInfoTokens;          // CPU tokens from /proc/cpuinfo
     int                         CPUInfoNumOfHostCPUs;
 
-    // torque
-    std::vector<std::string>    TorqueTokens;
-    CSmallString                TorqueFilter;
-    CSmallString                TorqueLib;
-    CSmallString                TorqueSrv;
-    int                         TorqueNCPUs;
-    CSmallString                TorqueProps;
-
     // cuda
     std::vector<std::string>    CUDATokens;
     CSmallString                CudaFilter;
@@ -206,9 +198,6 @@ private:
 
     /// init CPU tokens
     void InitCPUInfoTokens(CXMLElement* p_ele);
-
-    /// init Torque tokens
-    void InitTorqueTokens(CXMLElement* p_ele);
 
     /// init compatibility tokens
     void InitCompatibilityTokens(CXMLElement* p_ele);

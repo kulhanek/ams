@@ -25,10 +25,6 @@ SET(AMS_SRC
         soft/Site.cpp
         soft/Utils.cpp
 
-    # torque -------------------------------------
-        torque/TorqueAttr.cpp
-        torque/Torque.cpp
-
     # cuda ---------------------------------------
         cuda/Cuda.cpp
 

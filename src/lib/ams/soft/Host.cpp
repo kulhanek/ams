@@ -43,7 +43,6 @@
 #include <ostream>
 #include <iomanip>
 #include <limits>
-#include <Torque.hpp>
 #include <User.hpp>
 #include <set>
 #include <arpa/inet.h>
@@ -158,7 +157,6 @@ void CHost::ClearAll(void)
     DefaultTokens.clear();
     HostTokens.clear();
     CPUInfoTokens.clear();
-    TorqueTokens.clear();
     CompatTokens.clear();
     GPUInfoTokens.clear();
     CUDATokens.clear();
@@ -169,15 +167,9 @@ void CHost::ClearAll(void)
 
     NetFilters = "-none-";
 
-    TorqueFilter = "-none-";
-    TorqueLib = "-none-";
-    TorqueSrv = "-none-";
-    TorqueProps = "-none-";
-
     DefaultNumOfHostCPUs = 0;
     HostNumOfHostCPUs = 0;
     CPUInfoNumOfHostCPUs = 0;
-    TorqueNCPUs = 0;
 
     ConfigRealm  = NULL;
     ConfigKey = NULL;
@@ -260,19 +252,6 @@ void CHost::LoadCache(void)
         p_cele->GetAttribute("ncpu",CPUInfoNumOfHostCPUs);
     }
 
-// torque --------------
-    CXMLElement* p_tele = p_ele->GetFirstChildElement("torque");
-    if( p_tele ){
-        string sbuf;
-        p_tele->GetAttribute("tks",sbuf);
-        if( ! sbuf.empty() ) split(TorqueTokens,sbuf,is_any_of("#"));
-        p_tele->GetAttribute("flt",TorqueFilter);
-        p_tele->GetAttribute("lib",TorqueLib);
-        p_tele->GetAttribute("srv",TorqueSrv);
-        p_tele->GetAttribute("ncpu",TorqueNCPUs);
-        p_tele->GetAttribute("prps",TorqueProps);
-    }
-
 // cuda ----------------
     CXMLElement* p_nele = p_ele->GetFirstChildElement("cuda");
     if( p_nele ){
@@ -330,15 +309,6 @@ void CHost::SaveCache(void)
     p_cele->SetAttribute("hte",HTEnabled);
     p_cele->SetAttribute("tks",join(CPUInfoTokens,"#"));
     p_cele->SetAttribute("ncpu",CPUInfoNumOfHostCPUs);
-
-// torque --------------
-    CXMLElement* p_tele = p_ele->CreateChildElement("torque");
-    p_tele->SetAttribute("tks",join(TorqueTokens,"#"));
-    p_tele->SetAttribute("flt",TorqueFilter);
-    p_tele->SetAttribute("lib",TorqueLib);
-    p_tele->SetAttribute("srv",TorqueSrv);
-    p_tele->SetAttribute("ncpu",TorqueNCPUs);
-    p_tele->SetAttribute("prps",TorqueProps);
 
 // cuda ----------------
     CXMLElement* p_nele = p_ele->CreateChildElement("cuda");
@@ -459,10 +429,6 @@ void CHost::InitHost(bool nocache)
              (AlienHost == false) && (CacheLoaded == false) ){
             InitCPUInfoTokens(p_ele);
         }
-        if( (p_ele->GetName() == "torque") &&
-             (AlienHost == false) && (CacheLoaded == false) ){
-            InitTorqueTokens(p_ele);
-        }
         if( (p_ele->GetName() == "gpuinfo") && (AlienHost == false) ){
             InitGPUInfoTokens(p_ele);
         }
@@ -491,9 +457,6 @@ void CHost::InitHost(bool nocache)
     }
     for(size_t i=0; i < CPUInfoTokens.size(); i++){
         AllTokens.push_back(CPUInfoTokens[i]);
-    }
-    for(size_t i=0; i < TorqueTokens.size(); i++){
-        AllTokens.push_back(TorqueTokens[i]);
     }
     for(size_t i=0; i < GPUInfoTokens.size(); i++){
         AllTokens.push_back(GPUInfoTokens[i]);
@@ -758,90 +721,6 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
 
 //------------------------------------------------------------------------------
 
-void CHost::InitTorqueTokens(CXMLElement* p_ele)
-{
-    if( p_ele == NULL ){
-        INVALID_ARGUMENT("p_ele is NULL")
-    }
-
-    TorqueFilter = "-none-";
-    TorqueLib = "-none-";
-    TorqueTokens.clear();
-
-    if( AlienHost == true ) return;
-
-    // what is enabled
-    bool cenable = false;
-    p_ele->GetAttribute("ncpu",cenable);
-    bool tenable = false;
-    p_ele->GetAttribute("tokens",tenable);
-
-    // find host
-    CXMLElement* p_fele = p_ele->GetFirstChildElement("host");
-    while( p_fele != NULL ){
-        CSmallString filter,torquelib,torquesrv;
-
-        // load config
-        bool success = true;
-        success &= p_fele->GetAttribute("filter",filter);
-        success &= p_fele->GetAttribute("lib",torquelib);
-        success &= p_fele->GetAttribute("srv",torquesrv);
-        if( success == false ){
-            p_fele = p_fele->GetNextSiblingElement("host");
-            continue;
-        }
-
-        // does host match Hostname
-        if( fnmatch(filter,Hostname,0) == 0 ){
-            // ignore setup for this host
-            if( torquelib == "-ignore-"){
-                break;
-            }
-
-            // try to load torque lib
-            CTorque torque;
-            if( torque.Init(torquelib,torquesrv) == true ){
-
-                if( torque.GetNodeInfo(Hostname,TorqueNCPUs,TorqueProps) == true ){
-
-                    TorqueFilter = filter;
-                    TorqueLib = torquelib;
-                    TorqueSrv = torquesrv;
-
-                    if( cenable ){
-                        NumOfHostCPUs = TorqueNCPUs;
-                    }
-
-                    // tokens
-                    if( tenable ) {
-                        string value;
-                        std::vector<string> tokens;
-                        if( p_fele->GetAttribute("tokens",value) ){
-                            split(tokens,value,is_any_of("#"));
-
-                            vector<string>::iterator  it = tokens.begin();
-                            vector<string>::iterator  ie = tokens.end();
-                            while( it != ie ){
-                                TorqueTokens.push_back(*it);
-                                it++;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        } else {
-            CSmallString warning;
-            warning << "torque: host '" << Hostname << "' does not match filter '" << filter << "'";
-            ES_WARNING(warning);
-
-        }
-        p_fele = p_fele->GetNextSiblingElement("host");
-    }
-}
-
-//------------------------------------------------------------------------------
-
 void CHost::InitCompatibilityTokens(CXMLElement* p_cele)
 {
     std::list<string>  all_tokens;
@@ -855,9 +734,6 @@ void CHost::InitCompatibilityTokens(CXMLElement* p_cele)
     }
     for(size_t i=0; i < CPUInfoTokens.size(); i++){
         all_tokens.push_back(string(CPUInfoTokens[i]));
-    }
-    for(size_t i=0; i < TorqueTokens.size(); i++){
-        all_tokens.push_back(string(TorqueTokens[i]));
     }
 
     // sort tokens
@@ -1341,25 +1217,6 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    GPU model #" << setw(1) << i+1 << "  : " << GPUModelNames[i] << endl;
     }
     vout << "    Arch tokens   : " << GetSecTokens(CUDATokens) << endl;
-    }
-    }
-        }
-        if( p_ele->GetName() == "torque" ){
-            pri++;
-    vout << ">>> torque ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    if( AlienHost == true ){
-    vout << "    Enabled       : " << "disabled - alien host" << endl;
-    vout << "    Priority      : " << pri << endl;
-    } else {
-    vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
-    vout << "    Priority      : " << pri << endl;
-    vout << "    Host filter   : " << TorqueFilter << endl;
-    if( TorqueFilter != "-none-" ) {
-    vout << "    Torque lib    : " << TorqueLib << endl;
-    vout << "    Torque server : " << TorqueSrv << endl;
-    vout << "    Num of CPUs   : " << TorqueNCPUs << endl;
-    vout << "    Properties    : " << TorqueProps << endl;
-    vout << "    Arch tokens   : " << GetSecTokens(TorqueTokens) << endl;
     }
     }
         }
