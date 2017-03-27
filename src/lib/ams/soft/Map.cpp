@@ -24,7 +24,6 @@
 #include <Map.hpp>
 #include <ErrorSystem.hpp>
 #include <FileName.hpp>
-#include <prefix.h>
 #include <FileSystem.hpp>
 #include <DirectoryEnum.hpp>
 #include <Site.hpp>
@@ -38,6 +37,7 @@
 #include <Terminal.hpp>
 #include <string.h>
 #include <XMLIterator.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <iomanip>
 #include <sstream>
 #include <list>
@@ -69,7 +69,7 @@ CMap::CMap(void)
 
 bool CMap::LoadMap(void)
 {
-    CFileName map_name = CFileName(ETCDIR) / "map" / "map.xml";
+    CFileName map_name = AMSGlobalConfig.GetETCDIR() / "map" / "map.xml";
 
     if( CFileSystem::IsFile(map_name) == false ){
         // create header
@@ -106,7 +106,7 @@ bool CMap::SaveMap(void)
     }
 
     // save map
-    CFileName map_name = CFileName(ETCDIR) / "map" / "map.xml";
+    CFileName map_name = AMSGlobalConfig.GetETCDIR() / "map" / "map.xml";
 
     CXMLPrinter      xml_printer;
     xml_printer.SetPrintedXMLNode(&MapDoc);
@@ -132,7 +132,7 @@ bool CMap::LoadAutoPrefixes(const CSmallString& user_prefix)
     }
 
     // load prefixes
-    CFileName prefixes_name = CFileName(ETCDIR) / "map" / "prefixes";
+    CFileName prefixes_name = AMSGlobalConfig.GetETCDIR() / "map" / "prefixes";
     ifstream ifs(prefixes_name);
 
     if( ! ifs ){
@@ -158,7 +158,7 @@ bool CMap::LoadAutoPrefixes(const CSmallString& user_prefix)
 
 bool CMap::BackupMap(void)
 {
-    CFileName map_dir = CFileName(ETCDIR) / "map";
+    CFileName map_dir = AMSGlobalConfig.GetETCDIR() / "map";
 
     CFileName map5 = map_dir / "map5.xml";
     CFileName map4 = map_dir / "map4.xml";
@@ -201,7 +201,7 @@ bool CMap::UndoMapChange(void)
         return(false);
     }
 
-    CFileName map_dir = CFileName(ETCDIR) / "map";
+    CFileName map_dir = AMSGlobalConfig.GetETCDIR() / "map";
 
     CFileName map5 = map_dir / "map5.xml";
     CFileName map4 = map_dir / "map4.xml";
@@ -239,7 +239,7 @@ bool CMap::UndoMapChange(void)
 
 int CMap::GetNumOfUndoMapChanges(void)
 {
-    CFileName map_dir = CFileName(ETCDIR) / "map";
+    CFileName map_dir = AMSGlobalConfig.GetETCDIR() / "map";
 
     CFileName map5 = map_dir / "map5.xml";
     CFileName map4 = map_dir / "map4.xml";
@@ -271,7 +271,7 @@ int CMap::GetNumOfUndoMapChanges(void)
 
 void CMap::LoadSiteAliases(void)
 {
-    CFileName aliases_name = CFileName(ETCDIR) / "map" / "aliases.xml";
+    CFileName aliases_name = AMSGlobalConfig.GetETCDIR() / "map" / "aliases.xml";
 
     // generate all site alias
     list<string> all_sites;
@@ -402,7 +402,7 @@ bool CMap::AddBuilds(std::ostream& vout,const CSmallString& site,const CSmallStr
         return(false);
     }
 
-    CFileName path = CFileName(ETCDIR)  / "map" / "builds" / prefix;
+    CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds" / prefix;
     if( CFileSystem::IsDirectory(path) == false ){
         return(false);
     }
@@ -483,7 +483,7 @@ bool CMap::InjectVerIndx(CXMLElement* p_build)
 
     CFileName       build_full_name;
 
-    build_full_name = CFileName(ETCDIR) / "map" / "builds" / prefix / build + ".bld";
+    build_full_name = AMSGlobalConfig.GetETCDIR() / "map" / "builds" / prefix / build + ".bld";
 
     CXMLDocument    xml_doc;
     CXMLParser      xml_parser;
@@ -608,7 +608,7 @@ void CMap::GetAllSites(std::list<std::string>& sites)
 {
     sites.clear();
 
-    CFileName site_dir = CFileName(ETCDIR) / "sites";
+    CFileName site_dir = AMSGlobalConfig.GetETCDIR() / "sites";
     CDirectoryEnum dir_enum(site_dir);
 
     dir_enum.StartFindFile("*");
@@ -850,7 +850,7 @@ void CMap::ShowPrefixes(std::ostream& vout)
 
 void CMap::ListPrefixes(std::vector<std::string>& prefixes)
 {
-    CFileName path = CFileName(ETCDIR)  / "map" / "builds";
+    CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
 
     prefixes.clear();
 
@@ -877,7 +877,7 @@ void CMap::ListPrefixes(std::vector<std::string>& prefixes)
 
 void CMap::ShowBuilds(std::ostream& vout,const CSmallString& prefix,const CSmallString& filter)
 {
-    CFileName path = CFileName(ETCDIR)  / "map" / "builds";
+    CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
 
     // get prefix filter
     CSmallString prefix_filter;
@@ -965,7 +965,7 @@ bool cmp_builds(const SFullBuild& left,const SFullBuild& right)
 
 void CMap::ListBuilds(const CSmallString& prefix,std::vector<SFullBuild>& builds)
 {
-    CFileName path = CFileName(ETCDIR)  / "map" / "builds";
+    CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
 
     CDirectoryEnum build_enum(path / prefix);
     build_enum.StartFindFile("*.bld");
@@ -1127,7 +1127,7 @@ bool CMap::ShowMap(ostream& vout,const CSmallString& site)
         vout << "<purple>     Def: " << setw(40) << left << local_defname <<  auto_def << "</purple>" << endl;
 
         // documentation
-        CFileName path = CFileName(ETCDIR)  / "map" / "docs";
+        CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "docs";
 
         if( CFileSystem::IsFile(path / site / modname + ".doc" ) ){
             vout << "<green>     Doc: " << setw(40) << left << modname <<  site << "</green>" << endl;
@@ -1469,7 +1469,7 @@ bool CMap::DistributeAll(std::ostream& vout)
 bool CMap::CleanSiteModules(std::ostream& vout)
 {
     // go through the list of all available sites -------------
-    CFileName site_dir = CFileName(ETCDIR) / "sites";
+    CFileName site_dir = AMSGlobalConfig.GetETCDIR() / "sites";
     CDirectoryEnum dir_enum(site_dir);
 
     dir_enum.StartFindFile("*");
@@ -1483,7 +1483,7 @@ bool CMap::CleanSiteModules(std::ostream& vout)
         vout << "   <cyan>" << setw(20) << left << site.GetName() << "</cyan> .. ";
 
         CFileName module_dir;
-        module_dir = CFileName(ETCDIR) / "sites" / site_sid / "modules";
+        module_dir = AMSGlobalConfig.GetETCDIR() / "sites" / site_sid / "modules";
 
         // is that directory exist?
         if( CFileSystem::IsDirectory(module_dir) == true ) {
@@ -1518,7 +1518,7 @@ bool CMap::CleanSiteModules(std::ostream& vout)
 bool CMap::DistributeSiteModules(std::ostream& vout)
 {
     // go through the list of all available sites -------------
-    CFileName site_dir = CFileName(ETCDIR) / "sites";
+    CFileName site_dir = AMSGlobalConfig.GetETCDIR() / "sites";
     CDirectoryEnum dir_enum(site_dir);
 
     dir_enum.StartFindFile("*");
@@ -1597,7 +1597,7 @@ bool CMap::DistributeSiteModuleMap(std::ostream& vout, CXMLElement* p_mod,CSite*
 
     // create module file --------------------------------------------------
     CFileName mod_name;
-    mod_name = CFileName(ETCDIR) / "sites" / site_sid / "modules" / modname + ".mod" ;
+    mod_name = AMSGlobalConfig.GetETCDIR() / "sites" / site_sid / "modules" / modname + ".mod" ;
 
     CXMLDocument xml_out;
 
@@ -1718,7 +1718,7 @@ bool CMap::InjectBuildIntoSite(CXMLElement* p_builds,const CSmallString& prefix,
     CFileName rkey;
     CFileName rname;
     rkey = CFileName(prefix) / build;
-    rname = CFileName(ETCDIR) / "map" / "builds" / rkey + ".bld";
+    rname = AMSGlobalConfig.GetETCDIR() / "map" / "builds" / rkey + ".bld";
 
     // is it cached?
     CXMLDocumentPtr p_build = BuildCache[string(rkey)];
@@ -1799,13 +1799,13 @@ bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const
     while( (p_build = I.GetNextChildElement("build")) != NULL ){
         p_build->GetAttribute("prefix",prefix);
         CFileName doc_name;
-        doc_name = CFileName(ETCDIR) / "map" / "docs" / prefix / mname + ".doc";
+        doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
         if( CFileSystem::IsFile(doc_name) == true ) break;
     }
 
     CFileName doc_name;
     string rkey;
-    doc_name = CFileName(ETCDIR) / "map" / "docs" / prefix / mname + ".doc";
+    doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
     rkey = string(CFileName(prefix) / mname);
     if( CFileSystem::IsFile(doc_name) == false ) return(true); // no documentation is available
 
@@ -1907,7 +1907,7 @@ bool CMap::IsBuild(const CSmallString& site_name,const CSmallString& build_name,
 const CSmallString CMap::GetBuildName(const CSmallString& site_name,
                         const CSmallString& build_name,const CSmallString& prefix)
 {
-    CFileName all_builds = CFileName(ETCDIR) / "map" / "builds";
+    CFileName all_builds = AMSGlobalConfig.GetETCDIR() / "map" / "builds";
     CFileName full_build_name;
 
     full_build_name = all_builds / prefix / build_name + ".bld";

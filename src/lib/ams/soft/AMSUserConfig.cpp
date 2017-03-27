@@ -24,7 +24,6 @@
 #include <AMSUserConfig.hpp>
 #include <XMLParser.hpp>
 #include <XMLPrinter.hpp>
-#include <prefix.h>
 #include <ErrorSystem.hpp>
 #include <XMLElement.hpp>
 #include <Shell.hpp>
@@ -404,7 +403,7 @@ void CAMSUserConfig::SetModulePriorities(const CSmallString& pri)
 
 bool CAMSUserConfig::IsAvailableSite(const CSmallString& name)
 {
-    CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
+    CDirectoryEnum dir_enum(AMSGlobalConfig.GetETCDIR() / "sites");
 
     dir_enum.StartFindFile("*");
     CFileName site_sid;

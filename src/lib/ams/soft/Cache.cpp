@@ -31,7 +31,6 @@
 #include <XMLComment.hpp>
 #include <XMLIterator.hpp>
 #include <ErrorSystem.hpp>
-#include <prefix.h>
 #include <AMSGlobalConfig.hpp>
 #include <DirectoryEnum.hpp>
 #include <FileSystem.hpp>
@@ -79,7 +78,7 @@ bool CCache::LoadCache(bool loadbig)
 
     CFileName    config_path;
 
-    config_path = ETCDIR;
+    config_path = AMSGlobalConfig.GetETCDIR();
     if( loadbig ){
         config_path = config_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "cache_big.xml";
     } else {
@@ -117,7 +116,7 @@ bool CCache::LoadCache(const CSmallString& site_sid,bool loadbig)
 
     CFileName    config_path;
 
-    config_path = ETCDIR;
+    config_path = AMSGlobalConfig.GetETCDIR();
     if( loadbig ){
         config_path = config_path / "sites" / site_sid / "cache_big.xml";
     } else {
@@ -158,7 +157,7 @@ bool CCache::SaveCache(bool savebig)
 
     CFileName    config_path;
 
-    config_path = ETCDIR;
+    config_path = AMSGlobalConfig.GetETCDIR();
     if( savebig ){
         config_path = config_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "cache_big.xml";
     } else {
@@ -256,7 +255,7 @@ bool CCache::RebuildCache(CVerboseStr& vout,bool as_it_is)
     // get list of module files --------------------
     CFileName    modules_path;
 
-    modules_path = ETCDIR;
+    modules_path = AMSGlobalConfig.GetETCDIR();
     modules_path = modules_path / "sites" / AMSGlobalConfig.GetActiveSiteID() / "modules";
 
     bool result = RebuildCacheFromDirectory(vout,p_mele,modules_path,as_it_is);

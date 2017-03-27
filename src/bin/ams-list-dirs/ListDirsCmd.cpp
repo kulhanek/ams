@@ -25,7 +25,6 @@
 #include <Cache.hpp>
 #include <AmsUUID.hpp>
 #include <DirectoryEnum.hpp>
-#include <prefix.h>
 #include <Site.hpp>
 #include <ErrorSystem.hpp>
 #include <Shell.hpp>
@@ -135,7 +134,7 @@ bool CListDirsCmd::Run(void)
 
 void CListDirsCmd::ScanAllSiteBuilds(void)
 {
-    CFileName site_dir = CFileName(ETCDIR) / "sites";
+    CFileName site_dir = AMSGlobalConfig.GetETCDIR() / "sites";
     CDirectoryEnum dir_enum(site_dir);
 
     dir_enum.StartFindFile("*");

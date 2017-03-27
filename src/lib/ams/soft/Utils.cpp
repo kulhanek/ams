@@ -28,10 +28,10 @@
 #include <FileName.hpp>
 #include <FileSystem.hpp>
 #include <AmsUUID.hpp>
-#include <prefix.h>
 #include <errno.h>
 #include <ErrorSystem.hpp>
 #include <XMLIterator.hpp>
+#include <AMSGlobalConfig.hpp>
 #include <iomanip>
 #include <list>
 #include <boost/algorithm/string/split.hpp>
@@ -53,7 +53,7 @@ using namespace boost::algorithm;
 const CSmallString CUtils::GetSiteID(const CSmallString& site_name)
 {
     // go through the list of all available sites -------------
-    CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
+    CDirectoryEnum dir_enum(AMSGlobalConfig.GetETCDIR() / "sites");
 
     dir_enum.StartFindFile("*");
     CFileName site_sid;
@@ -88,7 +88,7 @@ const CSmallString CUtils::GetSiteName(const CSmallString& site_sid)
 
 bool CUtils::IsSiteIDValid(const CSmallString& site_id)
 {
-    CFileName config_path = ETCDIR;
+    CFileName config_path = AMSGlobalConfig.GetETCDIR();
     config_path = config_path / "sites" / site_id / "site.xml";
 
     if( CFileSystem::IsFile(config_path) == false ) return(false);

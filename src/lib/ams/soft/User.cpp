@@ -33,7 +33,6 @@
 #include <string.h>
 #include <FileName.hpp>
 #include <XMLParser.hpp>
-#include "prefix.h"
 #include <FileSystem.hpp>
 #include <XMLElement.hpp>
 #include <AMSGlobalConfig.hpp>
@@ -74,10 +73,10 @@ void CUser::InitUserFile(const CSmallString& site_sid)
     CFileName    config_name;
 
     // first try site config
-    config_name = CFileName(ETCDIR) / "sites" / site_sid / "user.xml";
+    config_name = AMSGlobalConfig.GetETCDIR() / "sites" / site_sid / "user.xml";
     if( CFileSystem::IsFile(config_name) == false ) {
         // then global config
-        config_name = CFileName(ETCDIR) / "default" / "user.xml";
+        config_name = AMSGlobalConfig.GetETCDIR() / "default" / "user.xml";
     } else {
         SiteConfigInUse = site_sid;
     }

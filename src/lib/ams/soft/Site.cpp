@@ -23,7 +23,6 @@
 
 #include <Site.hpp>
 #include <FileName.hpp>
-#include <prefix.h>
 #include <XMLParser.hpp>
 #include <XMLElement.hpp>
 #include <ErrorSystem.hpp>
@@ -97,7 +96,7 @@ bool CSite::LoadConfig(const CSmallString& site_id)
     CFileName    config_path;
     SiteConfig.RemoveAllChildNodes();
 
-    config_path = ETCDIR;
+    config_path = AMSGlobalConfig.GetETCDIR();
     config_path = config_path / "sites" / site_id / "site.xml";
 
     CXMLParser xml_parser;
@@ -736,7 +735,7 @@ bool CSite::ExecuteModaction(const CSmallString& action,
 
         // complete entire comand
         CFileName full_command;
-        full_command = CFileName(PREFIX) / "bin" / "actions" / lcommand;
+        full_command = AMSGlobalConfig.GetAMSRootDir() / "bin" / "actions" / lcommand;
 
         CFileName full_arguments;
         full_arguments = largs + " " + args;

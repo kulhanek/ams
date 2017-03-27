@@ -32,7 +32,6 @@
 #include <XMLIterator.hpp>
 #include <Terminal.hpp>
 #include <AMSGlobalConfig.hpp>
-#include <prefix.h>
 #include <Cache.hpp>
 #include <AmsUUID.hpp>
 #include <DirectoryEnum.hpp>
@@ -86,13 +85,13 @@ bool CPrintEngine::LoadSystemConfig(void)
 
     // first try site config
     if( AMSGlobalConfig.GetActiveSiteID() != NULL ) {
-        config_name = CFileName(ETCDIR) / "sites" / AMSGlobalConfig.GetActiveSiteID() / "print.xml";
+        config_name = AMSGlobalConfig.GetETCDIR() / "sites" / AMSGlobalConfig.GetActiveSiteID() / "print.xml";
         if( CFileSystem::IsFile(config_name) == false ) {
             // then global config
-            config_name = CFileName(ETCDIR) / "default" / "print.xml";
+            config_name = AMSGlobalConfig.GetETCDIR() / "default" / "print.xml";
         }
     } else {
-        config_name = CFileName(ETCDIR) / "default" / "print.xml";
+        config_name = AMSGlobalConfig.GetETCDIR() / "default" / "print.xml";
     }
 
     CXMLParser xml_parser;
@@ -516,7 +515,7 @@ bool CPrintEngine::PrintRawVariable(const CSmallString& build,const CSmallString
 void CPrintEngine::PrintRawSites(void)
 {
     // make list of all available sites -------------
-    CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
+    CDirectoryEnum dir_enum(AMSGlobalConfig.GetETCDIR() / "sites");
 
     dir_enum.StartFindFile("*");
     CFileName site_sid;
@@ -1090,7 +1089,7 @@ void CPrintEngine::PrintAvailableSites(CTerminal& terminal,bool print_all)
     terminal.EnableColors(AreColorsEnabled());
 
     // make list of all available sites -------------
-    CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
+    CDirectoryEnum dir_enum(AMSGlobalConfig.GetETCDIR() / "sites");
 
     dir_enum.StartFindFile("*");
     CFileName site_sid;

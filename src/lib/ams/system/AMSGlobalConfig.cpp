@@ -22,7 +22,6 @@
 
 #include <AMSGlobalConfig.hpp>
 #include <XMLParser.hpp>
-#include <prefix.h>
 #include <ErrorSystem.hpp>
 #include <XMLElement.hpp>
 #include <Shell.hpp>
@@ -41,6 +40,7 @@ CAMSGlobalConfig AMSGlobalConfig;
 
 CAMSGlobalConfig::CAMSGlobalConfig(void)
 {
+    AMSRoot            = CShell::GetSystemVariable("AMS_ROOT");
     ActiveSiteID       = CShell::GetSystemVariable("AMS_SITE");
     ActiveSiteName     = CUtils::GetSiteName(ActiveSiteID);
     ActiveModules      = CShell::GetSystemVariable("AMS_ACTIVE_MODULES");
@@ -84,7 +84,14 @@ void CAMSGlobalConfig::SetActiveSiteID(const CAmsUUID& site_id)
 
 const CFileName CAMSGlobalConfig::GetAMSRootDir(void)
 {
-    return( CFileName(PREFIX) );
+    return( AMSRoot );
+}
+
+//------------------------------------------------------------------------------
+
+const CFileName CAMSGlobalConfig::GetETCDIR(void)
+{
+    return( AMSRoot / "etc" );
 }
 
 //------------------------------------------------------------------------------

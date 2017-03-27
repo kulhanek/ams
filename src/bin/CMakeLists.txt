@@ -3,7 +3,6 @@
 # ==============================================================================
 
 # general commands -------------------------------
-ADD_SUBDIRECTORY(ams-root)
 ADD_SUBDIRECTORY(ams-config)
 ADD_SUBDIRECTORY(ams-host)
 ADD_SUBDIRECTORY(ams-user)

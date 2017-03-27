@@ -27,7 +27,6 @@
 #include <XMLElement.hpp>
 #include <XMLIterator.hpp>
 #include <Shell.hpp>
-#include <prefix.h>
 #include <fnmatch.h>
 #include <AmsUUID.hpp>
 #include <DirectoryEnum.hpp>
@@ -35,6 +34,7 @@
 #include <Cache.hpp>
 #include <PrintEngine.hpp>
 #include <string.h>
+#include <AMSGlobalConfig.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -289,7 +289,7 @@ bool CAMSCompletion::AddSuggestions(const CSmallString& list)
 bool CAMSCompletion::AddSiteSuggestions(void)
 {
     // make list of all available sites -------------
-    CDirectoryEnum dir_enum(BR_ETCDIR("/sites"));
+    CDirectoryEnum dir_enum(AMSGlobalConfig.GetETCDIR() / "sites");
 
     dir_enum.StartFindFile("*");
     CFileName site_sid;

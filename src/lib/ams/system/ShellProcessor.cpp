@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <prefix.h>
 #include <ShellProcessor.hpp>
 #include <ErrorSystem.hpp>
 
@@ -583,12 +582,6 @@ void CShellProcessor::BuildEnvironment(void)
 
     // set exit code variable
     SetVariable("AMS_EXIT_CODE",exit_code);
-
-    CSmallString module_root;
-
-    module_root = PREFIX;
-
-    printf("export AMS_ROOT=\"%s\";\n",(const char*)module_root);
 
     // build environment
     CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");

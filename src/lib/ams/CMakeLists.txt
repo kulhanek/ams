@@ -6,7 +6,6 @@
 SET(AMS_SRC
         AMSMainHeader.cpp
     # system -------------------------------------
-        system/prefix.c
         system/Shell.cpp
         system/ShellProcessor.cpp
         system/AMSGlobalConfig.cpp

@@ -29,7 +29,6 @@
 #include <XMLElement.hpp>
 #include <XMLIterator.hpp>
 #include <ShellProcessor.hpp>
-#include <prefix.h>
 #include <fnmatch.h>
 #include <AMSGlobalConfig.hpp>
 #include <FileSystem.hpp>
@@ -126,7 +125,7 @@ void CHost::InitHostFile(void)
 {
     CFileName    config_name;
 
-    config_name = CFileName(ETCDIR) / "default" / "hosts.xml";
+    config_name = AMSGlobalConfig.GetETCDIR() / "default" / "hosts.xml";
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&Hosts);
 

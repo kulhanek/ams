@@ -47,9 +47,12 @@ public:
     /// set active site ID
     void SetActiveSiteID(const CAmsUUID& site_id);
 
-// user config -----------------------------------------------------------------
+// ssytem config ---------------------------------------------------------------
     /// return infinity root directory
     const CFileName GetAMSRootDir(void);
+
+    /// return infinity etc directory
+    const CFileName GetETCDIR(void);
 
 // user config -----------------------------------------------------------------
     /// return the name of user config directory for active site
@@ -92,6 +95,7 @@ public:
 
 // section of private data ----------------------------------------------------
 private:
+    CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT variable
     // this values are initialized in constructor and can be updated anytime
     // by CSite during site activation/deactivation
     CSmallString    ActiveSiteID;

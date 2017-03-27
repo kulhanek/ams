@@ -25,7 +25,6 @@
 #include <Cache.hpp>
 #include <AmsUUID.hpp>
 #include <DirectoryEnum.hpp>
-#include <prefix.h>
 #include <Site.hpp>
 #include <ErrorSystem.hpp>
 #include <Shell.hpp>
@@ -441,7 +440,7 @@ void CRepoIndexCreate::HashNode(const CFileName& name,struct stat& my_stat,bool 
 
 bool CRepoIndexCreate::LoadSiteAliases(void)
 {
-    CFileName aliases_name = CFileName(ETCDIR) / "map" / "aliases.xml";
+    CFileName aliases_name = AMSGlobalConfig.GetETCDIR() / "map" / "aliases.xml";
 
     // generate all site alias
     list<string> all_sites;
@@ -487,7 +486,7 @@ void CRepoIndexCreate::GetAllSites(std::list<std::string>& sites)
 {
     sites.clear();
 
-    CFileName site_dir = CFileName(ETCDIR) / "sites";
+    CFileName site_dir = AMSGlobalConfig.GetETCDIR() / "sites";
     CDirectoryEnum dir_enum(site_dir);
 
     dir_enum.StartFindFile("*");
