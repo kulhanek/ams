@@ -73,6 +73,9 @@ public:
     /// get all user groups separated by comma
     const CSmallString GetGroups(void);
 
+    /// get user posix groups separated by comma
+    const CSmallString GetPosixGroups(void);
+
     /// check group
     bool IsInGroup(const CSmallString& grpname);
 
@@ -88,8 +91,8 @@ public:
     /// print all posix groups
     void PrintPosixGroups(void);
 
-    /// is posix group
-    bool IsPosixGroup(const CSmallString& group);
+    /// is in posix group
+    bool IsInPosixGroup(const CSmallString& group);
 
     /// return user requested umask
     const CSmallString GetRequestedUserUMask(void);

@@ -435,6 +435,22 @@ const CSmallString CUser::GetGroups(void)
 
 //------------------------------------------------------------------------------
 
+const CSmallString CUser::GetPosixGroups(void)
+{
+    CSmallString groups;
+
+    std::vector<CSmallString>::iterator   it = AllPosixGroups.begin();
+    std::vector<CSmallString>::iterator   ie = AllPosixGroups.end();
+    while(it != ie){
+        if( it != AllPosixGroups.begin() )  groups << ",";
+        groups << (*it);
+        it++;
+    }
+    return(groups);
+}
+
+//------------------------------------------------------------------------------
+
 bool CUser::IsInGroup(const CSmallString& grpname)
 {
     std::list<CSmallString>::iterator   it = AllGroups.begin();
@@ -515,7 +531,7 @@ void CUser::PrintUserInfo(CVerboseStr& vout)
     vout << "# Real group ID        : " << RGID << endl;
     vout << "# Effective group name : " << EGroup << endl;
     vout << "# Effective group ID   : " << EGID << endl;
-    vout << "# User groups          : " << GetGroups() << endl;
+    vout << "# Posix groups         : " << GetPosixGroups() << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -563,7 +579,7 @@ void CUser::PrintPosixGroups(void)
 
 //------------------------------------------------------------------------------
 
-bool CUser::IsPosixGroup(const CSmallString& group)
+bool CUser::IsInPosixGroup(const CSmallString& group)
 {
     std::vector<CSmallString>::iterator   it = AllPosixGroups.begin();
     std::vector<CSmallString>::iterator   ie = AllPosixGroups.end();
