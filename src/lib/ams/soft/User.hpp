@@ -79,6 +79,9 @@ public:
     /// print info about user
     void PrintUserDetailedInfo(CVerboseStr& vout);
 
+    /// print user compact info
+    void PrintUserInfo(CVerboseStr& vout);
+
     /// is user name provided?
     bool IsUserNameProvided(void);
 
@@ -90,6 +93,12 @@ public:
 
     /// return user requested umask
     const CSmallString GetRequestedUserUMask(void);
+
+    /// get user ID
+    uid_t GetUserID(void) const;
+
+    /// get group ID
+    gid_t GetGroupID(const CSmallString& name);
 
 // section of private data -----------------------------------------------------
 private:

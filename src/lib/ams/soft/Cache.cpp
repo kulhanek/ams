@@ -2332,6 +2332,34 @@ void CCache::RemoveBuildsWithArchToken(const CSmallString& token)
 
 //------------------------------------------------------------------------------
 
+bool CCache::DoesItNeedGPU(const CSmallString& name)
+{
+    CXMLElement* p_module = GetModule(name);
+    if( p_module == NULL ){
+        CSmallString warning;
+        warning << "module '" << name << "'' was not found in the cache";
+        ES_WARNING(warning);
+        return(false);
+    }
+
+    CXMLElement* p_list = p_module->GetFirstChildElement("builds");
+
+    CXMLIterator    I(p_list);
+    CXMLElement*    p_sele;
+
+    while( (p_sele = I.GetNextChildElement("build")) != NULL ) {
+        CSmallString larch;
+        p_sele->GetAttribute("arch",larch);
+        if( larch.FindSubString("gpu") >= 0 ){
+            return(true);
+        }
+    }
+
+    return(false);
+}
+
+//------------------------------------------------------------------------------
+
 const CSmallString CCache::GetVariableValue(CXMLElement* p_rele,
         const CSmallString& name)
 {

@@ -167,6 +167,9 @@ public:
     /// remove all builds with given architecture token
     void RemoveBuildsWithArchToken(const CSmallString& token);
 
+    /// does it need GPU resources
+    bool DoesItNeedGPU(const CSmallString& name);
+
 // print information methods ---------------------------------------------------
     /// get length of longest module spec (name+ver+arch+mode)
     int GetSizeOfLongestModuleSpecification(void);

@@ -90,9 +90,6 @@ public:
     /// set list of exported modules
     void SetExportedModules(const CSmallString& modules);
 
-// information about architectures --------------------------------------------
-
-
 // section of private data ----------------------------------------------------
 private:
     // this values are initialized in constructor and can be updated anytime
@@ -107,7 +104,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-extern CAMSGlobalConfig AMSGlobalConfig;
+extern AMS_PACKAGE CAMSGlobalConfig AMSGlobalConfig;
 
 //------------------------------------------------------------------------------
 

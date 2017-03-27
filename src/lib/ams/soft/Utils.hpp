@@ -43,6 +43,9 @@ public:
     /// is site id valid
     static bool IsSiteIDValid(const CSmallString& site_id);
 
+    /// generate unique ID
+    static CSmallString GenerateUUID(void);
+
     // module name operation ------------------------------------------------------
     /// divide module name to its parts (name,ver,arch,mode)
     static bool ParseModuleName(const CSmallString& module,

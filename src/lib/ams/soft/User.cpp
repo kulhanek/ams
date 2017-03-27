@@ -508,6 +508,19 @@ void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
+void CUser::PrintUserInfo(CVerboseStr& vout)
+{
+    vout << "# User name            : " << Name << endl;
+    vout << "# User UID             : " << UID << endl;
+    vout << "# Real group name      : " << RGroup << endl;
+    vout << "# Real group ID        : " << RGID << endl;
+    vout << "# Effective group name : " << EGroup << endl;
+    vout << "# Effective group ID   : " << EGID << endl;
+    vout << "# User groups          : " << GetGroups() << endl;
+}
+
+//------------------------------------------------------------------------------
+
 const CSmallString CUser::GetSecGroups(std::vector<CSmallString>& list)
 {
     CSmallString tokens;
@@ -567,6 +580,28 @@ bool CUser::IsPosixGroup(const CSmallString& group)
 const CSmallString CUser::GetRequestedUserUMask(void)
 {
     return( AMSUserConfig.GetUserUMask() );
+}
+
+//------------------------------------------------------------------------------
+
+uid_t CUser::GetUserID(void) const
+{
+    return(UID);
+}
+
+//------------------------------------------------------------------------------
+
+gid_t CUser::GetGroupID(const CSmallString& name)
+{
+    struct group *p_grp = getgrnam(name);
+    if( p_grp == NULL ){
+        CSmallString error;
+        error << "no gid for '" << name << "' - trying to use nogroup as bypass";
+        ES_ERROR(error);
+        p_grp = getgrnam("nogroup");
+        if( p_grp == NULL ) return(-1);
+    }
+    return(p_grp->gr_gid);
 }
 
 //==============================================================================
