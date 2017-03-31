@@ -142,12 +142,15 @@ bool CSiteCmd::Run(void)
             case SITE_ERROR_CONFIG_PROBLEM:
                 vout << "           Configuration problems." << endl;
                 ForcePrintErrors = true;
+                ExitCode = 1;
                 return(false);
             case SITE_ERROR_SITE_NOT_FOUND:
                 vout << "           The site is not defined in the AMS database (mispelled name?)." << endl;
+                ExitCode = 1;
                 return(false);
             case SITE_ERROR_NOT_ALLOWED:
                 vout << "           The site is not allowed on '<u>" << Host.GetHostName() << "</u>'." << endl;
+                ExitCode = 1;
                 return(false);
         }
         return(true);
@@ -159,6 +162,7 @@ bool CSiteCmd::Run(void)
             vout << low;
             vout << endl;
             vout << "<red>>>> ERROR:</red> No site is active!" << endl;
+            ExitCode = 1;
             return(false);
         }
 
@@ -174,9 +178,11 @@ bool CSiteCmd::Run(void)
             case SITE_ERROR_CONFIG_PROBLEM:
                 vout << "           Configuration problems." << endl;
                 ForcePrintErrors = true;
+                ExitCode = 1;
                 return(false);
             case SITE_ERROR_SITE_NOT_FOUND:
                 vout << "           The site is not defined in the AMS database (mispelled name?)." << endl;
+                ExitCode = 1;
                 return(false);
         }
         return(true);
@@ -188,6 +194,7 @@ bool CSiteCmd::Run(void)
             vout << low;
             vout << endl;
             vout << "<red>>>> ERROR:</red> No site is active!" << endl;
+            ExitCode = 1;
             return(false);
         }
 
@@ -203,9 +210,11 @@ bool CSiteCmd::Run(void)
             case SITE_ERROR_CONFIG_PROBLEM:
                 vout << "           Configuration problems." << endl;
                 ForcePrintErrors = true;
+                ExitCode = 1;
                 return(false);
             case SITE_ERROR_SITE_NOT_FOUND:
                 vout << "           The site is not defined in the AMS database (mispelled name?)." << endl;
+                ExitCode = 1;
                 return(false);
         }
         return(true);
@@ -220,6 +229,7 @@ bool CSiteCmd::Run(void)
             CSmallString error;
             error << "no site is active";
             ES_ERROR(error);
+            ExitCode = 1;
             return(false);
         }
 
@@ -227,6 +237,7 @@ bool CSiteCmd::Run(void)
             CSmallString error;
             error << "unable to load site '" << site_sid << "' config";
             ES_TRACE_ERROR(error);
+            ExitCode = 1;
             return(false);
         }
 
@@ -264,6 +275,7 @@ bool CSiteCmd::Run(void)
         // initialze AMS print engine
         if( PrintEngine.LoadConfig() == false) {
             ES_TRACE_ERROR("unable to load print engine config");
+            ExitCode = 1;
             return(false);
         }
         PrintEngine.SetOutputStream(vout);
@@ -291,6 +303,7 @@ bool CSiteCmd::Run(void)
             CSmallString error;
             error << "specified site '" << Options.GetArgSite() << "' was not found";
             ES_ERROR(error);
+            ExitCode = 1;
             return(false);
         }
 
@@ -298,6 +311,7 @@ bool CSiteCmd::Run(void)
             CSmallString error;
             error << "unable to load site '" << Options.GetArgSite() << "' config";
             ES_TRACE_ERROR(error);
+            ExitCode = 1;
             return(false);
         }
         fprintf(stderr,"%s",(const char*)Site.GetID());
@@ -307,6 +321,7 @@ bool CSiteCmd::Run(void)
     // ----------------------------------------------
     else {
         ES_ERROR("not implemented");
+        ExitCode = 1;
         return(false);
     }
 }

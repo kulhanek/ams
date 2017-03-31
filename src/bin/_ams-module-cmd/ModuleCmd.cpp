@@ -202,6 +202,9 @@ bool CModuleCmd::Run(void)
                     break;
             }
         }
+        if( ok == false ){
+            ExitCode = 1;
+        }
         return(ok);
     }
     // ----------------------------------------------
@@ -239,6 +242,9 @@ bool CModuleCmd::Run(void)
                     break;
             }
         }
+        if( ok == false ){
+            ExitCode = 1;
+        }
         return(ok);
     }
     // ----------------------------------------------
@@ -272,6 +278,9 @@ bool CModuleCmd::Run(void)
                 ForcePrintErrors = true;
                 ok = false;
             }
+        }
+        if( ok == false ){
+            ExitCode = 1;
         }
         return(ok);
     }
