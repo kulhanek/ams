@@ -574,6 +574,13 @@ bool CSite::ActivateSite(void)
     ShellProcessor.SetVariable("AMS_NHOSTCPU",Host.GetNumOfHostCPUs());
     ShellProcessor.SetVariable("AMS_NHOSTGPU",Host.GetNumOfHostGPUs());
 
+    CSmallString groupns;
+    CXMLElement* p_gele = Host.FindGroup();
+    if( p_gele != NULL ){
+        p_gele->GetAttribute("groupns",groupns);
+    }
+    ShellProcessor.SetVariable("AMS_GROUPNS",groupns);
+
     // reactivate cache, actions, and user config -----------------
 
     // initialze AMS cache

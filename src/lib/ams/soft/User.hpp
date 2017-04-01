@@ -67,8 +67,17 @@ public:
     /// get umask
     const CSmallString GetUMask(void) const;
 
+    /// get umask
+    const CSmallString GetUMask(mode_t mumask) const;
+
     /// get umask permission bits
     const CSmallString GetUMaskPermissions(void) const;
+
+    /// get umask permission bits
+    static mode_t GetUMaskMode(const CSmallString& smask);
+
+    /// get umask permission bits
+    static const CSmallString GetUMaskPermissions(mode_t mumask);
 
     /// get all user groups separated by comma
     const CSmallString GetGroups(void);

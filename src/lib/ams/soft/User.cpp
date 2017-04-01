@@ -372,6 +372,13 @@ const CSmallString CUser::GetUMask(void) const
    mode_t mumask = 0;
    mumask = umask(mumask); // get umask - it destroys current setup
    umask(mumask); // restore umask
+   return(GetUMask(mumask));
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CUser::GetUMask(mode_t mumask) const
+{
    stringstream str;
    char c1 = (mumask & 0007) + '0';
    char c2 = ((mumask & 0070) >> 3) + '0';
@@ -382,11 +389,17 @@ const CSmallString CUser::GetUMask(void) const
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUser::GetUMaskPermissions(void) const
+mode_t CUser::GetUMaskMode(const CSmallString& smask)
 {
-    mode_t mumask = 0;
-    mumask = umask(mumask); // get umask - it destroys current setup
-    umask(mumask); // restore umask
+    if( smask.GetLength() < 3 ) return(0x777);
+    mode_t mode = ((smask[2]-'0') << 6) | ((smask[1]-'0') << 3) | (smask[0]-'0');
+    return(mode);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CUser::GetUMaskPermissions(mode_t mumask)
+{
     stringstream str;
     char c1 = (mumask & 0007);
     char c2 = ((mumask & 0070) >> 3);
@@ -415,6 +428,16 @@ const CSmallString CUser::GetUMaskPermissions(void) const
     if( (c1 & 01) == 0 ) str << "x"; else str << "-";
 
     return(str.str());
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CUser::GetUMaskPermissions(void) const
+{
+    mode_t mumask = 0;
+    mumask = umask(mumask); // get umask - it destroys current setup
+    umask(mumask); // restore umask
+    return(GetUMaskPermissions(mumask));
 }
 
 //------------------------------------------------------------------------------
