@@ -58,10 +58,10 @@ public:
 
     // executive methods ----------------------------------------------------------
     /// add module - fordep is for depended modules
-    EActionError AddModule(CVerboseStr& vout,const CSmallString& module,bool fordep=false,bool do_not_export=false);
+    EActionError AddModule(CVerboseStr& vout,CSmallString module,bool fordep=false,bool do_not_export=false);
 
     /// remove module
-    EActionError RemoveModule(CVerboseStr& vout,const CSmallString& module);
+    EActionError RemoveModule(CVerboseStr& vout,CSmallString module);
 
     /// reactivate all active modules
     void ReactivateModules(CVerboseStr& vout);

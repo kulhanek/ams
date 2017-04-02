@@ -151,8 +151,10 @@ bool CActions::PurgeModules(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-EActionError CActions::AddModule(CVerboseStr& vout,const CSmallString& module,bool fordep,bool do_not_export)
+EActionError CActions::AddModule(CVerboseStr& vout,CSmallString module,bool fordep,bool do_not_export)
 {
+    module.GetSubstitute('/',':');
+
     // determine print level -----------------------
     EActionPrintLevel print_level =  GlobalPrintLevel;
     if( (Level > 0) && (GlobalPrintLevel != EAPL_NONE) ) print_level = EAPL_SHORT;
@@ -346,8 +348,10 @@ EActionError CActions::AddModule(CVerboseStr& vout,const CSmallString& module,bo
 //------------------------------------------------------------------------------
 //==============================================================================
 
-EActionError CActions::RemoveModule(CVerboseStr& vout,const CSmallString& module)
+EActionError CActions::RemoveModule(CVerboseStr& vout,CSmallString module)
 {
+    module.GetSubstitute('/',':');
+
     // determine print level -----------------------
     EActionPrintLevel print_level =  GlobalPrintLevel;
     if( (Level > 0) && (GlobalPrintLevel != EAPL_NONE) ) print_level = EAPL_SHORT;
