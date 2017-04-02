@@ -396,6 +396,7 @@ CXMLElement* CHost::FindGroup(const CSmallString& hostname,bool personal)
 
 const CSmallString CHost::GetGroupNS(void)
 {
+    cout << "here" << endl;
     CXMLElement* p_grp = FindGroup();
     if( p_grp == NULL ) return("na");
     cout << "found" << endl;
