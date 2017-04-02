@@ -347,6 +347,13 @@ void CHost::InitHost(int ncpus,int ngpus)
 CXMLElement* CHost::FindGroup(void)
 {
     bool personal = CShell::GetSystemVariable("AMS_PERSONAL") == "ON" ;
+    return(FindGroup(Hostname,personal));
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CHost::FindGroup(const CSmallString& hostname,bool personal)
+{
 
 //    CSmallString info;
 //    info << "hostname: " << Hostname;
@@ -369,7 +376,7 @@ CXMLElement* CHost::FindGroup(void)
             if( personal ){
                 if( name == "personal" ) return(p_gele);
             } else {
-                if( fnmatch(name,Hostname,0) == 0){
+                if( fnmatch(name,hostname,0) == 0){
 //                    CSmallString info;
 //                    info << "HIT: " << name;
 //                    ES_WARNING(info);
@@ -383,6 +390,28 @@ CXMLElement* CHost::FindGroup(void)
     }
 
     return(p_gele);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CHost::GetGroupNS(void)
+{
+    CXMLElement* p_grp = FindGroup();
+    if( p_grp == NULL ) return("na");
+    CSmallString gns("na");
+    p_grp->GetAttribute("groupns",gns);
+    return(gns);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CHost::GetGroupNS(const CSmallString& hostname,bool personal)
+{
+    CXMLElement* p_grp = FindGroup(hostname,personal);
+    if( p_grp == NULL ) return("na");
+    CSmallString gns("na");
+    p_grp->GetAttribute("groupns",gns);
+    return(gns);
 }
 
 //------------------------------------------------------------------------------

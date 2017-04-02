@@ -140,6 +140,15 @@ public:
     /// find host group
     CXMLElement* FindGroup(void);
 
+    /// find host group
+    CXMLElement* FindGroup(const CSmallString& hostname,bool personal=false);
+
+    /// find host group namespace
+    const CSmallString GetGroupNS(void);
+
+    /// find host group namespace
+    const CSmallString GetGroupNS(const CSmallString& hostname,bool personal=false);
+
 // section of private date -----------------------------------------------------
 private:
     CXMLDocument                Hosts;                  // host configuration
