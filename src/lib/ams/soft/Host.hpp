@@ -149,6 +149,12 @@ public:
     /// find host group namespace
     const CSmallString GetGroupNS(const CSmallString& hostname,bool personal=false);
 
+    /// find host realm
+    const CSmallString GetRealm(void);
+
+    /// find host realm
+    const CSmallString GetRealm(const CSmallString& hostname,bool personal=false);
+
 // section of private date -----------------------------------------------------
 private:
     CXMLDocument                Hosts;                  // host configuration

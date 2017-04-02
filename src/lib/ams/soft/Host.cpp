@@ -416,6 +416,28 @@ const CSmallString CHost::GetGroupNS(const CSmallString& hostname,bool personal)
 
 //------------------------------------------------------------------------------
 
+const CSmallString CHost::GetRealm(void)
+{
+    CXMLElement* p_grp = FindGroup();
+    if( p_grp == NULL ) return("NONE");
+    CSmallString realm("NONE");
+    p_grp->GetAttribute("realm",realm);
+    return(realm);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CHost::GetRealm(const CSmallString& hostname,bool personal)
+{
+    CXMLElement* p_grp = FindGroup(hostname,personal);
+    if( p_grp == NULL ) return("NONE");
+    CSmallString realm("NONE");
+    p_grp->GetAttribute("realm",realm);
+    return(realm);
+}
+
+//------------------------------------------------------------------------------
+
 void CHost::InitHost(bool nocache)
 {
     CPUModelName="unknown";
