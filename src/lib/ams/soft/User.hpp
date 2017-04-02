@@ -68,7 +68,7 @@ public:
     const CSmallString GetUMask(void) const;
 
     /// get umask
-    const CSmallString GetUMask(mode_t mumask) const;
+    static const CSmallString GetUMask(mode_t mumask);
 
     /// get umask permission bits
     const CSmallString GetUMaskPermissions(void) const;

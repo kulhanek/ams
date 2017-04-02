@@ -377,7 +377,7 @@ const CSmallString CUser::GetUMask(void) const
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUser::GetUMask(mode_t mumask) const
+const CSmallString CUser::GetUMask(mode_t mumask)
 {
    stringstream str;
    char c1 = (mumask & 0007) + '0';
