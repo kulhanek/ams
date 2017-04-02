@@ -398,6 +398,7 @@ const CSmallString CHost::GetGroupNS(void)
 {
     CXMLElement* p_grp = FindGroup();
     if( p_grp == NULL ) return("na");
+    cout << "found" << endl;
     CSmallString gns("na");
     p_grp->GetAttribute("groupns",gns);
     return(gns);
