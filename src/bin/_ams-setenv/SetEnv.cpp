@@ -159,17 +159,17 @@ bool CSetEnv::Run(void)
     nfstr.close();
 
     // generate environment
-    ShellProcessor.SetVariable("AMS_NCPU",Host.GetNCPUs());
+    ShellProcessor.SetVariable("AMS_NCPUS",Host.GetNCPUs());
     ShellProcessor.SetVariable("OMP_NUM_THREADS",Host.GetNCPUs());
     ShellProcessor.SetVariable("MKL_NUM_THREADS",Host.GetNCPUs());
-    ShellProcessor.SetVariable("AMS_NGPU",Host.GetNGPUs());
-    ShellProcessor.SetVariable("AMS_NNODE",1);
+    ShellProcessor.SetVariable("AMS_NGPUS",Host.GetNGPUs());
+    ShellProcessor.SetVariable("AMS_NNODES",1);
     ShellProcessor.SetVariable("AMS_NODEFILE",nodefile);
     ShellProcessor.SetVariable("AMS_GPUFILE",gpufile);
 
-    ShellProcessor.SetVariable("INF_NCPU",Host.GetNCPUs());
-    ShellProcessor.SetVariable("INF_NGPU",Host.GetNGPUs());
-    ShellProcessor.SetVariable("INF_NNODE",1);
+    ShellProcessor.SetVariable("INF_NCPUS",Host.GetNCPUs());
+    ShellProcessor.SetVariable("INF_NGPUS",Host.GetNGPUs());
+    ShellProcessor.SetVariable("INF_NNODES",1);
     ShellProcessor.SetVariable("INF_NODEFILE",nodefile);
     ShellProcessor.SetVariable("INF_GPUFILE",gpufile);
 

@@ -134,18 +134,18 @@ bool CStatClient::PopulateDatagram(const CSmallString& build,int flags)
     Datagram.SetUser(user);
     Datagram.SetHostName(CShell::GetSystemVariable("HOSTNAME"));
 
-    int ncpus = CShell::GetSystemVariable("AMS_NCPU").ToInt();
+    int ncpus = CShell::GetSystemVariable("AMS_NCPUS").ToInt();
     if( ncpus <= 0 ) ncpus = 1;
     Datagram.SetNCPUs(ncpus);
-    ncpus = CShell::GetSystemVariable("AMS_NHOSTCPU").ToInt();
+    ncpus = CShell::GetSystemVariable("AMS_NHOSTCPUS").ToInt();
     Datagram.SetNumOfHostCPUs(ncpus);
 
-    int ngpus = CShell::GetSystemVariable("AMS_NGPU").ToInt();
+    int ngpus = CShell::GetSystemVariable("AMS_NGPUS").ToInt();
     Datagram.SetNGPUs(ngpus);
-    ngpus = CShell::GetSystemVariable("AMS_NHOSTGPU").ToInt();
+    ngpus = CShell::GetSystemVariable("AMS_NHOSTGPUS").ToInt();
     Datagram.SetNumOfHostGPUs(ngpus);
 
-    int nnodes = CShell::GetSystemVariable("AMS_NNODE").ToInt();
+    int nnodes = CShell::GetSystemVariable("AMS_NNODES").ToInt();
     if( nnodes <= 0 ) nnodes = 1;
     Datagram.SetNumOfNodes(nnodes);
 

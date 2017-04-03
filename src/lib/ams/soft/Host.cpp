@@ -99,21 +99,21 @@ void CHost::InitGlobalSetup(void)
     // init default data -------------------------
     NCPUs = 1;
     CSmallString sNCPU;
-    sNCPU = CShell::GetSystemVariable("AMS_NCPU");
+    sNCPU = CShell::GetSystemVariable("AMS_NCPUS");
     if( sNCPU != NULL ) {
         NCPUs = sNCPU.ToInt();
     }
 
     NGPUs = 0;
     CSmallString sNGPU;
-    sNGPU = CShell::GetSystemVariable("AMS_NGPU");
+    sNGPU = CShell::GetSystemVariable("AMS_NGPUS");
     if( sNGPU != NULL ) {
         NGPUs = sNGPU.ToInt();
     }
 
     NNodes = 1;
     CSmallString sNNodes;
-    sNNodes = CShell::GetSystemVariable("AMS_NNODE");
+    sNNodes = CShell::GetSystemVariable("AMS_NNODES");
     if( sNNodes != NULL ) {
         NNodes = sNNodes.ToInt();
     }
