@@ -391,7 +391,7 @@ const CSmallString CUser::GetUMask(mode_t mumask)
 
 mode_t CUser::GetUMaskMode(const CSmallString& smask)
 {
-    if( smask.GetLength() < 3 ) return(0x777);
+    if( smask.GetLength() < 3 ) return(0777);
     mode_t mode = ((smask[0]-'0') << 6) | ((smask[1]-'0') << 3) | (smask[2]-'0');
     return(mode);
 }

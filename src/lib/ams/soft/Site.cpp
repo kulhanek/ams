@@ -571,8 +571,8 @@ bool CSite::ActivateSite(void)
     }
 
     // setup host resources
-    ShellProcessor.SetVariable("AMS_NHOSTCPU",Host.GetNumOfHostCPUs());
-    ShellProcessor.SetVariable("AMS_NHOSTGPU",Host.GetNumOfHostGPUs());
+    ShellProcessor.SetVariable("AMS_NHOSTCPUS",Host.GetNumOfHostCPUs());
+    ShellProcessor.SetVariable("AMS_NHOSTGPUS",Host.GetNumOfHostGPUs());
 
     CSmallString groupns;
     CXMLElement* p_gele = Host.FindGroup();
