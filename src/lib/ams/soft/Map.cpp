@@ -417,7 +417,10 @@ bool CMap::AddBuilds(std::ostream& vout,const CSmallString& site,const CSmallStr
     CSmallString build_filter;
     build_filter = filter;
 
-    build_filter += ".bld";
+    // add only if it is not present
+    if( build_filter.FindSubString(".bld") == -1 ){
+        build_filter += ".bld";
+    }
 
     int num = 0;
 
@@ -890,7 +893,9 @@ void CMap::ShowBuilds(std::ostream& vout,const CSmallString& prefix,const CSmall
     vout << "Prefix filter : " << prefix_filter << endl;
     vout << "Build filter  : " << build_filter << endl;
 
-    build_filter += ".bld";
+    if( build_filter.FindSubString(".bld") == -1 ){
+        build_filter += ".bld";
+    }
 
     vector<string>  prefixes;
 

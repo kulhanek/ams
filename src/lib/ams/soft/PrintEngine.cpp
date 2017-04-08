@@ -341,12 +341,12 @@ bool CPVerRecord::operator == (const CPVerRecord& left) const
 
 bool sort_tokens(const CPVerRecord& left,const CPVerRecord& right)
 {
-    if( left.version == right.version ) return(true);
-    if( left.verindx < right.verindx ) return(true);
+    if( left.version == right.version ) return(false);
+    if( left.verindx < right.verindx ) return(false);
     if( left.verindx == right.verindx ){
-        return( strcmp(left.version,right.version) < 0);
+        return( strcmp(left.version,right.version) > 0);
     }
-    return(false);
+    return(true);
 }
 
 //------------------------------------------------------------------------------
@@ -362,6 +362,8 @@ bool CPrintEngine::PrintRawModuleVersions(const CSmallString& mod_name)
         ES_ERROR(error);
         return(false);
     }
+    CSmallString dver, drch, dmode;
+    Cache.GetModuleDefaults(p_ele,dver,drch,dmode);
 
     std::list<CPVerRecord>  versions;
     CXMLElement*            p_list = p_ele->GetFirstChildElement("builds");
@@ -383,7 +385,9 @@ bool CPrintEngine::PrintRawModuleVersions(const CSmallString& mod_name)
     std::list<CPVerRecord>::iterator ie = versions.end();
 
     while( it != ie ){
+        if( (*it).version == dver ) vout << "<b>";
         vout << name << ":" << (*it).version << endl;
+        if( (*it).version == dver ) vout << "</b>";
         it++;
     }
 
@@ -710,8 +714,8 @@ bool CPrintEngine::PrintModModuleVersions(const CSmallString& mod_name)
 {
     CSmallString name = CUtils::GetModuleName(mod_name);
 
-    vout << "# Module name: " << name << " (available versions)" << endl;
-    vout << "#==============================================================" << endl;
+    vout << "# Module name: " << name << " (available versions, the default is bold)" << endl;
+    vout << "#=======================================================================" << endl;
 
     bool result = PrintRawModuleVersions(mod_name);
 
