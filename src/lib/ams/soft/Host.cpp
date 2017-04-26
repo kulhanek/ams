@@ -180,6 +180,8 @@ void CHost::ClearAll(void)
     HTEnabled = false;
 
     IsDesktop = false;
+
+    CPUSpec = 1.0;
 }
 
 //------------------------------------------------------------------------------
@@ -250,7 +252,7 @@ void CHost::LoadCache(void)
         string sbuf;
         p_cele->GetAttribute("tks",sbuf);
         if( ! sbuf.empty() ) split(CPUInfoTokens,sbuf,is_any_of("#"));
-        p_cele->GetAttribute("ncpu",CPUInfoNumOfHostCPUs);
+        p_cele->GetAttribute("ncpus",CPUInfoNumOfHostCPUs);
     }
 
 // cuda ----------------
@@ -309,7 +311,7 @@ void CHost::SaveCache(void)
     p_cele->SetAttribute("htd",HTDetected);
     p_cele->SetAttribute("hte",HTEnabled);
     p_cele->SetAttribute("tks",join(CPUInfoTokens,"#"));
-    p_cele->SetAttribute("ncpu",CPUInfoNumOfHostCPUs);
+    p_cele->SetAttribute("ncpus",CPUInfoNumOfHostCPUs);
 
 // cuda ----------------
     CXMLElement* p_nele = p_ele->CreateChildElement("cuda");
@@ -554,7 +556,7 @@ void CHost::InitDefaultTokens(CXMLElement* p_ele)
     }
 
     // max cpus per node
-    p_ele->GetAttribute("ncpu",DefaultNumOfHostCPUs);
+    p_ele->GetAttribute("ncpus",DefaultNumOfHostCPUs);
     if( CacheLoaded == false ) NumOfHostCPUs = DefaultNumOfHostCPUs;
 
     // copy tokens
@@ -598,9 +600,9 @@ void CHost::InitHostsTokens(CXMLElement* p_ele)
 
     // max cpus per node
     bool cenable = false;
-    p_ele->GetAttribute("ncpu",cenable);
+    p_ele->GetAttribute("ncpus",cenable);
     if( cenable ) {
-        p_ele->GetAttribute("ncpu",HostNumOfHostCPUs);
+        p_ele->GetAttribute("ncpus",HostNumOfHostCPUs);
         if( CacheLoaded == false ) NumOfHostCPUs = HostNumOfHostCPUs;
     }
 
@@ -747,7 +749,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
 
     // max cpus per node
     bool cenable = false;
-    p_ele->GetAttribute("ncpu",cenable);
+    p_ele->GetAttribute("ncpus",cenable);
     if( cenable ) {
         CPUInfoNumOfHostCPUs = count_CPU;
         NumOfHostCPUs = count_CPU;
@@ -1291,9 +1293,10 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
     vout << "    Priority      : " << pri << endl;
+    vout << "    SMP CPU model : " << GetCPUModel() << endl;
     vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
     PrintResourceTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
-    vout << "    SMP CPU model : " << GetCPUModel() << endl;
+    vout << "    CPU spec      : " << CPUSpec << endl;
     if( HTDetected ){
     vout << "    HypThreading  : detected ";
         if( HTEnabled ){
@@ -1377,16 +1380,16 @@ const CSmallString CHost::WhatIsEnabled(CXMLElement* p_ele)
 {
     if( p_ele == NULL ) return("-nothing-");
     bool tokens;
-    bool ncpu;
+    bool ncpus;
     CSmallString value;
     tokens = p_ele->GetAttribute("tokens",value);
-    ncpu = p_ele->GetAttribute("ncpu",value);
+    ncpus = p_ele->GetAttribute("ncpus",value);
 
     CSmallString output;
-    if( tokens || ncpu ){
+    if( tokens || ncpus ){
         if( tokens ) output << "tokens";
-        if( tokens && ncpu ) output << "/";
-        if( ncpu ) output << "ncpus";
+        if( tokens && ncpus ) output << "/";
+        if( ncpus ) output << "ncpus";
     } else {
         output << "-nothing-";
     }
@@ -1528,8 +1531,9 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
 {
     vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
-    vout << "spec " << "" << endl;
+    vout << "spec " << CPUSpec << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
+    vout << "gpu_cap " << join(GPUCapabilities,",") << endl;
 }
 
 //==============================================================================

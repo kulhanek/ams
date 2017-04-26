@@ -198,6 +198,7 @@ private:
     std::vector<std::string>    CPUInfoTokens;          // CPU tokens from /proc/cpuinfo
     int                         CPUInfoNumOfHostCPUs;
     std::vector<std::string>    CPUInfoFlags;           // list of CPU flags
+    float                       CPUSpec;
 
     // desktop
     bool                        IsDesktop;              // is the host a personal desktop? - not cached
@@ -206,7 +207,7 @@ private:
     std::vector<std::string>    CUDATokens;
     CSmallString                CudaFilter;
     CSmallString                CudaLib;
-    std::string                 GPUCapabilities;        // comma separated list of gpu capabilities
+    std::vector<std::string>    GPUCapabilities;        // list of GPU capabilities
 
     // network tokens
     std::set<std::string>       NetDevs;        // available network devices
