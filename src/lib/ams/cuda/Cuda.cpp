@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <FileSystem.hpp>
 #include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -119,9 +120,11 @@ int CCuda::GetNumOfGPUs(void)
 
 //------------------------------------------------------------------------------
 
-void CCuda::GetGPUInfo(std::vector<std::string>& list)
+void CCuda::GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& capas)
 {
     list.clear();
+    capas.clear();
+
     if( cudaGetDeviceCount == NULL ) return;
     if( cudaSetDevice == NULL ) return;
     if( cudaGetDeviceProperties == NULL ) return;
@@ -131,6 +134,8 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list)
         ES_ERROR("unable to get number of devices");
         return;
     }
+
+    std::set<std::string> capabilities;
 
     for(int devid=0; devid < ngpus; devid++){
 
@@ -163,7 +168,22 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list)
         final_name << str.str();
 
         list.push_back(string(final_name));
+
+        // decode capability
+        DecodeCapability(deviceProp,capabilities);
     }
+
+    // copy list of capabilities
+    capas.insert(capas.begin(),capabilities.begin(),capabilities.end());
+}
+
+//------------------------------------------------------------------------------
+
+void CCuda::DecodeCapability(cudaDeviceProp& prop,std::set<std::string>& capabilities)
+{
+    stringstream capa;
+    capa << "cuda" << prop.major << prop.minor;
+    capabilities.insert(capa.str());
 }
 
 //==============================================================================

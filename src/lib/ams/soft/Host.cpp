@@ -983,7 +983,7 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         // get number of GPU devices
         NumOfHostGPUs = cuda.GetNumOfGPUs();
         // get list of GPU devices
-        cuda.GetGPUInfo(GPUModelNames);
+        cuda.GetGPUInfo(GPUModelNames,GPUCapabilities);
 
         // add gpu tokens if available
         std::vector<string> tokens;
@@ -1304,9 +1304,9 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
             pri++;
     vout << ">>> desktop ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     if( IsDesktop ){
-    vout << "    Status        : it is a desktop, the CPU penalty will apply for PBS node specification" << endl;
+    vout << "    Status        : host is a desktop, the CPU penalty will apply for PBS node specification" << endl;
     } else {
-    vout << "    Status        : it is not a desktop" << endl;
+    vout << "    Status        : host is not a desktop" << endl;
     vout << "    CPU penalty   : " << DesktopCPUPenalty << endl;
     }
         }
@@ -1361,6 +1361,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    GPU model #" << setw(1) << i+1 << "  : " << GPUModelNames[i] << endl;
     }
     vout << "    Arch tokens   : " << GetSecTokens(CUDATokens) << endl;
+    vout << "    Capabilities  : " << GetSecTokens(GPUCapabilities) << endl;
     }
     }
         }

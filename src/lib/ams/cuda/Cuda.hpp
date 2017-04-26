@@ -23,6 +23,7 @@
 #include <AMSMainHeader.hpp>
 #include <DynamicPackage.hpp>
 #include <vector>
+#include <set>
 
 // -----------------------------------------------------------------------------
 
@@ -127,7 +128,7 @@ public:
     int GetNumOfGPUs(void);
 
     /// get GPU info
-    void GetGPUInfo(std::vector<std::string>& list);
+    void GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& capas);
 
 // section of private data -----------------------------------------------------
 private:
@@ -142,6 +143,7 @@ private:
     CUDASetDevice           cudaSetDevice;
     CUDAGetDeviceProperties cudaGetDeviceProperties;
 
+    void DecodeCapability(cudaDeviceProp& prop,std::set<std::string>& capabilities);
 };
 
 // -----------------------------------------------------------------------------
