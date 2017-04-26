@@ -1430,8 +1430,8 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    SMP GPU model : " << GPUModelNames[0] << endl;
     }
-    CPrintEngine::PrintTokens(vout,"    Arch tokens   : ",GetArchTokens());
     }
+    CPrintEngine::PrintTokens(vout,"    Arch tokens   : ",GetArchTokens());
 }
 
 //------------------------------------------------------------------------------
