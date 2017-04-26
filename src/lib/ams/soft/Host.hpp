@@ -83,6 +83,9 @@ public:
     void SaveCache(void);
 
 // information methods ---------------------------------------------------------
+    /// print node info
+    void PrintNodeInfo(CVerboseStr& vout);
+
     /// get host CPU model
     const CSmallString& GetCPUModel(void) const;
 
@@ -194,11 +197,16 @@ private:
     bool                        HTEnabled;
     std::vector<std::string>    CPUInfoTokens;          // CPU tokens from /proc/cpuinfo
     int                         CPUInfoNumOfHostCPUs;
+    std::vector<std::string>    CPUInfoFlags;           // list of CPU flags
+
+    // desktop
+    bool                        IsDesktop;              // is the host a personal desktop? - not cached
 
     // cuda
     std::vector<std::string>    CUDATokens;
     CSmallString                CudaFilter;
     CSmallString                CudaLib;
+    std::string                 GPUCapabilities;        // comma separated list of gpu capabilities
 
     // network tokens
     std::set<std::string>       NetDevs;        // available network devices
@@ -213,6 +221,9 @@ private:
 
     /// init CPU tokens
     void InitCPUInfoTokens(CXMLElement* p_ele);
+
+    /// init desktop tokens
+    void InitDesktopTokens(CXMLElement* p_ele);
 
     /// init compatibility tokens
     void InitCompatibilityTokens(CXMLElement* p_ele);
@@ -232,6 +243,7 @@ private:
     /// get section tokens
     const CSmallString GetSecTokens(std::vector<std::string>& list);
     const CSmallString GetSecTokens(std::set<std::string>& list);
+    void PrintResourceTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list);
 };
 
 // -----------------------------------------------------------------------------

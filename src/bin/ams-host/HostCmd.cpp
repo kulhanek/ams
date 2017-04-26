@@ -84,9 +84,17 @@ bool CHostCmd::Run(void)
     Host.InitGlobalSetup();
     User.InitGlobalSetup();
 
-    // initialize hosts -----------------------------
+    // load host file specification
     Host.InitHostFile();
-    Host.InitHost(Options.GetOptNoCache());
+
+    // init host specification
+    Host.InitHost(Options.GetOptNoCache() || Options.GetOptNodeInfo());
+
+    // print node info and ignore the rest
+    if( Options.GetOptNodeInfo() == true ){
+        Host.PrintNodeInfo(vout);
+        return(true);
+    }
 
     vout << low;
     if( Options.GetOptPrintHWSpec() == false ){

@@ -178,6 +178,8 @@ void CHost::ClearAll(void)
 
     HTDetected = false;
     HTEnabled = false;
+
+    IsDesktop = false;
 }
 
 //------------------------------------------------------------------------------
@@ -479,6 +481,10 @@ void CHost::InitHost(bool nocache)
              (AlienHost == false) && (CacheLoaded == false) ){
             InitCPUInfoTokens(p_ele);
         }
+        if(  (p_ele->GetName() == "desktop") &&
+             (AlienHost == false) && (CacheLoaded == false) ){
+            InitDesktopTokens(p_ele);
+        }
         if( (p_ele->GetName() == "gpuinfo") && (AlienHost == false) ){
             InitGPUInfoTokens(p_ele);
         }
@@ -629,7 +635,6 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
 
     // parse CPU attributes
     string line;
-    std::vector<string> tokens;
     bool arch_found = false;
 
     int count_CPU = 0;
@@ -680,7 +685,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
         }
 
         if( (key == "flags") && (arch_found == false) ){
-            split(tokens,values,is_any_of(" "));
+            split(CPUInfoFlags,values,is_any_of(" "),token_compress_on);
             arch_found = true;
             continue;
         }
@@ -756,8 +761,8 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
         while( p_fele != NULL ){
             CSmallString filter;
             p_fele->GetAttribute("value",filter);
-            vector<string>::iterator  it = tokens.begin();
-            vector<string>::iterator  ie = tokens.end();
+            vector<string>::iterator  it = CPUInfoFlags.begin();
+            vector<string>::iterator  ie = CPUInfoFlags.end();
             while( it != ie ){
                 if( fnmatch(filter,(*it).c_str(),0) == 0 ){
                     CPUInfoTokens.push_back(*it);
@@ -841,6 +846,56 @@ void CHost::InitGPUInfoTokens(CXMLElement* p_ele)
                 GPUInfoTokens.push_back(*it);
                 it++;
             }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CHost::InitDesktopTokens(CXMLElement* p_ele)
+{
+    if( p_ele == NULL ){
+        INVALID_ARGUMENT("p_ele is NULL");
+    }
+
+    if( AlienHost == true ) return;
+
+    CXMLElement* p_fele = p_ele->GetFirstChildElement("host");
+    while( p_fele != NULL ){
+        CSmallString filter,cmd;
+
+        // load config
+        bool success = true;
+
+        success &= p_fele->GetAttribute("filter",filter);
+        success &= p_fele->GetAttribute("cmd",cmd);
+
+        // move to next record
+        p_fele = p_fele->GetNextSiblingElement("host");
+
+        if( success == false ){
+            ES_WARNING("undefined filter and/or cmd attributes for host element");
+            continue;
+        }
+
+        // does host match Hostname
+        if( fnmatch(filter,Hostname,0) != 0 ){
+            CSmallString warning;
+            warning << "desktop: host '" << Hostname << "' does not match filter '" << filter << "'";
+            ES_WARNING(warning);
+            continue;
+        }
+
+        // execute command
+        success = false;
+        FILE* p_file = popen(cmd,"r");
+        if( p_file != NULL ){
+            success = pclose(p_file) == 0;
+        }
+        // was is OK?
+        if( success ){
+            IsDesktop = true;
+            break;
         }
     }
 }
@@ -1218,6 +1273,15 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Num of CPUs   : " << HostNumOfHostCPUs << endl;
     vout << "    Arch tokens   : " << GetSecTokens(HostTokens) << endl;
         }
+        if( p_ele->GetName() == "desktop" ){
+            pri++;
+    vout << ">>> desktop ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    if( IsDesktop ){
+    vout << "    Status        : -desktop-" << endl;
+    } else {
+    vout << "    Status        : -node-" << endl;
+    }
+        }
         if( p_ele->GetName() == "cpuinfo" ){
             pri++;
     vout << ">>> cpuinfo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1228,6 +1292,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
     vout << "    Priority      : " << pri << endl;
     vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
+    PrintResourceTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     if( HTDetected ){
     vout << "    HypThreading  : detected ";
@@ -1403,6 +1468,68 @@ void CHost::PrintHWSpec(CVerboseStr& vout)
     if( NumOfHostGPUs > 0 ){
        vout << " | " << GPUModelNames[0];
     }
+}
+
+//------------------------------------------------------------------------------
+
+void CHost::PrintResourceTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list)
+{
+    string          svalue = string(res_list);
+    vector<string>  items;
+    int             nrow, ncolumns = 80;
+    CTerminal::GetSize(nrow,ncolumns);
+
+    // split to items
+    split(items,svalue,is_any_of(","));
+
+    vector<string>::iterator it = items.begin();
+    vector<string>::iterator ie = items.end();
+
+    sout << title;
+
+    if(res_list == NULL ){
+        sout << "-none-" << endl;
+        return;
+    }
+
+    int len = title.GetLength();
+
+    while( it != ie ){
+        string sres = *it;
+        sout << sres;
+        len += sres.size();
+        len++;
+        it++;
+        if( it != ie ){
+            string sres = *it;
+            int tlen = len;
+            tlen += sres.size();
+            tlen++;
+            if( tlen > ncolumns ){
+                sout << "," << endl;
+                for(unsigned int i=0; i < title.GetLength(); i++){
+                    sout << " ";
+                }
+                len = title.GetLength();
+            } else {
+                sout << ", ";
+                len += 2;
+            }
+        }
+    }
+    sout << endl;
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CHost::PrintNodeInfo(CVerboseStr& vout)
+{
+    vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
+    vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
+    vout << "spec " << "" << endl;
+    vout << "ngpus " << NumOfHostGPUs << endl;
 }
 
 //==============================================================================

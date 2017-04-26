@@ -50,6 +50,7 @@ public:
     CSO_OPT(CSmallString,Host)
     CSO_OPT(bool,NoCache)
     CSO_OPT(bool,PrintHWSpec)
+    CSO_OPT(bool,NodeInfo)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -83,6 +84,15 @@ public:
                 "hw",                      /* long option name */
                 NULL,                           /* parametr name */
                 "print HW token")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                NodeInfo,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                '\0',                           /* short option name */
+                "nodeinfo",                      /* long option name */
+                NULL,                           /* parametr name */
+                "print node description suitable for a PBSPro node configuration")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */
