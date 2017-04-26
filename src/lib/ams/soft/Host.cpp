@@ -340,7 +340,7 @@ void CHost::SaveCache(void)
     p_nele->SetAttribute("tks",join(CUDATokens,"#"));
     p_nele->SetAttribute("flt",CudaFilter);
     p_nele->SetAttribute("lib",CudaLib);
-    p_cele->SetAttribute("cap",join(GPUCapabilities,","));
+    p_nele->SetAttribute("cap",join(GPUCapabilities,","));
 
 // special -------------
     CXMLElement* p_dele = p_ele->CreateChildElement("net");
@@ -985,15 +985,17 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         // get list of GPU devices
         cuda.GetGPUInfo(GPUModelNames,GPUCapabilities);
 
-        // add gpu tokens if available
-        std::vector<string> tokens;
-        split(tokens,stokens,is_any_of("#"));
+        if( NumOfHostGPUs > 0 ){
+            // add gpu tokens if available and ngpus > 0
+            std::vector<string> tokens;
+            split(tokens,stokens,is_any_of("#"));
 
-        vector<string>::iterator  it = tokens.begin();
-        vector<string>::iterator  ie = tokens.end();
-        while( it != ie ){
-            CUDATokens.push_back(*it);
-            it++;
+            vector<string>::iterator  it = tokens.begin();
+            vector<string>::iterator  ie = tokens.end();
+            while( it != ie ){
+                CUDATokens.push_back(*it);
+                it++;
+            }
         }
         break;
     }
@@ -1356,12 +1358,12 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Host filter   : " << CudaFilter << endl;
     if( CudaFilter != "-none-" ){
     vout << "    CUDA library  : " << CudaLib << endl;
-    vout << "    Num of GPUs   : " << NumOfHostGPUs << endl;
+    vout << "    Num of GPUs   : " << NumOfHostGPUs << endl;  
     for(size_t i=0; i < GPUModelNames.size(); i++){
     vout << "    GPU model #" << setw(1) << i+1 << "  : " << GPUModelNames[i] << endl;
     }
-    vout << "    Arch tokens   : " << GetSecTokens(CUDATokens) << endl;
     vout << "    Capabilities  : " << GetSecTokens(GPUCapabilities) << endl;
+    vout << "    Arch tokens   : " << GetSecTokens(CUDATokens) << endl;
     }
     }
         }
