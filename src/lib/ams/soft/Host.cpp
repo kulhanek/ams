@@ -1399,9 +1399,9 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    SMP GPU model : " << GPUModelNames[0] << endl;
     }
     CPrintEngine::PrintTokens(vout,"    Capabilities  : ",GetSecTokens(GPUCapabilities));
+    }
+    }
     CPrintEngine::PrintTokens(vout,"    CUDA tokens   : ",GetSecTokens(CUDATokens));
-    }
-    }
     }
         }
         if( p_ele->GetName() == "net" ){
