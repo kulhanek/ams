@@ -623,9 +623,9 @@ void CHost::InitHostsTokens(CXMLElement* p_ele)
 
     // max cpus per node
     bool cenable = false;
-    p_ele->GetAttribute("ncpus",cenable);
+    p_ele->GetAttribute("ecpus",cenable);
     if( cenable ) {
-        p_ele->GetAttribute("ncpus",HostNumOfHostCPUs);
+        p_ele->GetAttribute("ncpus",HostNumOfHostCPUs)
         if( CacheLoaded == false ) NumOfHostCPUs = HostNumOfHostCPUs;
     }
 
@@ -772,7 +772,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
 
     // max cpus per node
     bool cenable = false;
-    p_ele->GetAttribute("ncpus",cenable);
+    p_ele->GetAttribute("ecpus",cenable);
     if( cenable ) {
         CPUInfoNumOfHostCPUs = count_CPU;
         NumOfHostCPUs = count_CPU;
@@ -1304,9 +1304,9 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
             pri++;
     vout << ">>> desktop ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     if( IsDesktop ){
-    vout << "    Status        : -desktop-" << endl;
+    vout << "    Status        : it is a desktop, the CPU penalty will apply for PBS node specification" << endl;
     } else {
-    vout << "    Status        : -comp node-" << endl;
+    vout << "    Status        : it is not a desktop" << endl;
     vout << "    CPU penalty   : " << DesktopCPUPenalty << endl;
     }
         }
