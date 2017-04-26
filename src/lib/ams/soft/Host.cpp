@@ -625,7 +625,7 @@ void CHost::InitHostsTokens(CXMLElement* p_ele)
     bool cenable = false;
     p_ele->GetAttribute("ecpus",cenable);
     if( cenable ) {
-        p_ele->GetAttribute("ncpus",HostNumOfHostCPUs)
+        p_ele->GetAttribute("ncpus",HostNumOfHostCPUs);
         if( CacheLoaded == false ) NumOfHostCPUs = HostNumOfHostCPUs;
     }
 
