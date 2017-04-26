@@ -158,6 +158,9 @@ public:
     /// find host realm
     const CSmallString GetRealm(const CSmallString& hostname,bool personal=false);
 
+    /// get CUDA capabilities
+    CXMLElement* GetCUDACapabilities(void);
+
 // section of private date -----------------------------------------------------
 private:
     CXMLDocument                Hosts;                  // host configuration

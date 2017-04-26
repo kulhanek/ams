@@ -25,6 +25,8 @@
 #include <FileSystem.hpp>
 #include <iomanip>
 #include <sstream>
+#include <Host.hpp>
+#include <XMLElement.hpp>
 
 using namespace std;
 
@@ -179,38 +181,32 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& 
 
 //------------------------------------------------------------------------------
 
-// https://en.wikipedia.org/wiki/CUDA
-// in increasing order !!!
-
-const int compat_len = 7;
-const char* compat_map[compat_len] = {
-    "cuda20",
-    "cuda21",
-    "cuda30",
-    "cuda35",
-    "cuda50",
-    "cuda52",
-    "cuda61"
-};
-
-//------------------------------------------------------------------------------
-
 void CCuda::DecodeCapability(cudaDeviceProp& prop,std::set<std::string>& capabilities)
 {
-    stringstream capa;
+    std::stringstream capa;
     capa << "cuda" << prop.major << prop.minor;
 
     // GPU capability
     capabilities.insert(capa.str());
 
-    // find the capability in the map and insert all backward compatible capabilities
-    for(size_t i = 0; i < compat_len; i++){
-        if( capa.str() == compat_map[i] ){
-            for( size_t j=0; j < i; j++){
-                capabilities.insert(compat_map[j]);
-            }
+    // process compatible capabilities
+    CXMLElement* p_ele = Host.GetCUDACapabilities();
+    if( p_ele == NULL ) return;
+
+    std::set<std::string> compat;
+    CXMLElement* p_sele = p_ele->GetFirstChildElement("cap");
+    while( p_sele != NULL ){
+        std::string cap;
+        p_sele->GetAttribute("name",cap);
+        if( cap == capa.str() ){
+            capabilities.insert(compat.begin(),compat.end());
+            return;
         }
+        compat.insert(cap);
+        p_sele = p_sele->GetNextSiblingElement("cap");
     }
+
+    return;
 }
 
 //==============================================================================

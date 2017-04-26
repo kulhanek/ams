@@ -450,7 +450,7 @@ void CSite::PrintShortSiteInfo(ostream& vout)
 
     vout << "# User name  : " << User.GetName() << endl;
     vout << "# User group : " << User.GetEGroup() << " [umask: " << User.GetUMask() << " " << User.GetUMaskPermissions() << "]" << endl;
-    vout << "# ACL groups : " << User.GetGroups() << endl;
+    CPrintEngine::PrintTokens(vout,"# ACL groups : ",User.GetGroups());
 
     if( IsActive() ) {
     vout << "#" << endl;
@@ -460,7 +460,6 @@ void CSite::PrintShortSiteInfo(ostream& vout)
     vout << "# ~~~ Host info ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     }
     vout << "# Full host name     : " << Host.GetHostName() << endl;
-    CPrintEngine::PrintTokens(vout,"# Host arch tokens   : ",Host.GetArchTokens());
     vout << "# Num of host CPUs   : " << Host.GetNumOfHostCPUs() << endl;
     vout << "# Host SMP CPU model : " << Host.GetCPUModel() << endl;
         if( Host.GetNumOfHostGPUs() > 0 ){
@@ -473,6 +472,7 @@ void CSite::PrintShortSiteInfo(ostream& vout)
     vout << "# Host SMP GPU model : " << Host.GetGPUModels()[0] << endl;
     }
         }
+    CPrintEngine::PrintTokens(vout,"# Host arch tokens   : ",Host.GetArchTokens());
     }
 
     if( (GetDocumentationURL() != NULL) ||

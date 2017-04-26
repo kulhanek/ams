@@ -798,6 +798,22 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
             p_fele = p_fele->GetNextSiblingElement("filter");
         }
     }
+
+    // determine spec
+    CXMLElement* p_spele = Hosts.GetChildElementByPath("config/cpu_specs");
+    if( p_spele != NULL ){
+        CXMLElement* p_iele = p_spele->GetFirstChildElement("model");
+        while( p_iele != NULL ){
+            CSmallString model;
+            float        spec = 1.0;
+            p_iele->GetAttribute("model",model);
+            p_iele->GetAttribute("spec",spec);
+            if( model == CPUModelName ){
+                CPUSpec = spec;
+            }
+            p_iele = p_iele->GetNextSiblingElement("model");
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -1403,7 +1419,6 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Arch tokens   : " << GetSecTokens(CompatTokens) << endl;
     vout << "===================================================================" << endl;
     vout << ">>> final" << endl;
-    CPrintEngine::PrintTokens(vout,"    Arch tokens   : ",GetArchTokens());
     vout << "    Num of CPUs   : " << GetNumOfHostCPUs() << endl;
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     if( NumOfHostGPUs > 0 ){
@@ -1415,6 +1430,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    SMP GPU model : " << GPUModelNames[0] << endl;
     }
+    CPrintEngine::PrintTokens(vout,"    Arch tokens   : ",GetArchTokens());
     }
 }
 
@@ -1528,10 +1544,25 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
     } else {
         vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
     }
+    vout << "cpu_model " << CPUModelName << endl;
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
     vout << "spec " << CPUSpec << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
+    if( NumOfHostGPUs > 0 ){
+    vout << "gpu_model " << GPUModelNames[0] << endl;
+    } else {
+    vout << "gpu_model" << endl;
+    }
     vout << "gpu_cap " << join(GPUCapabilities,",") << endl;
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+CXMLElement* CHost::GetCUDACapabilities(void)
+{
+    return(Hosts.GetChildElementByPath("config/cuda_caps"));
 }
 
 //==============================================================================
