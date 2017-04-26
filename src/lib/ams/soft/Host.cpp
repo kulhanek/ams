@@ -674,8 +674,6 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     list<int> physIds;
     list<int> coreIds;
 
-    string raw_model;
-
     while( getline(cpuinfo,line) ){
         vector<string>  key_and_value;
         split(key_and_value,line,is_any_of(":"));
@@ -691,7 +689,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
             vector<string> words;
             split(words,values,is_any_of(" "),token_compress_on);
             CPUModelName =  join(words," ");
-            raw_model = CPUModelName;
+            CPURawModelName = CPUModelName;
             count_CPU++;
             continue;
         }
@@ -1355,7 +1353,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     CPrintEngine::PrintTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
-    vout << "    CPU spec      : " << setprecision(1) << CPUSpec << endl;
+    vout << "    CPU spec      : " << setprecision(2) << CPUSpec << endl;
     if( HTDetected ){
     vout << "    HypThreading  : detected ";
         if( HTEnabled ){
@@ -1552,7 +1550,7 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
     }
     vout << "cpu_model " << CPURawModelName << endl;
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
-    vout << "spec " << CPUSpec << endl;
+    vout << "spec " << setprecision(2) << CPUSpec << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
     vout << "gpu_cap " << join(GPUCapabilities,",") << endl;
 }
