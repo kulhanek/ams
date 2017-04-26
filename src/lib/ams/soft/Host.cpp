@@ -1355,7 +1355,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     CPrintEngine::PrintTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
-    vout << "    CPU spec      : " << CPUSpec << endl;
+    vout << "    CPU spec      : " << setprecision(1) << CPUSpec << endl;
     if( HTDetected ){
     vout << "    HypThreading  : detected ";
         if( HTEnabled ){
