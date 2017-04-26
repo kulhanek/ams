@@ -192,6 +192,7 @@ private:
     // header
     int                         NumOfHostCPUs;          // default max. number of CPUs per node
     CSmallString                CPUModelName;           // cpu model name
+    CSmallString                CPURawModelName;        // cpu model name without mem
     int                         NumOfHostGPUs;          // default max. number of GPUs per node
     std::vector<std::string>    GPUModelNames;          // gpu model names
 

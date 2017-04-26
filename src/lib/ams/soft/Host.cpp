@@ -184,6 +184,7 @@ void CHost::ClearAll(void)
     DesktopCPUPenalty = 1;
 
     CPUSpec = 1.0;
+    CPURawModelName = "";
 }
 
 //------------------------------------------------------------------------------
@@ -240,6 +241,7 @@ void CHost::LoadCache(void)
     if( p_hele ){
         p_hele->GetAttribute("nhcpu",NumOfHostCPUs);
         p_hele->GetAttribute("cpum",CPUModelName);
+        p_hele->GetAttribute("cpur",CPURawModelName);
         p_hele->GetAttribute("nhgpu",NumOfHostGPUs);
         string sbuf;
         p_hele->GetAttribute("gpum",sbuf);
@@ -319,6 +321,7 @@ void CHost::SaveCache(void)
     // common
     p_hele->SetAttribute("nhcpu",NumOfHostCPUs);
     p_hele->SetAttribute("cpum",CPUModelName);
+    p_hele->SetAttribute("cpur",CPURawModelName);
     p_hele->SetAttribute("nhgpu",NumOfHostGPUs);
     p_hele->SetAttribute("gpum",join(GPUModelNames,"|"));
 
@@ -671,6 +674,8 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     list<int> physIds;
     list<int> coreIds;
 
+    string raw_model;
+
     while( getline(cpuinfo,line) ){
         vector<string>  key_and_value;
         split(key_and_value,line,is_any_of(":"));
@@ -686,6 +691,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
             vector<string> words;
             split(words,values,is_any_of(" "),token_compress_on);
             CPUModelName =  join(words," ");
+            raw_model = CPUModelName;
             count_CPU++;
             continue;
         }
@@ -808,7 +814,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
             float        spec = 1.0;
             p_iele->GetAttribute("model",model);
             p_iele->GetAttribute("spec",spec);
-            if( model == CPUModelName ){
+            if( model == CPURawModelName ){
                 CPUSpec = spec;
             }
             p_iele = p_iele->GetNextSiblingElement("model");
@@ -1544,15 +1550,10 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
     } else {
         vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
     }
-    vout << "cpu_model " << CPUModelName << endl;
+    vout << "cpu_model " << CPURawModelName << endl;
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
     vout << "spec " << CPUSpec << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
-    if( NumOfHostGPUs > 0 ){
-    vout << "gpu_model " << GPUModelNames[0] << endl;
-    } else {
-    vout << "gpu_model" << endl;
-    }
     vout << "gpu_cap " << join(GPUCapabilities,",") << endl;
 }
 
