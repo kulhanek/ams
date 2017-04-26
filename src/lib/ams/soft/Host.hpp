@@ -245,7 +245,6 @@ private:
     /// get section tokens
     const CSmallString GetSecTokens(std::vector<std::string>& list);
     const CSmallString GetSecTokens(std::set<std::string>& list);
-    void PrintResourceTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list);
 };
 
 // -----------------------------------------------------------------------------

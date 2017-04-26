@@ -43,8 +43,13 @@
 #include <Host.hpp>
 #include <iomanip>
 #include <algorithm>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
+//------------------------------------------------------------------------------
 
 using namespace std;
+using namespace boost;
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -1789,6 +1794,58 @@ void CPrintEngine::SetIncludeVersion(bool set)
 {
     CXMLElement* p_ele = UserConfig.GetChildElementByPath("user/print",true);
     p_ele->SetAttribute("IncludeVersion",set);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CPrintEngine::PrintTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list)
+{
+    string          svalue = string(res_list);
+    vector<string>  items;
+    int             nrow, ncolumns = 80;
+    CTerminal::GetSize(nrow,ncolumns);
+
+    // split to items
+    split(items,svalue,is_any_of(","));
+
+    vector<string>::iterator it = items.begin();
+    vector<string>::iterator ie = items.end();
+
+    sout << title;
+
+    if(res_list == NULL ){
+        sout << "-none-" << endl;
+        return;
+    }
+
+    int len = title.GetLength();
+
+    while( it != ie ){
+        string sres = *it;
+        sout << sres;
+        len += sres.size();
+        len++;
+        it++;
+        if( it != ie ){
+            string sres = *it;
+            int tlen = len;
+            tlen += sres.size();
+            tlen++;
+            if( tlen > ncolumns ){
+                sout << "," << endl;
+                for(unsigned int i=0; i < title.GetLength(); i++){
+                    sout << " ";
+                }
+                len = title.GetLength();
+            } else {
+                sout << ", ";
+                len += 2;
+            }
+        }
+    }
+    sout << endl;
 }
 
 //==============================================================================

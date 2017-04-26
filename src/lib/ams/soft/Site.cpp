@@ -44,6 +44,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <PrintEngine.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -459,7 +460,7 @@ void CSite::PrintShortSiteInfo(ostream& vout)
     vout << "# ~~~ Host info ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     }
     vout << "# Full host name     : " << Host.GetHostName() << endl;
-    vout << "# Host arch tokens   : " << Host.GetArchTokens() << endl;
+    CPrintEngine::PrintTokens(vout,"# Host arch tokens   : ",Host.GetArchTokens());
     vout << "# Num of host CPUs   : " << Host.GetNumOfHostCPUs() << endl;
     vout << "# Host SMP CPU model : " << Host.GetCPUModel() << endl;
         if( Host.GetNumOfHostGPUs() > 0 ){

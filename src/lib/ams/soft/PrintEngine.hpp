@@ -62,6 +62,9 @@ public:
     /// set output stream
     void SetOutputStream(CVerboseStr& fout);
 
+    /// print comma delimited tokens
+    static void PrintTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list);
+
 // raw print output -----------------------------------------------------------
     void PrintRawAllBuilds(void);
     void PrintRawCategories(void);

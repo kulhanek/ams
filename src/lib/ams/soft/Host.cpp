@@ -51,6 +51,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <PrintEngine.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -940,6 +941,9 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
     CUDATokens.clear();
     if( AlienHost == true ) return;
 
+    bool capastokens = false;
+    p_ele->GetAttribute("capastokens",capastokens);
+
     CXMLElement* p_fele = p_ele->GetFirstChildElement("host");
     while( p_fele != NULL ){
         CSmallString filter,cudalib;
@@ -998,6 +1002,11 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
             }
         }
         break;
+    }
+
+    if( capastokens ){
+        // inject capabilities as cuda tokens
+        CUDATokens.insert(CUDATokens.begin(),GPUCapabilities.begin(),GPUCapabilities.end());
     }
 }
 
@@ -1292,7 +1301,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
     vout << "    Priority      : " << pri << endl;
     vout << "    Num of CPUs   : " << DefaultNumOfHostCPUs << endl;
-    vout << "    Arch tokens   : " << GetSecTokens(DefaultTokens) << endl;
+    CPrintEngine::PrintTokens(vout,"    Default tokens: ",GetSecTokens(DefaultTokens));
         }
         if( p_ele->GetName() == "hosts" ){
             pri++;
@@ -1300,7 +1309,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
     vout << "    Priority      : " << pri << endl;
     vout << "    Num of CPUs   : " << HostNumOfHostCPUs << endl;
-    vout << "    Arch tokens   : " << GetSecTokens(HostTokens) << endl;
+    CPrintEngine::PrintTokens(vout,"    Host tokens   : ",GetSecTokens(HostTokens));
         }
         if( p_ele->GetName() == "desktop" ){
             pri++;
@@ -1321,9 +1330,9 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
     vout << "    Priority      : " << pri << endl;
-    vout << "    SMP CPU model : " << GetCPUModel() << endl;
     vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
-    PrintResourceTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
+    vout << "    SMP CPU model : " << GetCPUModel() << endl;
+    CPrintEngine::PrintTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
     vout << "    CPU spec      : " << CPUSpec << endl;
     if( HTDetected ){
     vout << "    HypThreading  : detected ";
@@ -1335,7 +1344,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    HypThreading  : not found" << endl;
     }
-    vout << "    Arch tokens   : " << GetSecTokens(CPUInfoTokens) << endl;
+    CPrintEngine::PrintTokens(vout,"    CPU tokens    : ",GetSecTokens(CPUInfoTokens));
     }
         }
         if( p_ele->GetName() == "gpuinfo" ){
@@ -1358,12 +1367,18 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Host filter   : " << CudaFilter << endl;
     if( CudaFilter != "-none-" ){
     vout << "    CUDA library  : " << CudaLib << endl;
-    vout << "    Num of GPUs   : " << NumOfHostGPUs << endl;  
+    vout << "    Num of GPUs   : " << NumOfHostGPUs << endl;
+    if( NumOfHostGPUs > 0 ){
+    if( IsGPUModelSMP() == false ){
     for(size_t i=0; i < GPUModelNames.size(); i++){
     vout << "    GPU model #" << setw(1) << i+1 << "  : " << GPUModelNames[i] << endl;
     }
-    vout << "    Capabilities  : " << GetSecTokens(GPUCapabilities) << endl;
-    vout << "    Arch tokens   : " << GetSecTokens(CUDATokens) << endl;
+    } else {
+    vout << "    SMP GPU model : " << GPUModelNames[0] << endl;
+    }
+    CPrintEngine::PrintTokens(vout,"    Capabilities  : ",GetSecTokens(GPUCapabilities));
+    CPrintEngine::PrintTokens(vout,"    CUDA tokens   : ",GetSecTokens(CUDATokens));
+    }
     }
     }
         }
@@ -1377,7 +1392,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Priority      : " << pri << endl;
     vout << "    Net devices   : " << GetSecTokens(NetDevs) << endl;
     vout << "    Net filters   : " << NetFilters << endl;
-    vout << "    Net tokens    : " << GetSecTokens(NetTokens) << endl;
+    CPrintEngine::PrintTokens(vout,"    Net tokens    : ",GetSecTokens(NetTokens));
     }
         }
 
@@ -1388,7 +1403,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Arch tokens   : " << GetSecTokens(CompatTokens) << endl;
     vout << "===================================================================" << endl;
     vout << ">>> final" << endl;
-    vout << "    Arch tokens   : " << GetArchTokens() << endl;
+    CPrintEngine::PrintTokens(vout,"    Arch tokens   : ",GetArchTokens());
     vout << "    Num of CPUs   : " << GetNumOfHostCPUs() << endl;
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     if( NumOfHostGPUs > 0 ){
@@ -1500,56 +1515,6 @@ void CHost::PrintHWSpec(CVerboseStr& vout)
     if( NumOfHostGPUs > 0 ){
        vout << " | " << GPUModelNames[0];
     }
-}
-
-//------------------------------------------------------------------------------
-
-void CHost::PrintResourceTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list)
-{
-    string          svalue = string(res_list);
-    vector<string>  items;
-    int             nrow, ncolumns = 80;
-    CTerminal::GetSize(nrow,ncolumns);
-
-    // split to items
-    split(items,svalue,is_any_of(","));
-
-    vector<string>::iterator it = items.begin();
-    vector<string>::iterator ie = items.end();
-
-    sout << title;
-
-    if(res_list == NULL ){
-        sout << "-none-" << endl;
-        return;
-    }
-
-    int len = title.GetLength();
-
-    while( it != ie ){
-        string sres = *it;
-        sout << sres;
-        len += sres.size();
-        len++;
-        it++;
-        if( it != ie ){
-            string sres = *it;
-            int tlen = len;
-            tlen += sres.size();
-            tlen++;
-            if( tlen > ncolumns ){
-                sout << "," << endl;
-                for(unsigned int i=0; i < title.GetLength(); i++){
-                    sout << " ";
-                }
-                len = title.GetLength();
-            } else {
-                sout << ", ";
-                len += 2;
-            }
-        }
-    }
-    sout << endl;
 }
 
 //==============================================================================
