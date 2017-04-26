@@ -180,6 +180,7 @@ void CHost::ClearAll(void)
     HTEnabled = false;
 
     IsDesktop = false;
+    DesktopCPUPenalty = 1;
 
     CPUSpec = 1.0;
 }
@@ -862,6 +863,8 @@ void CHost::InitDesktopTokens(CXMLElement* p_ele)
 
     if( AlienHost == true ) return;
 
+    p_ele->GetAttribute("penalty",DesktopCPUPenalty);
+
     CXMLElement* p_fele = p_ele->GetFirstChildElement("host");
     while( p_fele != NULL ){
         CSmallString filter,cmd;
@@ -1281,7 +1284,8 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     if( IsDesktop ){
     vout << "    Status        : -desktop-" << endl;
     } else {
-    vout << "    Status        : -node-" << endl;
+    vout << "    Status        : -comp node-" << endl;
+    vout << "    CPU penalty   : " << DesktopCPUPenalty << endl;
     }
         }
         if( p_ele->GetName() == "cpuinfo" ){
@@ -1529,7 +1533,11 @@ void CHost::PrintResourceTokens(std::ostream& sout,const CSmallString& title, co
 
 void CHost::PrintNodeInfo(CVerboseStr& vout)
 {
-    vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
+    if( IsDesktop ){
+        vout << "ncpus " << CPUInfoNumOfHostCPUs - DesktopCPUPenalty << endl;
+    } else {
+        vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
+    }
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
     vout << "spec " << CPUSpec << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;

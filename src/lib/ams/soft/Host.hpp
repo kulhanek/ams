@@ -201,7 +201,8 @@ private:
     float                       CPUSpec;
 
     // desktop
-    bool                        IsDesktop;              // is the host a personal desktop? - not cached
+    bool                        IsDesktop;              // is the host a personal desktop?
+    int                         DesktopCPUPenalty;      // how many CPUs are not availbale for PBSPro node
 
     // cuda
     std::vector<std::string>    CUDATokens;
