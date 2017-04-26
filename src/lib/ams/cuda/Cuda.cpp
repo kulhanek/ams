@@ -182,7 +182,8 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& 
 // https://en.wikipedia.org/wiki/CUDA
 // in increasing order !!!
 
-const char* compat_map[] = {
+const int compat_len = 7;
+const char* compat_map[compat_len] = {
     "cuda20",
     "cuda21",
     "cuda30",
@@ -203,7 +204,7 @@ void CCuda::DecodeCapability(cudaDeviceProp& prop,std::set<std::string>& capabil
     capabilities.insert(capa.str());
 
     // find the capability in the map and insert all backward compatible capabilities
-    for(size_t i = 0; i < sizeof(compat_map); i++){
+    for(size_t i = 0; i < compat_len; i++){
         if( capa.str() == compat_map[i] ){
             for( size_t j=0; j < i; j++){
                 capabilities.insert(compat_map[j]);
