@@ -245,6 +245,13 @@ void CHost::LoadCache(void)
         if( ! sbuf.empty() ) split(GPUModelNames,sbuf,is_any_of("|"));
     }
 
+// desktop -------------
+    CXMLElement* p_dsele = p_ele->GetFirstChildElement("desktop");
+    if( p_dsele ){
+        p_dsele->GetAttribute("st",IsDesktop);
+        p_dsele->GetAttribute("pn",DesktopCPUPenalty);
+    }
+
 // cpuinfo -------------
     CXMLElement* p_cele = p_ele->GetFirstChildElement("cpuinfo");
     if( p_cele ){
@@ -254,6 +261,10 @@ void CHost::LoadCache(void)
         p_cele->GetAttribute("tks",sbuf);
         if( ! sbuf.empty() ) split(CPUInfoTokens,sbuf,is_any_of("#"));
         p_cele->GetAttribute("ncpus",CPUInfoNumOfHostCPUs);
+        string flags;
+        p_cele->GetAttribute("fl",flags);
+        split(CPUInfoFlags,flags,is_any_of(","));
+        p_cele->GetAttribute("sp",CPUSpec);
     }
 
 // cuda ----------------
@@ -264,6 +275,9 @@ void CHost::LoadCache(void)
         if( ! sbuf.empty() ) split(CUDATokens,sbuf,is_any_of("#"));
         p_nele->GetAttribute("flt",CudaFilter);
         p_nele->GetAttribute("lib",CudaLib);
+        string cap;
+        p_nele->GetAttribute("cap",cap);
+        split(GPUCapabilities,cap,is_any_of(","));
     }
 
 // network --------------
@@ -307,18 +321,26 @@ void CHost::SaveCache(void)
     p_hele->SetAttribute("nhgpu",NumOfHostGPUs);
     p_hele->SetAttribute("gpum",join(GPUModelNames,"|"));
 
+// desktop -------------
+    CXMLElement* p_dsele = p_ele->CreateChildElement("desktop");
+    p_dsele->SetAttribute("st",IsDesktop);
+    p_dsele->SetAttribute("pn",DesktopCPUPenalty);
+
 // cpuinfo -------------
     CXMLElement* p_cele = p_ele->CreateChildElement("cpuinfo");
     p_cele->SetAttribute("htd",HTDetected);
     p_cele->SetAttribute("hte",HTEnabled);
     p_cele->SetAttribute("tks",join(CPUInfoTokens,"#"));
     p_cele->SetAttribute("ncpus",CPUInfoNumOfHostCPUs);
+    p_cele->SetAttribute("fl",join(CPUInfoFlags,","));
+    p_cele->SetAttribute("sp",CPUSpec);
 
 // cuda ----------------
     CXMLElement* p_nele = p_ele->CreateChildElement("cuda");
     p_nele->SetAttribute("tks",join(CUDATokens,"#"));
     p_nele->SetAttribute("flt",CudaFilter);
     p_nele->SetAttribute("lib",CudaLib);
+    p_cele->SetAttribute("cap",join(GPUCapabilities,","));
 
 // special -------------
     CXMLElement* p_dele = p_ele->CreateChildElement("net");
