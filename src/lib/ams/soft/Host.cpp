@@ -88,6 +88,8 @@ CHost::CHost(void)
 
 void CHost::InitGlobalSetup(void)
 {
+    char hostname_buffer[HOST_NAME_MAX+1];
+
     // take hostname from HOSTNAME if it was not already set by SetHostName
     if( Hostname == NULL ){
         Hostname = CShell::GetSystemVariable("HOSTNAME");
@@ -95,6 +97,11 @@ void CHost::InitGlobalSetup(void)
         if( Hostname == CShell::GetSystemVariable("HOSTNAME") ){
             AlienHost = false;
         }
+    }
+    if( Hostname == NULL ){
+        gethostname(hostname_buffer,HOST_NAME_MAX);
+        hostname_buffer[HOST_NAME_MAX] = '\0';
+        Hostname = hostname_buffer;
     }
 
     // init default data -------------------------
@@ -1560,7 +1567,7 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
         vout << "ncpus " << CPUInfoNumOfHostCPUs << endl;
     }
     vout << "cpu_model " << CPURawModelName << endl;
-    vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
+    vout << "cpu_flag " << join(CPUInfoFlags,",") << endl;
     vout << "spec " << fixed << setprecision(2) << CPUSpec << endl;
     vout << "hyperthreading " << HTDetected << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
