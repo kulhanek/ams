@@ -1347,9 +1347,9 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << ">>> desktop ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     if( IsDesktop ){
     vout << "    Status        : host is a desktop, the CPU penalty will apply for PBS node specification" << endl;
+    vout << "    CPU penalty   : " << DesktopCPUPenalty << endl;
     } else {
     vout << "    Status        : host is not a desktop" << endl;
-    vout << "    CPU penalty   : " << DesktopCPUPenalty << endl;
     }
         }
         if( p_ele->GetName() == "cpuinfo" ){
