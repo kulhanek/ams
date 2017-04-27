@@ -48,7 +48,7 @@ int CHostCmd::Init(int argc, char* argv[])
 
     // output must be directed to stderr
     // stdout is used for shell processor
-    Console.Attach(stderr);
+    Console.Attach(stdout);
 
     // attach verbose stream to terminal stream and set desired verbosity level
     vout.Attach(Console);
@@ -88,7 +88,7 @@ bool CHostCmd::Run(void)
     Host.InitHostFile();
 
     // init host specification
-    Host.InitHost(Options.GetOptNoCache() || Options.GetOptNodeInfo());
+    Host.InitHost(Options.GetOptNoCache());
 
     // print node info and ignore the rest
     if( Options.GetOptNodeInfo() == true ){
