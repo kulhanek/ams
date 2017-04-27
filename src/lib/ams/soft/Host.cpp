@@ -88,8 +88,6 @@ CHost::CHost(void)
 
 void CHost::InitGlobalSetup(void)
 {
-    char hostname_buffer[HOST_NAME_MAX+1];
-
     // take hostname from HOSTNAME if it was not already set by SetHostName
     if( Hostname == NULL ){
         Hostname = CShell::GetSystemVariable("HOSTNAME");
@@ -1556,6 +1554,7 @@ void CHost::PrintHWSpec(CVerboseStr& vout)
 
 void CHost::PrintNodeInfo(CVerboseStr& vout)
 {
+    // keys must match resources in PBSPro node specification
     if( IsDesktop ){
         vout << "ncpus " << CPUInfoNumOfHostCPUs - DesktopCPUPenalty << endl;
     } else {
