@@ -98,11 +98,6 @@ void CHost::InitGlobalSetup(void)
             AlienHost = false;
         }
     }
-    if( Hostname == NULL ){
-        gethostname(hostname_buffer,HOST_NAME_MAX);
-        hostname_buffer[HOST_NAME_MAX] = '\0';
-        Hostname = hostname_buffer;
-    }
 
     // init default data -------------------------
     NCPUs = 1;
