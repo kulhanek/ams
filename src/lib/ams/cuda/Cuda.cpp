@@ -122,7 +122,7 @@ int CCuda::GetNumOfGPUs(void)
 
 //------------------------------------------------------------------------------
 
-void CCuda::GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& capas)
+void CCuda::GetGPUInfo(CSmallString& raw_model,std::vector<std::string>& list,std::vector<std::string>& capas)
 {
     list.clear();
     capas.clear();
@@ -151,6 +151,8 @@ void CCuda::GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& 
         CSmallString final_name;
         // name
         final_name << gpudev_name;
+        // FIXME - it takes the last model, how to handle heteregenous situation?
+        raw_model = gpudev_name;
         // memory
         double dmem = (double)deviceProp.totalGlobalMem;
         stringstream str;

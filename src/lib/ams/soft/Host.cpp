@@ -1010,7 +1010,7 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         // get number of GPU devices
         NumOfHostGPUs = cuda.GetNumOfGPUs();
         // get list of GPU devices
-        cuda.GetGPUInfo(GPUModelNames,GPUCapabilities);
+        cuda.GetGPUInfo(GPURawModelName,GPUModelNames,GPUCapabilities);
 
         if( NumOfHostGPUs > 0 ){
             // add gpu tokens if available and ngpus > 0
@@ -1023,9 +1023,6 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
                 CUDATokens.push_back(*it);
                 it++;
             }
-
-            // FIXME - take only the first model, how to handle heteregenous situation?
-            GPURawModelName = GPUModelNames[0];
         }
         break;
     }
@@ -1130,7 +1127,7 @@ void CHost::InitNetworkTokens(CXMLElement* p_ele)
 
 CXMLElement* CHost::GetRootParallelModes(void)
 {
-    // FIX ME - check if site does not have own specification
+    // FIXME - check if site does not have own specification
     CXMLElement* p_mele = Hosts.GetChildElementByPath("config/modes");
     if( p_mele == NULL ){
         RUNTIME_ERROR("unable to open hosts config/modes element");

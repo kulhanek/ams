@@ -128,7 +128,7 @@ public:
     int GetNumOfGPUs(void);
 
     /// get GPU info
-    void GetGPUInfo(std::vector<std::string>& list,std::vector<std::string>& capas);
+    void GetGPUInfo(CSmallString& raw_model,std::vector<std::string>& list,std::vector<std::string>& capas);
 
 // section of private data -----------------------------------------------------
 private:
