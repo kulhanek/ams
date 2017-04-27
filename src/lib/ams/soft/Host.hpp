@@ -195,6 +195,7 @@ private:
     CSmallString                CPURawModelName;        // cpu model name without mem
     int                         NumOfHostGPUs;          // default max. number of GPUs per node
     std::vector<std::string>    GPUModelNames;          // gpu model names
+    CSmallString                GPURawModelName;        // gpu model name without mem
 
     // cpuinfo
     bool                        HTDetected;             // hyperthreading

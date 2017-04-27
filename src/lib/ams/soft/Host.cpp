@@ -246,6 +246,7 @@ void CHost::LoadCache(void)
         string sbuf;
         p_hele->GetAttribute("gpum",sbuf);
         if( ! sbuf.empty() ) split(GPUModelNames,sbuf,is_any_of("|"));
+        p_hele->GetAttribute("gpur",GPURawModelName);
     }
 
 // desktop -------------
@@ -324,6 +325,7 @@ void CHost::SaveCache(void)
     p_hele->SetAttribute("cpur",CPURawModelName);
     p_hele->SetAttribute("nhgpu",NumOfHostGPUs);
     p_hele->SetAttribute("gpum",join(GPUModelNames,"|"));
+    p_hele->SetAttribute("gpur",GPURawModelName);
 
 // desktop -------------
     CXMLElement* p_dsele = p_ele->CreateChildElement("desktop");
@@ -814,6 +816,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
             p_iele->GetAttribute("spec",spec);
             if( model == CPURawModelName ){
                 CPUSpec = spec;
+                break;
             }
             p_iele = p_iele->GetNextSiblingElement("model");
         }
@@ -1020,6 +1023,9 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
                 CUDATokens.push_back(*it);
                 it++;
             }
+
+            // FIXME - take only the first model, how to handle heteregenous situation?
+            GPURawModelName = GPUModelNames[0];
         }
         break;
     }
@@ -1551,7 +1557,9 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
     vout << "cpu_model " << CPURawModelName << endl;
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
     vout << "spec " << setprecision(2) << CPUSpec << endl;
+    vout << "hyperthreading " << HTDetected << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
+    vout << "gpu_model " << GPURawModelName << endl;
     vout << "gpu_cap " << join(GPUCapabilities,",") << endl;
 }
 
