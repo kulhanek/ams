@@ -825,7 +825,9 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     }
 
     if( spec_found == false ){
-        ES_WARNING("spec not found");
+        CSmallString warning;
+        warning << "spec not found for '" << CPURawModelName << "'";
+        ES_WARNING(warning);
     }
 }
 
