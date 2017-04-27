@@ -806,6 +806,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     }
 
     // determine spec
+    bool spec_found = false;
     CXMLElement* p_spele = Hosts.GetChildElementByPath("config/cpu_specs");
     if( p_spele != NULL ){
         CXMLElement* p_iele = p_spele->GetFirstChildElement("model");
@@ -816,10 +817,15 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
             p_iele->GetAttribute("spec",spec);
             if( model == CPURawModelName ){
                 CPUSpec = spec;
+                spec_found = true;
                 break;
             }
             p_iele = p_iele->GetNextSiblingElement("model");
         }
+    }
+
+    if( spec_found == false ){
+        ES_WARNING("spec not found");
     }
 }
 
