@@ -1364,7 +1364,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     CPrintEngine::PrintTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
-    vout << "    CPU spec      : " << setprecision(2) << CPUSpec << endl;
+    vout << "    CPU spec      : " << fixed << setprecision(2) << CPUSpec << endl;
     if( HTDetected ){
     vout << "    HypThreading  : detected ";
         if( HTEnabled ){
@@ -1561,7 +1561,7 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
     }
     vout << "cpu_model " << CPURawModelName << endl;
     vout << "cpu_flags " << join(CPUInfoFlags,",") << endl;
-    vout << "spec " << setprecision(2) << CPUSpec << endl;
+    vout << "spec " << fixed << setprecision(2) << CPUSpec << endl;
     vout << "hyperthreading " << HTDetected << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
     vout << "gpu_model " << GPURawModelName << endl;
