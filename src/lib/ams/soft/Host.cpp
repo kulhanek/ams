@@ -813,7 +813,7 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
         while( p_iele != NULL ){
             CSmallString model;
             float        spec = 1.0;
-            p_iele->GetAttribute("model",model);
+            p_iele->GetAttribute("name",model);
             p_iele->GetAttribute("spec",spec);
             if( model == CPURawModelName ){
                 CPUSpec = spec;
