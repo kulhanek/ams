@@ -629,7 +629,7 @@ uid_t CUser::GetUserID(void) const
 
 //------------------------------------------------------------------------------
 
-gid_t CUser::GetGroupID(const CSmallString& name)
+gid_t CUser::GetGroupID(const CSmallString& name,bool trynobody)
 {
     struct group *p_grp = getgrnam(name);
     if( p_grp == NULL ){

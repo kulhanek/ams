@@ -110,7 +110,7 @@ public:
     uid_t GetUserID(void) const;
 
     /// get group ID
-    gid_t GetGroupID(const CSmallString& name);
+    static gid_t GetGroupID(const CSmallString& name,bool trynobody=true);
 
 // section of private data -----------------------------------------------------
 private:
