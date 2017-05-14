@@ -31,10 +31,10 @@
 
 class AMS_PACKAGE CAMSGlobalConfig {
 public:
-    // constructor and destructor -------------------------------------------------
+// constructor and destructor --------------------------------------------------
     CAMSGlobalConfig(void);
 
-// information about active site ----------------------------------------------
+// information about active site -----------------------------------------------
     /// get ID of active site
     const CSmallString& GetActiveSiteID(void);
 
@@ -47,7 +47,10 @@ public:
     /// set active site ID
     void SetActiveSiteID(const CAmsUUID& site_id);
 
-// ssytem config ---------------------------------------------------------------
+// system config ---------------------------------------------------------------
+    /// return infinity root directory
+    void SetAMSRootDir(const CFileName& dir);
+
     /// return infinity root directory
     const CFileName GetAMSRootDir(void);
 

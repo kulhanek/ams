@@ -82,6 +82,13 @@ void CAMSGlobalConfig::SetActiveSiteID(const CAmsUUID& site_id)
 //------------------------------------------------------------------------------
 //==============================================================================
 
+void CAMSGlobalConfig::SetAMSRootDir(const CFileName& dir)
+{
+    AMSRoot = dir;
+}
+
+//------------------------------------------------------------------------------
+
 const CFileName CAMSGlobalConfig::GetAMSRootDir(void)
 {
     return( AMSRoot );
