@@ -1162,13 +1162,13 @@ void CPrintEngine::ListModAvailableModules(CTemplateParams& params,bool include_
                             CSmallString full_name;
                             full_name = name + ":" + ver;
                             params.SetParam("MODULE",full_name);
-                            params.SetParam("MODURL",CFCGIParams::DecodeString(full_name));
+                            params.SetParam("MODURL",CFCGIParams::EncodeString(full_name));
                             params.NextRun();
                         }
                     }
                 } else {
                     params.SetParam("MODULE",name);
-                    params.SetParam("MODURL",CFCGIParams::DecodeString(name));
+                    params.SetParam("MODURL",CFCGIParams::EncodeString(name));
                     params.NextRun();
                 }
             }
