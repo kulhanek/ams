@@ -119,13 +119,15 @@ bool CAMSCompletion::GetSuggestions(void)
         // what part should be completed?
         switch(CWord) {
         case 1:
-            AddSuggestions("add builds remove versions disp list");
+            AddSuggestions("add builds remove versions disp list help");
             FilterSuggestions();
             PrintSuggestions();
             return(true);
         default:
             if( (GetAction() == "add" ) ||
                     (GetAction() == "remove" ) ||
+                    (GetAction() == "help" ) ||
+                    (GetAction() == "activate" ) ||
                     (GetAction() == "versions" ) ||
                     (GetAction() == "builds" ) ||
                     (GetAction() == "disp" ) ||
