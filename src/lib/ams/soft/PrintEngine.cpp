@@ -1924,7 +1924,8 @@ bool CPrintEngine::ShowHelp(void)
 {
     CXMLPrinter pe;
     pe.SetPrintedXMLNode(&HTMLHelp);
-    pe.Print(stdout);
+    pe.SetPrintAsItIs(true);
+    pe.Print(stderr);
 
     return(true);
 }
