@@ -1842,23 +1842,22 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
     std::vector<std::string> versions;
     if( Cache.GetSortedModuleVersions(name,versions) == false ) return(false);
 
-    CXMLElement* p_ele;
+    CXMLElement* p_mele = HTMLHelp.GetChildElementByPath("html/body");
 
     // create title
-    p_ele = HTMLHelp.GetChildElementByPath("html/body/h1",true);
+    CXMLElement* p_ele = p_mele->CreateChildElement("h1");
     p_ele->CreateChildText("Module: " + name);
 
     bool specific_version_info = false;
 
     if( (versions.size() > 0) && (vers == NULL) ){
+
         // create list of versions
-        p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
-        p_ele->CreateChildText("Available versions (bold is default):");
 
         std::vector<std::string>::iterator it = versions.begin();
         std::vector<std::string>::iterator ie = versions.end();
 
-        CSmallString svers;
+        CSmallString svers = "Available versions: ";
         while( it != ie ){
             std::string version = *it;
             if( Cache.GetModuleDescription(p_module,version) != NULL ) specific_version_info = true;
@@ -1870,19 +1869,22 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
             it++;
         }
 
-        p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
+        p_ele = p_mele->CreateChildElement("p");
         p_ele->CreateChildText(svers);
     }
 
     if( (specific_version_info == true) && (vers == NULL) ){
-        p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
+        p_ele = p_mele->CreateChildElement("p");
         p_ele->CreateChildText("Notice: This module contains specific documentation for individual module versions.");
     }
 
     CXMLElement* p_doc = Cache.GetModuleDescription(p_module);
     if(  p_doc != NULL  ){
-        p_ele = HTMLHelp.GetChildElementByPath("html/body");
-        p_ele->CopyChildNodesFrom(p_doc);
+        // create title
+        p_ele = p_mele->CreateChildElement("h2");
+        p_ele->CreateChildText("Description");
+        // insert contents
+        p_mele->CopyChildNodesFrom(p_doc);
     }
 
     // specific version comments
@@ -1895,11 +1897,10 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
             CXMLElement* p_doc = Cache.GetModuleDescription(p_module,version);
             if(  p_doc != NULL  ){
                 // create title
-                p_ele = HTMLHelp.CreateChildElementByPath("html/body/h2");
+                p_ele = p_mele->CreateChildElement("h2");
                 p_ele->CreateChildText("Module version: " + name + ":" + CSmallString(version));
-
-                p_ele = HTMLHelp.GetChildElementByPath("html/body");
-                p_ele->CopyChildNodesFrom(p_doc);
+                // insert contents
+                p_mele->CopyChildNodesFrom(p_doc);
             }
             it++;
         }
@@ -1907,11 +1908,11 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         CXMLElement* p_doc = Cache.GetModuleDescription(p_module,vers);
         if( p_doc != NULL ){
             // create title
-            p_ele = HTMLHelp.CreateChildElementByPath("html/body/h2");
+            p_ele = p_mele->CreateChildElement("h2");
             p_ele->CreateChildText("Module version: " + name + ":" + vers);
 
-            p_ele = HTMLHelp.GetChildElementByPath("html/body");
-            p_ele->CopyChildNodesFrom(p_doc);
+            // insert contents
+            p_mele->CopyChildNodesFrom(p_doc);
         }
     }
 
