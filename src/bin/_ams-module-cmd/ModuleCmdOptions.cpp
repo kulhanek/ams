@@ -93,6 +93,7 @@ int CModuleCmdOptions::CheckArguments(void)
                 (GetProgArg(0) == "versions") ||
                 (GetProgArg(0) == "builds") ||
                 (GetProgArg(0) == "disp") ||
+                (GetProgArg(0) == "help") ||
                 (GetProgArg(0) == "isactive") ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
@@ -120,6 +121,7 @@ int CModuleCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "builds" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "isactive" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "help" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "getactver" ) {
             if( GetNumberOfProgArgs() != 2 ) {
                 if( IsVerbose() ) {
