@@ -28,6 +28,7 @@
 #include <string.h>
 #include <iomanip>
 #include <XMLElement.hpp>
+#include <FileSystem.hpp>
 
 using namespace std;
 
@@ -73,6 +74,15 @@ bool CServerWatcher::ProcessWatcherControl(CVerboseStr& vout,CXMLElement* p_conf
         vout << "# Error log file (logname)                       = " << setw(15) << ErrorLogFileName << endl;
     } else {
         vout << "# Error log file (logname)                       = " << setw(15) << ErrorLogFileName << "     (default)" << endl;
+    }
+
+    // create log directory
+    CFileName log_dir = CFileName(ErrorLogFileName).GetFileDirectory();
+    if( log_dir != NULL ){
+        if( CFileSystem::IsDirectory(log_dir) == false ){
+            CFileSystem::CreateDir(log_dir);
+        }
+
     }
 
     return(true);
