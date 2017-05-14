@@ -1845,15 +1845,15 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
     CXMLElement* p_ele;
 
     // create title
-    p_ele = HTMLHelp.CreateChildElementByPath("html/body/h1");
-    p_ele->CreateChildText("Module: " + name);
+    p_ele = HTMLHelp.GetChildElementByPath("html/body/h1",true);
+    p_ele->CreateChildText("Module: " + name,false);
 
     bool specific_version_info = false;
 
     if( (versions.size() > 0) && (vers == NULL) ){
         // create list of versions
         p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
-        p_ele->CreateChildText("Available versions (bold is default):");
+        p_ele->CreateChildText("Available versions (bold is default):",false);
 
         std::vector<std::string>::iterator it = versions.begin();
         std::vector<std::string>::iterator ie = versions.end();
@@ -1871,12 +1871,12 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         }
 
         p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
-        p_ele->CreateChildText(svers);
+        p_ele->CreateChildText(svers,false);
     }
 
     if( (specific_version_info == true) && (vers == NULL) ){
         p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
-        p_ele->CreateChildText("Notice: This module contains specific documentation for individual module versions.");
+        p_ele->CreateChildText("Notice: This module contains specific documentation for individual module versions.",false);
     }
 
     CXMLElement* p_doc = Cache.GetModuleDescription(p_module);
@@ -1896,7 +1896,7 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
             if(  p_doc != NULL  ){
                 // create title
                 p_ele = HTMLHelp.CreateChildElementByPath("html/body/h2");
-                p_ele->CreateChildText("Module version: " + name + ":" + CSmallString(version));
+                p_ele->CreateChildText("Module version: " + name + ":" + CSmallString(version),false);
 
                 p_ele = HTMLHelp.GetChildElementByPath("html/body");
                 p_ele->CopyChildNodesFrom(p_doc);
@@ -1908,7 +1908,7 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         if( p_doc != NULL ){
             // create title
             p_ele = HTMLHelp.CreateChildElementByPath("html/body/h2");
-            p_ele->CreateChildText("Module version: " + name + ":" + vers);
+            p_ele->CreateChildText("Module version: " + name + ":" + vers,false);
 
             p_ele = HTMLHelp.GetChildElementByPath("html/body");
             p_ele->CopyChildNodesFrom(p_doc);
