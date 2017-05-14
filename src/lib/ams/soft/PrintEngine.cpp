@@ -1816,7 +1816,9 @@ void CPrintEngine::StartHelp(void)
 
         CXMLElement* p_head = p_html->CreateChildElement("head");
             CXMLElement* p_title = p_head->CreateChildElement("title");
-                p_title->CreateChildText("Advanced Module System");
+                CSmallString title;
+                title << "Advanced Module System (" << LibBuildVersion_AMS_Web << ")";
+                p_title->CreateChildText(title);
             CXMLElement* p_meta = p_head->CreateChildElement("meta");
                 p_meta->SetAttribute("http-equiv","Content-Type");
                 p_meta->SetAttribute("content","text/html; charset=utf-8");

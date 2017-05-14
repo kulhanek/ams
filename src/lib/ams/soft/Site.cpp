@@ -608,11 +608,24 @@ bool CSite::ActivateSite(void)
     CXMLElement* p_mod_ele;
     // this can be performed here - setup is in site config file
     if( AMSUserConfig.AreSystemAutoloadedModulesDisabled() == false ) {
+        // site modules
         p_mod_ele = SiteConfig.GetChildElementByPath("site/autoload");
         Actions.SetFlags(Actions.GetFlags() | MFB_SYS_AUTOLOADED);
         if( ActivateAutoloadedModules(p_mod_ele) == false ) {
-            ES_ERROR("unable to load system auto-loaded modules");
+            ES_ERROR("unable to load site auto-loaded modules");
             return(false);
+        }
+        // host modules
+        CXMLElement* p_hg = Host.FindGroup();
+        if( p_hg != NULL ){
+            p_mod_ele = p_hg->GetChildElementByPath("autoload");
+            if( p_mod_ele != NULL ){
+                Actions.SetFlags(Actions.GetFlags() | MFB_SYS_AUTOLOADED);
+                if( ActivateAutoloadedModules(p_mod_ele) == false ) {
+                    ES_ERROR("unable to load host auto-loaded modules");
+                    return(false);
+                }
+            }
         }
     }
 
