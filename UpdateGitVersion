@@ -10,7 +10,7 @@ GITREVS=`git rev-list --count HEAD`
 GITHASH=`git rev-parse --short HEAD`
 DATE=`date +"%Y-%m-%d %H:%M"`
 
-cat >> src/lib/ams/AMSMainHeaderConfig.hpp
+cat > src/lib/ams/AMSMainHeaderConfig.hpp << EOF
 #define AMS_CONFIG_VERSION  "8.x"
 #define AMS_VERSION         "8.${GITREVS}.${GITHASH}"
 #define AMS_BUILDTIME       "${DATE}"
