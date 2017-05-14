@@ -1806,8 +1806,25 @@ bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const
         CFileName doc_name;
         doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
         if( CFileSystem::IsFile(doc_name) == true ) break;
+        prefix = NULL;
     }
 
+    // try auto prefixes
+    if( prefix == NULL ){
+        std::list<std::string>::iterator    it = AutoPrefixes.begin();
+        std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+        while( it != ie ){
+            prefix = CSmallString(*it);
+            CFileName doc_name;
+            doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
+            if( CFileSystem::IsFile(doc_name) == true ) break;
+            prefix = NULL;
+            it++;
+        }
+    }
+
+    // load documentation
     CFileName doc_name;
     string rkey;
     doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
