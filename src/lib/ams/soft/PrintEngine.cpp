@@ -337,8 +337,9 @@ bool CPrintEngine::PrintRawModuleVersions(const CSmallString& mod_name)
         std::string version = *it;
         bool defver = dver == CSmallString(version);
         if( defver ) vout << "<b>";
-        vout << name << ":" << version << endl;
+        vout << name << ":" << version;
         if( defver ) vout << "</b>";
+        vout << endl;
         it++;
     }
 
@@ -1792,6 +1793,138 @@ void CPrintEngine::PrintTokens(std::ostream& sout,const CSmallString& title, con
         }
     }
     sout << endl;
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CPrintEngine::StartHelp(void)
+{
+    // remove previous contents
+    HTMLHelp.RemoveAllChildNodes();
+
+    // create header
+    HTMLHelp.CreateChildDeclaration();
+    HTMLHelp.CreateChildText("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">",true);
+
+    CXMLElement* p_html = HTMLHelp.CreateChildElement("html");
+    p_html->SetAttribute("xmlns","http://www.w3.org/1999/xhtml");
+    p_html->SetAttribute("xml:lang","en");
+    p_html->SetAttribute("lang","en");
+    p_html->SetAttribute("encoding","utf-8");
+
+        CXMLElement* p_head = p_html->CreateChildElement("head");
+            CXMLElement* p_title = p_head->CreateChildElement("title");
+                p_title->CreateChildText("Advanced Module System");
+            CXMLElement* p_meta = p_head->CreateChildElement("meta");
+                p_meta->SetAttribute("http-equiv","Content-Type");
+                p_meta->SetAttribute("content","text/html; charset=utf-8");
+
+        p_html->CreateChildElement("body");
+}
+
+//------------------------------------------------------------------------------
+
+bool CPrintEngine::AddHelp(const CSmallString& mod_name)
+{
+    CSmallString name;
+    CSmallString vers;
+
+    CUtils::ParseModuleName(mod_name,name,vers);
+
+    CXMLElement* p_module = Cache.GetModule(name);
+    if( p_module == NULL ) return(false);
+
+    CSmallString dver, drch, dmode;
+    Cache.GetModuleDefaults(p_module,dver,drch,dmode);
+
+    std::vector<std::string> versions;
+    if( Cache.GetSortedModuleVersions(name,versions) == false ) return(false);
+
+    CXMLElement* p_ele;
+
+    // create title
+    p_ele = HTMLHelp.CreateChildElementByPath("html/body/h1");
+    p_ele->CreateChildText("Module: " + name);
+
+    bool specific_version_info = false;
+
+    if( (versions.size() > 0) && (vers == NULL) ){
+        // create list of versions
+        p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
+        p_ele->CreateChildText("Available versions (bold is default):");
+
+        std::vector<std::string>::iterator it = versions.begin();
+        std::vector<std::string>::iterator ie = versions.end();
+
+        CSmallString svers;
+        while( it != ie ){
+            std::string version = *it;
+            if( Cache.GetModuleDescription(p_module,version) != NULL ) specific_version_info = true;
+            if( it != versions.begin() ) svers << ", ";
+            bool defver = dver == CSmallString(version);
+            if( defver ) svers << "<b>";
+            svers << name << ":" << version;
+            if( defver ) svers << "</b>";
+            it++;
+        }
+
+        p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
+        p_ele->CreateChildText(svers);
+    }
+
+    if( (specific_version_info == true) && (vers == NULL) ){
+        p_ele = HTMLHelp.GetChildElementByPath("html/body/p",true);
+        p_ele->CreateChildText("Notice: This module contains specific documentation for individual module versions.");
+    }
+
+    CXMLElement* p_doc = Cache.GetModuleDescription(p_module);
+    if(  p_doc != NULL  ){
+        p_ele = HTMLHelp.GetChildElementByPath("html/body");
+        p_ele->CopyChildNodesFrom(p_doc);
+    }
+
+    // specific version comments
+    if( vers == NULL ){
+        std::vector<std::string>::iterator it = versions.begin();
+        std::vector<std::string>::iterator ie = versions.end();
+
+        while( it != ie ){
+            std::string version = *it;
+            CXMLElement* p_doc = Cache.GetModuleDescription(p_module,version);
+            if(  p_doc != NULL  ){
+                // create title
+                p_ele = HTMLHelp.CreateChildElementByPath("html/body/h2");
+                p_ele->CreateChildText("Module version: " + name + ":" + CSmallString(version));
+
+                p_ele = HTMLHelp.GetChildElementByPath("html/body");
+                p_ele->CopyChildNodesFrom(p_doc);
+            }
+            it++;
+        }
+    } else {
+        CXMLElement* p_doc = Cache.GetModuleDescription(p_module,vers);
+        if( p_doc != NULL ){
+            // create title
+            p_ele = HTMLHelp.CreateChildElementByPath("html/body/h2");
+            p_ele->CreateChildText("Module version: " + name + ":" + vers);
+
+            p_ele = HTMLHelp.GetChildElementByPath("html/body");
+            p_ele->CopyChildNodesFrom(p_doc);
+        }
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CPrintEngine::ShowHelp(void)
+{
+
+
+    return(true);
 }
 
 //==============================================================================

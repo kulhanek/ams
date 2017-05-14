@@ -80,6 +80,11 @@ public:
     void PrintRawArchs(void);
     void PrintRawModes(void);
 
+// help print output -----------------------------------------------------------
+    void StartHelp(void);
+    bool AddHelp(const CSmallString& mod_name);
+    bool ShowHelp(void);
+
 // color print output ----------------------------------------------------------
     bool PrintModModuleVersions(const CSmallString& mod_name);
     bool PrintModModuleBuilds(const CSmallString& mod_name);
@@ -147,6 +152,7 @@ private:
     CVerboseStr     vout;
     CXMLDocument    SystemConfig;   // print engine configuration
     CXMLDocument    UserConfig;     // user print configuration
+    CXMLDocument    HTMLHelp;       // module help document
 };
 
 //-----------------------------------------------------------------------------

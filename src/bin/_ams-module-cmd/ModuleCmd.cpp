@@ -225,6 +225,17 @@ bool CModuleCmd::Run(void)
         return(true);
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "help" ) {
+        // module help
+        bool ok = true;
+        PrintEngine.StartHelp();
+        for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
+            ok &= PrintEngine.AddHelp(Options.GetProgArg(i));
+        }
+        if( ok == true ) PrintEngine.ShowHelp();
+        return(ok);
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "builds" ) {
         // module builds
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
