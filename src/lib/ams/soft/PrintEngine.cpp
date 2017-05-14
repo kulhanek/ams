@@ -1922,7 +1922,9 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
 
 bool CPrintEngine::ShowHelp(void)
 {
-
+    CXMLPrinter pe;
+    pe.SetPrintedXMLNode(&HTMLHelp);
+    pe.Print(stdout);
 
     return(true);
 }
