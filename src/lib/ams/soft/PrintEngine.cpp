@@ -45,6 +45,7 @@
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <FCGIParams.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -1161,11 +1162,13 @@ void CPrintEngine::ListModAvailableModules(CTemplateParams& params,bool include_
                             CSmallString full_name;
                             full_name = name + ":" + ver;
                             params.SetParam("MODULE",full_name);
+                            params.SetParam("MODURL",CFCGIParams::DecodeString(full_name));
                             params.NextRun();
                         }
                     }
                 } else {
                     params.SetParam("MODULE",name);
+                    params.SetParam("MODURL",CFCGIParams::DecodeString(name));
                     params.NextRun();
                 }
             }
