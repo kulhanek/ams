@@ -1848,7 +1848,12 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
 
     // create title
     CXMLElement* p_ele = p_mele->CreateChildElement("h1");
-    p_ele->CreateChildText("Module: " + name);
+    CSmallString title;
+    title << "Module: " << name;
+    if( vers != NULL ){
+        title << ":" << vers;
+    }
+    p_ele->CreateChildText(title);
 
     bool specific_version_info = false;
 
