@@ -30,6 +30,7 @@
 #include <VerboseStr.hpp>
 #include <vector>
 #include <list>
+#include <string>
 
 //-----------------------------------------------------------------------------
 
@@ -176,6 +177,9 @@ public:
 
     /// get length of longest module name (name + ver)
     int GetSizeOfLongestModuleName(bool include_ver=true);
+
+    /// return sorted vector of module versions
+    bool GetSortedModuleVersions(const CSmallString& mod_name,std::vector<std::string>& versions);
 
 // section of private data -----------------------------------------------------
 private:

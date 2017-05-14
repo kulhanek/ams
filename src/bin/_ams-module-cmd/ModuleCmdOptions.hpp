@@ -50,7 +50,6 @@ public:
     "<b>Arguments:</b>\n"
     "   <b><cyan>action</cyan></b>          operation, which should be performed (avail by default)\n"
     "   <b><cyan>module</cyan></b>          module name\n"
-    "\n"
     "Supported actions:\n"
     "   <green>add</green>             activate modules\n"
     "   <green>remove</green>          deactivate modules\n"

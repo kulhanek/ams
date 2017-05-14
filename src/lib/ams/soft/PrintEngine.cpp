@@ -317,82 +317,28 @@ bool CPrintEngine::PrintRawModulesInCategory(const CSmallString& cat_name,
 
 //------------------------------------------------------------------------------
 
-
-class CPVerRecord {
-    public:
-    CPVerRecord(void);
-    CSmallString   version;
-    int            verindx;
-    bool operator == (const CPVerRecord& left) const;
-};
-
-//------------------------------------------------------------------------------
-
-CPVerRecord::CPVerRecord(void)
-{
-    verindx = 0.0;
-}
-
-//------------------------------------------------------------------------------
-
-bool CPVerRecord::operator == (const CPVerRecord& left) const
-{
-    bool result = true;
-    result &= version == left.version;
-    return(result);
-}
-
-//------------------------------------------------------------------------------
-
-bool sort_tokens(const CPVerRecord& left,const CPVerRecord& right)
-{
-    if( left.version == right.version ) return(false);
-    if( left.verindx < right.verindx ) return(false);
-    if( left.verindx == right.verindx ){
-        return( strcmp(left.version,right.version) > 0);
-    }
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
 bool CPrintEngine::PrintRawModuleVersions(const CSmallString& mod_name)
 {
     CSmallString name = CUtils::GetModuleName(mod_name);
-    CXMLElement* p_ele = Cache.GetModule(name);
 
-    if( p_ele == NULL ) {
-        CSmallString error;
-        error << "module '" << mod_name << "' was not found in AMS cache";
-        ES_ERROR(error);
-        return(false);
-    }
+    std::vector<std::string> versions;
+    if( Cache.GetSortedModuleVersions(name,versions) == false ) return(false);
+
+    CXMLElement* p_ele = Cache.GetModule(name);
+    if( p_ele == NULL ) return(false);
+
     CSmallString dver, drch, dmode;
     Cache.GetModuleDefaults(p_ele,dver,drch,dmode);
 
-    std::list<CPVerRecord>  versions;
-    CXMLElement*            p_list = p_ele->GetFirstChildElement("builds");
-    CXMLIterator            K(p_list);
-    CXMLElement*            p_tele;
-
-    while( (p_tele = K.GetNextChildElement("build")) != NULL ) {
-        CPVerRecord verrcd;
-        verrcd.verindx = 0.0;
-        p_tele->GetAttribute("ver",verrcd.version);
-        p_tele->GetAttribute("verindx",verrcd.verindx);
-        versions.push_back(verrcd);
-    }
-
-    versions.sort(sort_tokens);
-    versions.unique();
-
-    std::list<CPVerRecord>::iterator it = versions.begin();
-    std::list<CPVerRecord>::iterator ie = versions.end();
+    std::vector<std::string>::iterator it = versions.begin();
+    std::vector<std::string>::iterator ie = versions.end();
 
     while( it != ie ){
-        if( (*it).version == dver ) vout << "<b>";
-        vout << name << ":" << (*it).version << endl;
-        if( (*it).version == dver ) vout << "</b>";
+        std::string version = *it;
+        bool defver = dver == CSmallString(version);
+        if( defver ) vout << "<b>";
+        vout << name << ":" << version << endl;
+        if( defver ) vout << "</b>";
         it++;
     }
 

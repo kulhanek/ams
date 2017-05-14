@@ -47,6 +47,9 @@ private:
     CVerboseStr         vout;
     bool                ForcePrintErrors;
     int                 ExitCode;
+
+    // add module with possible version downgrade
+    bool AddModule(const CSmallString& module,bool do_not_export);
 };
 
 // -----------------------------------------------------------------------------

@@ -2492,3 +2492,85 @@ bool CCache::SearchCache(const CSmallString& pattern,
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
+
+class CPVerRecord {
+    public:
+    CPVerRecord(void);
+    string      version;
+    int         verindx;
+    bool operator == (const CPVerRecord& left) const;
+};
+
+//------------------------------------------------------------------------------
+
+CPVerRecord::CPVerRecord(void)
+{
+    verindx = 0.0;
+}
+
+//------------------------------------------------------------------------------
+
+bool CPVerRecord::operator == (const CPVerRecord& left) const
+{
+    bool result = true;
+    result &= version == left.version;
+    return(result);
+}
+
+//------------------------------------------------------------------------------
+
+bool sort_tokens(const CPVerRecord& left,const CPVerRecord& right)
+{
+    if( left.version == right.version ) return(false);
+    if( left.verindx < right.verindx ) return(false);
+    if( left.verindx == right.verindx ){
+        return( left.version > right.version );
+    }
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CCache::GetSortedModuleVersions(const CSmallString& mod_name,std::vector<std::string>& versions)
+{
+    CSmallString name = CUtils::GetModuleName(mod_name);
+    CXMLElement* p_ele = GetModule(name);
+
+    if( p_ele == NULL ) {
+        CSmallString error;
+        error << "module '" << mod_name << "' was not found in AMS cache";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    std::list<CPVerRecord>  list;
+    CXMLElement*            p_list = p_ele->GetFirstChildElement("builds");
+    CXMLIterator            K(p_list);
+    CXMLElement*            p_tele;
+
+    while( (p_tele = K.GetNextChildElement("build")) != NULL ) {
+        CPVerRecord verrcd;
+        verrcd.verindx = 0.0;
+        p_tele->GetAttribute("ver",verrcd.version);
+        p_tele->GetAttribute("verindx",verrcd.verindx);
+        list.push_back(verrcd);
+    }
+
+    list.sort(sort_tokens);
+    list.unique();
+
+    std::list<CPVerRecord>::iterator it = list.begin();
+    std::list<CPVerRecord>::iterator ie = list.end();
+
+    versions.clear();
+    while( it != ie ){
+        versions.push_back((*it).version);
+        it++;
+    }
+
+    return(true);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
