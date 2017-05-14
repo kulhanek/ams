@@ -100,7 +100,7 @@ bool CModuleCmd::Run(void)
     }
 
     // initialze AMS cache
-    if( Cache.LoadCache() == false) {
+    if( Cache.LoadCache(Options.GetArgAction() == "help") == false) {
         ES_ERROR("unable to load AMS cache");
         return(false);
     }
