@@ -1794,18 +1794,14 @@ bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const
     CSmallString mname;
     p_mele->GetAttribute("name",mname);
 
-    CSmallString prefix;
+    CSmallString prefix = site;
 
     // determine prefix
-    CXMLIterator    I(p_sele);
-    CXMLElement*    p_build;
 
     // simply take the one for which the documentatation exists
-    while( (p_build = I.GetNextChildElement("build")) != NULL ){
-        p_build->GetAttribute("prefix",prefix);
-        CFileName doc_name;
-        doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
-        if( CFileSystem::IsFile(doc_name) == true ) break;
+    CFileName doc_name;
+    doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
+    if( CFileSystem::IsFile(doc_name) != true ) {
         prefix = NULL;
     }
 
@@ -1825,7 +1821,6 @@ bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const
     }
 
     // load documentation
-    CFileName doc_name;
     string rkey;
     doc_name = AMSGlobalConfig.GetETCDIR() / "map" / "docs" / prefix / mname + ".doc";
     rkey = string(CFileName(prefix) / mname);

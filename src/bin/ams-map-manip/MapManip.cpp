@@ -202,6 +202,11 @@ bool CMapManip::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "distribute" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
         if( Map.LoadMap() == false ) return(false);
         if( Map.DistributeAll(vout) == false ) {
             ES_TRACE_ERROR("unable to distribute builds");
