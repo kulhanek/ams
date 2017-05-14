@@ -7,9 +7,18 @@
 # initialize wrapper functions -------------------------------------------------
 
 amsmodule(){
- AMS_EXIT_CODE=0
- eval `_ams-module-cmd $*`
- return $AMS_EXIT_CODE
+    AMS_EXIT_CODE=0
+    case "$2" in
+        help)
+            _ams-module-cmd $* | lynx -stdin
+            AMS_EXIT_CODE=$?
+            ;;
+        *)
+            eval `_ams-module-cmd $*`
+            ;;
+    esac
+
+    return $AMS_EXIT_CODE
 }
 
 site(){

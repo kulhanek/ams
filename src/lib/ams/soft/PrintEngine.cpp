@@ -1924,11 +1924,11 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
 bool CPrintEngine::ShowHelp(void)
 {
     CXMLPrinter pe;
+
     pe.SetPrintedXMLNode(&HTMLHelp);
     pe.SetPrintAsItIs(true);
-    pe.Print(stderr);
 
-    return(true);
+    return(pe.Print(stdout));
 }
 
 //==============================================================================

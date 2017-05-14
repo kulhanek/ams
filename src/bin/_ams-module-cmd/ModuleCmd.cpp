@@ -390,7 +390,11 @@ void CModuleCmd::Finalize(void)
     }
 
     ShellProcessor.SetExitCode(ExitCode);
-    ShellProcessor.BuildEnvironment();
+
+    // do not buld shell environment in specific cases
+    if( Options.GetArgAction() != "help" ){
+        ShellProcessor.BuildEnvironment();
+    }
 }
 
 //------------------------------------------------------------------------------
