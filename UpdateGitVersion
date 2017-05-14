@@ -10,10 +10,11 @@ GITREVS=`git rev-list --count HEAD`
 GITHASH=`git rev-parse --short HEAD`
 DATE=`date +"%Y-%m-%d %H:%M"`
 
-sed -e "s/GITREVS/$GITREVS/g" -e "s/GITHASH/$GITHASH/g" -e "s/DATE/$DATE/g" \
-    src/lib/ams/AMSMainHeader.cpp > src/lib/ams/AMSMainHeader_.cpp
-
-mv -f src/lib/ams/AMSMainHeader_.cpp src/lib/ams/AMSMainHeader.cpp
+cat >> src/lib/ams/AMSMainHeaderConfig.hpp
+#define AMS_CONFIG_VERSION  "8.x"
+#define AMS_VERSION         "8.${GITREVS}.${GITHASH}"
+#define AMS_BUILDTIME       "${DATE}"
+EOF
 
 echo ""
 echo "AMS Revision: 8.$GITREVS.$GITHASH ($DATE)"
