@@ -7,6 +7,7 @@ INSTALL(FILES
             bashrc.it4i
             dashrc.ams
             init.ams
+            bash_env
         DESTINATION
             etc/boot
         PERMISSIONS

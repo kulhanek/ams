@@ -435,7 +435,7 @@ bool CModuleCmd::AddModule(const CSmallString& module,bool do_not_export)
                 CSmallString version = CSmallString(*it);
 
                 if( default_found == true ){
-                    vout << "<blue>>>> WARNING:</blue> No suitable build found for <b>" << name << ":" << last_vers << "</b>";
+                    vout << "<blue><b>>>> WARNING:</b></blue> No suitable build found for <b>" << name << ":" << last_vers << "</b>";
                     vout << ", downgrading to <b>" << name << ":" << version << "</b>" << endl;
                     CSmallString moudle_name;
                     last_vers = version;
