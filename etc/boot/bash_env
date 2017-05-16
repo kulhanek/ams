@@ -11,7 +11,7 @@ if [ -z "$AMS_ROOT" ]; then return 0; fi
 . $AMS_ROOT/etc/boot/init.ams
 
 # reactivate modules
-amsmodule reactivate &> /dev/null
+amsmodule --system reactivate 2> /dev/null
 
 return 0
 
