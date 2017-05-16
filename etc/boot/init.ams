@@ -38,11 +38,6 @@ export -f amsmodule
 export -f site
 export -f amssetenv
 
-# non-interactive setup --------------------------------------------------------
-if [ -n "$AMS_ROOT" ]; then
-    export BASH_ENV="$AMS_ROOT/etc/boot/bash_env"
-fi
-
 # name completion --------------------------------------------------------------
 COMP_WORDBREAKS=" \"'@><=;|&("    # : removed from the list
 
