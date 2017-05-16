@@ -90,11 +90,10 @@ if [ -z "$ACTION" ]; then ACTION="all"; fi;
 
 test_password_less_ssh()
 {
-    ssh -x -o "BatchMode yes" "$AMS_DST_HOST" "/bin/echo" &> /dev/null
+    ssh -x -o "BatchMode=yes" "$AMS_DST_HOST" "/bin/echo" &> /dev/null
     if [ $? -ne 0 ]; then
         echo "" 1>&2
         echo ">>> ERROR: Passwordless ssh connection with $AMS_DST_HOST is not available!"  1>&2
-        echo "           Setup appropriate authorized_keys." 1>&2
         echo "" 1>&2
         exit 1
     fi
