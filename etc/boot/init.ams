@@ -10,11 +10,11 @@ amsmodule(){
     AMS_EXIT_CODE=0
     case "$1" in
         help)
-            _ams-module-cmd $* | lynx -stdin
+            _ams-module-cmd "$@" | lynx -lss=$AMS_ROOT/etc/default/lync.lss -stdin
             AMS_EXIT_CODE=$?
             ;;
         *)
-            eval `_ams-module-cmd $*`
+            eval `_ams-module-cmd "$@"`
             ;;
     esac
 
@@ -23,14 +23,14 @@ amsmodule(){
 
 site(){
  AMS_EXIT_CODE=0
- eval `_ams-site-cmd $*`
+ eval `_ams-site-cmd "$@"`
  return $AMS_EXIT_CODE
 }
 
 # in dash the name cannot contain -, it is the same for the newest version of bash
 amssetenv() {
  AMS_EXIT_CODE=0
- eval `_ams-setenv $*`
+ eval `_ams-setenv "$@"`
  return $AMS_EXIT_CODE
 }
 
