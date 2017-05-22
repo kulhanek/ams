@@ -10,7 +10,7 @@ amsmodule(){
     AMS_EXIT_CODE=0
     case "$1" in
         help)
-            _ams-module-cmd "$@" | lynx -lss=$AMS_ROOT/etc/default/lync.lss -stdin
+            _ams-module-cmd "$@" | lynx -lss=$AMS_ROOT/etc/default/lynx.lss -stdin
             AMS_EXIT_CODE=$?
             ;;
         *)
