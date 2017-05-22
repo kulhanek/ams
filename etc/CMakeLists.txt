@@ -3,4 +3,4 @@
 # ==============================================================================
 
 ADD_SUBDIRECTORY(boot)
-ADD_SUBDIRECTORY(lynx-cur)
+ADD_SUBDIRECTORY(lynx)
