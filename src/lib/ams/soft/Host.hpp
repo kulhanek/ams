@@ -26,6 +26,7 @@
 #include <AMSMainHeader.hpp>
 #include <XMLDocument.hpp>
 #include <SmallString.hpp>
+#include <FileName.hpp>
 #include <vector>
 #include <string>
 #include <list>
@@ -163,6 +164,7 @@ public:
 
 // section of private date -----------------------------------------------------
 private:
+    CFileName                   CacheFileName;          // cache file name
     CXMLDocument                Hosts;                  // host configuration
     CSmallString                Hostname;               // hostname
     bool                        AlienHost;              // hostname is overwritten

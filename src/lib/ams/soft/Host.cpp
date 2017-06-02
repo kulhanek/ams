@@ -193,23 +193,27 @@ void CHost::LoadCache(void)
 {
     CXMLDocument xml_document;
 
-    // try to load cache
-    CFileName file_name = "/tmp/ams_cache." + User.GetName();
+    // try to use pathname provided in AMS_HOST_CACHE
+    CacheFileName = CShell::GetSystemVariable("AMS_HOST_CACHE");
+    if( CacheFileName == NULL ){
+        // or then system wide
+        CacheFileName = "/tmp/ams_cache." + User.GetName();
+    }
 
-    if( CFileSystem::IsFile(file_name) == false ){
+    if( CFileSystem::IsFile(CacheFileName) == false ){
         // no cache file
         CSmallString warning;
-        warning << "no cache file '" << file_name << "'";
+        warning << "no cache file '" << CacheFileName << "'";
         ES_WARNING(warning);
         return;
     }
 
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&xml_document);
-    if( xml_parser.Parse(file_name) == false ){
+    if( xml_parser.Parse(CacheFileName) == false ){
         ErrorSystem.RemoveAllErrors(); // avoid global error
         CSmallString warning;
-        warning << "unable to parse cache '" << file_name << "'";
+        warning << "unable to parse cache '" << CacheFileName << "'";
         ES_WARNING(warning);
         return;
     }
@@ -354,14 +358,18 @@ void CHost::SaveCache(void)
     p_dele->SetAttribute("flt",NetFilters);
     p_dele->SetAttribute("tks",join(NetTokens,"#"));
 
-    // save cache
-    CFileName file_name = "/tmp/ams_cache." + User.GetName();
+    // try to use pathname provided in AMS_HOST_CACHE
+    CacheFileName = CShell::GetSystemVariable("AMS_HOST_CACHE");
+    if( CacheFileName == NULL ){
+        // or then system wide
+        CacheFileName = "/tmp/ams_cache." + User.GetName();
+    }
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&xml_document);
-    if( xml_printer.Print(file_name) == false ){
+    if( xml_printer.Print(CacheFileName) == false ){
         CSmallString warning;
-        warning << "unable to save cache '" << file_name << "'";
+        warning << "unable to save cache '" << CacheFileName << "'";
         ES_WARNING(warning);
     }
 }
@@ -1305,6 +1313,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << endl;
     vout << "Full host name      : " << GetHostName() << endl;
     vout << "Config key          : " << ConfigKey << endl;
+    vout << "Cache file name     : " << CacheFileName << endl;
     if( ConfigRealm != NULL ){
     vout << "Configuration realm : " << ConfigRealm << endl;
     } else {
