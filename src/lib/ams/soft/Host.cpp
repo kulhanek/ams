@@ -1313,12 +1313,12 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << endl;
     vout << "Full host name      : " << GetHostName() << endl;
     vout << "Config key          : " << ConfigKey << endl;
-    vout << "Cache file name     : " << CacheFileName << endl;
     if( ConfigRealm != NULL ){
     vout << "Configuration realm : " << ConfigRealm << endl;
     } else {
     vout << "Configuration realm : default" << endl;
     }
+    vout << "Cache file name     : " << CacheFileName << endl;
     if( CacheLoaded ){
     CSmallTime time(CacheValidity());
     vout << "Loaded from cache ... (Cache is still valid for " << time.GetSTimeAndDay() << ")" << endl;
