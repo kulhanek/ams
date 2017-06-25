@@ -783,11 +783,12 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
 
     // opteron hack
     if( find(CPUInfoFlags.begin(),CPUInfoFlags.end(),"cmp_legacy") != CPUInfoFlags.end() ){
+        HTDetected = false;
         HTEnabled = false;
-    }
-
-    if( (HTEnabled == false) && (cpu_cores*phys_CPUs != 0) ){
-        count_CPU = cpu_cores*phys_CPUs;
+    } else {
+        if( (HTEnabled == false) && (cpu_cores*phys_CPUs != 0) ){
+            count_CPU = cpu_cores*phys_CPUs;
+        }
     }
 
     // max cpus per node
