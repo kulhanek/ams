@@ -781,6 +781,11 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     p_ele->GetAttribute("ht",HTEnabled);
     HTEnabled &= HTDetected;
 
+    // opteron hack
+    if( find(CPUInfoFlags.begin(),CPUInfoFlags.end(),"cmp_legacy") != CPUInfoFlags.end() ){
+        HTEnabled = false;
+    }
+
     if( (HTEnabled == false) && (cpu_cores*phys_CPUs != 0) ){
         count_CPU = cpu_cores*phys_CPUs;
     }
