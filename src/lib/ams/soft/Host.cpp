@@ -782,6 +782,9 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     HTEnabled &= HTDetected;
 
     // opteron hack
+    // CMP_Legacy – Register showing the CPU is not Hyper-Threading capable
+    // https://unix.stackexchange.com/questions/43539/what-do-the-flags-in-proc-cpuinfo-mean
+    // cmp_legacy: If yes HyperThreading not valid
     if( find(CPUInfoFlags.begin(),CPUInfoFlags.end(),"cmp_legacy") != CPUInfoFlags.end() ){
         HTDetected = false;
         HTEnabled = false;
