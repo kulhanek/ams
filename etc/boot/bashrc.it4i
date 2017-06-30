@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------------
 
 # disable this activation procedure
-if [ -n "$AMS_SKIP_ME" ]; then return; fi
+if [[ (-n "$AMS_ALLOWED") && ("$AMS_ALLOWED" != "8.0") ]]; then return; fi
 
 # standard AMS core path
 if [ -z "$AMS_ROOT" ]; then
