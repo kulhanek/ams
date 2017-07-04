@@ -156,16 +156,42 @@ rsync_dpkg()
          "$AMS_ROOT/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
+        echo "AMS core synchronization [OK]"
+    else
+        echo "AMS core synchronization [FAILED]"
+        exit 1
+    fi
+
+    # sync site setups
+    for SITE in $SITES; do
+        SITEID=`site id $SITE`
+        if [ -z "$SITEID" ]; then
+            echo "Undefined site '$SITE'"
+            exit 1
+        fi
+        rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w  \
+             "$AMS_ROOT/etc/sites/$SITEID" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/etc/sites/" >> $LOG_FILE 2>&1
+
+        if [ $? -eq 0 ]; then
+            echo "AMS site '$SITE' synchronization [OK]"
+        else
+            echo "AMS site '$SITE' synchronization [FAILED]"
+            exit 1
+        fi
+    done
+
+    # copy DEBIAN package setup
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w  \
+         "$AMS_ROOT/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/" >> $LOG_FILE 2>&1
+
+    if [ $? -eq 0 ]; then
         echo "AMS dpkg synchronization [OK]"
-        return 0
     else
         echo "AMS dpkg synchronization [FAILED]"
         exit 1
     fi
 
-    # copy DEBIAN package setup
-    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w  \
-         "$AMS_ROOT/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/" >> $LOG_FILE 2>&1
+    return 0
 }
 
 # -------------------------------------------------------------------------------------
@@ -259,8 +285,6 @@ case $ACTION in
         if [ $? -ne 0 ]; then exit 1; fi;
         ;;
     "dpkg")
-        rsync_amscore_cache
-        if [ $? -ne 0 ]; then exit 1; fi;
         rsync_dpkg
         if [ $? -ne 0 ]; then exit 1; fi;
         ;;
