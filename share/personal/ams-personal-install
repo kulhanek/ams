@@ -1,7 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
-# Advanced Module System synchronization utility
-# usage: ams-personal-install <build>
+# Advanced Module System synchronization utility for personal site
 # ------------------------------------------------------------------------------
 
 function print_header()
@@ -19,97 +18,6 @@ function print_usage()
     echo ""
     echo "Usage: sudo -u infinity ams-personal-install [-h | --help] <[prefix/]build1> [[prefix/]build2 [prefix/]build3 ...]"
     echo ""
-}
-
-# ------------------------------------------------
-
-function read_profile()
-{
-    export AMS_SRC_HOST="`grep SOURCE $PROFILE | awk '{print $2;}'`"
-    echo "  Source:               $AMS_SRC_HOST"
-    if [ -z "$AMS_SRC_HOST" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: SOURCE key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-
-    export AMS_SRC_SOFTREPO="`grep SRC_SOFTREPO $PROFILE | awk '{print $2;}'`"
-    echo "  Source softrepo:      $AMS_SRC_SOFTREPO"
-    if [ -z "$AMS_SRC_SOFTREPO" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: SRC_SOFTREPO key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-
-    export AMS_DST_HOST="`grep DESTINATION $PROFILE | awk '{print $2;}'`"
-    echo "  Destination:          $AMS_DST_HOST"
-    if [ -z "$AMS_DST_HOST" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: DESTINATION key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-
-    export AMS_DST_SOFTREPO="`grep DST_SOFTREPO $PROFILE | awk '{print $2;}'`"
-    echo "  Destination softrepo: $AMS_DST_SOFTREPO"
-    if [ -z "$AMS_DST_SOFTREPO" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: DST_SOFTREPO key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-
-    export AMS_DST_PREFIX="`grep DST_PREFIX $PROFILE | awk '{print $2;}'`"
-    echo "  Destination prefix:   $AMS_DST_PREFIX"
-
-    export AMS_SYNC_DIRECTION="`grep DIRECTION $PROFILE | awk '{print $2;}'`"
-    echo "  Sync direction:       $AMS_SYNC_DIRECTION"
-    case "$AMS_SYNC_DIRECTION" in
-        "push" | "pull" )
-            ;;
-        *)
-            echo "" 1>&2
-            echo ">>> ERROR: DIRECTION key is not defined or is incorrect!" 1>&2
-            echo "" 1>&2
-            exit 1
-            ;;
-    esac
-
-    MODE="`grep MODE $PROFILE | awk '{print $2;}'`"
-    echo "  Sync mode:            $MODE"
-    case "$MODE" in
-        "rsync" )
-            ;;
-        *)
-            echo "" 1>&2
-            echo ">>> ERROR: MODE key is not defined or is incorrect!" 1>&2
-            echo "" 1>&2
-            exit 1
-            ;;
-    esac
-
-    SITES="`grep SITES $PROFILE | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
-    echo "  Sync sites:           $SITES"
-    if [ -z "$SITES" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: SITES key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-}
-
-# --------------------------------------
-
-function sync_ams_core(){
-
-    echo ""
-    echo "#-------------------------------------------------------------------------------"
-    echo "# 1) Syncing AMS core ..."
-    echo "#-------------------------------------------------------------------------------"
-
-    ams-sync personal amscore
 }
 
 # --------------------------------------
@@ -232,22 +140,10 @@ if [ -z "$AMS_ROOT" ]; then
     exit 1
 fi
 
-PROFILE=$AMS_ROOT/etc/sync/personal.conf
-
-if ! [ -f "$PROFILE" ]; then
-    echo "" 1>&2
-    echo ">>> ERROR: Profile $PROFILE is not defined!" 1>&2
-    echo "" 1>&2
-    exit 1
-fi
-
 # ------------------------------------------------
 
-read_profile
-sync_ams_core
-
 INSTALL_BUILDS=""
-check_builds $*
+check_builds "$@"
 add_builds_to_map
 rebuild_map_and_cache
 sync_site

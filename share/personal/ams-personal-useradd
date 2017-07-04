@@ -1,0 +1,48 @@
+#!/bin/bash
+
+function print_header()
+{
+    echo ""
+    echo "#------------------------------------------------------"
+    echo "# *** Add the current user into the infinity group *** "
+    echo "#------------------------------------------------------"
+
+    if [ "`id -u`" != "root" ]; then
+        echo ""
+        echo ">>> ERROR: This script must be run by the root user!"
+        echo ""
+        echo "    \$ sudo ams-personal-useradd"
+        echo ""
+        exit 1
+    fi
+}
+
+# --------------------------------------
+
+function add_user_to_infinity()
+{
+    echo ""
+    # TODO
+}
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo ""
+    echo "#---------------------------------------------------------"
+    echo "#                        *** DONE ***                     "
+    echo "#                                                         "
+    echo "# = NEW SESSION MUST BE OPENED (LOGOUT AND LOGIN AGAIN) = "
+    echo "#---------------------------------------------------------"
+    echo ""
+}
+
+# --------------------------------------
+
+print_header
+add_user_to_infinity
+print_bottom
+
+
+

@@ -151,6 +151,13 @@ if [ $# -ne 1 ] && [ $# -ne 2 ] && [ $# -ne 3 ]; then
     exit 1
 fi
 
+if [ -n "$AMS_SYNC_ACTION" ] && [ $# -ge 2 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: ACTION can be provided via the profile or command argument but not both!" 1>&2
+    print_usage
+    exit 1
+fi
+
 if [ $# -ge 2 ]; then
     case $2 in
         "all" | "amscore" | "softrepo" | "app" | "dpkg" )

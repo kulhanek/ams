@@ -5,6 +5,7 @@
 INSTALL(FILES
             ams-personal-envinit
             ams-personal-sshkeys
+            ams-personal-useradd
             ams-personal-install
        DESTINATION
             share/personal
