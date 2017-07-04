@@ -3,18 +3,17 @@
 # ==============================================================================
 
 INSTALL(FILES
-            ams-rsync-push
+            postinst
        DESTINATION
-            share/sync/rsync
+            share/dpkg/DEBIAN
         PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         )
 
 INSTALL(FILES
-            ams-core-exclude-rules
-            ams-dpkg-exclude-rules
+            control
        DESTINATION
-            share/sync/rsync
+            share/dpkg/DEBIAN
         PERMISSIONS
             OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
         )

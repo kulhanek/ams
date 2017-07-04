@@ -11,7 +11,7 @@ function print_usage()
     echo ""
     echo "Usage: ams-sync [-h][--help] [-f][--force] <profile/alias> [action] [build]"
     echo ""
-    echo "       Actions: all amscore softrepo app (for rsync mode)"
+    echo "       Actions: all amscore softrepo app dpkg (for rsync mode)"
     echo ""
 }
 
@@ -115,7 +115,7 @@ function read_profile()
     if [ -n  "$AMS_SYNC_ACTION" ]; then
         echo "  Action             :    $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
-            "amscore" | "softrepo" | "all" )
+            "amscore" | "softrepo" | "all" | "dpkg" )
                 ;;
             *)
                 echo "" 1>&2
@@ -153,7 +153,7 @@ fi
 
 if [ $# -ge 2 ]; then
     case $2 in
-        "all" | "amscore" | "softrepo" | "app" )
+        "all" | "amscore" | "softrepo" | "app" | "dpkg" )
         ;;
         *)
             echo "" 1>&2

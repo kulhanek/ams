@@ -1,0 +1,5 @@
+/var/
+/etc/map/map*.xml
+/etc/sites/*/modules/*
+/etc/sites/cache.xml
+/etc/sites/cache_big.xml

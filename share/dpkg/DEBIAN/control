@@ -1,0 +1,8 @@
+Package: ncbr-ams-core-personal
+Version: 8.0.0
+Priority: extra
+Section: ncbr
+Maintainer: LCC Support <support@lcc.ncbr.muni.cz>
+Architecture: amd64
+Description: Infinity AMS Core for Personal Site
+
