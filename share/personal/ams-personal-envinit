@@ -1,0 +1,92 @@
+#!/bin/bash
+
+function print_header()
+{
+    echo ""
+    echo "#------------------------------------------------------"
+    echo "#    *** Shell Environment Startup File Update ***     "
+    echo "#------------------------------------------------------"
+}
+
+# --------------------------------------
+
+function backup_old_files()
+{
+
+    echo ""
+    echo "1) Backuping old user startup files ..."
+
+    SEQ=`date +"%s"`
+    if [ -f ~/.profile ]; then
+        mv ~/.profile ~/.profile.$SEQ
+        echo "   ~/.profile        -> ~/.profile.$SEQ"
+    fi
+    if [ -f ~/.bash_profile ]; then
+        mv ~/.bash_profile ~/.bash_profile.$SEQ
+        echo "   ~/.bash_profile   -> ~/.bash_profile.$SEQ"
+    fi
+    if [ -f ~/.bashrc ]; then
+        mv ~/.bashrc ~/.bashrc.$SEQ
+        echo "   ~/.bashrc         -> ~/.bashrc.$SEQ"
+    fi
+
+}
+
+# --------------------------------------
+
+function create_new_files()
+{
+
+    echo ""
+    echo "2) Creating new user startup files ..."
+
+cat << EOF > ~/.bash_profile
+#--------------------------------------
+# Standard NCBR .bash_profile
+#--------------------------------------
+
+# include .bashrc if it exists
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+EOF
+    echo "   ~/.bash_profile"
+
+cat << EOF > ~/.bashrc
+#--------------------------------------
+# Standard NCBR .bashrc
+#--------------------------------------
+
+# use system wide setup
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+EOF
+    echo "   ~/.bashrc"
+
+}
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo ""
+    echo "#---------------------------------------------------------"
+    echo "#                  *** End of update ***                  "
+    echo "#                                                         "
+    echo "# = NEW SESSION MUST BE OPENED (LOGOUT AND LOGIN AGAIN) = "
+    echo "#---------------------------------------------------------"
+    echo ""
+}
+
+# --------------------------------------
+
+umask 027
+
+print_header
+backup_old_files
+create_new_files
+print_bottom
+
+
+

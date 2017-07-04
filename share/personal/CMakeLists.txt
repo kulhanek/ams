@@ -3,17 +3,12 @@
 # ==============================================================================
 
 INSTALL(FILES
-            postinst
+            ams-personal-envinit
+            ams-personal-sshkeys
+            ams-personal-install
        DESTINATION
-            share/dpkg/DEBIAN
+            share/personal
         PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         )
 
-INSTALL(FILES
-            control.tmp
-       DESTINATION
-            share/dpkg/DEBIAN
-        PERMISSIONS
-            OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
-        )

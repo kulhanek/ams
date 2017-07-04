@@ -1,0 +1,257 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# Advanced Module System synchronization utility
+# usage: ams-personal-install <build>
+# ------------------------------------------------------------------------------
+
+function print_header()
+{
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "#                             *** Installing builds ***                         "
+    echo "#-------------------------------------------------------------------------------"
+}
+
+# ------------------------------------------------
+
+function print_usage()
+{
+    echo ""
+    echo "Usage: sudo -u infinity ams-personal-install [-h | --help] <[prefix/]build1> [[prefix/]build2 [prefix/]build3 ...]"
+    echo ""
+}
+
+# ------------------------------------------------
+
+function read_profile()
+{
+    export AMS_SRC_HOST="`grep SOURCE $PROFILE | awk '{print $2;}'`"
+    echo "  Source:               $AMS_SRC_HOST"
+    if [ -z "$AMS_SRC_HOST" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: SOURCE key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_SRC_SOFTREPO="`grep SRC_SOFTREPO $PROFILE | awk '{print $2;}'`"
+    echo "  Source softrepo:      $AMS_SRC_SOFTREPO"
+    if [ -z "$AMS_SRC_SOFTREPO" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: SRC_SOFTREPO key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_DST_HOST="`grep DESTINATION $PROFILE | awk '{print $2;}'`"
+    echo "  Destination:          $AMS_DST_HOST"
+    if [ -z "$AMS_DST_HOST" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DESTINATION key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_DST_SOFTREPO="`grep DST_SOFTREPO $PROFILE | awk '{print $2;}'`"
+    echo "  Destination softrepo: $AMS_DST_SOFTREPO"
+    if [ -z "$AMS_DST_SOFTREPO" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DST_SOFTREPO key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_DST_PREFIX="`grep DST_PREFIX $PROFILE | awk '{print $2;}'`"
+    echo "  Destination prefix:   $AMS_DST_PREFIX"
+
+    export AMS_SYNC_DIRECTION="`grep DIRECTION $PROFILE | awk '{print $2;}'`"
+    echo "  Sync direction:       $AMS_SYNC_DIRECTION"
+    case "$AMS_SYNC_DIRECTION" in
+        "push" | "pull" )
+            ;;
+        *)
+            echo "" 1>&2
+            echo ">>> ERROR: DIRECTION key is not defined or is incorrect!" 1>&2
+            echo "" 1>&2
+            exit 1
+            ;;
+    esac
+
+    MODE="`grep MODE $PROFILE | awk '{print $2;}'`"
+    echo "  Sync mode:            $MODE"
+    case "$MODE" in
+        "rsync" )
+            ;;
+        *)
+            echo "" 1>&2
+            echo ">>> ERROR: MODE key is not defined or is incorrect!" 1>&2
+            echo "" 1>&2
+            exit 1
+            ;;
+    esac
+
+    SITES="`grep SITES $PROFILE | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
+    echo "  Sync sites:           $SITES"
+    if [ -z "$SITES" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: SITES key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+}
+
+# --------------------------------------
+
+function sync_ams_core(){
+
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 1) Syncing AMS core ..."
+    echo "#-------------------------------------------------------------------------------"
+
+    ams-sync personal amscore
+}
+
+# --------------------------------------
+
+function check_builds(){
+
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 2) Checking requested builds and their dependencies ..."
+    echo "#-------------------------------------------------------------------------------"
+    echo ""
+    echo "Number of builds: $#"
+    echo ""
+
+    while [ $# -ne 0 ]; do
+        BUILD="$1"
+        printf "%-40s ... " "$BUILD"
+        PREFIX="`dirname $BUILD`"
+        BUILD="`basename $BUILD`"
+        if [ "$PREFIX" == "." ]; then PREFIX=""; fi
+        ams-map-manip --prefix "$PREFIX" isbuild personal "$BUILD" &> /dev/null
+        if [ $? -eq 0 ]; then
+            printf " [OK]\n"
+            for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" deepsyncdeps personal "$BUILD"`; do
+                printf "    |-> %-40s\n" "$SYNC_BUILD"
+                if [ -n "$PREFIX" ]; then SYNC_BUILD="$PREFIX/$SYNC_BUILD"; fi
+                INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
+            done
+            if [ -n "$PREFIX" ]; then BUILD="$PREFIX/$BUILD"; fi
+            INSTALL_BUILDS="$INSTALL_BUILDS $BUILD"
+        else
+            printf " [NOT FOUND]\n"
+        fi
+        shift
+    done
+    INSTALL_BUILDS="`echo $INSTALL_BUILDS | tr " " "\n" | sort -u`"
+}
+
+# --------------------------------------
+
+function add_builds_to_map(){
+
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 3) Adding builds to the map ..."
+    echo "#-------------------------------------------------------------------------------"
+    echo ""
+    echo "Number of builds: `echo $INSTALL_BUILDS | wc --words`"
+    echo ""
+
+    for BUILD in $INSTALL_BUILDS; do
+        echo "Adding $BUILD ..."
+        PREFIX="`dirname $BUILD`"
+        BUILD="`basename $BUILD`"
+        if [ "$PREFIX" == "." ]; then PREFIX=""; fi
+        ams-map-manip --prefix "$PREFIX" addbuilds personal "$BUILD"
+    done
+}
+
+# --------------------------------------
+
+function rebuild_map_and_cache(){
+
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 4) Rebuilding map and cache ..."
+    echo "#-------------------------------------------------------------------------------"
+
+    ams-map-manip distribute
+    ams-cache rebuildall
+}
+
+# --------------------------------------
+
+function sync_site(){
+
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 5) Syncing site ..."
+    echo "#-------------------------------------------------------------------------------"
+
+    ams-sync personal softrepo
+}
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo "#-------------------------------------------------------------------------------"
+    echo "#                        *** End of build installation ***                      "
+    echo "#-------------------------------------------------------------------------------"
+    echo ""
+}
+
+# ------------------------------------------------------------------------------
+
+print_header
+
+SHIFT="-"
+while [ -n "$SHIFT" ]; do
+    SHIFT=""
+    case $1 in
+        '-h'|'--help')
+            print_usage
+            exit 0
+        ;;
+    esac
+done
+
+if [ $# -le 0 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Incorrect number of arguments!" 1>&2
+    print_usage
+    exit 1
+fi
+
+# determine full path to the script --------------
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+PROFILE=$AMS_ROOT/etc/sync/personal.conf
+
+if ! [ -f "$PROFILE" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Profile $PROFILE is not defined!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# ------------------------------------------------
+
+read_profile
+sync_ams_core
+
+INSTALL_BUILDS=""
+check_builds $*
+add_builds_to_map
+rebuild_map_and_cache
+sync_site
+
+print_bottom
+
+

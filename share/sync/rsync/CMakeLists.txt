@@ -13,6 +13,8 @@ INSTALL(FILES
 INSTALL(FILES
             ams-core-exclude-rules
             ams-dpkg-exclude-rules
+            ams-site-exclude-rules
+            ams-ctrl-exclude-rules
        DESTINATION
             share/sync/rsync
         PERMISSIONS

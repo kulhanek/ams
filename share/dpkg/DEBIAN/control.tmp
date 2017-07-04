@@ -1,5 +1,5 @@
 Package: ncbr-ams-core-personal-8.0
-Version: 8.0.0
+Version: 8.VERSION
 Priority: extra
 Section: ncbr
 Maintainer: LCC Support <support@lcc.ncbr.muni.cz>

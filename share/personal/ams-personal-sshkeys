@@ -1,0 +1,58 @@
+#!/bin/bash
+
+function print_header()
+{
+    echo ""
+    echo "#------------------------------------------------------"
+    echo "#  *** Initialize ssh-keys for the infinity user ***   "
+    echo "#------------------------------------------------------"
+
+    if [ "`id -u`" != "infinity" ]; then
+        echo ""
+        echo ">>> ERROR: This script must be run by the infinity user!"
+        echo ""
+        echo "    \$ sudo -u infinity ams-personal-sshkeys"
+        echo ""
+        exit 1
+    fi
+
+    echo ""
+    echo "This will invalidate the previous ssh kyes of the infnity user."
+    echo -n "Do you want to continue? (YES/NO) "
+    read CONF
+    if [ "$CONF" != "YES" ];
+        echo "Execution interrupted!"
+        exit 1
+    fi
+}
+
+# --------------------------------------
+
+function gen_keys()
+{
+    echo ""
+    ssh-keygen -N ""
+}
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo ""
+    echo "#---------------------------------------------------------"
+    echo "#             *** End of ssh keys update ***              "
+    echo "#---------------------------------------------------------"
+    echo ""
+    echo "Public ssh key:"
+    cat "~infinity/.ssh/id_rsa.pub"
+    echo ""
+}
+
+# --------------------------------------
+
+print_header
+gen_keys
+print_bottom
+
+
+

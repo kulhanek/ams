@@ -184,8 +184,14 @@ rsync_dpkg()
         fi
     done
 
+    # gen new control file
+    VERSION="`cat \"$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/dpkgver\" 2>/dev/null`"
+    ((VERSION++))
+    sed -e "s/VERSION/$VERSION/g" < "$AMS_ROOT/share/dpkg/DEBIAN/control.tmp" > "$AMS_ROOT/share/dpkg/DEBIAN/control"
+    echo "$VERSION" > "$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/dpkgver"
+
     # copy DEBIAN package setup
-    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w  \
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-ctrl-exclude-rules \
          "$AMS_ROOT/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
