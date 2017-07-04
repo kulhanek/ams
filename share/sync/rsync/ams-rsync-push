@@ -163,7 +163,7 @@ rsync_dpkg()
     fi
 
     # sync site setups
-    for SITE in $SITES; do
+    for SITE in $AMS_SYNC_SITES; do
         SITEID=`site id $SITE`
         if [ -z "$SITEID" ]; then
             echo "Undefined site '$SITE'"
