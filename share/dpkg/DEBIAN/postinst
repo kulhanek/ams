@@ -7,7 +7,7 @@ if [ "$1" == "configure" ]; then
     # create infinity user
     echo "   creating infinity user ..."
     useradd --system --user-group --shell /bin/bash --create-home --home-dir /var/lib/infinity \
-            --skel /software/ncbr/softmods/8.0/share/skel
+            --skel /software/ncbr/softmods/8.0/share/skel infinity
 
     # change file ownership
     echo "   creating infinity user ..."
