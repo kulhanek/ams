@@ -10,10 +10,11 @@ if [ "$1" == "configure" ]; then
             --skel /software/ncbr/softmods/8.0/share/skel infinity
 
     # change file ownership
-    echo "   creating infinity user ..."
+    echo "   updating access rights to softmods ..."
     chown -R infinity:infinity /software/ncbr/softmods || exit 1
 
     # setup softrepo
+    echo "   creating softrepo ..."
     mkdir -p /software/ncbr/softrepo
     chown -R infinity:infinity /software/ncbr/softmods || exit 1
 fi
