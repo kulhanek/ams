@@ -12,7 +12,7 @@ INSTALL(FILES
 
 INSTALL(FILES
             control.tmp
-            PERSONAL
+            PUBLIC
        DESTINATION
             share/dpkg/DEBIAN
         PERMISSIONS
