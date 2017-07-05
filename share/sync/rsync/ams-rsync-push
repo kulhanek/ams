@@ -153,10 +153,10 @@ rsync_dpkg()
     echo "# AMS dpkg - sync data" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
-    ssh -x $AMS_DST_HOST "if ! [ -d \"$AMS_DST_DPKGROOT\" ]; then mkdir -m 755 -p \"$AMS_DST_DPKGROOT\" ; fi;" >> $LOG_FILE 2>&1
+    ssh -x $AMS_DST_HOST "umask 022; if ! [ -d \"$AMS_DST_DPKGROOT\" ]; then mkdir -m 755 -p \"$AMS_DST_DPKGROOT\" ; fi;" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
 
-    ssh -x $AMS_DST_HOST "if ! [ -d \"$AMS_DST_SOFTMODS\" ]; then mkdir -m 755 -p \"$AMS_DST_SOFTMODS\" ; fi;" >> $LOG_FILE 2>&1
+    ssh -x $AMS_DST_HOST "umask 022; if ! [ -d \"$AMS_DST_SOFTMODS\" ]; then mkdir -m 755 -p \"$AMS_DST_SOFTMODS\" ; fi;" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
 
     rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-dpkg-exclude-rules \
@@ -171,7 +171,7 @@ rsync_dpkg()
 
     # sync site setups
 
-    ssh -x $AMS_DST_HOST "rm -rf \"$AMS_DST_SOFTMODS/etc/sites\"; mkdir -m 755 -p \"$AMS_DST_SOFTMODS/etc/sites\"" >> $LOG_FILE 2>&1
+    ssh -x $AMS_DST_HOST "umask 022; rm -rf \"$AMS_DST_SOFTMODS/etc/sites\"; mkdir -m 755 -p \"$AMS_DST_SOFTMODS/etc/sites\"" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
 
     for SITE in $AMS_SYNC_SITES; do
