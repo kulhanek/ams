@@ -6,17 +6,16 @@ if [ "$1" == "configure" ]; then
 
     # create infinity user
     echo "   creating infinity user ..."
-    adduser --system --group --shell /bin/bash --home /var/lib/infinity \
-            --skel /software/ncbr/softmods/8.0/share/skel --disabled-password
+    useradd --system --user-group --shell /bin/bash --create-home --home-dir /var/lib/infinity \
+            --skel /software/ncbr/softmods/8.0/share/skel
 
     # change file ownership
-    echo "   updating access rights to softmods ..."
+    echo "   creating infinity user ..."
     chown -R infinity:infinity /software/ncbr/softmods || exit 1
 
     # setup softrepo
-    echo "   updating access rights to softrepo ..."
-    mkdir -m 755 -p /software/ncbr/softrepo || exit 1
-    chown infinity:infinity /software/ncbr/softmods || exit 1
+    mkdir -p /software/ncbr/softrepo
+    chown -R infinity:infinity /software/ncbr/softmods || exit 1
 fi
 
 exit 0
