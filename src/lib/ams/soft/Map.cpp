@@ -1924,26 +1924,40 @@ bool CMap::IsBuild(const CSmallString& site_name,const CSmallString& build_name,
 const CSmallString CMap::GetBuildName(const CSmallString& site_name,
                         const CSmallString& build_name,const CSmallString& prefix)
 {
+    CSmallString build_name_ext = build_name;
+
+    // add only if it is not present
+    if( build_name_ext.FindSubString(".bld") == -1 ){
+        build_name_ext += ".bld";
+    }
+
     CFileName all_builds = AMSGlobalConfig.GetETCDIR() / "map" / "builds";
     CFileName full_build_name;
 
-    full_build_name = all_builds / prefix / build_name + ".bld";
-
     // is prefix specific
+    full_build_name = all_builds / prefix / build_name_ext;
     if( CFileSystem::IsFile(full_build_name) ){
         return(full_build_name);
     }
 
     // is site specific build?
-    full_build_name = all_builds / site_name / build_name + ".bld";
+    full_build_name = all_builds / site_name / build_name_ext;
     if( CFileSystem::IsFile(full_build_name) ){
         return(full_build_name);
     }
 
-    // is common specific
-    full_build_name = all_builds / "common" / build_name + ".bld";
-    if( CFileSystem::IsFile(full_build_name) ){
-        return(full_build_name);
+    // is within autoprefix?
+    std::list<std::string>::iterator    it = AutoPrefixes.begin();
+    std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+    while( it != ie ){
+        CSmallString auto_prefix = *it;
+
+        full_build_name = all_builds / auto_prefix / build_name_ext;
+        if( CFileSystem::IsFile(full_build_name) ){
+            return(full_build_name);
+        }
+        it++;
     }
 
     return("");

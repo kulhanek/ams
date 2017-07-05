@@ -7,12 +7,12 @@ function print_header()
     echo "#  *** Initialize ssh-keys for the infinity user ***   "
     echo "#------------------------------------------------------"
 
-    if [ "`id -u`" != "infinity" ]; then
-        echo ""
-        echo ">>> ERROR: This script must be run by the infinity user!"
-        echo ""
-        echo "    \$ sudo -u infinity ams-personal-sshkeys"
-        echo ""
+    if [ "`id -u -n`" != "infinity" ]; then
+        echo "" 2>&1
+        echo ">>> ERROR: This script must be run by the infinity user!" 2>&1
+        echo "" 2>&1
+        echo "    \$ sudo -u infinity ams-personal-sshkeys" 2>&1
+        echo "" 2>&1
         exit 1
     fi
 
@@ -20,8 +20,8 @@ function print_header()
     echo "This will invalidate the previous ssh kyes of the infnity user."
     echo -n "Do you want to continue? (YES/NO) "
     read CONF
-    if [ "$CONF" != "YES" ];
-        echo "Execution interrupted!"
+    if [ "$CONF" != "YES" ]; then
+        echo "Execution interrupted!" 2>&1
         exit 1
     fi
 }
@@ -31,7 +31,9 @@ function print_header()
 function gen_keys()
 {
     echo ""
-    ssh-keygen -N ""
+    echo "# Generating ssh keys ...."
+    rm -f /var/lib/infinity/.ssh/id_rsa /var/lib/infinity/.ssh/id_rsa.pub
+    ssh-keygen -N "" -f /var/lib/infinity/.ssh/id_rsa
 }
 
 # --------------------------------------
@@ -44,7 +46,7 @@ function print_bottom()
     echo "#---------------------------------------------------------"
     echo ""
     echo "Public ssh key:"
-    cat "~infinity/.ssh/id_rsa.pub"
+    cat "/var/lib/infinity/.ssh/id_rsa.pub"
     echo ""
 }
 

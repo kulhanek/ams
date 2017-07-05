@@ -9,6 +9,13 @@ function print_header()
     echo "#-------------------------------------------------------------------------------"
     echo "#                             *** Installing builds ***                         "
     echo "#-------------------------------------------------------------------------------"
+
+    if [ "`id -u -n`" != "infinity" ]; then
+        echo "" 2>&1
+        echo ">>> ERROR: This script must be run by the infinity user!"  2>&1
+        print_usage  2>&1
+        exit 1
+    fi
 }
 
 # ------------------------------------------------
@@ -16,7 +23,7 @@ function print_header()
 function print_usage()
 {
     echo ""
-    echo "Usage: sudo -u infinity ams-personal-install [-h | --help] <[prefix/]build1> [[prefix/]build2 [prefix/]build3 ...]"
+    echo "    Usage: sudo -u infinity -i ams-personal-install [-h | --help] <[prefix/]build1> [[prefix/]build2 [prefix/]build3 ...]"
     echo ""
 }
 
@@ -73,7 +80,7 @@ function add_builds_to_map(){
         PREFIX="`dirname $BUILD`"
         BUILD="`basename $BUILD`"
         if [ "$PREFIX" == "." ]; then PREFIX=""; fi
-        ams-map-manip --prefix "$PREFIX" addbuilds personal "$BUILD"
+        ams-map-manip --prefix "$PREFIX" addbuilds all "$BUILD"
     done
 }
 
@@ -128,7 +135,7 @@ done
 if [ $# -le 0 ]; then
     echo "" 1>&2
     echo ">>> ERROR: Incorrect number of arguments!" 1>&2
-    print_usage
+    print_usage 2>&1
     exit 1
 fi
 

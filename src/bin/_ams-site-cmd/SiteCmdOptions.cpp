@@ -77,10 +77,12 @@ int CSiteCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "info" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "active" ) return(SO_CONTINUE);
+
         if( (GetProgArg(0) == "activate") ||
                 (GetProgArg(0) == "isactive") ||
                 (GetProgArg(0) == "isallowed") ||
-                (GetProgArg(0) == "id") ) {
+                (GetProgArg(0) == "id") ||
+                (GetProgArg(0) == "listamods") ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
                 fprintf(stderr,"%s: specified action '%s' requires the specification of site\n",
@@ -107,6 +109,7 @@ int CSiteCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "isactive" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "isallowed" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "id" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "listamods" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "avail" ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");

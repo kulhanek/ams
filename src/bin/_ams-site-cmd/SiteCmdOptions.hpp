@@ -60,6 +60,7 @@ public:
     "   <green>isactive</green>    return zero if the site is active\n"
     "   <green>isallowed</green>   return zero if the site can be activated on the host\n"
     "   <green>id</green>          return site id\n"
+    "   <green>listamods</green>   list autoloaded modules\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

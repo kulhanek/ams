@@ -220,6 +220,38 @@ bool CSiteCmd::Run(void)
         return(true);
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "listamods" ) {
+
+        CSmallString site_sid;
+
+        if( Options.GetArgSite() != NULL ) {
+            if( (Options.GetArgSite().GetLength() > 0) && (Options.GetArgSite()[0] == '{') ) {
+                site_sid = Options.GetArgSite();
+            } else {
+                site_sid = CUtils::GetSiteID(Options.GetArgSite());
+            }
+        } else {
+            site_sid = AMSGlobalConfig.GetActiveSiteID();
+        }
+
+        if( CUtils::IsSiteIDValid(site_sid) == false ) {
+            CSmallString error;
+            error << "specified site '" << Options.GetArgSite() << "' was not found";
+            ES_TRACE_ERROR(error);
+            return(false);
+        }
+
+        if( Site.LoadConfig(site_sid) == false ) {
+            CSmallString error;
+            error << "unable to load site '" << Options.GetArgSite() << "' config";
+            ES_TRACE_ERROR(error);
+            return(false);
+        }
+        Site.PrintAutoloadedModules(vout);
+
+        return(true);
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "active" ) {
         CSmallString site_sid;
 

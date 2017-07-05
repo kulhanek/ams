@@ -514,6 +514,43 @@ void CSite::PrintFullSiteInfo(std::ostream& vout)
     CUtils::PrintBuild(vout,p_env_ele);
 }
 
+//------------------------------------------------------------------------------
+
+void CSite::PrintAutoloadedModules(std::ostream& vout)
+{
+    // print automodules -----------------------------
+    CXMLElement* p_mod_ele;
+    // this can be performed here - setup is in site config file
+    if( AMSUserConfig.AreSystemAutoloadedModulesDisabled() == false ) {
+        // host modules
+        // these modules have to be loaded first, since they are supposed to correct some host dependent problems
+        CXMLElement* p_hg = Host.FindGroup();
+        if( p_hg != NULL ){
+            p_mod_ele = p_hg->GetChildElementByPath("autoload");
+            PrintAutoloadedModules(p_mod_ele,vout);
+        }
+
+        // site modules
+        p_mod_ele = SiteConfig.GetChildElementByPath("site/autoload");
+        PrintAutoloadedModules(p_mod_ele,vout);
+
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CSite::PrintAutoloadedModules(CXMLElement* p_mod_ele,std::ostream& vout)
+{
+    CXMLIterator    I(p_mod_ele);
+    CXMLElement*    p_mod;
+
+    while((p_mod = I.GetNextChildElement("module")) != NULL) {
+        CSmallString mod_name;
+        p_mod->GetAttribute("name",mod_name);
+        vout << mod_name << endl;
+    }
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

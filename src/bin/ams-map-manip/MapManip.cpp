@@ -240,6 +240,11 @@ bool CMapManip::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "isbuild" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
         return( Map.IsBuild(Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix()) );
     }
     // ----------------------------------------------

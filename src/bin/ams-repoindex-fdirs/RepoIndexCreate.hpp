@@ -1,7 +1,7 @@
-#ifndef BuildItemH
-#define BuildItemH
+#ifndef RepoIndexCreateH
+#define RepoIndexCreateH
 // =============================================================================
-// AMS
+// AMS - Advanced Module System
 // -----------------------------------------------------------------------------
 //    Copyright (C) 2016      Petr Kulhanek, kulhanek@chemi.muni.cz
 //
@@ -20,27 +20,58 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
+#include "RepoIndexCreateOptions.hpp"
+#include <VerboseStr.hpp>
+#include <TerminalStr.hpp>
+#include <Site.hpp>
+#include <FileName.cpp>
+#include <map>
 #include <string>
-#include <FileName.hpp>
+#include <set>
+#include <list>
 
 // -----------------------------------------------------------------------------
 
 class CBuildId {
 public:
-    std::string Prefix;
     std::string Name;
+    bool operator < (const CBuildId& bp_id) const;
 };
+
+class SHA1;
 
 // -----------------------------------------------------------------------------
 
-class CBuildItem {
+class CRepoIndexCreate {
 public:
-// section of public data ------------------------------------------------------
-public:
-    std::string Prefix;
-    std::string Name;
-    CFileName   Path;
-    std::string SHA1;   // SHA hash of build
+// constructor -----------------------------------------------------------------
+        CRepoIndexCreate(void);
+
+// main methods ----------------------------------------------------------------
+    /// init options
+    int Init(int argc,char* argv[]);
+
+    /// main part of program
+    bool Run(void);
+
+    /// finalize
+    void Finalize(void);
+
+// section of private data -----------------------------------------------------
+private:
+    CRepoIndexCreateOptions     Options;
+    CTerminalStr                Console;
+    CVerboseStr                 vout;
+
+    int                             NumOfAllBuilds;
+    int                             NumOfStats;
+    std::map<CBuildId,CFileName>    BuildPaths;
+    std::map<CBuildId,std::string>  BuildIndexes;
+
+    bool ListDirs(void);
+    std::string CalculateBuildHash(const CFileName& build_path);
+    void HashDir(const CFileName& full_path,SHA1& sha1);
+    void HashNode(const CFileName& name,struct stat& my_stat,bool build_node,SHA1& sha1);
 };
 
 // -----------------------------------------------------------------------------

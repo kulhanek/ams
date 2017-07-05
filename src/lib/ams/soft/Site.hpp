@@ -125,6 +125,12 @@ public:
     /// print full info about site
     void PrintFullSiteInfo(std::ostream& vout);
 
+    /// print list of autoloaded modules
+    void PrintAutoloadedModules(std::ostream& vout);
+
+    /// print list of autoloaded modules
+    void PrintAutoloadedModules(CXMLElement* p_mod_ele,std::ostream& vout);
+
     // executive methods ----------------------------------------------------------
     /// activate site
     bool ActivateSite(void);
