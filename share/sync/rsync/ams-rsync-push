@@ -140,6 +140,13 @@ rsync_amscore()
 
 rsync_dpkg()
 {
+    if [ -z "$AMS_DST_PKGROOT" ];then
+        echo "" 1>&2
+        echo ">>> ERROR: DST_PKGROOT key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
     echo "" | tee -a $LOG_FILE
     echo "# AMS dpkg - sync data" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
