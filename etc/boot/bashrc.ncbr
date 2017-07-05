@@ -21,12 +21,14 @@ export HOSTNAME
 USER="`whoami`"
 export USER
 
-export PATH=`$AMS_ROOT/bin/_ams-module-var prepend "$PATH" : "$AMS_ROOT/bin"`
-export PATH=`$AMS_ROOT/bin/_ams-module-var prepend "$PATH" : "$AMS_ROOT/share/scripts"`
+PATH=`$AMS_ROOT/bin/_ams-module-var prepend "$PATH" : "$AMS_ROOT/bin"`
+PATH=`$AMS_ROOT/bin/_ams-module-var prepend "$PATH" : "$AMS_ROOT/share/scripts"`
 
 if [ "$AMS_PERSONAL" == "ON" ]; then
-    export PATH=`$AMS_ROOT/bin/_ams-module-var prepend "$PATH" : "$AMS_ROOT/share/personal"`
+    PATH=`$AMS_ROOT/bin/_ams-module-var prepend "$PATH" : "$AMS_ROOT/share/personal"`
 fi
+
+export PATH
 
 . $AMS_ROOT/etc/boot/init.ams
 
