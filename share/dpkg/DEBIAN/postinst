@@ -6,8 +6,8 @@ if [ "$1" == "configure" ]; then
 
     # create infinity user
     echo "   creating infinity user ..."
-    adduser --system --user-group --shell /bin/bash --create-home  --home-dir /var/lib/infinity \
-            --skel /software/ncbr/softmods/8.0/share/skel
+    adduser --system --group --shell /bin/bash --home /var/lib/infinity \
+            --skel /software/ncbr/softmods/8.0/share/skel --disabled-password
 
     # change file ownership
     echo "   updating access rights to softmods ..."
