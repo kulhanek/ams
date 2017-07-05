@@ -140,9 +140,9 @@ rsync_amscore()
 
 rsync_dpkg()
 {
-    if [ -z "$AMS_DST_PKGROOT" ];then
+    if [ -z "$AMS_DST_DPKGROOT" ];then
         echo "" 1>&2
-        echo ">>> ERROR: DST_PKGROOT key is not defined!" 1>&2
+        echo ">>> ERROR: AMS_DST_DPKGROOT key is not defined!" 1>&2
         echo "" 1>&2
         exit 1
     fi
@@ -151,9 +151,7 @@ rsync_dpkg()
     echo "# AMS dpkg - sync data" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
-# AMS_DST_SOFTREPO - it is the root of the package
-
-    ssh -x $AMS_DST_HOST "if ! [ -d \"$AMS_DST_SOFTREPO\" ]; then mkdir -p \"$AMS_DST_SOFTREPO\" ; fi;" >> $LOG_FILE 2>&1
+    ssh -x $AMS_DST_HOST "if ! [ -d \"$AMS_DST_DPKGROOT\" ]; then mkdir -p \"$AMS_DST_DPKGROOT\" ; fi;" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
 
     ssh -x $AMS_DST_HOST "if ! [ -d \"$AMS_DST_SOFTMODS\" ]; then mkdir -p \"$AMS_DST_SOFTMODS\" ; fi;" >> $LOG_FILE 2>&1
@@ -199,7 +197,7 @@ rsync_dpkg()
 
     # copy DEBIAN package setup
     rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-ctrl-exclude-rules \
-         "$AMS_ROOT/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/" >> $LOG_FILE 2>&1
+         "$AMS_ROOT/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
         echo "AMS dpkg synchronization [OK]"

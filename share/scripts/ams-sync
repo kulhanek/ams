@@ -55,8 +55,8 @@ function read_profile()
         exit 1
     fi
 
-    export AMS_DST_PKGROOT="`grep DST_PKGROOT "$PROFILE" | awk '{print $2;}'`"
-    echo "  Destination package :   $AMS_DST_PKGROOT"
+    export AMS_DST_DPKGROOT="`grep DST_DPKGROOT "$PROFILE" | awk '{print $2;}'`"
+    echo "  Destination package :   $AMS_DST_DPKGROOT"
 
     export AMS_DST_SOFTMODS="`grep DST_SOFTMODS "$PROFILE" | awk '{print $2;}'`"
     echo "  Destination softmods:   $AMS_DST_SOFTMODS"
