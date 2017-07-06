@@ -74,8 +74,7 @@ case "$ACTION" in
     "addcorebuilds" )
         CORE_BUILDS=""
         for SITE in `site listavail 2>&1`; do
-            CORE_MODS="$CORE_BUILDS `site listamods $SITE 2>&1`"
-            for MOD in $CORE_MODS; do
+            for MOD in `site listamods $SITE 2>&1`; do
                 CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
             done
         done

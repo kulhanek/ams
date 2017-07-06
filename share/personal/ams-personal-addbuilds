@@ -59,6 +59,8 @@ function check_builds(){
     echo "# 2) Checking requested builds and their dependencies ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "" | tee -a $LOG_FILE
+    echo "# Number of reuests : $#" | tee -a $LOG_FILE
+    echo ""
 
     while [ $# -ne 0 ]; do
         ABUILD="$1"
@@ -66,7 +68,7 @@ function check_builds(){
         APREFIX="`dirname $ABUILD`"
         ABUILD="`basename $ABUILD`"
         if [ "$APREFIX" == "." ]; then APREFIX=""; fi
-        BUILDS=`ams-map-manip --prefix "$APREFIX" getbuilds personal "$ABUILD" 2> /dev/null`
+        BUILDS=`ams-map-manip --prefix "$APREFIX" showautobuilds personal "$ABUILD" 2> /dev/null`
         NBUILDS=0
         for BUILD in $BUILDS; do
             printf "    %s\n" $BUILD  | tee -a $LOG_FILE

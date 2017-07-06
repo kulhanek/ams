@@ -1062,7 +1062,9 @@ void CPrintEngine::PrintAvailableSites(CTerminal& terminal,bool print_all,bool p
 
         CSmallString name = site.GetName();
         if( site.IsActive() ) {
-            name = "[" + name + "]";
+            if( plain == false ){
+                name = "[" + name + "]";
+            }
         } else {
             if( print_all && site.CanBeActivated() ) name = name + "*";
         }
