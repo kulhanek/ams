@@ -1,0 +1,102 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# Advanced Module System - personal site management utility
+# (c) 2017 Petr Kulhanek
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------
+
+function print_usage()
+{
+    echo ""
+    echo "Usage: ams-personal [-h][--help] <action> [ARGS]"
+    echo ""
+    echo "Supported actions (builds):"
+    echo "       addbuilds <[prefix]/bldfilter1> ...  install builds specified by full build name or build filter"
+    echo "                                            (incomplete buildname with wildcard characters)"
+    echo "       rmbuilds <bldfilter1> ...            remove builds specified by full build name or build filter"
+    echo ""
+    echo "Supported actions (setup):"
+    echo "       sshkeys                              setup sshkeys for the local infinity user"
+    echo "       useradd <user>                       add <user> to the infnity group"
+    echo "       envinit                              initialize bash startup files for the current user"
+    echo ""
+    echo "General pre-requisites for a computer:"
+    echo "       * ncbr-ams-core-X.Y-personal package must by installed"
+    echo "       * passwordless connection to the infinity softrepo must be configured (use 'sshkeys')"
+    echo ""
+    echo "General pre-requisites for a user employing the infinity environment:"
+    echo "       * the user must be a member of the infinity group (use 'useradd')"
+    echo "       * the user must have correct bash startup files (use 'envinit')"
+    echo ""
+
+}
+
+# ------------------------------------------------
+
+SHIFT="-"
+while [ -n "$SHIFT" ]; do
+    SHIFT=""
+    case $1 in
+        '-h'|'--help')
+            print_usage
+            exit 0
+        ;;
+    esac
+done
+
+if [ $# -ge 1 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Incorrect number of arguments!" 1>&2
+    print_usage
+    exit 1
+fi
+
+# check if AMS_ROOT is set -----------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+ACTION="$1"
+shift
+
+case "$ACTION" in
+# -----------------------------
+    "addbuilds" )
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds "$@"
+        ;;
+# -----------------------------
+    "rmbuilds" )
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-rmbuilds "$@"
+        ;;
+# -----------------------------
+    "envinit" )
+        $AMS_ROOT/share/personal/ams-personal-envinit "$@"
+        ;;
+# -----------------------------
+    "sshkeys" )
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-sshkeys "$@"
+        ;;
+# -----------------------------
+    "useradd" )
+        sudo $AMS_ROOT/share/personal/ams-personal-useradd "$@"
+        ;;
+# -----------------------------
+    *)
+        echo "" 1>&2
+        echo ">>> ERROR: Unsupported action!" 1>&2
+        print_usage
+        exit 1
+        ;;
+esac
+
+
+
+
+
+
+

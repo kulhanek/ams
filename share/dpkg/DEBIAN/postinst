@@ -18,7 +18,7 @@ if [ "$1" == "configure" ]; then
     # setup softrepo
     echo "   creating softrepo ..."
     mkdir -m 755 -p /software/ncbr/softrepo
-    chown -R infinity:infinity /software/ncbr/softmods || exit 1
+    chown -R infinity:infinity /software/ncbr/softrepo || exit 1
 fi
 
 exit 0

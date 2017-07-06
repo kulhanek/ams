@@ -9,13 +9,6 @@ function print_header()
     echo "#-------------------------------------------------------------------------------"
     echo "#                             *** Installing builds ***                         "
     echo "#-------------------------------------------------------------------------------"
-
-    if [ "`id -u -n`" != "infinity" ]; then
-        echo "" 2>&1
-        echo ">>> ERROR: This script must be run by the infinity user!"  2>&1
-        print_usage  2>&1
-        exit 1
-    fi
 }
 
 # ------------------------------------------------
@@ -23,8 +16,7 @@ function print_header()
 function print_usage()
 {
     echo ""
-    echo "    Usage: sudo -u infinity -i ams-personal-install [-h | --help] <[prefix1/]build_mask1> [[prefix2/]build_mask2 ...]"
-    echo "           build_mask is either full build specification or incomplete name employing wildcard characters"
+    echo "    Usage: ams-personal addbuilds <[prefix1/]bldfilter1> [...]"
     echo ""
 }
 
@@ -139,16 +131,12 @@ function print_bottom()
 
 print_header
 
-SHIFT="-"
-while [ -n "$SHIFT" ]; do
-    SHIFT=""
-    case $1 in
-        '-h'|'--help')
-            print_usage
-            exit 0
-        ;;
-    esac
-done
+if [ "`id -u -n`" != "infinity" ]; then
+    echo "" 2>&1
+    echo ">>> ERROR: This script must be run by the infinity user!"  2>&1
+    print_usage  2>&1
+    exit 1
+fi
 
 if [ $# -le 0 ]; then
     echo "" 1>&2

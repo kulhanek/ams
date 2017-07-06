@@ -327,7 +327,7 @@ string CRepoIndexCreate::CalculateBuildHash(const CFileName& build_path)
         // the build might not be synchronized yet
         if( CFileSystem::IsDirectory(build_path) == false ){
             // return null sha1
-            return("00000000000000000000000000000000000000000");
+            return("0000000000000000000000000000000000000000");
         }
     }
 

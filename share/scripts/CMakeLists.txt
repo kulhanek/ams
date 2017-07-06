@@ -4,6 +4,7 @@
 
 INSTALL(FILES
             ams-sync
+            ams-personal
        DESTINATION
             share/scripts
         PERMISSIONS

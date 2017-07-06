@@ -75,15 +75,29 @@ MST_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.mst"
 
 # -------------------------------------------------------------------------------------
 
+show_log_error()
+{
+    echo "" 1>&2
+    echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    tail -10 "$LOG_FILE" 1>&2
+    echo "" 1>&2
+}
+
+# -------------------------------------------------------------------------------------
+
 test_password_less_ssh()
 {
-    ssh -x -o "BatchMode=yes" "$AMS_SRC_HOST" "/bin/echo" &> /dev/null
+    echo -n ">>> Testing connection to: $AMS_SRC_HOST ... " | tee -a $LOG_FILE
+    ssh -x -o "BatchMode=yes" "$AMS_SRC_HOST" "/bin/echo" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then
+        echo "failure" | tee -a $LOG_FILE
         echo "" 1>&2
         echo ">>> ERROR: Passwordless ssh connection with $AMS_SRC_HOST is not available!"  1>&2
         echo "" 1>&2
+        show_log_error
         exit 1
     fi
+    echo "success" | tee -a $LOG_FILE
 }
 
 # -------------------------------------------------------------------------------------
@@ -94,6 +108,7 @@ rsync_amscore_cache()
     echo "# AMS core - update site caches" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
+    umask 022
     SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
     $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall | tee -a $LOG_FILE
     if [ $? -ne 0 ]; then exit 1; fi;
@@ -121,6 +136,7 @@ rsync_amsbuilds()
         echo "AMS builds synchronization [OK]"
     else
         echo "AMS builds synchronization [FAILED]"
+        show_log_error
         exit 1
     fi
 
@@ -131,6 +147,7 @@ rsync_amsbuilds()
             echo "AMS master index synchronization [OK]"
         else
             echo "AMS master index synchronization [FAILED]"
+            show_log_error
             exit 1
         fi
     fi
@@ -150,10 +167,10 @@ rsync_softrepo()
     if [ $? -ne 0 ]; then exit 1; fi;
 
     echo "# Changed builds ..." | tee -a $LOG_FILE
-    $AMS_ROOT/bin/ams-repoindex-diff "$MST_INDEX" "$NEW_INDEX" | tee -a $LOG_FILE
+    $AMS_ROOT/bin/ams-repoindex-diff --skipremoved "$MST_INDEX" "$NEW_INDEX" | tee -a $LOG_FILE
     if [ $? -ne 0 ]; then exit 1; fi;
 
-    NCHANGES="`$AMS_ROOT/bin/ams-repoindex-diff "$MST_INDEX" "$NEW_INDEX" | wc -l`"
+    NCHANGES="`$AMS_ROOT/bin/ams-repoindex-diff --skipremoved "$MST_INDEX" "$NEW_INDEX" | wc -l`"
     if [ "$NCHANGES" -eq 0 ]; then
         echo "> No changed builds were detected ..."
         return
@@ -174,12 +191,14 @@ rsync_softrepo()
 
     # create app root directory
         BACKUP_PWD=$PWD
-        cd $AMS_DST_SOFTREPO
+        MY_GROUP=`id -g -n $AMS_DST_USER`
+        cd "$AMS_DST_SOFTREPO"
         cat /tmp/perms.$$ | while read NAME GROUP PERM; do
-            mkdir -p $NAME
-            chmod $PERM $NAME
-            chgrp $GROUP $NAME
-            cd $NAME
+            mkdir -p "$NAME"
+            chmod "$PERM" "$NAME"
+            # ignore GROUP and use group of AMS_DST_USER
+            chgrp "$MY_GROUP" "$NAME"
+            cd "$NAME"
         done >> $LOG_FILE 2>&1
         cd $BACKUP_PWD
         rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
@@ -189,12 +208,13 @@ rsync_softrepo()
               "$AMS_SRC_HOST:$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then
             echo "             [FAILED]"
-            echo ""
+            show_log_error
             exit 1
         else
             echo "             [SYNC]"
         fi
         ) < /dev/null
+        if [ $? -ne 0 ]; then exit 1; fi
     done
 }
 

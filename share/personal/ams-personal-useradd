@@ -1,7 +1,5 @@
 #!/bin/bash
 
-AMS_PERS=/software/ncbr/softmods/8.0/share/personal
-
 function print_header()
 {
     echo ""
@@ -13,7 +11,7 @@ function print_header()
         echo "" 2>&1
         echo ">>> ERROR: This script must be run by the root user!" 2>&1
         echo "" 2>&1
-        echo "    \$ sudo $AMS_PERS/ams-personal-useradd <user>" 2>&1
+        echo "           Usage: ams-personal useradd <user>" 2>&1
         echo "" 2>&1
         exit 1
     fi
@@ -22,7 +20,7 @@ function print_header()
         echo "" 2>&1
         echo ">>> ERROR: User not specified!" 2>&1
         echo "" 2>&1
-        echo "    \$ sudo $AMS_PERS/ams-personal-useradd <user>" 2>&1
+        echo "           Usage: ams-personal useradd <user>" 2>&1
         echo "" 2>&1
         exit 1
     fi
@@ -32,7 +30,7 @@ function print_header()
         echo "" 2>&1
         echo ">>> ERROR: User '$1' does not exist!" 2>&1
         echo "" 2>&1
-        echo "    \$ sudo $AMS_PERS/ams-personal-useradd <user>" 2>&1
+        echo "           Usage: ams-personal useradd <user>" 2>&1
         echo "" 2>&1
         exit 1
     fi

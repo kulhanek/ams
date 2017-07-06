@@ -77,15 +77,29 @@ if ! [ -f "$OLD_INDEX" ]; then touch "$OLD_INDEX"; fi
 
 # -------------------------------------------------------------------------------------
 
+show_log_error()
+{
+    echo "" 1>&2
+    echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    tail -10 "$LOG_FILE" 1>&2
+    echo "" 1>&2
+}
+
+# -------------------------------------------------------------------------------------
+
 test_password_less_ssh()
 {
-    ssh -x -o "BatchMode=yes" "$AMS_DST_HOST" "/bin/echo" &> /dev/null
+    echo -n ">>> Testing connection to: $AMS_SRC_HOST ... " | tee -a $LOG_FILE
+    ssh -x -o "BatchMode=yes" "$AMS_SRC_HOST" "/bin/echo" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then
+        echo "failure" | tee -a $LOG_FILE
         echo "" 1>&2
-        echo ">>> ERROR: Passwordless ssh connection with $AMS_DST_HOST is not available!"  1>&2
+        echo ">>> ERROR: Passwordless ssh connection with $AMS_SRC_HOST is not available!"  1>&2
         echo "" 1>&2
+        show_log_error
         exit 1
     fi
+    echo "success" | tee -a $LOG_FILE
 }
 
 # -------------------------------------------------------------------------------------
@@ -96,6 +110,7 @@ rsync_amscore_cache()
     echo "# AMS core - update site caches" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
+    umask 022
     SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
     $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall | tee -a $LOG_FILE
     if [ $? -ne 0 ]; then exit 1; fi;
@@ -118,9 +133,9 @@ rsync_amscore()
 
     if [ $? -eq 0 ]; then
         echo "AMS core synchronization [OK]"
-        return 0
     else
         echo "AMS core synchronization [FAILED]"
+        show_log_error
         exit 1
     fi
 }
@@ -155,6 +170,7 @@ rsync_dpkg()
         echo "AMS core synchronization [OK]"
     else
         echo "AMS core synchronization [FAILED]"
+        show_log_error
         exit 1
     fi
 
@@ -176,6 +192,7 @@ rsync_dpkg()
             echo "AMS site '$SITE' synchronization [OK]"
         else
             echo "AMS site '$SITE' synchronization [FAILED]"
+            show_log_error
             exit 1
         fi
     done
@@ -194,6 +211,7 @@ rsync_dpkg()
         echo "AMS dpkg synchronization [OK]"
     else
         echo "AMS dpkg synchronization [FAILED]"
+        show_log_error
         exit 1
     fi
 
@@ -256,12 +274,13 @@ rsync_softrepo()
         rsync -e "ssh -x" --timeout=50000 -av --delete $AMS_RSYNC_OPTS "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then
             echo "             [FAILED]"
-            echo ""
+            show_log_error
             exit 1
         else
             echo "             [SYNC]"
         fi
         ) < /dev/null
+        if [ $? -ne 0 ]; then exit 1; fi
     done
 
 # commit changes
@@ -315,7 +334,7 @@ rsync_build()
         rsync -e "ssh -x" --timeout=50000 -av --delete $AMS_RSYNC_OPTS "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then
             echo "             [FAILED]"
-            echo ""
+            show_log_error
             exit 1
         else
             echo "             [SYNC]"

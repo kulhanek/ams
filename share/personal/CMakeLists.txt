@@ -6,7 +6,8 @@ INSTALL(FILES
             ams-personal-envinit
             ams-personal-sshkeys
             ams-personal-useradd
-            ams-personal-install
+            ams-personal-addbuilds
+            ams-personal-rmbuilds
        DESTINATION
             share/personal
         PERMISSIONS
