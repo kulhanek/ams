@@ -71,7 +71,7 @@ case "$ACTION" in
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds "$@"
         ;;
 # -----------------------------
-    "addbcoreuilds" )
+    "addcoreuilds" )
         for SITE in `site listavail`; do
             CORE_BUILDS="$CORE_BUILDS `site listamods`"
         done

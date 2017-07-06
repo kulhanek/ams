@@ -5,10 +5,10 @@
 
 function print_header()
 {
-    echo "" | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "#                             *** Installing builds ***                         " | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "#                             *** Installing builds ***                         "
+    echo "#-------------------------------------------------------------------------------"
 }
 
 # ------------------------------------------------
@@ -102,7 +102,7 @@ function add_builds_to_map(){
     echo "" | tee -a $LOG_FILE
 
     for BUILD in $INSTALL_BUILDS; do
-        printf -n "Adding %-40s ..." $BUILD | tee -a $LOG_FILE
+        printf "Adding %-40s ..." $BUILD | tee -a $LOG_FILE
         PREFIX="`dirname $BUILD`"
         BUILD="`basename $BUILD`"
         if [ "$PREFIX" == "." ]; then PREFIX=""; fi
@@ -163,7 +163,6 @@ function sync_site(){
 
 function print_bottom()
 {
-    echo "" | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "#                        *** End of build installation ***                      " | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
