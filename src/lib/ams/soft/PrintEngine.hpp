@@ -97,7 +97,7 @@ public:
     void PrintSYSAvailHeader(CTerminal& terminal);
 
 // color print output ----------------------------------------------------------
-    void PrintAvailableSites(CTerminal& terminal,bool print_all);
+    void PrintAvailableSites(CTerminal& terminal,bool print_all,bool plain);
 
 // web data providers
     void ListModAvailableModules(CTemplateParams& params,bool include_vers);

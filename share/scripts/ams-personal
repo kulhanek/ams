@@ -20,6 +20,7 @@ function print_usage()
     echo "       sshkeys                              setup sshkeys for the local infinity user"
     echo "       useradd <user>                       add <user> to the infnity group"
     echo "       envinit                              initialize bash startup files for the current user"
+    echo "       addcorebuilds                        install AMS core builds"
     echo ""
     echo "General pre-requisites for a computer:"
     echo "       * ncbr-ams-core-X.Y-personal package must by installed"
@@ -68,6 +69,14 @@ case "$ACTION" in
 # -----------------------------
     "addbuilds" )
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds "$@"
+        ;;
+# -----------------------------
+    "addbcoreuilds" )
+        for SITE in `site listavail`; do
+            CORE_BUILDS="$CORE_BUILDS `site listamods`"
+        done
+        CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
         ;;
 # -----------------------------
     "rmbuilds" )

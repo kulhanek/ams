@@ -1040,7 +1040,7 @@ void CPrintEngine::PrintSYSAvailHeader(CTerminal& terminal)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CPrintEngine::PrintAvailableSites(CTerminal& terminal,bool print_all)
+void CPrintEngine::PrintAvailableSites(CTerminal& terminal,bool print_all,bool plain)
 {
     // setup terminal -------------------------------
     terminal.EnableColors(AreColorsEnabled());
@@ -1079,21 +1079,28 @@ void CPrintEngine::PrintAvailableSites(CTerminal& terminal,bool print_all)
     vector<string>::iterator    ie = sites.end();
 
     while( it != ie ){
-        terminal.AddItem(*it);
+        string item = *it;
+        if( plain == false ){
+            terminal.AddItem(item);
+        } else {
+            terminal.Printf("%s\n",item.c_str());
+        }
         it++;
     }
 
     // print header ---------------------------------
-    terminal.Printf("\n");
-    terminal.SetColors(GetSiteSectionFgColor(),
-                       GetSiteSectionBgColor());
-    terminal.SetBold();
-    terminal.PrintTitle("AVAILABLE SITES",GetSiteSectionDelimiter(),3);
-    terminal.SetDefault();
-    terminal.Printf("\n\n");
+    if( plain == false ){
+        terminal.Printf("\n");
+        terminal.SetColors(GetSiteSectionFgColor(),
+                           GetSiteSectionBgColor());
+        terminal.SetBold();
+        terminal.PrintTitle("AVAILABLE SITES",GetSiteSectionDelimiter(),3);
+        terminal.SetDefault();
+        terminal.Printf("\n\n");
 
-    // print the list -------------------------------
-    terminal.PrintColumnSortedList();
+        // print the list -------------------------------
+        terminal.PrintColumnSortedList();
+    }
 }
 
 //==============================================================================

@@ -603,7 +603,7 @@ void VisualizationMenu(void)
             break;
 
         case 'd':
-            PrintEngine.PrintAvailableSites(Console.GetTerminal(),false);
+            PrintEngine.PrintAvailableSites(Console.GetTerminal(),false,false);
             PrintVisualizationMenu();
             break;
 
@@ -1417,7 +1417,7 @@ void ListSites(void)
     printf("List of available sites:\n");
 
     // print available sites
-    PrintEngine.PrintAvailableSites(Console.GetTerminal(),false);
+    PrintEngine.PrintAvailableSites(Console.GetTerminal(),false,false);
 }
 
 //==============================================================================

@@ -42,9 +42,9 @@ function sync_ams_builds(){
     ams-sync personal amsbuilds >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
-        echo "AMS builds synchronization [OK]"
+        echo "AMS builds synchronization ... [OK]"
     else
-        echo "AMS builds synchronization [FAILED]"
+        echo "AMS builds synchronization ... [FAILED]"
         show_log_error
         exit 1
     fi
@@ -102,17 +102,17 @@ function add_builds_to_map(){
     echo "" | tee -a $LOG_FILE
 
     for BUILD in $INSTALL_BUILDS; do
-        echo -n "Adding $BUILD ... " | tee -a $LOG_FILE
+        printf -n "Adding %-40s ..." $BUILD | tee -a $LOG_FILE
         PREFIX="`dirname $BUILD`"
         BUILD="`basename $BUILD`"
         if [ "$PREFIX" == "." ]; then PREFIX=""; fi
         ams-map-manip --prefix "$PREFIX" addbuilds all "$BUILD" >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then
-            echo "             [FAILED]"
+            echo " [FAILED]"
             show_log_error
             exit 1
         else
-            echo "             [SYNC]"
+            echo " [OK]"
         fi
     done
 }
@@ -130,18 +130,18 @@ function rebuild_map_and_cache(){
 
     ams-map-manip distribute  >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS map distributed [OK]"
+        echo "AMS map distributed         ... [OK]"
     else
-        echo "AMS map distributed [FAILED]"
+        echo "AMS map distributed         ... [FAILED]"
         show_log_error
         exit 1
     fi
 
     ams-cache rebuildall  >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS module cache rebuilded [OK]"
+        echo "AMS module cache rebuilded ... [OK]"
     else
-        echo "AMS module cache rebuilded [FAILED]"
+        echo "AMS module cache rebuilded ... [FAILED]"
         show_log_error
         exit 1
     fi
@@ -167,7 +167,6 @@ function print_bottom()
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "#                        *** End of build installation ***                      " | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "" | tee -a $LOG_FILE
 }
 
 # ------------------------------------------------------------------------------
@@ -218,10 +217,9 @@ add_builds_to_map
 rebuild_map_and_cache
 sync_site
 
-echo ""
-echo "END: Log file is in: $LOG_FILE"
-
 print_bottom
 
-
+echo ""
+echo "END: Log file is in: $LOG_FILE"
+echo ""
 

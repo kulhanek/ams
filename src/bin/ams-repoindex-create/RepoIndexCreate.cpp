@@ -426,12 +426,18 @@ void CRepoIndexCreate::HashNode(const CFileName& name,struct stat& my_stat,bool 
     str << name;
     str << my_stat.st_size;
 
-    str << my_stat.st_ino;
-    str << my_stat.st_dev;
+    // ignore for compatibility with personal site
+    if( Options.GetOptFullIndex() == true ){
+        str << my_stat.st_ino;
+        str << my_stat.st_dev;
+    }
 
 // permisssion data
-    str << my_stat.st_uid;
-    str << my_stat.st_gid;
+    // ignore for compatibility with personal site
+    if( Options.GetOptFullIndex() == true ){
+        str << my_stat.st_uid;
+        str << my_stat.st_gid;
+    }
     str << my_stat.st_mode;
 
 // time data

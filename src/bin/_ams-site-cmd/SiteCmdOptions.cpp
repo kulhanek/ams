@@ -74,6 +74,7 @@ int CSiteCmdOptions::CheckArguments(void)
     if( GetNumberOfProgArgs() == 1 ) {
         Action = GetProgArg(0);
         if( GetProgArg(0) == "avail" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "listavail" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "info" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "active" ) return(SO_CONTINUE);

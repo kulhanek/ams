@@ -313,7 +313,25 @@ bool CSiteCmd::Run(void)
         PrintEngine.SetOutputStream(vout);
 
         // print available sites
-        PrintEngine.PrintAvailableSites(Console.GetTerminal(),Options.GetOptAll());
+        PrintEngine.PrintAvailableSites(Console.GetTerminal(),Options.GetOptAll(),false);
+
+        return(true);
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "listavail" ) {
+        // load user config
+        AMSUserConfig.LoadUserConfig();
+
+        // initialze AMS print engine
+        if( PrintEngine.LoadConfig() == false) {
+            ES_TRACE_ERROR("unable to load print engine config");
+            ExitCode = 1;
+            return(false);
+        }
+        PrintEngine.SetOutputStream(vout);
+
+        // print available sites
+        PrintEngine.PrintAvailableSites(Console.GetTerminal(),Options.GetOptAll(),true);
 
         return(true);
     }

@@ -49,6 +49,7 @@ public:
     CSO_ARG(CSmallString,ScannedDir)
     CSO_ARG(CSmallString,OutputFile)
     // options ------------------------------
+    CSO_OPT(bool,FullIndex)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -69,6 +70,15 @@ public:
                 true,                           /* is argument mandatory */
                 "output",                        /* parametr name */
                 "name of created index file")   /* argument description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                FullIndex,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                'f',                           /* short option name */
+                "full",                      /* long option name */
+                NULL,                           /* parametr name */
+                "include more (local) stat data to the index")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */
