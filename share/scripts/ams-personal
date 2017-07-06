@@ -45,7 +45,7 @@ while [ -n "$SHIFT" ]; do
     esac
 done
 
-if [ $# -ge 1 ]; then
+if [ $# -lt 1 ]; then
     echo "" 1>&2
     echo ">>> ERROR: Incorrect number of arguments!" 1>&2
     print_usage

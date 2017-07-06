@@ -323,14 +323,6 @@ string CRepoIndexCreate::CalculateBuildHash(const CFileName& build_path)
 {
     SHA1 sha1;
 
-    if( Options.GetOptPersonalSite() == true ){
-        // the build might not be synchronized yet
-        if( CFileSystem::IsDirectory(build_path) == false ){
-            // return null sha1
-            return("0000000000000000000000000000000000000000");
-        }
-    }
-
     // split build_path into individual directories and hash them
     string sbuildp = string(build_path);
     vector<string> dirs;
@@ -354,9 +346,25 @@ string CRepoIndexCreate::CalculateBuildHash(const CFileName& build_path)
         if( dir == NULL ) continue;         // if absolute path is provided in AMS_PACKAGE_DIR
         full_path = full_path / dir;
 
+        if( Options.GetOptPersonalSite() == true ){
+            // the build might not be synchronized yet
+            if( CFileSystem::IsDirectory(full_path) == false ){
+                // return null sha1
+                return("0000000000000000000000000000000000000000");
+            }
+        }
+
         struct stat my_stat;
         if( lstat(full_path,&my_stat) != 0 ) continue; // silently skip
         HashNode(dir,my_stat,it == dirs.end(),sha1);
+    }
+
+    if( Options.GetOptPersonalSite() == true ){
+        // the build might not be synchronized yet
+        if( CFileSystem::IsDirectory(full_path) == false ){
+            // return null sha1
+            return("0000000000000000000000000000000000000000");
+        }
     }
 
     // scan the build directory

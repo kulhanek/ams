@@ -109,8 +109,14 @@ rsync_amscore_cache()
 
     umask 022
     SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
-    $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall | tee -a $LOG_FILE
-    if [ $? -ne 0 ]; then exit 1; fi;
+    $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall >> $LOG_FILE 2>&1
+    if [ $? -eq 0 ]; then
+        echo "AMS module cache updated [OK]"
+    else
+        echo "AMS module cache updated [FAILED]"
+        show_log_error
+        exit 1
+    fi
 
 }
 
