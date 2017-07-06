@@ -119,6 +119,14 @@ public:
     /// show builds from given prefix and satysfying given filter condition
     void ShowBuilds(std::ostream& vout,const CSmallString& prefix,const CSmallString& filter);
 
+    /// print all builds satisfying filter, prefix/site/autoprefix
+    void ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const CSmallString& filter,
+                         const CSmallString& prefix);
+
+    /// print best build for module employing prefix/site/autoprefix
+    void ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                         const CSmallString& prefix);
+
     /// show all maps
     bool ShowMapForSites(std::ostream& vout,const CSmallString& sites);
 
@@ -151,10 +159,6 @@ public:
 
     /// distribute modules on all sites
     bool DistributeSiteModules(std::ostream& vout);
-
-    /// print all builds satisfiing filter, prefix/site/autoprefix
-    void GetBuilds(std::ostream& vout,const CSmallString& site_name,const CSmallString& filter,
-                         const CSmallString& prefix);
 
     /// check if the build exists
     bool IsBuild(const CSmallString& site_name,const CSmallString& build_name,

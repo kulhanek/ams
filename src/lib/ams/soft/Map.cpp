@@ -962,7 +962,7 @@ void CMap::ShowBuilds(std::ostream& vout,const CSmallString& prefix,const CSmall
 
 //------------------------------------------------------------------------------
 
-void CMap::GetBuilds(std::ostream& vout,const CSmallString& site_name,const CSmallString& filter,
+void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const CSmallString& filter,
                      const CSmallString& prefix)
 {
     std::set<SFullBuild>  builds;
@@ -993,6 +993,87 @@ void CMap::GetBuilds(std::ostream& vout,const CSmallString& site_name,const CSma
         vout << bld.prefix << "/" << bld.build << endl;
         ibt++;
     }
+}
+
+//------------------------------------------------------------------------------
+
+void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                     const CSmallString& prefix)
+{
+    std::set<SFullBuild>  builds;
+
+    CSmallString name,ver,arch,mode;
+    CUtils::ParseModuleName(module,name,ver,arch,mode);
+
+    CSmallString filter;
+    if( ver == NULL ) ver = "*";
+    if( arch == NULL ) arch = "*";
+    if( mode == NULL ) mode = "*";
+    filter << name << ":" << ver << ":" << arch << ":" << mode;
+
+    // prefix specific
+    ListBuilds(prefix,filter,builds);
+
+    // site specific
+    ListBuilds(site_name,filter,builds);
+
+    // autosite
+    // is within autoprefix?
+    std::list<std::string>::iterator    it = AutoPrefixes.begin();
+    std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+    while( it != ie ){
+        CSmallString auto_prefix = *it;
+        ListBuilds(auto_prefix,filter,builds);
+        it++;
+    }
+
+    // load builds and determine the best one
+    std::set<SFullBuild>::iterator    ibt = builds.begin();
+    std::set<SFullBuild>::iterator    ibe = builds.end();
+
+    SFullBuild best_build;
+    double     best_verindx = 0.0;
+
+    while( ibt != ibe ){
+
+        SFullBuild bld = *ibt;
+
+        CFileName full_build_name;
+
+        full_build_name = GetBuildName(site_name,bld.build,bld.prefix);
+        if( full_build_name == NULL ){
+            ES_ERROR("build does not exist");
+            return;
+        }
+
+        CXMLDocument    xml_doc;
+        CXMLParser      xml_parser;
+        xml_parser.SetOutputXMLNode(&xml_doc);
+
+        if( xml_parser.Parse(full_build_name) == false ) {
+            CSmallString error;
+            error <<  "unable to parse build file (" << full_build_name << ")";
+            ES_ERROR(error);
+            return;
+        }
+
+        double verindx = 0.0;
+
+        CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
+        if( p_bld != NULL ){
+            p_bld->GetAttribute("verindx",verindx);
+        }
+
+        if( (ibt == builds.begin()) || (verindx > best_verindx) ){
+            best_build = bld;
+            best_verindx = verindx;
+        }
+
+        ibt++;
+    }
+
+    vout << best_build.prefix << "/" << best_build.build;
 
 }
 

@@ -71,9 +71,13 @@ case "$ACTION" in
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds "$@"
         ;;
 # -----------------------------
-    "addcoreuilds" )
-        for SITE in `site listavail`; do
-            CORE_BUILDS="$CORE_BUILDS `site listamods`"
+    "addcorebuilds" )
+        CORE_BUILDS=""
+        for SITE in `site listavail 2>&1`; do
+            CORE_MODS="$CORE_BUILDS `site listamods $SITE 2>&1`"
+            for MOD in $CORE_MODS; do
+                CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
+            done
         done
         CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS

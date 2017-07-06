@@ -248,13 +248,23 @@ bool CMapManip::Run(void)
         return( Map.IsBuild(Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix()) );
     }
     // ----------------------------------------------
-    else if( Options.GetArgAction() == "getbuilds" ) {
+    else if( Options.GetArgAction() == "showautobuilds" ) {
         if( Options.IsOptPrefixSet() ){
             if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
         } else {
             if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
         }
-        Map.GetBuilds(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix());
+        Map.ShowAutoBuilds(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix());
+        return(true);
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "bestbuild" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
+        Map.ShowBestBuild(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix());
         return(true);
     }
     // ----------------------------------------------
