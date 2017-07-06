@@ -57,7 +57,7 @@ function read_profile()
 
     export AMS_DST_DPKGROOT="`grep DST_DPKGROOT "$PROFILE" | awk '{print $2;}'`"
     if [ -n "$AMS_DST_DPKGROOT" ]; then
-    echo "  Destination package :   $AMS_DST_DPKGROOT"
+    echo "  Destination package:    $AMS_DST_DPKGROOT"
     fi
 
     export AMS_DST_SOFTMODS="`grep DST_SOFTMODS "$PROFILE" | awk '{print $2;}'`"
@@ -120,7 +120,7 @@ function read_profile()
 
     export AMS_SYNC_ACTION="`grep ACTION $PROFILE | awk '{print $2;}'`"
     if [ -n  "$AMS_SYNC_ACTION" ]; then
-        echo "  Action:             $AMS_SYNC_ACTION"
+    echo "  Action:                 $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
             "all" | "amscore" | "amsbuilds" | "softrepo" | "app" | "dpkg" )
                 ;;
