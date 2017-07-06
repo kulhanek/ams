@@ -53,15 +53,18 @@ function check_builds(){
     echo ""
 
     while [ $# -ne 0 ]; do
-        ARGBUILD="$1"
-        printf ">>> %-40s ... \n" "$ARGBUILD"
-        PREFIX="`dirname $ARGBUILD`"
-        ARGBUILD="`basename $ARGBUILD`"
-        if [ "$PREFIX" == "." ]; then PREFIX=""; fi
-        BUILDS=`ams-map-manip --prefix "$PREFIX" getbuilds personal "$ARGBUILD" 2> /dev/null`
+        ABUILD="$1"
+        printf ">>> %-40s ... \n" "$ABUILD"
+        APREFIX="`dirname $ABUILD`"
+        ABUILD="`basename $ABUILD`"
+        if [ "$APREFIX" == "." ]; then APREFIX=""; fi
+        BUILDS=`ams-map-manip --prefix "$APREFIX" getbuilds personal "$ABUILD" 2> /dev/null`
         NBUILDS=0
         for BUILD in $BUILDS; do
             printf "    %s\n" $BUILD
+            PREFIX="`dirname $BUILD`"
+            BUILD="`basename $BUILD`"
+            if [ "$PREFIX" == "." ]; then PREFIX=""; fi
             for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" deepsyncdeps personal "$BUILD"`; do
                 printf "    |-> %-40s\n" "$SYNC_BUILD"
                 if [ -n "$PREFIX" ]; then SYNC_BUILD="$PREFIX/$SYNC_BUILD"; fi

@@ -332,7 +332,7 @@ rsync_build()
 
 test_password_less_ssh
 
-case $ACTION in
+case "$ACTION" in
     "amscore")
         rsync_amscore_cache
         if [ $? -ne 0 ]; then exit 1; fi;
@@ -366,7 +366,7 @@ case $ACTION in
 esac
 
 echo ""
-echo "Log file is in: $LOG_FILE"
+echo "END: Log file is in: $LOG_FILE"
 echo ""
 
 exit 0

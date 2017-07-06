@@ -1011,6 +1011,8 @@ void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std:
 {
     CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
 
+    if( CFileSystem::IsDirectory(path / prefix) == false ) return;
+
     CDirectoryEnum build_enum(path / prefix);
 
     CSmallString build_filter = filter;
@@ -1037,6 +1039,8 @@ void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std:
 void CMap::ListBuilds(const CSmallString& prefix,std::vector<SFullBuild>& builds)
 {
     CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
+
+    if( CFileSystem::IsDirectory(path / prefix) == false ) return;
 
     CDirectoryEnum build_enum(path / prefix);
 

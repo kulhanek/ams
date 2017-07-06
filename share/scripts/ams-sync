@@ -120,7 +120,7 @@ function read_profile()
 
     export AMS_SYNC_ACTION="`grep ACTION $PROFILE | awk '{print $2;}'`"
     if [ -n  "$AMS_SYNC_ACTION" ]; then
-        echo "  Action             :    $AMS_SYNC_ACTION"
+        echo "  Action:             $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
             "all" | "amscore" | "amsbuilds" | "softrepo" | "app" | "dpkg" )
                 ;;
@@ -135,7 +135,7 @@ function read_profile()
 
     export AMS_MASTER_INDEX="`grep MASTER_INDEX "$PROFILE" | awk '{print $2;}'`"
     if [ -n "$AMS_MASTER_INDEX" ]; then
-    echo "  Master index           :   $AMS_MASTER_INDEX"
+    echo "  Master index:           $AMS_MASTER_INDEX"
     fi
 }
 
@@ -302,7 +302,7 @@ function sync_profile() {
             if [ -n "$AMS_SYNC_ACTION" ]; then
                 $AMS_ROOT/share/sync/rsync/ams-rsync-push "$AMS_SYNC_ACTION"
             else
-                $AMS_ROOT/share/sync/rsync/ams-rsync-push "$@"
+                $AMS_ROOT/share/sync/rsync/ams-rsync-push "$2" "$3"
             fi
             ;;
     # -----------------------------
@@ -317,7 +317,7 @@ function sync_profile() {
             if [ -n "$AMS_SYNC_ACTION" ]; then
                 $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$AMS_SYNC_ACTION"
             else
-                $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$@"
+                $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$2" "$3"
             fi
             ;;
     # -----------------------------

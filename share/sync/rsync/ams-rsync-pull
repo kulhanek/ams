@@ -73,9 +73,6 @@ echo ">>> Log file: $LOG_FILE"
 NEW_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.new"
 MST_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.mst"
 
-ACTION=$1
-if [ -z "$ACTION" ]; then ACTION="all"; fi;
-
 # -------------------------------------------------------------------------------------
 
 test_password_less_ssh()
@@ -87,19 +84,6 @@ test_password_less_ssh()
         echo "" 1>&2
         exit 1
     fi
-}
-
-# -------------------------------------------------------------------------------------
-
-rsync_amscore_cache()
-{
-    echo "" | tee -a $LOG_FILE
-    echo "# AMS core - update site caches" | tee -a $LOG_FILE
-    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
-
-    SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
-    $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall | tee -a $LOG_FILE
-    if [ $? -ne 0 ]; then exit 1; fi;
 }
 
 # -------------------------------------------------------------------------------------
@@ -121,18 +105,16 @@ rsync_amsbuilds()
 
     if [ $? -eq 0 ]; then
         echo "AMS builds synchronization [OK]"
-        return 0
     else
         echo "AMS builds synchronization [FAILED]"
         exit 1
     fi
 
     if [ -n "$AMS_MASTER_INDEX" ]; then
-        scp -x "$AMS_SRC_HOST:$AMS_SRC_SOFTMODS/var/sync/$AMS_MASTER_INDEX/index.new" "$MST_INDEX" >> $LOG_FILE 2>&1
+        scp "$AMS_SRC_HOST:$AMS_SRC_SOFTMODS/var/sync/$AMS_MASTER_INDEX/index.new" "$MST_INDEX" >> $LOG_FILE 2>&1
 
         if [ $? -eq 0 ]; then
             echo "AMS master index synchronization [OK]"
-            return 0
         else
             echo "AMS master index synchronization [FAILED]"
             exit 1
@@ -208,7 +190,7 @@ rsync_softrepo()
 
 test_password_less_ssh
 
-case $ACTION in
+case "$ACTION" in
     "amsbuilds")
         rsync_amsbuilds
         if [ $? -ne 0 ]; then exit 1; fi;
@@ -222,7 +204,7 @@ case $ACTION in
 esac
 
 echo ""
-echo "Log file is in: $LOG_FILE"
+echo "END: Log file is in: $LOG_FILE"
 echo ""
 
 exit 0
