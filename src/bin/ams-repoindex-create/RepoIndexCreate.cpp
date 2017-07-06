@@ -443,7 +443,9 @@ void CRepoIndexCreate::HashNode(const CFileName& name,struct stat& my_stat,bool 
 // time data
     if( build_node ){
         str << my_stat.st_mtime;
-        str << my_stat.st_ctime;
+        if( Options.GetOptFullIndex() == true ){
+            str << my_stat.st_ctime;
+        }
     } else {
         // str << my_stat.st_mtime; this prevent to mark several unchanged builds by modification of their parent directories
         // str << my_stat.st_ctime;

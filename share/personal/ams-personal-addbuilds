@@ -139,9 +139,9 @@ function rebuild_map_and_cache(){
 
     ams-cache rebuildall  >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS module cache rebuilded ... [OK]"
+        echo "AMS module cache rebuilded  ... [OK]"
     else
-        echo "AMS module cache rebuilded ... [FAILED]"
+        echo "AMS module cache rebuilded  ... [FAILED]"
         show_log_error
         exit 1
     fi

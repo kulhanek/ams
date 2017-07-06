@@ -113,9 +113,9 @@ rsync_amscore_cache()
     SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
     $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS module cache updated [OK]"
+        echo "AMS module cache updated             ... [OK]"
     else
-        echo "AMS module cache updated [FAILED]"
+        echo "AMS module cache updated             ... [FAILED]"
         show_log_error
         exit 1
     fi
@@ -137,9 +137,9 @@ rsync_amscore()
          "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
-        echo "AMS core synchronization [OK]"
+        echo "AMS core synchronization             ... [OK]"
     else
-        echo "AMS core synchronization [FAILED]"
+        echo "AMS core synchronization             ... [FAILED]"
         show_log_error
         exit 1
     fi
@@ -172,9 +172,9 @@ rsync_dpkg()
          "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
-        echo "AMS core synchronization [OK]"
+        echo "AMS core synchronization ... [OK]"
     else
-        echo "AMS core synchronization [FAILED]"
+        echo "AMS core synchronization ... [FAILED]"
         show_log_error
         exit 1
     fi
@@ -194,9 +194,9 @@ rsync_dpkg()
              "$AMS_SRC_SOFTMODS/etc/sites/$SITEID" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/etc/sites/" >> $LOG_FILE 2>&1
 
         if [ $? -eq 0 ]; then
-            echo "AMS site '$SITE' synchronization [OK]"
+            echo "AMS site '$SITE' synchronization ... [OK]"
         else
-            echo "AMS site '$SITE' synchronization [FAILED]"
+            echo "AMS site '$SITE' synchronization ... [FAILED]"
             show_log_error
             exit 1
         fi
@@ -213,9 +213,9 @@ rsync_dpkg()
          "$AMS_SRC_SOFTMODS/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
-        echo "AMS dpkg synchronization [OK]"
+        echo "AMS dpkg synchronization ... [OK]"
     else
-        echo "AMS dpkg synchronization [FAILED]"
+        echo "AMS dpkg synchronization ... [FAILED]"
         show_log_error
         exit 1
     fi
