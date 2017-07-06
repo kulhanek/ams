@@ -1,2 +1,2 @@
-/etc/sites/*/modules/*
-/etc/sites/*/cache*
+/modules/*
+/cache*

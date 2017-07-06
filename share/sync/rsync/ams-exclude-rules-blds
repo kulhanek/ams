@@ -1,2 +1,1 @@
-/etc/sites/*/modules/*
-/etc/sites/*/cache*
+/map*.xml
