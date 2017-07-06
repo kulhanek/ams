@@ -1,22 +1,14 @@
 #!/bin/bash
 # =============================================================================
 # AMS - Advanced Module System
-# (c) 2010,2016 Petr Kulhanek
+# (c) 2010,2016,2017 Petr Kulhanek
 # -----------------------------------------------------------------------------
 # ams-rsync-push - synchronize software repository in push mode
 #
 # ams-rsync-push [action] [build]
 #
-# actions: all amscore softrepo build final-core
+# actions: all amscore dpkg softrepo build
 #
-# required setup
-#
-# AMS_SYNC_PROFILE
-# AMS_DST_HOST
-# AMS_DST_SOFTMODS
-# AMS_DST_SOFTREPO
-# AMS_SYNC_SITES
-# AMS_RSYNC_OPTS - optional
 
 # we have piped commands and all must succeed
 set -o pipefail
@@ -121,11 +113,11 @@ rsync_amscore()
     echo "# AMS core - sync data" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
-    ssh -x $AMS_DST_HOST "if ! [ -d "$AMS_DST_SOFTMODS" ]; then mkdir -p "$AMS_DST_SOFTMODS" ; fi;" >> $LOG_FILE 2>&1
+    ssh -x $AMS_DST_HOST "umask 022; if ! [ -d "$AMS_DST_SOFTMODS" ]; then mkdir -p "$AMS_DST_SOFTMODS" ; fi;" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
 
-    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --exclude-from=$AMS_ROOT/share/sync/rsync/ams-core-exclude-rules \
-         "$AMS_ROOT/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --exclude-from=$AMS_ROOT/share/sync/rsync/ams-exclude-rules-core \
+         "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
         echo "AMS core synchronization [OK]"
@@ -159,8 +151,8 @@ rsync_dpkg()
     ssh -x $AMS_DST_HOST "umask 022; if ! [ -d \"$AMS_DST_SOFTMODS\" ]; then mkdir -p \"$AMS_DST_SOFTMODS\" ; fi;" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
 
-    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-dpkg-exclude-rules \
-         "$AMS_ROOT/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-exclude-rules-dpkg \
+         "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
         echo "AMS core synchronization [OK]"
@@ -180,8 +172,8 @@ rsync_dpkg()
             echo "Undefined site '$SITE'"
             exit 1
         fi
-        rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w  \
-             "$AMS_ROOT/etc/sites/$SITEID" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/etc/sites/" >> $LOG_FILE 2>&1
+        rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-exclude-rules-site  \
+             "$AMS_SRC_SOFTMODS/etc/sites/$SITEID" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/etc/sites/" >> $LOG_FILE 2>&1
 
         if [ $? -eq 0 ]; then
             echo "AMS site '$SITE' synchronization [OK]"
@@ -192,14 +184,14 @@ rsync_dpkg()
     done
 
     # gen new control file
-    VERSION="`cat \"$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/dpkgver\" 2>/dev/null`"
+    VERSION="`cat \"$AMS_SRC_SOFTMODS/var/sync/$AMS_SYNC_PROFILE/dpkgver\" 2>/dev/null`"
     ((VERSION++))
-    sed -e "s/VERSION/$VERSION/g" < "$AMS_ROOT/share/dpkg/DEBIAN/control.tmp" > "$AMS_ROOT/share/dpkg/DEBIAN/control"
-    echo "$VERSION" > "$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/dpkgver"
+    sed -e "s/VERSION/$VERSION/g" < "$AMS_SRC_SOFTMODS/share/dpkg/DEBIAN/control.tmp" > "$AMS_SRC_SOFTMODS/share/dpkg/DEBIAN/control"
+    echo "$VERSION" > "$AMS_SRC_SOFTMODS/var/sync/$AMS_SYNC_PROFILE/dpkgver"
 
     # copy DEBIAN package setup
-    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-ctrl-exclude-rules \
-         "$AMS_ROOT/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-exclude-rules-ctrl \
+         "$AMS_SRC_SOFTMODS/share/dpkg/DEBIAN" "$AMS_DST_HOST:$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
         echo "AMS dpkg synchronization [OK]"
@@ -245,14 +237,14 @@ rsync_softrepo()
         printf "%-60s " "$BUILD"
         echo "==== $BUILD" >> $LOG_FILE
 
-        if ! [ -d "$SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
-            echo " - [ERROR] - package directory does not exists: $SOFTREPO/$AMS_PACKAGE_DIR/"
+        if ! [ -d "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
+            echo " - [ERROR] - package directory does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
             exit 1
         fi
 
     # get list of root app directories and their setup (permision and group)
         BACKUP_PWD=$PWD
-        cd $SOFTREPO
+        cd $AMS_SRC_SOFTREPO
         echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do
             stat --format="%n %G %a" $A
             cd $A
@@ -260,12 +252,11 @@ rsync_softrepo()
         cd $BACKUP_PWD
 
     # create app root directory
-        APP_DIR="$AMS_DST_SOFTREPO"
         cat /tmp/perms.$$ | ssh -x $AMS_DST_HOST "cd $AMS_DST_SOFTREPO; while read NAME GROUP PERM; do mkdir -p \$NAME; chmod \$PERM \$NAME; chgrp \$GROUP \$NAME; cd \$NAME; done" >> $LOG_FILE 2>&1
         rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
 
     # copy data
-        rsync -e "ssh -x" --timeout=50000 -av --delete $AMS_RSYNC_OPTS "$SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
+        rsync -e "ssh -x" --timeout=50000 -av --delete $AMS_RSYNC_OPTS "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then
             echo "             [FAILED]"
             echo ""
@@ -284,8 +275,55 @@ rsync_softrepo()
 
 rsync_build()
 {
-    # TODO
-    echo "dsdsa"
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS softrepo - sync build: $1" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    PREFIX="`dirname "$1"`"
+    BUILD="`basename "$1"`"
+    if [ "$PREFIX" == "." ]; then PREFIX=""; fi
+
+    BUILDS=`ams-map-manip --prefix "$PREFIX" getbuilds all "$BUILD" 2> /dev/null`
+
+    for BUILD in $BUILDS; do
+
+        PREFIX="`dirname "$BUILD"`"
+        BUILD="`basename "$BUILD"`"
+        if [ "$PREFIX" == "." ]; then PREFIX=""; fi
+
+        AMS_PACKAGE_DIR=`ams-map-manip --prefix "$PREFIX" getpkgdir all "$BUILD" 2> /dev/null`
+
+        printf "%-60s " "$PREFIX/$BUILD"
+        echo "==== $PREFIX/$BUILD" >> $LOG_FILE
+
+        if ! [ -d "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
+            echo " - [ERROR] - package directory does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
+            exit 1
+        fi
+
+        # get list of root app directories and their setup (permision and group)
+        BACKUP_PWD=$PWD
+        cd $AMS_SRC_SOFTREPO
+        echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do
+            stat --format="%n %G %a" $A
+            cd $A
+        done > /tmp/perms.$$ 2>> $LOG_FILE
+        cd $BACKUP_PWD
+
+        # create app root directory
+        cat /tmp/perms.$$ | ssh -x $AMS_DST_HOST "cd $AMS_DST_SOFTREPO; while read NAME GROUP PERM; do mkdir -p \$NAME; chmod \$PERM \$NAME; chgrp \$GROUP \$NAME; cd \$NAME; done" >> $LOG_FILE 2>&1
+        rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
+
+        # copy data
+        rsync -e "ssh -x" --timeout=50000 -av --delete $AMS_RSYNC_OPTS "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
+        if [ $? -ne 0 ]; then
+            echo "             [FAILED]"
+            echo ""
+            exit 1
+        else
+            echo "             [SYNC]"
+        fi
+    done
 }
 
 # ==============================================================================
@@ -314,7 +352,7 @@ case $ACTION in
     "build")
         rsync_amscore_cache
         if [ $? -ne 0 ]; then exit 1; fi;
-        rsync_build $2
+        rsync_build "$2"
         if [ $? -ne 0 ]; then exit 1; fi;
         ;;
     "all")

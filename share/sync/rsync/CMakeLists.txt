@@ -11,10 +11,11 @@ INSTALL(FILES
         )
 
 INSTALL(FILES
-            ams-core-exclude-rules
-            ams-dpkg-exclude-rules
-            ams-site-exclude-rules
-            ams-ctrl-exclude-rules
+            ams-exclude-rules-core
+            ams-exclude-rules-dpkg
+            ams-exclude-rules-site
+            ams-exclude-rules-ctrl
+            ams-exclude-rules-blds
        DESTINATION
             share/sync/rsync
         PERMISSIONS

@@ -11,7 +11,7 @@ function print_header()
         echo "" 2>&1
         echo ">>> ERROR: This script must be run by the infinity user!" 2>&1
         echo "" 2>&1
-        echo "    \$ sudo -u infinity ams-personal-sshkeys" 2>&1
+        echo "    \$ sudo -u infinity -i ams-personal-sshkeys" 2>&1
         echo "" 2>&1
         exit 1
     fi

@@ -31,6 +31,7 @@
 #include <iostream>
 #include <map>
 #include <list>
+#include <set>
 #include <vector>
 
 //------------------------------------------------------------------------------
@@ -43,6 +44,8 @@ class CSite;
 struct SFullBuild {
     std::string prefix;
     std::string build;
+
+    bool operator < (const SFullBuild& right) const;
 };
 
 //------------------------------------------------------------------------------
@@ -149,6 +152,10 @@ public:
     /// distribute modules on all sites
     bool DistributeSiteModules(std::ostream& vout);
 
+    /// print all builds satisfiing filter, prefix/site/autoprefix
+    void GetBuilds(std::ostream& vout,const CSmallString& site_name,const CSmallString& filter,
+                         const CSmallString& prefix);
+
     /// check if the build exists
     bool IsBuild(const CSmallString& site_name,const CSmallString& build_name,
                  const CSmallString& prefix);
@@ -180,6 +187,7 @@ private:
     void AddSyncDeps(const CSmallString& site_name,const CSmallString& build_name,
                      const CSmallString& prefix,std::list<std::string>& deps,bool deep);
     void ListBuilds(const CSmallString& prefix,std::vector<SFullBuild>& builds);
+    void ListBuilds(const CSmallString& prefix,const CSmallString& filter,std::set<SFullBuild>& builds);
     void ListPrefixes(std::vector<std::string>& prefixes);
     const CSmallString GetBuildName(const CSmallString& site_name,const CSmallString& build_name,
                                    const CSmallString& prefix);

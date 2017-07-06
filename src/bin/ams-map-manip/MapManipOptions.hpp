@@ -54,6 +54,7 @@ public:
     "      <green>showprefixes</green>                - show available build prefixes\n"
     "      <green>showbuilds</green>    prefix filter - show builds from <u>prefix</u> satisfying <u>filter</u>\n"
     "      <green>isbuild</green>       site   build  - test if <u>build</u> exists for given site\n"
+    "      <green>getbuilds</green>     site   filter - show builds satisfying <u>filter</u>\n"
     "      <green>showsyncdeps</green>  site   build  - show sync dependencies for <u>build</u>\n"
     "      <green>deepsyncdeps</green>  site   build  - show sync dependencies for <u>build</u>\n"
     "\n"

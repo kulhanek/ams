@@ -56,7 +56,9 @@ function read_profile()
     fi
 
     export AMS_DST_DPKGROOT="`grep DST_DPKGROOT "$PROFILE" | awk '{print $2;}'`"
+    if [ -n "$AMS_DST_DPKGROOT" ]; then
     echo "  Destination package :   $AMS_DST_DPKGROOT"
+    fi
 
     export AMS_DST_SOFTMODS="`grep DST_SOFTMODS "$PROFILE" | awk '{print $2;}'`"
     echo "  Destination softmods:   $AMS_DST_SOFTMODS"
@@ -103,7 +105,9 @@ function read_profile()
     esac
     
     export AMS_RSYNC_OPTS="`grep RSYNCOPTS "$PROFILE" | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
+    if [ -n "$AMS_RSYNC_OPTS" ]; then
     echo "  rsync options:          $AMS_RSYNC_OPTS"
+    fi
 
     export AMS_SYNC_SITES="`grep SITES "$PROFILE" | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
     echo "  Sync sites:             $AMS_SYNC_SITES"
@@ -118,15 +122,20 @@ function read_profile()
     if [ -n  "$AMS_SYNC_ACTION" ]; then
         echo "  Action             :    $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
-            "amscore" | "softrepo" | "all" | "dpkg" )
+            "all" | "amscore" | "amsbuilds" | "softrepo" | "app" | "dpkg" )
                 ;;
             *)
                 echo "" 1>&2
-                echo ">>> ERROR: ACTION key is not defined or is incorrect!" 1>&2
+                echo ">>> ERROR: ACTION key is incorrect!" 1>&2
                 echo "" 1>&2
                 exit 1
                 ;;
         esac
+    fi
+
+    export AMS_MASTER_INDEX="`grep MASTER_INDEX "$PROFILE" | awk '{print $2;}'`"
+    if [ -n "$AMS_MASTER_INDEX" ]; then
+    echo "  Master index           :   $AMS_MASTER_INDEX"
     fi
 }
 
@@ -156,7 +165,7 @@ fi
 
 if [ $# -ge 2 ]; then
     case $2 in
-        "all" | "amscore" | "softrepo" | "app" | "dpkg" )
+        "all" | "amscore" | "amsbuilds" | "softrepo" | "app" | "dpkg" )
         ;;
         *)
             echo "" 1>&2
@@ -293,26 +302,23 @@ function sync_profile() {
             if [ -n "$AMS_SYNC_ACTION" ]; then
                 $AMS_ROOT/share/sync/rsync/ams-rsync-push "$AMS_SYNC_ACTION"
             else
-                $AMS_ROOT/share/sync/rsync/ams-rsync-push "$2" "$3"
+                $AMS_ROOT/share/sync/rsync/ams-rsync-push "$@"
             fi
             ;;
     # -----------------------------
         "pull" )
-            AMS_DST_HOSTNAME="`echo $AMS_DST_HOST | cut -f 2 -d @`"
-            if [ $AMS_DST_HOSTNAME != "$HOSTNAME" ]; then
-                echo "" 1>&2
-                echo ">>> ERROR: Sync can be initialized only from destination machine $AMS_DST_HOSTNAME!" 1>&2
-                echo "" 1>&2
-                exit 1
-            fi
             AMS_DST_USER="`echo $AMS_DST_HOST | cut -f 1 -d @`"
             if [ $AMS_SRC_USER != "$USER" ]; then
                 echo "" 1>&2
-                echo ">>> ERROR: Sync can be initialized only by $AMS_DST_USER user!" 1>&2
+                echo ">>> ERROR: Sync can be initialized only by '$AMS_DST_USER' user!" 1>&2
                 echo "" 1>&2
                 exit 1
             fi
-            # FIXME
+            if [ -n "$AMS_SYNC_ACTION" ]; then
+                $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$AMS_SYNC_ACTION"
+            else
+                $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$@"
+            fi
             ;;
     # -----------------------------
         *)
@@ -334,7 +340,7 @@ if [ -f "$AMS_ROOT/etc/sync/$1.alias" ]; then
       sync_profile "$PROFILE"
    done
 else
-   sync_profile "$1" "$2" "$3"
+   sync_profile "$@"
 fi
 
 

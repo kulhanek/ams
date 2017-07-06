@@ -111,6 +111,7 @@ int CMapManipOptions::CheckArguments(void)
 
     if( GetNumberOfProgArgs() == 3 ) {
         if( GetProgArg(0) == "showbuilds" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "getbuilds" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "isbuild" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "showsyncdeps" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "deepsyncdeps" ) return(SO_CONTINUE);

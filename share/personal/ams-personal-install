@@ -23,8 +23,21 @@ function print_header()
 function print_usage()
 {
     echo ""
-    echo "    Usage: sudo -u infinity -i ams-personal-install [-h | --help] <[prefix/]build1> [[prefix/]build2 [prefix/]build3 ...]"
+    echo "    Usage: sudo -u infinity -i ams-personal-install [-h | --help] <[prefix1/]build_mask1> [[prefix2/]build_mask2 ...]"
+    echo "           build_mask is either full build specification or incomplete name employing wildcard characters"
     echo ""
+}
+
+# --------------------------------------
+
+function sync_ams_builds(){
+
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 1) Syncing library of AMS builds  ..."
+    echo "#-------------------------------------------------------------------------------"
+
+    ams-sync personal amsbuilds
 }
 
 # --------------------------------------
@@ -40,24 +53,26 @@ function check_builds(){
     echo ""
 
     while [ $# -ne 0 ]; do
-        BUILD="$1"
-        printf "%-40s ... " "$BUILD"
-        PREFIX="`dirname $BUILD`"
-        BUILD="`basename $BUILD`"
+        ARGBUILD="$1"
+        printf ">>> %-40s ... \n" "$ARGBUILD"
+        PREFIX="`dirname $ARGBUILD`"
+        ARGBUILD="`basename $ARGBUILD`"
         if [ "$PREFIX" == "." ]; then PREFIX=""; fi
-        ams-map-manip --prefix "$PREFIX" isbuild personal "$BUILD" &> /dev/null
-        if [ $? -eq 0 ]; then
-            printf " [OK]\n"
+        BUILDS=`ams-map-manip --prefix "$PREFIX" getbuilds personal "$ARGBUILD" 2> /dev/null`
+        NBUILDS=0
+        for BUILD in $BUILDS; do
+            printf "    %s\n" $BUILD
             for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" deepsyncdeps personal "$BUILD"`; do
                 printf "    |-> %-40s\n" "$SYNC_BUILD"
                 if [ -n "$PREFIX" ]; then SYNC_BUILD="$PREFIX/$SYNC_BUILD"; fi
                 INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
+                ((NBUILDS++))
             done
             if [ -n "$PREFIX" ]; then BUILD="$PREFIX/$BUILD"; fi
             INSTALL_BUILDS="$INSTALL_BUILDS $BUILD"
-        else
-            printf " [NOT FOUND]\n"
-        fi
+            ((NBUILDS++))
+        done
+        printf "    Number of builds: %d\n" $NBUILDS
         shift
     done
     INSTALL_BUILDS="`echo $INSTALL_BUILDS | tr " " "\n" | sort -u`"
@@ -150,6 +165,7 @@ fi
 # ------------------------------------------------
 
 INSTALL_BUILDS=""
+sync_ams_builds
 check_builds "$@"
 add_builds_to_map
 rebuild_map_and_cache

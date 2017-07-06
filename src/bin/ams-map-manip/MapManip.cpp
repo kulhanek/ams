@@ -248,12 +248,32 @@ bool CMapManip::Run(void)
         return( Map.IsBuild(Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix()) );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "getbuilds" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
+        Map.GetBuilds(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix());
+        return(true);
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "showsyncdeps" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
         Map.ShowSyncDeps(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix(),false);
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "deepsyncdeps" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
         Map.ShowSyncDeps(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix(),true);
         return(true);
     }

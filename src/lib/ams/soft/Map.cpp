@@ -41,6 +41,7 @@
 #include <iomanip>
 #include <sstream>
 #include <list>
+#include <set>
 #include <fnmatch.h>
 #include <fstream>
 #include <sstream>
@@ -961,9 +962,74 @@ void CMap::ShowBuilds(std::ostream& vout,const CSmallString& prefix,const CSmall
 
 //------------------------------------------------------------------------------
 
-bool cmp_builds(const SFullBuild& left,const SFullBuild& right)
+void CMap::GetBuilds(std::ostream& vout,const CSmallString& site_name,const CSmallString& filter,
+                     const CSmallString& prefix)
 {
-    return( left.build < right.build );
+    std::set<SFullBuild>  builds;
+
+    // prefix specific
+    ListBuilds(prefix,filter,builds);
+
+    // site specific
+    ListBuilds(site_name,filter,builds);
+
+    // autosite
+    // is within autoprefix?
+    std::list<std::string>::iterator    it = AutoPrefixes.begin();
+    std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+    while( it != ie ){
+        CSmallString auto_prefix = *it;
+        ListBuilds(auto_prefix,filter,builds);
+        it++;
+    }
+
+    // print builds
+    std::set<SFullBuild>::iterator    ibt = builds.begin();
+    std::set<SFullBuild>::iterator    ibe = builds.end();
+
+    while( ibt != ibe ){
+        SFullBuild bld = *ibt;
+        vout << bld.prefix << "/" << bld.build << endl;
+        ibt++;
+    }
+
+}
+
+//------------------------------------------------------------------------------
+
+bool SFullBuild::operator < (const SFullBuild& right) const
+{
+    if( prefix < right.prefix ) return(true);
+    if( prefix > right.prefix ) return(false);
+    return( build < right.build );
+}
+
+//------------------------------------------------------------------------------
+
+void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std::set<SFullBuild>& builds)
+{
+    CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
+
+    CDirectoryEnum build_enum(path / prefix);
+
+    CSmallString build_filter = filter;
+    if( build_filter.FindSubString(".bld") == -1 ){
+        build_filter += ".bld";
+    }
+
+    build_enum.StartFindFile(build_filter);
+
+    CFileName build_name;
+    while( build_enum .FindFile(build_name) ) {
+        if( build_name == "." ) continue;
+        if( build_name == ".." ) continue;
+        SFullBuild build;
+        build.prefix = prefix;
+        build.build = string(build_name.GetFileNameWithoutExt());
+        builds.insert(build);
+    }
+    build_enum.EndFindFile();
 }
 
 //------------------------------------------------------------------------------
@@ -973,6 +1039,7 @@ void CMap::ListBuilds(const CSmallString& prefix,std::vector<SFullBuild>& builds
     CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
 
     CDirectoryEnum build_enum(path / prefix);
+
     build_enum.StartFindFile("*.bld");
 
     CFileName build_name;
@@ -1010,7 +1077,7 @@ void CMap::ShowAllBuilds(std::ostream& vout)
     vout << "# Prefix             Build" << endl;
     vout << "# ------------------ -----------------------------------------------------------" << endl;
 
-    sort(builds.begin(),builds.end(),cmp_builds);
+    sort(builds.begin(),builds.end());
 
     vector<SFullBuild>::iterator bit = builds.begin();
     vector<SFullBuild>::iterator bie = builds.end();
