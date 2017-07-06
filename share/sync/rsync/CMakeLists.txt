@@ -4,6 +4,7 @@
 
 INSTALL(FILES
             ams-rsync-push
+            ams-rsync-pull
        DESTINATION
             share/sync/rsync
         PERMISSIONS

@@ -308,7 +308,7 @@ function sync_profile() {
     # -----------------------------
         "pull" )
             AMS_DST_USER="`echo $AMS_DST_HOST | cut -f 1 -d @`"
-            if [ $AMS_SRC_USER != "$USER" ]; then
+            if [ "$AMS_DST_USER" != "$USER" ]; then
                 echo "" 1>&2
                 echo ">>> ERROR: Sync can be initialized only by '$AMS_DST_USER' user!" 1>&2
                 echo "" 1>&2
