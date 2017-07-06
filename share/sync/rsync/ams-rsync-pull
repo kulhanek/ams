@@ -88,6 +88,20 @@ test_password_less_ssh()
 
 # -------------------------------------------------------------------------------------
 
+rsync_amscore_cache()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS core - update site caches" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
+    $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall | tee -a $LOG_FILE
+    if [ $? -ne 0 ]; then exit 1; fi;
+
+}
+
+# -------------------------------------------------------------------------------------
+
 rsync_amsbuilds()
 {
     echo "" | tee -a $LOG_FILE
@@ -189,6 +203,8 @@ rsync_softrepo()
 # ==============================================================================
 
 test_password_less_ssh
+
+ACTION="$1"
 
 case "$ACTION" in
     "amsbuilds")

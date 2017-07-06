@@ -291,11 +291,14 @@ bool CRepoIndexCreate::ListSiteBuilds(const CSmallString& site_name)
                 path = SoftRepo / package_dir;
             }
 
-            if( CFileSystem::IsDirectory(path) == false ){
-                CSmallString error;
-                error << build_id.Name << " -> AMS_PACKAGE_DIR: " << package_dir << " does not exist!";
-                ES_ERROR(error);
-                return(false);
+            if( Options.GetOptPersonalSite() == false ){
+                // ignore this test for personal site as the build might not be synchronized yet
+                if( CFileSystem::IsDirectory(path) == false ){
+                    CSmallString error;
+                    error << build_id.Name << " -> AMS_PACKAGE_DIR: " << package_dir << " does not exist!";
+                    ES_ERROR(error);
+                    return(false);
+                }
             }
 
             // register build
@@ -319,6 +322,14 @@ bool CRepoIndexCreate::ListSiteBuilds(const CSmallString& site_name)
 string CRepoIndexCreate::CalculateBuildHash(const CFileName& build_path)
 {
     SHA1 sha1;
+
+    if( Options.GetOptPersonalSite() == true ){
+        // the build might not be synchronized yet
+        if( CFileSystem::IsDirectory(build_path) == false ){
+            // return null sha1
+            return("00000000000000000000000000000000000000000");
+        }
+    }
 
     // split build_path into individual directories and hash them
     string sbuildp = string(build_path);
@@ -407,28 +418,21 @@ void CRepoIndexCreate::HashNode(const CFileName& name,struct stat& my_stat,bool 
     str << name;
     str << my_stat.st_size;
 
-    if( Options.GetOptPersonalSite() == false ){
-        str << my_stat.st_ino;
-        str << my_stat.st_dev;
+    str << my_stat.st_ino;
+    str << my_stat.st_dev;
 
-    // permisssion data
-        str << my_stat.st_uid;
-        str << my_stat.st_gid;
-        str << my_stat.st_mode;
+// permisssion data
+    str << my_stat.st_uid;
+    str << my_stat.st_gid;
+    str << my_stat.st_mode;
 
-    // time data
-        if( build_node ){
-            str << my_stat.st_mtime;
-            str << my_stat.st_ctime;
-        } else {
-            // str << my_stat.st_mtime; this prevent to mark several unchanged builds by modification of their parent directories
-            // str << my_stat.st_ctime;
-        }
+// time data
+    if( build_node ){
+        str << my_stat.st_mtime;
+        str << my_stat.st_ctime;
     } else {
-        // ???
-        // in personal sites the presmission will be updated to local filesystem
-        // how to detect changes?
-        // FIXME
+        // str << my_stat.st_mtime; this prevent to mark several unchanged builds by modification of their parent directories
+        // str << my_stat.st_ctime;
     }
 
     sha1.update(str.str());

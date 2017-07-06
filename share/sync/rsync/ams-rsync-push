@@ -75,9 +75,6 @@ NEW_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.new"
 OLD_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.old"
 if ! [ -f "$OLD_INDEX" ]; then touch "$OLD_INDEX"; fi
 
-ACTION=$1
-if [ -z "$ACTION" ]; then ACTION="all"; fi;
-
 # -------------------------------------------------------------------------------------
 
 test_password_less_ssh()
@@ -331,6 +328,9 @@ rsync_build()
 # ==============================================================================
 
 test_password_less_ssh
+
+ACTION="$1"
+if [ -z "$ACTION" ]; then ACTION="all"; fi;
 
 case "$ACTION" in
     "amscore")
