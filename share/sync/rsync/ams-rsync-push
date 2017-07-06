@@ -67,7 +67,6 @@ fi
 # log file
 LOG_FILE="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
 
-echo ""
 echo ">>> Log file: $LOG_FILE"
 
 # indexes
