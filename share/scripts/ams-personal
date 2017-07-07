@@ -73,6 +73,8 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "addcorebuilds" )
+        echo ""
+        echo "# AMS core builds for sites: `site listavail 2>&1`"
         CORE_BUILDS=""
         for SITE in `site listavail 2>&1`; do
             for MOD in `site listamods $SITE 2>&1`; do
@@ -80,6 +82,8 @@ case "$ACTION" in
             done
         done
         CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
+        echo $CORE_BUILDS | tr " " "\n"
+
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
         ;;
 # -----------------------------
