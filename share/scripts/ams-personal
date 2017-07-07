@@ -74,7 +74,7 @@ case "$ACTION" in
 # -----------------------------
     "addcorebuilds" )
         echo ""
-        echo "# AMS core builds for sites: `site listavail 2>&1`"
+        echo "# AMS core builds for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(", "); printf("%s",$1); i++;}' `"
         CORE_BUILDS=""
         for SITE in `site listavail 2>&1`; do
             for MOD in `site listamods $SITE 2>&1`; do

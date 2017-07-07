@@ -138,10 +138,10 @@ bool CMap::LoadAutoPrefixes(const CSmallString& user_prefix)
     ifstream ifs(prefixes_name);
 
     if( ! ifs ){
-        CSmallString error;
-        error <<  "unable to load prefixes file (" << prefixes_name << ")";
-        ES_ERROR(error);
-        return(false);
+        CSmallString warning;
+        warning <<  "unable to load prefixes file (" << prefixes_name << ")";
+        ES_WARNING(warning);
+        return(true);
     }
 
     string line,prefix;
@@ -1032,6 +1032,9 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
             it++;
         }
     }
+
+    // no build was found
+    if( builds.size() == 0 ) return;
 
     // load builds and determine the best one
     std::set<SFullBuild>::iterator    ibt = builds.begin();
