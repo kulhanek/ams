@@ -19,7 +19,7 @@ function print_usage()
     echo ""
     echo "Supported actions (setup):"
     echo "       sshkeys                              setup sshkeys for the local infinity user"
-    echo "       useradd <user>                       add <user> to the infnity group"
+    echo "       useradd [user]                       add 'user' to the infnity group, if not provided the current user is added"
     echo "       envinit                              initialize bash startup files for the current user"
     echo "       addcorebuilds                        install AMS core builds"
     echo ""
@@ -100,7 +100,11 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "useradd" )
-        sudo $AMS_ROOT/share/personal/ams-personal-useradd "$@"
+        AUSER="$2"
+        if [ -z "$AUSER" ]; then
+            AUSER="`whoami`"
+        fi
+        sudo $AMS_ROOT/share/personal/ams-personal-useradd "$AUSER"
         ;;
 # -----------------------------
     *)

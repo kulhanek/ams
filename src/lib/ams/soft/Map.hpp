@@ -127,6 +127,10 @@ public:
     void ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
                          const CSmallString& prefix);
 
+    /// print AMS_PACKAGE_DIR
+    bool ShowPkgDir(std::ostream& vout,const CSmallString& site_name,
+                      const CSmallString& build,const CSmallString& prefix);
+
     /// show all maps
     bool ShowMapForSites(std::ostream& vout,const CSmallString& sites);
 

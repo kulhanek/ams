@@ -58,6 +58,7 @@ public:
     "      <green>bestbuild</green>      site   module - show best build for <u>module</u> from <u>prefix</u>/<u>site</u>/<u>autoprefix</u>\n"
     "      <green>showsyncdeps</green>   site   build  - show sync dependencies for <u>build</u>\n"
     "      <green>deepsyncdeps</green>   site   build  - show sync dependencies for <u>build</u>\n"
+    "      <green>getpkgdir</green>      site   build  - get value of AMS_PACKAGE_DIR for <u>build</u> (only one build)\n"
     "\n"
     "      <green>addbuilds</green>  site1[,...] filter  - add builds from <u>prefix</u> satisfying <u>filter</u> to <u>site1</u>, ...\n"
     "      <green>rmbuilds</green>   site1[,...] filter  - remove builds satisfying <u>filter</u> from <u>site1</u>, ...\n"

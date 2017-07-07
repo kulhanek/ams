@@ -142,7 +142,7 @@ public:
                             CSmallString& mode);
 
     /// return value of build variable
-    const CSmallString GetVariableValue(CXMLElement* p_rele,
+    static const CSmallString GetVariableValue(CXMLElement* p_rele,
                             const CSmallString& name);
 
     /// check module version

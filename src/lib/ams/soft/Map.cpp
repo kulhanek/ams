@@ -38,6 +38,7 @@
 #include <string.h>
 #include <XMLIterator.hpp>
 #include <AMSGlobalConfig.hpp>
+#include <Cache.hpp>
 #include <iomanip>
 #include <sstream>
 #include <list>
@@ -967,21 +968,23 @@ void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const
 {
     std::set<SFullBuild>  builds;
 
-    // prefix specific
-    ListBuilds(prefix,filter,builds);
+    if( prefix != NULL ){
+        // prefix specific
+        ListBuilds(prefix,filter,builds);
+    } else {
+        // site specific
+        ListBuilds(site_name,filter,builds);
 
-    // site specific
-    ListBuilds(site_name,filter,builds);
+        // autosite
+        // is within autoprefix?
+        std::list<std::string>::iterator    it = AutoPrefixes.begin();
+        std::list<std::string>::iterator    ie = AutoPrefixes.end();
 
-    // autosite
-    // is within autoprefix?
-    std::list<std::string>::iterator    it = AutoPrefixes.begin();
-    std::list<std::string>::iterator    ie = AutoPrefixes.end();
-
-    while( it != ie ){
-        CSmallString auto_prefix = *it;
-        ListBuilds(auto_prefix,filter,builds);
-        it++;
+        while( it != ie ){
+            CSmallString auto_prefix = *it;
+            ListBuilds(auto_prefix,filter,builds);
+            it++;
+        }
     }
 
     // print builds
@@ -1011,21 +1014,23 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
     if( mode == NULL ) mode = "*";
     filter << name << ":" << ver << ":" << arch << ":" << mode;
 
-    // prefix specific
-    ListBuilds(prefix,filter,builds);
+    if( prefix != NULL ){
+        // prefix specific
+        ListBuilds(prefix,filter,builds);
+    } else {
+        // site specific
+        ListBuilds(site_name,filter,builds);
 
-    // site specific
-    ListBuilds(site_name,filter,builds);
+        // autosite
+        // is within autoprefix?
+        std::list<std::string>::iterator    it = AutoPrefixes.begin();
+        std::list<std::string>::iterator    ie = AutoPrefixes.end();
 
-    // autosite
-    // is within autoprefix?
-    std::list<std::string>::iterator    it = AutoPrefixes.begin();
-    std::list<std::string>::iterator    ie = AutoPrefixes.end();
-
-    while( it != ie ){
-        CSmallString auto_prefix = *it;
-        ListBuilds(auto_prefix,filter,builds);
-        it++;
+        while( it != ie ){
+            CSmallString auto_prefix = *it;
+            ListBuilds(auto_prefix,filter,builds);
+            it++;
+        }
     }
 
     // load builds and determine the best one
@@ -1075,6 +1080,64 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
 
     vout << best_build.prefix << "/" << best_build.build;
 
+}
+
+//------------------------------------------------------------------------------
+
+bool CMap::ShowPkgDir(std::ostream& vout,const CSmallString& site_name,
+                  const CSmallString& build,const CSmallString& prefix)
+{
+    std::set<SFullBuild>  builds;
+
+    CSmallString filter = build;
+
+    if( prefix != NULL ){
+        // prefix specific
+        ListBuilds(prefix,filter,builds);
+    } else {
+        // site specific
+        ListBuilds(site_name,filter,builds);
+
+        // autosite
+        // is within autoprefix?
+        std::list<std::string>::iterator    it = AutoPrefixes.begin();
+        std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+        while( it != ie ){
+            CSmallString auto_prefix = *it;
+            ListBuilds(auto_prefix,filter,builds);
+            it++;
+        }
+    }
+
+    // if more builds - terminate
+    if( builds.size() != 1 ) return(false);
+
+    SFullBuild bld = *(builds.begin());
+
+    CFileName full_build_name;
+
+    full_build_name = GetBuildName(site_name,bld.build,bld.prefix);
+    if( full_build_name == NULL ){
+        ES_ERROR("build does not exist");
+        return(false);
+    }
+
+    CXMLDocument    xml_doc;
+    CXMLParser      xml_parser;
+    xml_parser.SetOutputXMLNode(&xml_doc);
+
+    if( xml_parser.Parse(full_build_name) == false ) {
+        CSmallString error;
+        error <<  "unable to parse build file (" << full_build_name << ")";
+        ES_ERROR(error);
+        return(false);
+    }
+    CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
+    CSmallString dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
+
+    vout << dir;
+    return(true);
 }
 
 //------------------------------------------------------------------------------
@@ -2086,30 +2149,32 @@ const CSmallString CMap::GetBuildName(const CSmallString& site_name,
     CFileName all_builds = AMSGlobalConfig.GetETCDIR() / "map" / "builds";
     CFileName full_build_name;
 
-    // is prefix specific
-    full_build_name = all_builds / prefix / build_name_ext;
-    if( CFileSystem::IsFile(full_build_name) ){
-        return(full_build_name);
-    }
-
-    // is site specific build?
-    full_build_name = all_builds / site_name / build_name_ext;
-    if( CFileSystem::IsFile(full_build_name) ){
-        return(full_build_name);
-    }
-
-    // is within autoprefix?
-    std::list<std::string>::iterator    it = AutoPrefixes.begin();
-    std::list<std::string>::iterator    ie = AutoPrefixes.end();
-
-    while( it != ie ){
-        CSmallString auto_prefix = *it;
-
-        full_build_name = all_builds / auto_prefix / build_name_ext;
+    if( prefix != NULL ){
+        // is prefix specific
+        full_build_name = all_builds / prefix / build_name_ext;
         if( CFileSystem::IsFile(full_build_name) ){
             return(full_build_name);
         }
-        it++;
+    } else {
+        // is site specific build?
+        full_build_name = all_builds / site_name / build_name_ext;
+        if( CFileSystem::IsFile(full_build_name) ){
+            return(full_build_name);
+        }
+
+        // is within autoprefix?
+        std::list<std::string>::iterator    it = AutoPrefixes.begin();
+        std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+        while( it != ie ){
+            CSmallString auto_prefix = *it;
+
+            full_build_name = all_builds / auto_prefix / build_name_ext;
+            if( CFileSystem::IsFile(full_build_name) ){
+                return(full_build_name);
+            }
+            it++;
+        }
     }
 
     return("");

@@ -288,6 +288,15 @@ bool CMapManip::Run(void)
         return(true);
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "getpkgdir" ) {
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
+        return(Map.ShowPkgDir(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix()));
+    }
+    // ----------------------------------------------
     else {
         ES_ERROR("not implemented action");
         return(false);

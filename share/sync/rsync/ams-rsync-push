@@ -89,7 +89,7 @@ show_log_error()
 test_password_less_ssh()
 {
     echo -n ">>> Testing connection to: $AMS_SRC_HOST ... " | tee -a $LOG_FILE
-    ssh -x -o "BatchMode=yes" "$AMS_SRC_HOST" "/bin/echo" >> $LOG_FILE 2>&1
+    ssh -x -o "BatchMode=yes" -o "StrictHostKeyChecking=no" "$AMS_SRC_HOST" "/bin/echo" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then
         echo "failure" | tee -a $LOG_FILE
         echo "" 1>&2
@@ -266,7 +266,7 @@ rsync_softrepo()
         BACKUP_PWD=$PWD
         cd $AMS_SRC_SOFTREPO
         echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do
-            stat --format="%n %G %a" $A
+            stat --format="%n %G %a" "$A"
             cd $A
         done > /tmp/perms.$$ 2>> $LOG_FILE
         cd $BACKUP_PWD
@@ -304,7 +304,7 @@ rsync_build()
     BUILD="`basename "$1"`"
     if [ "$PREFIX" == "." ]; then PREFIX=""; fi
 
-    BUILDS=`ams-map-manip --prefix "$PREFIX" getbuilds all "$BUILD" 2> /dev/null`
+    BUILDS=`ams-map-manip --prefix "$PREFIX" showautobuilds all "$BUILD" 2> /dev/null`
 
     for BUILD in $BUILDS; do
 
@@ -314,8 +314,13 @@ rsync_build()
 
         AMS_PACKAGE_DIR=`ams-map-manip --prefix "$PREFIX" getpkgdir all "$BUILD" 2> /dev/null`
 
+        if [ -z "$AMS_PACKAGE_DIR" ]; then
+            echo " - [ERROR] - package directory is not specified!"
+            exit 1
+        fi
+
         printf "%-60s " "$PREFIX/$BUILD"
-        echo "==== $PREFIX/$BUILD" >> $LOG_FILE
+        echo "==== $PREFIX/$BUILD ($AMS_PACKAGE_DIR)" >> $LOG_FILE
 
         if ! [ -d "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
             echo " - [ERROR] - package directory does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
@@ -326,7 +331,7 @@ rsync_build()
         BACKUP_PWD=$PWD
         cd $AMS_SRC_SOFTREPO
         echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do
-            stat --format="%n %G %a" $A
+            stat --format="%n %G %a" "$A"
             cd $A
         done > /tmp/perms.$$ 2>> $LOG_FILE
         cd $BACKUP_PWD

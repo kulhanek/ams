@@ -11,7 +11,7 @@ function print_usage()
     echo ""
     echo "Usage: ams-sync [-h][--help] [-f][--force] <profile/alias> [action] [build]"
     echo ""
-    echo "       Actions: all amscore softrepo app dpkg (for rsync mode)"
+    echo "       Actions: all amscore softrepo build dpkg (for rsync mode)"
     echo ""
 }
 
@@ -122,7 +122,7 @@ function read_profile()
     if [ -n  "$AMS_SYNC_ACTION" ]; then
     echo "  Action:                 $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
-            "all" | "amscore" | "amsbuilds" | "softrepo" | "app" | "dpkg" )
+            "all" | "amscore" | "amsbuilds" | "softrepo" | "build" | "dpkg" )
                 ;;
             *)
                 echo "" 1>&2
@@ -165,7 +165,7 @@ fi
 
 if [ $# -ge 2 ]; then
     case $2 in
-        "all" | "amscore" | "amsbuilds" | "softrepo" | "app" | "dpkg" )
+        "all" | "amscore" | "amsbuilds" | "softrepo" | "build" | "dpkg" )
         ;;
         *)
             echo "" 1>&2
@@ -292,7 +292,7 @@ function sync_profile() {
                 echo "" 1>&2
                 exit 1
             fi
-            if [ -n "AMS_SYNC_ACTION" ] && [ -n "$2" ]; then
+            if [ -n "$AMS_SYNC_ACTION" ] && [ -n "$2" ]; then
                 echo "" 1>&2
                 echo ">>> ERROR: ACTION is specified both via the profile and command argument!" 1>&2
                 echo "" 1>&2
