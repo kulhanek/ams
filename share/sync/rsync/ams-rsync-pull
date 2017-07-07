@@ -7,7 +7,7 @@
 #
 # ams-rsync-pull [action]
 #
-# actions: amsbuilds softrepo
+# actions: bldlib softrepo
 
 # we have piped commands and all must succeed
 set -o pipefail
@@ -108,12 +108,14 @@ rsync_amscore_cache()
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
     umask 022
+    echo -n "AMS module cache updated              ... "
+
     SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
     $AMS_ROOT/bin/ams-cache --sites "$SITES" rebuildall >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS module cache updated             ... [OK]"
+        echo "[OK]"
     else
-        echo "AMS module cache updated             ... [FAILED]"
+        echo "[FAILED]"
         show_log_error
         exit 1
     fi
@@ -122,10 +124,10 @@ rsync_amscore_cache()
 
 # -------------------------------------------------------------------------------------
 
-rsync_amsbuilds()
+rsync_bldlib()
 {
     echo "" | tee -a $LOG_FILE
-    echo "# AMS builds - sync data" | tee -a $LOG_FILE
+    echo "# AMS build library - sync data" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
     umask 022
@@ -134,7 +136,7 @@ rsync_amsbuilds()
         if [ $? -ne 0 ]; then exit 1; fi;
     fi
 
-    echo -n "AMS builds synchronization           ... "
+    echo -n "AMS build library synchronization     ... "
 
     rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w --exclude-from=$AMS_ROOT/share/sync/rsync/ams-exclude-rules-blds \
          "$AMS_SRC_HOST:$AMS_SRC_SOFTMODS/etc/map/" "$AMS_DST_SOFTMODS/etc/map/" >> $LOG_FILE 2>&1
@@ -158,7 +160,7 @@ rsync_amsindex()
 
     umask 022
 
-    echo -n "AMS master index synchronization ... "
+    echo -n "AMS master index synchronization      ... "
 
     if [ -n "$AMS_MASTER_INDEX" ]; then
         scp "$AMS_SRC_HOST:$AMS_SRC_SOFTMODS/var/sync/$AMS_MASTER_INDEX/index.old" "$MST_INDEX" >> $LOG_FILE 2>&1
@@ -248,8 +250,8 @@ test_password_less_ssh
 ACTION="$1"
 
 case "$ACTION" in
-    "amsbuilds")
-        rsync_amsbuilds
+    "bldlib")
+        rsync_bldlib
         if [ $? -ne 0 ]; then exit 1; fi;
         ;;
     "softrepo")
