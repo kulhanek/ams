@@ -88,7 +88,7 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "update" )
-        sudo -u infinity -i $AMS_ROOT/scripts/ams-sync personal softrepo
+        sudo -u infinity -i $AMS_ROOT/share/scripts/ams-sync personal softrepo
         ;;
 # -----------------------------
     "envinit" )
