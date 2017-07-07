@@ -312,15 +312,15 @@ rsync_build()
         BUILD="`basename "$BUILD"`"
         if [ "$PREFIX" == "." ]; then PREFIX=""; fi
 
+        printf "%-60s " "$PREFIX/$BUILD"
+        echo "==== $PREFIX/$BUILD ($AMS_PACKAGE_DIR)" >> $LOG_FILE
+
         AMS_PACKAGE_DIR=`ams-map-manip --prefix "$PREFIX" getpkgdir all "$BUILD" 2> /dev/null`
 
         if [ -z "$AMS_PACKAGE_DIR" ]; then
-            echo " - [ERROR] - package directory is not specified!"
-            exit 1
+            echo " - [SKIP]"
+            continue
         fi
-
-        printf "%-60s " "$PREFIX/$BUILD"
-        echo "==== $PREFIX/$BUILD ($AMS_PACKAGE_DIR)" >> $LOG_FILE
 
         if ! [ -d "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
             echo " - [ERROR] - package directory does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
