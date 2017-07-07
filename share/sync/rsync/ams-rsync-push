@@ -297,7 +297,7 @@ rsync_softrepo()
 rsync_build()
 {
     echo "" | tee -a $LOG_FILE
-    echo "# AMS softrepo - sync build: $1" | tee -a $LOG_FILE
+    echo "# AMS softrepo - sync builds: $1" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
     PREFIX="`dirname "$1"`"
@@ -318,12 +318,12 @@ rsync_build()
         AMS_PACKAGE_DIR=`ams-map-manip --prefix "$PREFIX" getpkgdir all "$BUILD" 2> /dev/null`
 
         if [ -z "$AMS_PACKAGE_DIR" ]; then
-            echo " - [SKIP]"
+            echo " [NOPKGDIR]"
             continue
         fi
 
         if ! [ -d "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
-            echo " - [ERROR] - package directory does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
+            echo " - [ERROR] - AMS_PACKAGE_DIR does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
             exit 1
         fi
 
