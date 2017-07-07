@@ -15,6 +15,7 @@ function print_usage()
     echo "       addbuilds <[prefix]/bldfilter1> ...  install builds specified by full build name or build filter"
     echo "                                            (incomplete buildname with wildcard characters)"
     echo "       rmbuilds <bldfilter1> ...            remove builds specified by full build name or build filter"
+    echo "       update                               update local builds"
     echo ""
     echo "Supported actions (setup):"
     echo "       sshkeys                              setup sshkeys for the local infinity user"
@@ -84,6 +85,10 @@ case "$ACTION" in
 # -----------------------------
     "rmbuilds" )
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-rmbuilds "$@"
+        ;;
+# -----------------------------
+    "update" )
+        sudo -u infinity -i $AMS_ROOT/scripts/ams-sync personal softrepo
         ;;
 # -----------------------------
     "envinit" )
