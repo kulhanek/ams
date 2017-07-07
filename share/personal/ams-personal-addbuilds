@@ -39,12 +39,12 @@ function sync_ams_builds(){
     echo "# 1) Syncing library of AMS builds  ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
 
-    ams-sync personal amsbuilds >> $LOG_FILE 2>&1
+    ams-sync personal bldlib >> $LOG_FILE 2>&1
 
     if [ $? -eq 0 ]; then
-        echo "AMS builds synchronization ... [OK]"
+        echo "AMS build library synchronization ... [OK]"
     else
-        echo "AMS builds synchronization ... [FAILED]"
+        echo "AMS build library synchronization ... [FAILED]"
         show_log_error
         exit 1
     fi
@@ -132,18 +132,18 @@ function rebuild_map_and_cache(){
 
     ams-map-manip distribute  >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS map distributed         ... [OK]"
+        echo "AMS map distributed               ... [OK]"
     else
-        echo "AMS map distributed         ... [FAILED]"
+        echo "AMS map distributed               ... [FAILED]"
         show_log_error
         exit 1
     fi
 
     ams-cache rebuildall  >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo "AMS module cache rebuilded  ... [OK]"
+        echo "AMS module cache rebuilded        ... [OK]"
     else
-        echo "AMS module cache rebuilded  ... [FAILED]"
+        echo "AMS module cache rebuilded        ... [FAILED]"
         show_log_error
         exit 1
     fi
