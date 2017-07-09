@@ -152,6 +152,8 @@ while [ -n "$SHIFT" ]; do
         ;;
         '-f'|'--force')
             export AMS_FORCE_SYNC="YES"
+            shift
+            SHIFT="-"
         ;;
     esac
 done

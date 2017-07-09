@@ -69,7 +69,8 @@ public:
     "   <green>builds</green>          show available builds of a module\n"
     "   <green>disp</green>            show how module activation influences shell environment\n"
     "   <green>isactive</green>        return zero if all modules in the argument list are active\n"
-    "   <green>getactver</green>       return version of active module\n"
+    "   <green>getactmod</green>       return name:version if the module is active\n"
+    "   <green>getactver</green>       return module version if the module is active\n"
     "   <green>syshdr</green>          print header for system modules\n"
     CSO_PROG_ARGS_LONG_DESC_END
 

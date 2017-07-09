@@ -283,6 +283,20 @@ bool CModuleCmd::Run(void)
         return(result);
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "getactmod" ) {
+        CSmallString actver;
+        CSmallString name;
+        CUtils::ParseModuleName(Options.GetProgArg(1),name);
+        if( AMSGlobalConfig.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
+            CSmallString warning;
+            warning << "module '" << Options.GetProgArg(1) << "' is no active";
+            ES_WARNING(warning);
+            return(false);
+        }
+        vout << name << ":" << actver;
+        return(true);
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "getactver" ) {
         CSmallString actver;
         if( AMSGlobalConfig.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
@@ -291,7 +305,7 @@ bool CModuleCmd::Run(void)
             ES_WARNING(warning);
             return(false);
         }
-        vout << actver << endl;
+        vout << actver;
         return(true);
     }
     // ----------------------------------------------
@@ -382,7 +396,9 @@ void CModuleCmd::Finalize(void)
     }
 
     vout << low;
-    if( ! ForcePrintErrors ) vout << endl;
+    if( (Options.GetArgAction() != "getactmod") && (Options.GetArgAction() != "getactver") ){
+        if( ! ForcePrintErrors ) vout << endl;
+    }
 
     if( ErrorSystem.IsError() ) {
         ExitCode = 1;
