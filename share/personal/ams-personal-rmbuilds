@@ -44,22 +44,26 @@ function gen_list_of_packages()
         done
     done
 
-    echo "" | tee -a $LOG_FILE
-    echo -n "# Distributing map ...    " | tee -a $LOG_FILE
-    ams-map-manip distribute >> $LOG_FILE 2>&1
-    if [ $? -eq 0 ]; then
-        echo " [OK]"
-    else
-        echo " [FAILED]"
-    fi
+    umask 022
 
     echo "" | tee -a $LOG_FILE
-    echo -n "# Updating AMS caches ... " | tee -a $LOG_FILE
-    ams-cache rebuildall >> $LOG_FILE 2>&1
+
+    ams-map-manip distribute  >> $LOG_FILE 2>&1
     if [ $? -eq 0 ]; then
-        echo " [OK]"
+        echo "AMS map distributed               ... [OK]" | tee -a $LOG_FILE
     else
-        echo " [FAILED]"
+        echo "AMS map distributed               ... [FAILED]" | tee -a $LOG_FILE
+        show_log_error
+        exit 1
+    fi
+
+    ams-cache rebuildall  >> $LOG_FILE 2>&1
+    if [ $? -eq 0 ]; then
+        echo "AMS module cache rebuilded        ... [OK]" | tee -a $LOG_FILE
+    else
+        echo "AMS module cache rebuilded        ... [FAILED]" | tee -a $LOG_FILE
+        show_log_error
+        exit 1
     fi
 
 }
