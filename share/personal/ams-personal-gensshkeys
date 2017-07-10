@@ -45,7 +45,7 @@ function print_bottom()
     echo "#             *** End of ssh keys update ***              "
     echo "#---------------------------------------------------------"
     echo ""
-    echo "Public ssh key:"
+    echo "Public Infinity ssh key:"
     cat "/var/lib/infinity/.ssh/id_rsa.pub"
     echo ""
 }

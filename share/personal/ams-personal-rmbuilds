@@ -3,6 +3,158 @@
 # Advanced Module System synchronization utility for personal site
 # ------------------------------------------------------------------------------
 
-echo ">>> INFO: This operation is not currently supported ..."
+function print_header()
+{
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "#                             *** Removing builds ***                         "
+    echo "#-------------------------------------------------------------------------------"
+}
+
+# ------------------------------------------------
+
+function show_log_error()
+{
+    echo "" 1>&2
+    echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    tail -10 "$LOG_FILE" 1>&2
+    echo "" 1>&2
+}
+
+# ------------------------------------------------
+
+function gen_list_of_packages()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 1) Get full builds and remove them from the map ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+    echo "# Number of requests : $#" | tee -a $LOG_FILE
+
+    for SITE in `site listavail 2>&1`; do
+        echo ">>> Site: $SITE" | tee -a $LOG_FILE
+        for FILTER in $1; do
+            printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
+            for BUILD in `ams-cache --site \"$SITE\" getbuilds \"$FILTER\"`; do
+                printf "    |-> %-40s\n" "$BUILD" | tee -a $LOG_FILE
+                AMS_PACKAGE_DIR=`ams-cache --site \"$SITE\" getvariable \"$BUILD\" \"AMS_PACKAGE_DIR\"`
+                if [ -n "$AMS_PACKAGE_DIR" ]; then
+                    REMOVE_PACKAGES="$REMOVE_PACKAGES $AMS_PACKAGE_DIR"
+                fi
+                # remove build from the map
+                ams-map-manip rmbuilds "$SITE" "$BUILD" >> $LOG_FILE 2>&1
+            done
+        done
+    done
+}
+# ------------------------------------------------
+
+function remmove_packages()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 2) Removing builds ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+
+    echo "# The following builds will be removed ..." | tee -a $LOG_FILE
+    # make unique list of builds
+    echo $REMOVE_PACKAGES | tr \" \" \"\n\" | sort -u | tee -a $LOG_FILE
+    REMOVE_PACKAGES="`echo $REMOVE_PACKAGES | tr \" \" \"\n\" | sort -u`"
+
+    echo ""
+    echo -n "Do you want to continue (YES/NO)? "
+    read ANSW
+    if [ "$ANSW" != "YES" ]; then
+        echo ""
+        echo "No builds were removed from the disk (but they were removed from the AMS database)."
+        echo ""
+        exit 1
+    fi
+
+    echo ""
+
+    # remove builds
+    for AMS_PACKAGE_DIR in $REMOVE_PACKAGES; do
+        printf ">>> %-80 " "$AMS_PACKAGE_DIR" | tee -a $LOG_FILE
+        if [ -d "$SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
+            rm -rf "$SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE
+            if [ $? -eq 0 ]; then
+                echo "    [REMOVED]"
+            else
+                echo " [FAILED]"
+            fi
+        fi
+    done
+}
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "#                           *** End of build removal ***                        " | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+}
+
+# ------------------------------------------------------------------------------
+
+print_header
+
+if [ "`id -u -n`" != "infinity" ]; then
+    echo "" 2>&1
+    echo ">>> ERROR: This script must be run by the infinity user!"  2>&1
+    print_usage  2>&1
+    exit 1
+fi
+
+if [ $# -le 0 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Incorrect number of arguments!" 1>&2
+    print_usage 2>&1
+    exit 1
+fi
+
+# check if AMS_ROOT is set -----------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+if [ -z "$SOFTREPO" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: SOFTREPO variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# ------------------------------------------------
+
+mkdir -p "$AMS_ROOT/var/personal/logs"
+if [ $? -ne 0 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Unable to create $AMS_ROOT/var/personal/logs directory!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# log file
+LOG_FILE="$AMS_ROOT/var/personal/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
+
+echo ">>> Log file: $LOG_FILE"
+
+REMOVE_PACKAGES=""
+gen_list_of_packages "$@"
+remmove_packages
+print_bottom
+
+echo ""
+echo "END: Log file is in: $LOG_FILE"
+echo ""
+
 
 

@@ -73,6 +73,7 @@ int CCacheCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "splitmore" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "dependencies" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "syntax" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "allmods" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "allbuilds" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "archs" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "modes" ) return(SO_CONTINUE);
@@ -94,6 +95,11 @@ int CCacheCmdOptions::CheckArguments(void)
             IsError = true;
         }
         return(SO_OPTS_ERROR);
+    }
+
+    if( GetNumberOfProgArgs() == 2 ) {
+        Action = GetProgArg(0);
+        if( GetProgArg(0) == "getbuilds" ) return(SO_CONTINUE);
     }
 
     if( GetNumberOfProgArgs() == 3 ) {

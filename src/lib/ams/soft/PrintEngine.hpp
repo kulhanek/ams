@@ -66,7 +66,9 @@ public:
     static void PrintTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list);
 
 // raw print output -----------------------------------------------------------
+    void PrintRawAllModules(void);
     void PrintRawAllBuilds(void);
+    void PrintRawBuilds(const CSmallString& filter);
     void PrintRawCategories(void);
     bool PrintRawModulesInCategory(const CSmallString& cat_name,bool include_vers);
     bool PrintRawModuleVersions(const CSmallString& mod_name);   

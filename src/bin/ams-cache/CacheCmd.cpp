@@ -113,13 +113,13 @@ bool CCacheCmd::Run(void)
         AMSGlobalConfig.SetActiveSiteID(site_sid);
     }
 
-    if( (Options.GetArgAction() != "rebuildall") &&
-            (Options.GetArgAction() != "syntaxall") ) {
+    if( (Options.GetArgAction() != "rebuildall") && (Options.GetArgAction() != "syntaxall") ) {
         if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
             ES_ERROR("no site is active");
             return(false);
         }
     }
+
     //-----------------------------------------------
     if( Options.GetArgAction() == "rebuild" ) {
         vout << "  # full cache" << endl;
@@ -198,6 +198,26 @@ bool CCacheCmd::Run(void)
         return(true);
     }
     //-----------------------------------------------
+    else if( Options.GetArgAction() == "allmods" ) {
+        // initialze AMS cache
+        if( Cache.LoadCache() == false) {
+            ES_ERROR("unable to load AMS cache");
+            return(false);
+        }
+        // initialize AMS print engine
+        if( PrintEngine.LoadConfig() == false) {
+            ES_ERROR("unable to load print config");
+            return(false);
+        }
+
+        // set output stream
+        PrintEngine.SetOutputStream(vout);
+
+        // print all builds
+        PrintEngine.PrintRawAllModules();
+        return(true);
+    }
+    //-----------------------------------------------
     else if( Options.GetArgAction() == "allbuilds" ) {
         // initialze AMS cache
         if( Cache.LoadCache() == false) {
@@ -215,6 +235,26 @@ bool CCacheCmd::Run(void)
 
         // print all builds
         PrintEngine.PrintRawAllBuilds();
+        return(true);
+    }
+    //-----------------------------------------------
+    else if( Options.GetArgAction() == "getbuilds" ) {
+        // initialze AMS cache
+        if( Cache.LoadCache() == false) {
+            ES_ERROR("unable to load AMS cache");
+            return(false);
+        }
+        // initialize AMS print engine
+        if( PrintEngine.LoadConfig() == false) {
+            ES_ERROR("unable to load print config");
+            return(false);
+        }
+
+        // set output stream
+        PrintEngine.SetOutputStream(vout);
+
+        // print all builds
+        PrintEngine.PrintRawBuilds(Options.GetProgArg(1));
         return(true);
     }
     //-----------------------------------------------

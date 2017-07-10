@@ -46,6 +46,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <FCGIParams.hpp>
+#include <fnmatch.h>
 
 //------------------------------------------------------------------------------
 
@@ -168,7 +169,43 @@ CXMLElement* CPrintEngine::GetRootElementOfConfig(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
+void CPrintEngine::PrintRawAllModules(void)
+{
+    CXMLElement*     p_mele = Cache.GetRootElementOfCache();
+    if( p_mele == NULL ){
+        RUNTIME_ERROR("unable to find root cache element");
+    }
+
+    CXMLElement*    p_ele;
+    CXMLIterator    I(p_mele);
+
+    set<string>  modules;
+
+    while( (p_ele = I.GetNextChildElement("module")) != NULL ) {
+        CSmallString name;
+        p_ele->GetAttribute("name",name);
+        modules.insert(string(name));
+    }
+
+
+    set<string>::iterator    it = modules.begin();
+    set<string>::iterator    ie = modules.end();
+    while( it != ie ){
+        vout << (*it) << endl;
+        it++;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void CPrintEngine::PrintRawAllBuilds(void)
+{
+    PrintRawBuilds("*");
+}
+
+//------------------------------------------------------------------------------
+
+void CPrintEngine::PrintRawBuilds(const CSmallString& filter)
 {
     CXMLElement*     p_mele = Cache.GetRootElementOfCache();
     if( p_mele == NULL ){
@@ -199,7 +236,10 @@ void CPrintEngine::PrintRawAllBuilds(void)
             p_sele->GetAttribute("mode",mode);
 
             CSmallString full_spec = name + ":" + ver + ":" + arch + ":" + mode;
-            builds.push_back(full_spec);
+
+            if( fnmatch(filter,full_spec,0) == 0 ){
+                builds.push_back(full_spec);
+            }
         }
 
     }

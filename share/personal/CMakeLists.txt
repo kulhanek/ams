@@ -4,7 +4,8 @@
 
 INSTALL(FILES
             ams-personal-envinit
-            ams-personal-sshkeys
+            ams-personal-gensshkeys
+            ams-personal-showsshkey
             ams-personal-useradd
             ams-personal-addbuilds
             ams-personal-rmbuilds

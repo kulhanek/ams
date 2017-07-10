@@ -12,16 +12,20 @@ function print_usage()
     echo "Usage: ams-personal [-h][--help] <action> [ARGS]"
     echo ""
     echo "Supported actions (builds):"
-    echo "       addbuilds <[prefix]/bldfilter1> ...  install builds specified by full build name or build filter"
-    echo "                                            (incomplete buildname with wildcard characters)"
-    echo "       rmbuilds <bldfilter1> ...            remove builds specified by full build name or build filter"
-    echo "       update                               update local builds"
+    echo "       addbuilds <[prefix]/bldfilter1> ... install builds specified by full build name or build filter"
+    echo "                                           (filter is incomplete buildname with wildcard characters)"
+    echo "       rmbuilds <bldfilter1> ...           remove builds specified by full build name or build filter"
+    echo "       update                              update all local builds"
+    echo "       upgrade                             upgrade modules to the most recent builds (by verindx) and update all local builds"
     echo ""
-    echo "Supported actions (setup):"
-    echo "       sshkeys                              setup sshkeys for the local infinity user"
-    echo "       useradd [user]                       add 'user' to the infnity group, if not provided the current user is added"
-    echo "       envinit                              initialize bash startup files for the current user"
-    echo "       addcorebuilds                        install AMS core builds"
+    echo "Supported actions (setup):"  
+    echo "       gensshkeys         setup sshkeys for the local infinity user"
+    echo "       showsshkey         show the public key of the local infinity user"
+    echo "       useradd [user]     add 'user' to the infnity group, if not provided the current user is added"
+    echo "       envinit            initialize bash startup files for the current user"
+    echo "       addcorebuilds      install AMS core builds"
+    echo ""
+    echo "All actions except of useradd requires sudo privilegies."
     echo ""
     echo "General pre-requisites for a computer:"
     echo "       * ncbr-ams-core-X.Y-personal package must by installed"
@@ -88,20 +92,40 @@ case "$ACTION" in
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
         ;;
 # -----------------------------
-    "rmbuilds" )
-        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-rmbuilds "$@"
-        ;;
-# -----------------------------
     "update" )
         sudo -u infinity -i $AMS_ROOT/share/scripts/ams-sync personal softrepo
+        ;;
+# -----------------------------
+    "upgrade" )
+        sudo -u infinity -i $AMS_ROOT/share/scripts/ams-sync personal bldlib
+        echo ""
+        echo "# AMS installed modules for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(", "); printf("%s",$1); i++;}' `"
+        CORE_BUILDS=""
+        for SITE in `site listavail 2>&1`; do
+            for MOD in `ams-cache --site $SITE allmods`; do
+                CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
+            done
+        done
+        CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
+        echo $CORE_BUILDS | tr " " "\n"
+
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
+        ;;
+# -----------------------------
+    "rmbuilds" )
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-rmbuilds "$@"
         ;;
 # -----------------------------
     "envinit" )
         $AMS_ROOT/share/personal/ams-personal-envinit "$@"
         ;;
 # -----------------------------
-    "sshkeys" )
-        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-sshkeys "$@"
+    "gensshkeys" )
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-gensshkeys "$@"
+        ;;
+# -----------------------------
+    "showsshkey" )
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-showsshkey "$@"
         ;;
 # -----------------------------
     "useradd" )

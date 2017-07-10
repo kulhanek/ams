@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo ""
+    echo "Public Infinity ssh key:"
+    cat "/var/lib/infinity/.ssh/id_rsa.pub"
+    echo ""
+}
+
+# --------------------------------------
+
+print_bottom
+
+
+

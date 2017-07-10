@@ -56,14 +56,16 @@ public:
     "   <green>splitmore</green>       split cache to individual build files\n"
     "   <green>dependencies</green>    print dependency info among modules\n"
     "   <green>syntax</green>          check syntax of cache\n"
-    "   <green>getvariable</green>     print value of variable\n"
+    "   <green>allmods</green>         print all modules\n"
     "   <green>allbuilds</green>       print all builds\n"
     "   <green>archs</green>           print unique list of architectures used\n"
     "   <green>modes</green>           print unique list of parallel modes used\n"
+    "   <green>getbuilds filter</green>          print all builds satisfying filter\n"
+    "   <green>getvariable build varname</green> print value of variable for build\n"
     "\n"
     "Supported actions for all sites or site aliases:\n"
     "   <green>rebuildall</green>      rebuild site caches for specified sites\n"
-    "   <green>syntaxall</green>       check cache syntax for specified sites\n"
+    "   <green>syntaxall</green>       check cache syntax for specified sites"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN
