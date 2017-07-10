@@ -92,13 +92,11 @@ function remmove_packages()
     # remove directories
     for DIR in `ams-list-dirs orphans`; do
         printf ">>> %-80s " "$DIR" | tee -a $LOG_FILE
-        if [ -d "$SOFTREPO/$DIR/" ]; then
-            rm -rf "$SOFTREPO/$DIR/" >> $LOG_FILE
-            if [ $? -eq 0 ]; then
-                echo "    [REMOVED]"
-            else
-                echo " [FAILED]"
-            fi
+        rm -rf "$DIR/" >> $LOG_FILE
+        if [ $? -eq 0 ]; then
+            echo "    [REMOVED]"
+        else
+            echo " [FAILED]"
         fi
     done
 }
