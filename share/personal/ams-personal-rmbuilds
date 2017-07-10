@@ -105,6 +105,7 @@ function remmove_packages()
 
 function print_bottom()
 {
+    echo ""
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "#                           *** End of build removal ***                        " | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE

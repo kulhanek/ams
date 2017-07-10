@@ -13,10 +13,12 @@ function print_usage()
     echo ""
     echo "Supported actions (builds):"
     echo "       addbuilds <[prefix]/bldfilter1> ... install builds specified by full build name or build filter"
-    echo "                                           (filter is incomplete buildname with wildcard characters)"
+    echo "                                              (filter is incomplete buildname with wildcard characters)"
+    echo "                                              update all local builds"
     echo "       rmbuilds <bldfilter1> ...           remove builds specified by full build name or build filter"
     echo "       update                              update all local builds"
-    echo "       upgrade                             upgrade modules to the most recent builds (by verindx) and update all local builds"
+    echo "       upgrade                             upgrade modules to the most recent builds (by verindx)"
+    echo "                                              and update all local builds"
     echo ""
     echo "Supported actions (setup):"  
     echo "       gensshkeys         setup sshkeys for the local infinity user"
@@ -80,6 +82,7 @@ case "$ACTION" in
         sudo -u infinity -i $AMS_ROOT/share/scripts/ams-sync personal bldlib
         echo ""
         echo "# AMS core builds for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(", "); printf("%s",$1); i++;}' `"
+        echo "# ------------------------------------------------------------------------------"
         CORE_BUILDS=""
         for SITE in `site listavail 2>&1`; do
             for MOD in `site listamods $SITE 2>&1`; do
@@ -99,7 +102,8 @@ case "$ACTION" in
     "upgrade" )
         sudo -u infinity -i $AMS_ROOT/share/scripts/ams-sync personal bldlib
         echo ""
-        echo "# AMS installed modules for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(", "); printf("%s",$1); i++;}' `"
+        echo "# AMS best builds for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(", "); printf("%s",$1); i++;}' `"
+        echo "# ------------------------------------------------------------------------------"
         CORE_BUILDS=""
         for SITE in `site listavail 2>&1`; do
             for MOD in `ams-cache --site $SITE allmods`; do

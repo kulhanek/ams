@@ -5,7 +5,6 @@
 
 function print_header()
 {
-    echo ""
     echo "#-------------------------------------------------------------------------------"
     echo "#                             *** Installing builds ***                         "
     echo "#-------------------------------------------------------------------------------"
@@ -64,7 +63,7 @@ function check_builds(){
 
     while [ $# -ne 0 ]; do
         ABUILD="$1"
-        printf ">>> %-40s ... \n" "$ABUILD"  | tee -a $LOG_FILE
+        printf ">>> %-40s\n" "$ABUILD"  | tee -a $LOG_FILE
         APREFIX="`dirname $ABUILD`"
         ABUILD="`basename $ABUILD`"
         if [ "$APREFIX" == "." ]; then APREFIX=""; fi
@@ -76,7 +75,7 @@ function check_builds(){
             BUILD="`basename $BUILD`"
             if [ "$PREFIX" == "." ]; then PREFIX=""; fi
             for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" deepsyncdeps personal "$BUILD"`; do
-                printf "    |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
+                printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
                 if [ -n "$PREFIX" ]; then SYNC_BUILD="$PREFIX/$SYNC_BUILD"; fi
                 INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
                 ((NBUILDS++))
