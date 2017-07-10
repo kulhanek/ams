@@ -5,7 +5,6 @@
 
 function print_header()
 {
-    echo ""
     echo "#-------------------------------------------------------------------------------"
     echo "#                             *** Removing builds ***                         "
     echo "#-------------------------------------------------------------------------------"
@@ -17,7 +16,7 @@ function show_log_error()
 {
     echo "" 1>&2
     echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
-    tail -10 "$LOG_FILE" 1>&2
+    tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
     echo "" 1>&2
 }
 
@@ -31,14 +30,15 @@ function gen_list_of_packages()
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "" | tee -a $LOG_FILE
     echo "# Number of requests : $#" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
 
     for SITE in `site listavail 2>&1`; do
         echo ">>> Site: $SITE" | tee -a $LOG_FILE
-        for FILTER in $1; do
+        for FILTER in "$@"; do
             printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
-            for BUILD in `ams-cache --site \"$SITE\" getbuilds \"$FILTER\"`; do
+            for BUILD in `ams-cache --site "$SITE" getbuilds "$FILTER"`; do
                 printf "    |-> %-40s\n" "$BUILD" | tee -a $LOG_FILE
-                AMS_PACKAGE_DIR=`ams-cache --site \"$SITE\" getvariable \"$BUILD\" \"AMS_PACKAGE_DIR\"`
+                AMS_PACKAGE_DIR=`ams-cache --site "$SITE" getvariable "$BUILD" "AMS_PACKAGE_DIR"`
                 if [ -n "$AMS_PACKAGE_DIR" ]; then
                     REMOVE_PACKAGES="$REMOVE_PACKAGES $AMS_PACKAGE_DIR"
                 fi

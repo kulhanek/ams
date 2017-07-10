@@ -2,7 +2,6 @@
 
 function print_header()
 {
-    echo ""
     echo "#------------------------------------------------------"
     echo "#  *** Initialize ssh-keys for the infinity user ***   "
     echo "#------------------------------------------------------"
@@ -21,7 +20,9 @@ function print_header()
     echo -n "Do you want to continue? (YES/NO) "
     read CONF
     if [ "$CONF" != "YES" ]; then
-        echo "Execution interrupted!" 2>&1
+        echo ""
+        echo ">>> Execution interrupted!" 2>&1
+        echo ""
         exit 1
     fi
 }
