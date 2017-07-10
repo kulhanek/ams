@@ -38,15 +38,30 @@ function gen_list_of_packages()
             printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
             for BUILD in `ams-cache --site "$SITE" getbuilds "$FILTER"`; do
                 printf "    |-> %-40s\n" "$BUILD" | tee -a $LOG_FILE
-                AMS_PACKAGE_DIR=`ams-cache --site "$SITE" getvariable "$BUILD" "AMS_PACKAGE_DIR"`
-                if [ -n "$AMS_PACKAGE_DIR" ]; then
-                    REMOVE_PACKAGES="$REMOVE_PACKAGES $AMS_PACKAGE_DIR"
-                fi
                 # remove build from the map
                 ams-map-manip rmbuilds "$SITE" "$BUILD" >> $LOG_FILE 2>&1
             done
         done
     done
+
+    echo "" | tee -a $LOG_FILE
+    echo -n "# Distributing map ...    " | tee -a $LOG_FILE
+    ams-map-manip distribute >> $LOG_FILE 2>&1
+    if [ $? -eq 0 ]; then
+        echo " [OK]"
+    else
+        echo " [FAILED]"
+    fi
+
+    echo "" | tee -a $LOG_FILE
+    echo -n "# Updating AMS caches ... " | tee -a $LOG_FILE
+    ams-cache rebuildall >> $LOG_FILE 2>&1
+    if [ $? -eq 0 ]; then
+        echo " [OK]"
+    else
+        echo " [FAILED]"
+    fi
+
 }
 # ------------------------------------------------
 
@@ -54,32 +69,31 @@ function remmove_packages()
 {
     echo "" | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 2) Removing builds ..." | tee -a $LOG_FILE
+    echo "# 2) Removing build directories ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "" | tee -a $LOG_FILE
 
-    echo "# The following builds will be removed ..." | tee -a $LOG_FILE
-    # make unique list of builds
-    echo $REMOVE_PACKAGES | tr " " "\n" | sort -u | tee -a $LOG_FILE
-    REMOVE_PACKAGES="`echo $REMOVE_PACKAGES | tr \" \" \"\n\" | sort -u`"
+    echo "# The following directories will be removed ..." | tee -a $LOG_FILE
+    ams-list-dirs orphans |tee -a $LOG_FILE
 
     echo ""
     echo -n "Do you want to continue (YES/NO)? "
     read ANSW
     if [ "$ANSW" != "YES" ]; then
         echo ""
-        echo ">>> No builds were removed from the disk but they were removed from the AMS database."
+        echo ">>> No build directories were removed from the disk."
+        echo "    They can be removed later ..."
         echo ""
         exit 1
     fi
 
     echo ""
 
-    # remove builds
-    for AMS_PACKAGE_DIR in $REMOVE_PACKAGES; do
-        printf ">>> %-80s " "$AMS_PACKAGE_DIR" | tee -a $LOG_FILE
-        if [ -d "$SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
-            rm -rf "$SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE
+    # remove directories
+    for DIR in `ams-list-dirs orphans`; do
+        printf ">>> %-80s " "$DIR" | tee -a $LOG_FILE
+        if [ -d "$SOFTREPO/$DIR/" ]; then
+            rm -rf "$SOFTREPO/$DIR/" >> $LOG_FILE
             if [ $? -eq 0 ]; then
                 echo "    [REMOVED]"
             else
@@ -147,7 +161,6 @@ LOG_FILE="$AMS_ROOT/var/personal/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
 
 echo ">>> Log file: $LOG_FILE"
 
-REMOVE_PACKAGES=""
 gen_list_of_packages "$@"
 remmove_packages
 print_bottom
