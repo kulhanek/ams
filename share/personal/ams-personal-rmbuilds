@@ -60,7 +60,7 @@ function remmove_packages()
 
     echo "# The following builds will be removed ..." | tee -a $LOG_FILE
     # make unique list of builds
-    echo $REMOVE_PACKAGES | tr \" \" \"\n\" | sort -u | tee -a $LOG_FILE
+    echo $REMOVE_PACKAGES | tr " " "\n" | sort -u | tee -a $LOG_FILE
     REMOVE_PACKAGES="`echo $REMOVE_PACKAGES | tr \" \" \"\n\" | sort -u`"
 
     echo ""
@@ -68,7 +68,7 @@ function remmove_packages()
     read ANSW
     if [ "$ANSW" != "YES" ]; then
         echo ""
-        echo "No builds were removed from the disk (but they were removed from the AMS database)."
+        echo ">>> No builds were removed from the disk but they were removed from the AMS database."
         echo ""
         exit 1
     fi
@@ -77,7 +77,7 @@ function remmove_packages()
 
     # remove builds
     for AMS_PACKAGE_DIR in $REMOVE_PACKAGES; do
-        printf ">>> %-80 " "$AMS_PACKAGE_DIR" | tee -a $LOG_FILE
+        printf ">>> %-80s " "$AMS_PACKAGE_DIR" | tee -a $LOG_FILE
         if [ -d "$SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
             rm -rf "$SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE
             if [ $? -eq 0 ]; then
