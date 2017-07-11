@@ -10,6 +10,8 @@ SET(AMS_SRC
         system/ShellProcessor.cpp
         system/AMSGlobalConfig.cpp
         system/AMSCompletion.cpp
+        system/FSIndex.cpp
+        system/sha1.cpp
 
     # software -----------------------------------
         soft/AMSUserConfig.cpp

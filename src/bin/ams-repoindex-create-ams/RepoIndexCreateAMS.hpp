@@ -1,5 +1,5 @@
-#ifndef RepoIndexCreateH
-#define RepoIndexCreateH
+#ifndef RepoIndexCreateAMSH
+#define RepoIndexCreateAMSH
 // =============================================================================
 // AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -20,7 +20,7 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "RepoIndexCreateOptions.hpp"
+#include "RepoIndexCreateAMSOptions.hpp"
 #include <VerboseStr.hpp>
 #include <TerminalStr.hpp>
 #include <Site.hpp>
@@ -43,10 +43,10 @@ class SHA1;
 
 // -----------------------------------------------------------------------------
 
-class CRepoIndexCreate {
+class CRepoIndexCreateAMS {
 public:
 // constructor -----------------------------------------------------------------
-        CRepoIndexCreate(void);
+        CRepoIndexCreateAMS(void);
 
 // main methods ----------------------------------------------------------------
     /// init options
@@ -60,7 +60,7 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    CRepoIndexCreateOptions     Options;
+    CRepoIndexCreateAMSOptions     Options;
     CTerminalStr                Console;
     CVerboseStr                 vout;
 
@@ -80,9 +80,6 @@ private:
 
     bool ListSites(const CSmallString& sites);
     bool ListSiteBuilds(const CSmallString& site_name);
-    std::string CalculateBuildHash(const CFileName& build_path);
-    void HashDir(const CFileName& full_path,SHA1& sha1);
-    void HashNode(const CFileName& name,struct stat& my_stat,bool build_node,SHA1& sha1);
     bool LoadSiteAliases(void);
     void GetAllSites(std::list<std::string>& sites);
 };

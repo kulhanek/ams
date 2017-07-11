@@ -1,5 +1,5 @@
-#ifndef RepoIndexCreateOptionsH
-#define RepoIndexCreateOptionsH
+#ifndef RepoIndexCreateAMSOptionsH
+#define RepoIndexCreateAMSOptionsH
 // =============================================================================
 // AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -25,10 +25,10 @@
 
 //------------------------------------------------------------------------------
 
-class CRepoIndexCreateOptions : public CSimpleOptions {
+class CRepoIndexCreateAMSOptions : public CSimpleOptions {
 public:
     // constructor - tune option setup
-    CRepoIndexCreateOptions(void);
+    CRepoIndexCreateAMSOptions(void);
 
     // program name and description -----------------------------------------------
     CSO_PROG_NAME_BEGIN
@@ -50,7 +50,6 @@ public:
     // options ------------------------------
     CSO_OPT(CSmallString,Sites)
     CSO_OPT(bool,PersonalSite)
-    CSO_OPT(bool,FullIndex)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -82,15 +81,6 @@ public:
                 "personal",                      /* long option name */
                 NULL,                           /* parametr name */
                 "generate index for personal site")   /* option description */
-    //----------------------------------------------------------------------
-    CSO_MAP_OPT(bool,                           /* option type */
-                FullIndex,                        /* option name */
-                false,                          /* default value */
-                false,                          /* is option mandatory */
-                'f',                           /* short option name */
-                "full",                      /* long option name */
-                NULL,                           /* parametr name */
-                "include more (local) stat data to the index")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */

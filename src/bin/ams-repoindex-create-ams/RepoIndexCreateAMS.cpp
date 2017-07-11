@@ -18,7 +18,7 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "RepoIndexCreate.hpp"
+#include "RepoIndexCreateAMS.hpp"
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
 #include <AMSGlobalConfig.hpp>
@@ -29,7 +29,6 @@
 #include <ErrorSystem.hpp>
 #include <Shell.hpp>
 #include <Utils.hpp>
-#include "sha1.hpp"
 #include <XMLIterator.hpp>
 #include <XMLParser.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -41,6 +40,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <FSIndex.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -50,13 +50,13 @@ using namespace boost::algorithm;
 
 //------------------------------------------------------------------------------
 
-MAIN_ENTRY(CRepoIndexCreate)
+MAIN_ENTRY(CRepoIndexCreateAMS)
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CRepoIndexCreate::CRepoIndexCreate(void)
+CRepoIndexCreateAMS::CRepoIndexCreateAMS(void)
 {
     NumOfAllBuilds = 0;
     NumOfNonSoftRepoBuilds = 0;
@@ -68,7 +68,7 @@ CRepoIndexCreate::CRepoIndexCreate(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-int CRepoIndexCreate::Init(int argc, char* argv[])
+int CRepoIndexCreateAMS::Init(int argc, char* argv[])
 {
     // encode program options
     int result = Options.ParseCmdLine(argc,argv);
@@ -100,7 +100,7 @@ int CRepoIndexCreate::Init(int argc, char* argv[])
 
 //------------------------------------------------------------------------------
 
-bool CRepoIndexCreate::Run(void)
+bool CRepoIndexCreateAMS::Run(void)
 {
     // scan software repository
     SoftRepo = CShell::GetSystemVariable("SOFTREPO");
@@ -131,10 +131,14 @@ bool CRepoIndexCreate::Run(void)
     map<CBuildId,CFileName>::iterator it = BuildPaths.begin();
     map<CBuildId,CFileName>::iterator ie = BuildPaths.end();
 
+    CFSIndex index;
+    index.RootDir = SoftRepo;
+    index.PersonalSite = Options.GetOptPersonalSite();
+
     while( it != ie ){
         CBuildId  build_id = it->first;
         CFileName build_path(it->second);
-        string sha1 = CalculateBuildHash(build_path);
+        string sha1 = index.CalculateBuildHash(build_path);
         BuildIndexes[build_id] = sha1;
         vout << sha1 << " " << build_id.Prefix << "/" << build_id.Name << endl;
         it++;
@@ -174,7 +178,7 @@ bool CRepoIndexCreate::Run(void)
 
 //------------------------------------------------------------------------------
 
-bool CRepoIndexCreate::ListSites(const CSmallString& sites)
+bool CRepoIndexCreateAMS::ListSites(const CSmallString& sites)
 {
     // split sites into individual words
     string ssites = string(sites);
@@ -215,7 +219,7 @@ bool CRepoIndexCreate::ListSites(const CSmallString& sites)
 
 //------------------------------------------------------------------------------
 
-bool CRepoIndexCreate::ListSiteBuilds(const CSmallString& site_name)
+bool CRepoIndexCreateAMS::ListSiteBuilds(const CSmallString& site_name)
 {
     CAmsUUID    site_id = CUtils::GetSiteID(site_name);
 
@@ -319,146 +323,7 @@ bool CRepoIndexCreate::ListSiteBuilds(const CSmallString& site_name)
 
 //------------------------------------------------------------------------------
 
-string CRepoIndexCreate::CalculateBuildHash(const CFileName& build_path)
-{
-    SHA1 sha1;
-
-    // split build_path into individual directories and hash them
-    string sbuildp = string(build_path);
-    vector<string> dirs;
-    split(dirs,sbuildp,is_any_of("/"));
-
-    vector<string>::iterator it = dirs.begin();
-    vector<string>::iterator ie = dirs.end();
-
-    CFileName full_path;
-    CFileName dir;
-    while (it != ie ){
-        dir = CFileName(*it);
-        if( it == dirs.begin() ) {
-            if( dir == NULL ){
-                full_path = "/";
-            } else {
-                full_path = SoftRepo;
-            }
-        }
-        it++;
-        if( dir == NULL ) continue;         // if absolute path is provided in AMS_PACKAGE_DIR
-        full_path = full_path / dir;
-
-        if( Options.GetOptPersonalSite() == true ){
-            // the build might not be synchronized yet
-            if( CFileSystem::IsDirectory(full_path) == false ){
-                // return null sha1
-                return("0000000000000000000000000000000000000000");
-            }
-        }
-
-        struct stat my_stat;
-        if( lstat(full_path,&my_stat) != 0 ) continue; // silently skip
-        HashNode(dir,my_stat,it == dirs.end(),sha1);
-    }
-
-    if( Options.GetOptPersonalSite() == true ){
-        // the build might not be synchronized yet
-        if( CFileSystem::IsDirectory(full_path) == false ){
-            // return null sha1
-            return("0000000000000000000000000000000000000000");
-        }
-    }
-
-    // scan the build directory
-    HashDir(full_path,sha1);
-
-    // final hash
-    return( sha1.final() );
-}
-
-//------------------------------------------------------------------------------
-
-void CRepoIndexCreate::HashDir(const CFileName& full_path,SHA1& sha1)
-{   
-    DIR* p_dir = opendir(full_path);
-    if( p_dir == NULL ) return;  // silently skip
-
-    struct dirent*  p_subdir;
-    list<string>    nodes;
-
-    while( (p_subdir = readdir(p_dir)) != NULL ){
-        if( strcmp(p_subdir->d_name,".") == 0 ) continue;
-        if( strcmp(p_subdir->d_name,"..") == 0 ) continue;
-        nodes.push_back(p_subdir->d_name);
-    }
-    closedir(p_dir);
-
-    // sort it
-    nodes.sort();
-
-    // calculate hash
-    list<string>::iterator it = nodes.begin();
-    list<string>::iterator ie = nodes.end();
-
-    while( it != ie ){
-        CFileName   name(*it);
-        it++;
-        CFileName   sub_node = full_path / name;
-
-        struct stat my_stat;
-        if( lstat(sub_node,&my_stat) != 0 ) continue; // silently skip
-        HashNode(name,my_stat,true,sha1);
-
-        if (S_ISLNK(my_stat.st_mode)) continue;
-
-        if (S_ISDIR(my_stat.st_mode)) {
-            HashDir(sub_node,sha1);
-        }
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void CRepoIndexCreate::HashNode(const CFileName& name,struct stat& my_stat,bool build_node,SHA1& sha1)
-{
-    // sum up monitored values
-    stringstream str;
-
-// core data
-    str << name;
-    str << my_stat.st_size;
-
-    // ignore for compatibility with personal site
-    if( Options.GetOptFullIndex() == true ){
-        str << my_stat.st_ino;
-        str << my_stat.st_dev;
-    }
-
-// permisssion data
-    // ignore for compatibility with personal site
-    if( Options.GetOptFullIndex() == true ){
-        str << my_stat.st_uid;
-        str << my_stat.st_gid;
-    }
-    str << my_stat.st_mode;
-
-// time data
-    if( build_node ){
-        str << my_stat.st_mtime;
-        if( Options.GetOptFullIndex() == true ){
-            str << my_stat.st_ctime;
-        }
-    } else {
-        // str << my_stat.st_mtime; this prevent to mark several unchanged builds by modification of their parent directories
-        // str << my_stat.st_ctime;
-    }
-
-    sha1.update(str.str());
-
-    NumOfStats++;
-}
-
-//------------------------------------------------------------------------------
-
-bool CRepoIndexCreate::LoadSiteAliases(void)
+bool CRepoIndexCreateAMS::LoadSiteAliases(void)
 {
     CFileName aliases_name = AMSGlobalConfig.GetETCDIR() / "map" / "aliases.xml";
 
@@ -502,7 +367,7 @@ bool CRepoIndexCreate::LoadSiteAliases(void)
 
 //------------------------------------------------------------------------------
 
-void CRepoIndexCreate::GetAllSites(std::list<std::string>& sites)
+void CRepoIndexCreateAMS::GetAllSites(std::list<std::string>& sites)
 {
     sites.clear();
 
@@ -527,7 +392,7 @@ void CRepoIndexCreate::GetAllSites(std::list<std::string>& sites)
 
 //------------------------------------------------------------------------------
 
-void CRepoIndexCreate::Finalize(void)
+void CRepoIndexCreateAMS::Finalize(void)
 {
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();

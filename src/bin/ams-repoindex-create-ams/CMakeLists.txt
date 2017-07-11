@@ -4,19 +4,18 @@
 
 # program objects --------------------------------------------------------------
 SET(CMD_SRC
-        RepoIndexCreate.cpp
-        RepoIndexCreateOptions.cpp
-        sha1.cpp
+        RepoIndexCreateAMS.cpp
+        RepoIndexCreateAMSOptions.cpp
         )
 
 # final build ------------------------------------------------------------------
-ADD_EXECUTABLE(ams-repoindex-create ${CMD_SRC})
-ADD_DEPENDENCIES(ams-repoindex-create ams_shared)
+ADD_EXECUTABLE(ams-repoindex-create-ams ${CMD_SRC})
+ADD_DEPENDENCIES(ams-repoindex-create-ams ams_shared)
 
-TARGET_LINK_LIBRARIES(ams-repoindex-create ${AMS_LIBS})
+TARGET_LINK_LIBRARIES(ams-repoindex-create-ams ${AMS_LIBS})
 
 INSTALL(TARGETS
-            ams-repoindex-create
+            ams-repoindex-create-ams
         DESTINATION
             bin
         )
