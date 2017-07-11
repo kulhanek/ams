@@ -155,6 +155,9 @@ public:
     /// remove orphan sites from the map
     void RemoveOrphanSites(std::ostream& vout);
 
+    /// remove orphan bulds
+    void RemoveOrphanBuilds(std::ostream& vout);
+
     /// perform whole mapping procedure
     bool DistributeAll(std::ostream& vout);
 
@@ -199,6 +202,7 @@ private:
     void ListPrefixes(std::vector<std::string>& prefixes);
     const CSmallString GetBuildName(const CSmallString& site_name,const CSmallString& build_name,
                                    const CSmallString& prefix);
+    void RemoveOrphanBuildsFromDir(CFileName buildlib, std::ostream& vout);
  };
 
 //------------------------------------------------------------------------------

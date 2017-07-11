@@ -39,6 +39,7 @@
 #include <XMLIterator.hpp>
 #include <AMSGlobalConfig.hpp>
 #include <Cache.hpp>
+#include <Shell.hpp>
 #include <iomanip>
 #include <sstream>
 #include <list>
@@ -1565,6 +1566,68 @@ void CMap::RemoveOrphanSites(std::ostream& vout)
         }
         p_site = p_next;
     }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CMap::RemoveOrphanBuilds(std::ostream& vout)
+{
+    RemoveOrphanBuildsFromDir("",vout);
+}
+
+//------------------------------------------------------------------------------
+
+void CMap::RemoveOrphanBuildsFromDir(CFileName buildlib, std::ostream& vout)
+{
+    CFileName root_dir = AMSGlobalConfig.GetETCDIR() / "map" / "builds";
+
+    CDirectoryEnum dir_enum(root_dir / buildlib);
+
+    dir_enum.StartFindFile("*");
+    CFileName file;
+    while( dir_enum.FindFile(file) ) {
+        if( file == "." ) continue;
+        if( file == ".." ) continue;
+        CFileName full_name = buildlib / file;
+        if( fnmatch("*.bld",file,0) == 0 ){
+            vout << setw(80) << left << full_name << " ";
+
+            CXMLDocument    xml_doc;
+            CXMLParser      xml_parser;
+            xml_parser.SetOutputXMLNode(&xml_doc);
+
+            if( xml_parser.Parse(root_dir / full_name) == false ) {
+                CSmallString error;
+                error <<  "unable to parse build file (" << full_name << ")";
+                ES_ERROR(error);
+                vout << "unable to parse" << endl;
+                return;
+            }
+            CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
+            CSmallString dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
+            if( dir == NULL ){
+                vout << "AMS_PACKAGE_DIR - not defined" << endl;
+            } else {
+                CFileName softrepo = CShell::GetSystemVariable("SOFTREPO");
+                CFileName pkddir = softrepo / dir;
+                if( CFileSystem::IsDirectory(pkddir) == true ){
+                    vout << "  [OK]" << endl;
+                } else {
+                    vout << "      AMS_PACKAGE_DIR - set but not found - removing build" << endl;
+                    CFileSystem::RemoveFile(root_dir / full_name);
+                }
+            }
+
+        } else {
+            if( CFileSystem::IsDirectory(root_dir / full_name) == true ){
+                RemoveOrphanBuildsFromDir(full_name,vout);
+            }
+        }
+
+    }
+    dir_enum.EndFindFile();
 }
 
 //==============================================================================

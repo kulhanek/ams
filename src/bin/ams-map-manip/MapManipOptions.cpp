@@ -86,6 +86,7 @@ int CMapManipOptions::CheckArguments(void)
         if( GetProgArg(0) == "undo" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "distribute" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "rmorphansites" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "rmorphanbuilds" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "updateverindexes" ) return(SO_CONTINUE);
         if( IsVerbose() ) {
             if( IsError == false ) fprintf(stderr,"\n");

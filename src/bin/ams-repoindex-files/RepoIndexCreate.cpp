@@ -88,7 +88,7 @@ int CRepoIndexCreate::Init(int argc, char* argv[])
     vout << high;
     vout << endl;
     vout << "# ==============================================================================" << endl;
-    vout << "# ams-repoindex-fdirs (AMS utility) started at " << dt.GetSDateAndTime() << endl;
+    vout << "# ams-repoindex-files (AMS utility) started at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
     vout << high;
@@ -102,10 +102,10 @@ bool CRepoIndexCreate::Run(void)
 {
     // create list of builds
     vout << endl;
-    vout << "# Assembling list of subdirectories ..." << endl;
-    if( ListDirs() == false ) return(false);
+    vout << "# Assembling list of files ..." << endl;
+    if( ListFiles() == false ) return(false);
 
-    vout << "  > Number of subdirectories                             = " << NumOfAllBuilds << endl;
+    vout << "  > Number of files                                      = " << NumOfAllBuilds << endl;
 
     // calculate index
     vout << endl;
@@ -130,7 +130,7 @@ bool CRepoIndexCreate::Run(void)
     vout << endl;
     vout << "# Saving index ..." << endl;
 
-    ofstream ofs(Options.GetArgOutputFile());
+    ofstream ofs(Options.GetProgArg(0));
     if( ! ofs ){
         ES_ERROR("Unable to open the index file for writing!");
         return(false);
@@ -157,29 +157,20 @@ bool CRepoIndexCreate::Run(void)
 
 //------------------------------------------------------------------------------
 
-bool CRepoIndexCreate::ListDirs(void)
+bool CRepoIndexCreate::ListFiles(void)
 {
-    CDirectoryEnum enum_dir(Options.GetArgScannedDir());
+    CFileSystem::GetCurrentDir(CurrentDir);
 
-    CFileName   file;
+    for(int i=1; i < Options.GetNumberOfProgArgs(); i++){
+        CFileName file = Options.GetProgArg(i);
 
-    enum_dir.StartFindFile("*");
-    while( enum_dir.FindFile(file) ){
-        if( file == "." ) continue;
-        if( file == ".." ) continue;
-        if( CFileSystem::IsDirectory( CFileName(Options.GetArgScannedDir()) / file ) ){
-            NumOfAllBuilds++;
+        // register build
+        CBuildId build_id;
+        build_id.Name = file;
 
-            // register build
-            CBuildId build_id;
-            build_id.Name = file;
-
-            // register build for index
-            BuildPaths[build_id] = file;
-        }
+        // register build for index
+        BuildPaths[build_id] = file;
     }
-
-    enum_dir.EndFindFile();
 
     return(true);
 }
@@ -206,7 +197,7 @@ string CRepoIndexCreate::CalculateBuildHash(const CFileName& build_path)
             if( dir == NULL ){
                 full_path = "/";
             } else {
-                full_path = Options.GetArgScannedDir();
+                full_path = CurrentDir;
             }
         }
         it++;
@@ -315,7 +306,7 @@ void CRepoIndexCreate::Finalize(void)
     vout << high;
     vout << endl;
     vout << "# ==============================================================================" << endl;
-    vout << "# ams-repoindex-fdirs (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
+    vout << "# ams-repoindex-files (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
     if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){

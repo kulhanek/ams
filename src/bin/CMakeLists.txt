@@ -22,6 +22,7 @@ ADD_SUBDIRECTORY(ams-list-dirs)
 ADD_SUBDIRECTORY(ams-repoindex-create)
 ADD_SUBDIRECTORY(ams-repoindex-diff)
 ADD_SUBDIRECTORY(ams-repoindex-fdirs)
+ADD_SUBDIRECTORY(ams-repoindex-files)
 
 # actions ----------------------------------------
 ADD_SUBDIRECTORY(actions)

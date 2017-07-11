@@ -187,6 +187,11 @@ bool CMapManip::Run(void)
         return(true);
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "rmorphanbuilds" ) {
+        Map.RemoveOrphanBuilds(vout);
+        return(true);
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "newverindex" ) {
         if( Map.LoadMap() == false ) return(false);
         double verindex = Map.GetNewVerIndex(Options.GetProgArg(1));
