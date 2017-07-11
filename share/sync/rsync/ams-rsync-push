@@ -363,6 +363,14 @@ ACTION="$1"
 if [ -z "$ACTION" ]; then ACTION="all"; fi;
 
 case "$ACTION" in
+    "all")
+        rsync_amscore_cache
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_softrepo
+        if [ $? -ne 0 ]; then exit 1; fi;
+        rsync_amscore
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
     "rmindx")
         rm -f "$NEW_INDEX"
         rm -f "$OLD_INDEX"

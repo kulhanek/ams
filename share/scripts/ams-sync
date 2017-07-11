@@ -11,7 +11,7 @@ function print_usage()
     echo ""
     echo "Usage: ams-sync [-h][--help] <profile/alias> [action] [build]"
     echo ""
-    echo "       Actions: amscore bldlib softrepo build dpkg rmindx (for rsync mode)"
+    echo "       Actions: all amscore bldlib softrepo build dpkg rmindx (for rsync mode)"
     echo "                exec (for exec mode) only via profile"
     echo ""
 }
@@ -26,7 +26,7 @@ function get_profile_action()
     if [ -n  "$AMS_SYNC_ACTION" ]; then
     echo "Action:  $AMS_SYNC_ACTION"
         case "$AMS_SYNC_ACTION" in
-            "amscore" | "bldlib" | "softrepo" | "build" | "dpkg" | "rmindx" | "exec")
+            "all" | "amscore" | "bldlib" | "softrepo" | "build" | "dpkg" | "rmindx" | "exec")
                 ;;
             *)
                 echo "" 1>&2
