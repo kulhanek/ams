@@ -93,6 +93,9 @@ public:
     /// test module cache syntax
     bool CheckCacheSyntax(CVerboseStr& vout);
 
+    /// clear cache and create empty cache element
+    void ClearCache(void);
+
 // www information methods -----------------------------------------------------
     /// get module description
     CXMLElement* GetModuleDescription(CXMLElement* p_module);

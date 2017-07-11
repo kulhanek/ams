@@ -28,6 +28,7 @@
 #include <Cache.hpp>
 #include <DirectoryEnum.hpp>
 #include <AmsUUID.hpp>
+#include <Host.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -264,6 +265,11 @@ bool CMapManip::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "bestbuild" ) {
+        // init host data
+        Host.InitGlobalSetup();
+        Host.InitHostFile();
+        Host.InitHost();
+
         if( Options.IsOptPrefixSet() ){
             if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
         } else {

@@ -85,7 +85,7 @@ int  CActions::GetFlags(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CActions::ReactivateModules(CVerboseStr& vout)
+void CActions::ReactivateModules(std::ostream& vout)
 {
     CSmallString active_modules;
     active_modules = AMSGlobalConfig.GetActiveModules();
@@ -118,7 +118,7 @@ void CActions::ReactivateModules(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-bool CActions::PurgeModules(CVerboseStr& vout)
+bool CActions::PurgeModules(std::ostream& vout)
 {
     CSmallString active_modules;
     active_modules = AMSGlobalConfig.GetActiveModules();
@@ -151,7 +151,7 @@ bool CActions::PurgeModules(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-EActionError CActions::AddModule(CVerboseStr& vout,CSmallString module,bool fordep,bool do_not_export)
+EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool fordep,bool do_not_export)
 {
     module.GetSubstitute('/',':');
 
@@ -348,7 +348,7 @@ EActionError CActions::AddModule(CVerboseStr& vout,CSmallString module,bool ford
 //------------------------------------------------------------------------------
 //==============================================================================
 
-EActionError CActions::RemoveModule(CVerboseStr& vout,CSmallString module)
+EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
 {
     module.GetSubstitute('/',':');
 
@@ -448,7 +448,7 @@ void CActions::SetModuleExportFlag(bool set)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::SolveModuleDependencies(CVerboseStr& vout,CXMLElement* p_dep_container)
+bool CActions::SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_container)
 {
     CXMLElement* p_ele = NULL;
 
@@ -519,7 +519,7 @@ bool CActions::SolveModuleDependencies(CVerboseStr& vout,CXMLElement* p_dep_cont
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::SolveModulePostDependencies(CVerboseStr& vout,CXMLElement* p_dep_container)
+bool CActions::SolveModulePostDependencies(std::ostream& vout,CXMLElement* p_dep_container)
 {
     CXMLElement* p_ele = NULL;
 
@@ -699,7 +699,7 @@ const CSmallString CActions::AppendModule(const CSmallString& module_list,const 
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
+bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
                                 CSmallString& name,
                                 CSmallString& ver,
                                 CSmallString& arch,
@@ -912,7 +912,7 @@ bool CActions::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::DetermineArchitecture(CVerboseStr& vout,
+bool CActions::DetermineArchitecture(std::ostream& vout,
                                         CXMLElement* p_module,
                                         const CSmallString& ver,
                                         CSmallString& arch)
@@ -1099,7 +1099,7 @@ bool CActions::DetermineArchitecture(CVerboseStr& vout,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::DetermineMode(CVerboseStr& vout,CXMLElement* p_module,
+bool CActions::DetermineMode(std::ostream& vout,CXMLElement* p_module,
                                 const CSmallString& ver,
                                 const CSmallString& arch,
                                 CSmallString& mode)

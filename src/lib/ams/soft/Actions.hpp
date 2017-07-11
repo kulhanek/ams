@@ -58,16 +58,16 @@ public:
 
     // executive methods ----------------------------------------------------------
     /// add module - fordep is for depended modules
-    EActionError AddModule(CVerboseStr& vout,CSmallString module,bool fordep=false,bool do_not_export=false);
+    EActionError AddModule(std::ostream& vout,CSmallString module,bool fordep=false,bool do_not_export=false);
 
     /// remove module
-    EActionError RemoveModule(CVerboseStr& vout,CSmallString module);
+    EActionError RemoveModule(std::ostream& vout,CSmallString module);
 
     /// reactivate all active modules
-    void ReactivateModules(CVerboseStr& vout);
+    void ReactivateModules(std::ostream& vout);
 
     /// deactivate all active modules
-    bool PurgeModules(CVerboseStr& vout);
+    bool PurgeModules(std::ostream& vout);
 
     /// set print level
     void SetActionPrintLevel(EActionPrintLevel set);
@@ -76,7 +76,7 @@ public:
     void SetModuleExportFlag(bool set);
 
     /// complete module build
-    bool CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
+    bool CompleteModule(std::ostream& vout,CXMLElement* p_module,
                                      CSmallString& name,
                                      CSmallString& ver,
                                      CSmallString& arch,
@@ -98,18 +98,18 @@ private:
 
     // actions related ------------------------------
     /// solve module dependencies
-    bool SolveModuleDependencies(CVerboseStr& vout,CXMLElement* p_dep_container);
+    bool SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_container);
 
     /// solve module dependencies  -  after module is activated
-    bool SolveModulePostDependencies(CVerboseStr& vout,CXMLElement* p_dep_container);
+    bool SolveModulePostDependencies(std::ostream& vout,CXMLElement* p_dep_container);
 
     /// determine acceptable architecture for module
-    bool DetermineArchitecture(CVerboseStr& vout,CXMLElement* p_module,
+    bool DetermineArchitecture(std::ostream& vout,CXMLElement* p_module,
                                             const CSmallString& ver,
                                             CSmallString& arch);
 
     /// determine acceptable parallel mode for module
-    bool DetermineMode(CVerboseStr& vout,CXMLElement* p_module,
+    bool DetermineMode(std::ostream& vout,CXMLElement* p_module,
                                           const CSmallString& ver,
                                           const CSmallString& arch,
                                           CSmallString& mode);
@@ -128,22 +128,22 @@ private:
     const CSmallString AppendModule(const CSmallString& module_list,
                                     const CSmallString& module);
 
-    bool TryOneParaProperty(CVerboseStr& vout,CXMLElement* p_module,
+    bool TryOneParaProperty(std::ostream& vout,CXMLElement* p_module,
                                         const CSmallString& name,
                                         const CSmallString& ver,
                                         const CSmallString& arch,
                                         const CSmallString& mode);
-    bool TryLEParaProperty(CVerboseStr& vout,CXMLElement* p_module,
+    bool TryLEParaProperty(std::ostream& vout,CXMLElement* p_module,
                                         const CSmallString& name,
                                         const CSmallString& ver,
                                         const CSmallString& arch,
                                         const CSmallString& mode);
-    bool TryGTParaProperty(CVerboseStr& vout,CXMLElement* p_module,
+    bool TryGTParaProperty(std::ostream& vout,CXMLElement* p_module,
                                         const CSmallString& name,
                                         const CSmallString& ver,
                                         const CSmallString& arch,
                                         const CSmallString& mode);
-    bool TryAlwaysParaProperty(CVerboseStr& vout,CXMLElement* p_module,
+    bool TryAlwaysParaProperty(std::ostream& vout,CXMLElement* p_module,
                                         const CSmallString& name,
                                         const CSmallString& ver,
                                         const CSmallString& arch,

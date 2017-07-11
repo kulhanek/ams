@@ -203,6 +203,9 @@ private:
     const CSmallString GetBuildName(const CSmallString& site_name,const CSmallString& build_name,
                                    const CSmallString& prefix);
     void RemoveOrphanBuildsFromDir(CFileName buildlib, std::ostream& vout);
+    CXMLElement* PopulateCache(const CSmallString& site_name,const CSmallString& module,const CSmallString& prefix,CSmallString& best_ver);
+    void PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& my_build,
+                          const CSmallString& prefix);
  };
 
 //------------------------------------------------------------------------------

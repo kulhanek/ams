@@ -50,6 +50,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <Actions.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -1002,12 +1003,149 @@ void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const
 //------------------------------------------------------------------------------
 
 void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
-                     const CSmallString& prefix)
+                         const CSmallString& prefix)
 {
+    // prepare cache
+    Cache.ClearCache();
+
+    // populate cache by builds
+    CSmallString name,ver;
+
+    CXMLElement* p_module = PopulateCache(site_name,module,prefix,ver);
+    if( p_module == NULL ) return;
+
+    CUtils::ParseModuleName(module,name);
+
+    // generate default build
+    vout << high;
+    CSmallString arch,mode;
+    Actions.SetActionPrintLevel(EAPL_VERBOSE);
+    Actions.CompleteModule(vout,p_module,name,ver,arch,mode);
+
+    // find build and prefix
+    CSmallString build = name;
+    build << ":" << ver << ":" << arch << ":" << mode;
+    PrintBestBuild(vout,site_name,build,prefix);
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CMap::PopulateCache(const CSmallString& site_name,const CSmallString& module,
+                                 const CSmallString& prefix,CSmallString& best_ver)
+{
+    CXMLElement* p_cele = Cache.GetRootElementOfCache();
+    if( p_cele == NULL ) return(NULL);
+
     std::set<SFullBuild>  builds;
 
     CSmallString name,ver,arch,mode;
     CUtils::ParseModuleName(module,name,ver,arch,mode);
+
+    CXMLElement* p_mele = p_cele->CreateChildElement("module");
+    p_mele->SetAttribute("name",name);
+    if( p_mele == NULL ) return(NULL);
+
+    CXMLElement* p_bele = p_mele->CreateChildElement("builds");
+    if( p_bele == NULL ) return(NULL);
+
+    CSmallString filter;
+    if( ver == NULL ) ver = "*";
+    if( arch == NULL ) arch = "*";
+    if( mode == NULL ) mode = "*";
+    filter << name << ":" << ver << ":" << arch << ":" << mode;
+
+    if( prefix != NULL ){
+        // prefix specific
+        ListBuilds(prefix,filter,builds);
+    } else {
+        // site specific
+        ListBuilds(site_name,filter,builds);
+
+        // autosite
+        // is within autoprefix?
+        std::list<std::string>::iterator    it = AutoPrefixes.begin();
+        std::list<std::string>::iterator    ie = AutoPrefixes.end();
+
+        while( it != ie ){
+            CSmallString auto_prefix = *it;
+            ListBuilds(auto_prefix,filter,builds);
+            it++;
+        }
+    }
+
+    // no build was found
+    if( builds.size() == 0 ) return(NULL);
+
+    // load builds and determine the best one
+    std::set<SFullBuild>::iterator    ibt = builds.begin();
+    std::set<SFullBuild>::iterator    ibe = builds.end();
+
+    double  best_verindx = 0.0;
+    best_ver = NULL;
+
+    while( ibt != ibe ){
+
+        SFullBuild bld = *ibt;
+
+        CFileName full_build_name;
+
+        full_build_name = GetBuildName(site_name,bld.build,bld.prefix);
+        if( full_build_name == NULL ){
+            ES_ERROR("build does not exist");
+            return(NULL);
+        }
+
+        CXMLDocument    xml_doc;
+        CXMLParser      xml_parser;
+        xml_parser.SetOutputXMLNode(&xml_doc);
+
+        if( xml_parser.Parse(full_build_name) == false ) {
+            CSmallString error;
+            error <<  "unable to parse build file (" << full_build_name << ")";
+            ES_ERROR(error);
+            return(NULL);
+        }
+
+        CSmallString    ver;
+        double          verindx = 0.0;
+
+        CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
+        if( p_bld != NULL ){
+            p_bld->GetAttribute("verindx",verindx);
+            p_bld->GetAttribute("ver",ver);
+
+            p_bld->SetAttribute("prefix",prefix);
+            p_bld->DuplicateNode(p_bele);
+        }
+
+        if( (ibt == builds.begin()) || (verindx > best_verindx) ){
+            best_ver = ver;
+            best_verindx = verindx;
+        }
+
+        ibt++;
+    }
+
+//    CXMLPrinter xml_printer;
+
+//    xml_printer.SetPrintedXMLNode(p_mele);
+//    xml_printer.SetPrintAsItIs(true);
+//    xml_printer.Print(stdout);
+
+    return(p_mele);
+}
+
+//------------------------------------------------------------------------------
+
+// get prefix for FULL build
+
+void CMap::PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& my_build,
+                      const CSmallString& prefix)
+{
+    std::set<SFullBuild>  builds;
+
+    CSmallString name,ver,arch,mode;
+    CUtils::ParseModuleName(my_build,name,ver,arch,mode);
 
     CSmallString filter;
     if( ver == NULL ) ver = "*";
@@ -1037,88 +1175,25 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
     // no build was found
     if( builds.size() == 0 ) return;
 
+    // in ideal case - here we should have only one build
+
     // load builds and determine the best one
     std::set<SFullBuild>::iterator    ibt = builds.begin();
     std::set<SFullBuild>::iterator    ibe = builds.end();
 
-    SFullBuild      best_build;
-    double          best_verindx = 0.0;
-    CSmallString    best_mode;
-    CSmallString    best_core;
+    CSmallString my_prefix = prefix;
+
+    vout << high;
 
     while( ibt != ibe ){
-
         SFullBuild bld = *ibt;
-
-        CFileName full_build_name;
-
-        full_build_name = GetBuildName(site_name,bld.build,bld.prefix);
-        if( full_build_name == NULL ){
-            ES_ERROR("build does not exist");
-            return;
-        }
-
-        CXMLDocument    xml_doc;
-        CXMLParser      xml_parser;
-        xml_parser.SetOutputXMLNode(&xml_doc);
-
-        if( xml_parser.Parse(full_build_name) == false ) {
-            CSmallString error;
-            error <<  "unable to parse build file (" << full_build_name << ")";
-            ES_ERROR(error);
-            return;
-        }
-
-        double verindx = 0.0;
-        CSmallString name,vers,arch;
-        CSmallString mode = "single";
-        CSmallString core_build;
-
-        CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
-        if( p_bld != NULL ){
-            p_bld->GetAttribute("verindx",verindx);
-            p_bld->GetAttribute("name",name);
-            p_bld->GetAttribute("vers",vers);
-            p_bld->GetAttribute("arch",arch);
-            p_bld->GetAttribute("mode",mode);
-            core_build << name << ":" << vers << ":" << arch;
-        }
-
-        if( ibt == builds.begin() ){
-            best_build = bld;
-            best_verindx = verindx;
-            best_mode = mode;
-            best_core = core_build;
-        }
-
-        if( verindx > best_verindx ){
-            if( best_core != core_build ){
-                best_build = bld;
-                best_verindx = verindx;
-                best_mode = mode;
-                best_core = core_build;
-            }
-        }
-        if( (verindx >= best_verindx) && ( mode == "single") ){
-            best_build = bld;
-            best_verindx = verindx;
-            best_mode = mode;
-            best_core = core_build;
-        }
-        if( best_mode != "single" ){
-            if( (verindx >= best_verindx) && ( mode == "node") ){
-                best_build = bld;
-                best_verindx = verindx;
-                best_mode = mode;
-                best_core = core_build;
-            }
-        }
-
+        vout << "|> " << bld.prefix << "/" << bld.build << endl;
+        my_prefix = bld.prefix;
         ibt++;
     }
 
-    vout << best_build.prefix << "/" << best_build.build;
-
+    vout << low;
+    vout << my_prefix << "/" << my_build;
 }
 
 //------------------------------------------------------------------------------
