@@ -211,6 +211,7 @@ function sync_profile() {
             exit 1
         fi
     fi
+    umask 027
     mkdir -p "$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/"
     if [ $? -ne 0 ]; then
         echo "" 1>&2
