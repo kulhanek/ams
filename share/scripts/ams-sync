@@ -174,7 +174,7 @@ function read_profile_rsync()
 function read_profile_exec()
 {
     export AMS_WORKING_DIR="`grep CWD "$PROFILE" | awk '{print $2;}'`"
-    echo "  Working directory:      $AMS_WORKING_DIR"
+    echo "  Working directory: $AMS_WORKING_DIR"
     if [ -z "$AMS_WORKING_DIR" ]; then
         echo "" 1>&2
         echo ">>> ERROR: CWD key is not defined!" 1>&2
@@ -182,8 +182,8 @@ function read_profile_exec()
         exit 1
     fi
 
-    export AMS_COMMAND="`grep CMD "$PROFILE" | awk '{print $2;}'`"
-    echo "  Command:                $AMS_COMMAND"
+    export AMS_COMMAND="`grep CMD "$PROFILE" | awk 'for(i=2;i<=NF;i++){printf("%s ",$i);}'`"
+    echo "  Command:           $AMS_COMMAND"
     if [ -z "$AMS_COMMAND" ]; then
         echo "" 1>&2
         echo ">>> ERROR: CMD key is not defined!" 1>&2
@@ -408,11 +408,14 @@ fi
 
 if [ -f "$AMS_ROOT/etc/sync/$1.alias" ]; then
     echo ""
-    echo " >>> ALIAS: $1"
+    echo "# ------------------------------------------------------------------------------"
+    echo ">>> ALIAS: $1"
+    echo "# ------------------------------------------------------------------------------"
 
     while read LINE; do
         if [ -n "$LINE" ]; then
             echo ""
+            echo "# ------------------------------------------------------------------------------"
             echo "# Alias '$1' command: $LINE"
             echo "# ------------------------------------------------------------------------------"
             run_profile $LINE < /dev/null
