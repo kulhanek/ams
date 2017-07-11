@@ -1041,8 +1041,9 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
     std::set<SFullBuild>::iterator    ibt = builds.begin();
     std::set<SFullBuild>::iterator    ibe = builds.end();
 
-    SFullBuild best_build;
-    double     best_verindx = 0.0;
+    SFullBuild      best_build;
+    double          best_verindx = 0.0;
+    CSmallString    best_mode;
 
     while( ibt != ibe ){
 
@@ -1068,15 +1069,30 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
         }
 
         double verindx = 0.0;
+        CSmallString mode = "single";
 
         CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
         if( p_bld != NULL ){
             p_bld->GetAttribute("verindx",verindx);
+            p_bld->GetAttribute("mode",mode);
         }
 
         if( (ibt == builds.begin()) || (verindx > best_verindx) ){
             best_build = bld;
             best_verindx = verindx;
+            best_mode = mode;
+        }
+        if( (verindx == best_verindx) && ( mode == "single") ){
+            best_build = bld;
+            best_verindx = verindx;
+            best_mode = mode;
+        }
+        if( best_mode != "single" ){
+            if( (verindx == best_verindx) && ( mode == "node") ){
+                best_build = bld;
+                best_verindx = verindx;
+                best_mode = mode;
+            }
         }
 
         ibt++;

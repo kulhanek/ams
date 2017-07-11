@@ -12,12 +12,14 @@ function print_usage()
     echo "Usage: ams-personal [-h][--help] <action> [ARGS]"
     echo ""
     echo "Supported actions (builds):"
+    echo "       addmodules <module1> ...            install modules (only single modes)"
+    echo "                                              and update all local builds"
     echo "       addbuilds <[prefix]/bldfilter1> ... install builds specified by full build name or build filter"
     echo "                                              (filter is incomplete buildname with wildcard characters)"
-    echo "                                              update all local builds"
+    echo "                                              and update all local builds"
     echo "       rmbuilds <bldfilter1> ...           remove builds specified by full build name or build filter"
     echo "       update                              update all local builds"
-    echo "       upgrade                             upgrade modules to the most recent builds (by verindx)"
+    echo "       upgrade                             upgrade modules to the most recent builds (by verindx, only single modes)"
     echo "                                              and update all local builds"
     echo ""
     echo "Supported actions (setup):"  
@@ -73,6 +75,23 @@ ACTION="$1"
 shift
 
 case "$ACTION" in
+# -----------------------------
+    "addmodules" )
+        sudo -u infinity -i $AMS_ROOT/share/scripts/ams-sync personal bldlib
+        echo ""
+        echo "# AMS modules for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(","); printf("%s",$1); i++;}' `"
+        echo "# ------------------------------------------------------------------------------"
+        CORE_BUILDS=""
+        for SITE in `site listavail 2>&1`; do
+            for MOD in "$@"; do
+                CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
+            done
+        done
+        CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
+        echo $CORE_BUILDS | tr " " "\n"
+
+        sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
+        ;;
 # -----------------------------
     "addbuilds" )
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-addbuilds "$@"
