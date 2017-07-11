@@ -55,6 +55,7 @@ if [ -z "$SOFTREPO" ]; then
     exit 1
 fi
 
+umask 027
 mkdir -p "$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/logs"
 if [ $? -ne 0 ]; then
     echo "" 1>&2

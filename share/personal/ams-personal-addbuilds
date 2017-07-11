@@ -198,6 +198,7 @@ fi
 
 # ------------------------------------------------
 
+umask 027
 mkdir -p "$AMS_ROOT/var/personal/logs"
 if [ $? -ne 0 ]; then
     echo "" 1>&2
