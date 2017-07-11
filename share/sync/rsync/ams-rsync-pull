@@ -7,7 +7,7 @@
 #
 # ams-rsync-pull [action]
 #
-# actions: bldlib softrepo
+# actions: rmindx bldlib softrepo
 
 # we have piped commands and all must succeed
 set -o pipefail
@@ -74,11 +74,12 @@ MST_INDEX="$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/index.mst"
 
 # -------------------------------------------------------------------------------------
 
-show_log_error()
+function show_log_error()
 {
     echo "" 1>&2
     echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
-    tail -10 "$LOG_FILE" 1>&2
+    echo "    Last 10 lines ..." 1>&2
+    tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
     echo "" 1>&2
 }
 
@@ -250,6 +251,11 @@ test_password_less_ssh
 ACTION="$1"
 
 case "$ACTION" in
+    "rmindx")
+        rm -f "$NEW_INDEX"
+        rm -f "$MST_INDEX"
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
     "bldlib")
         rsync_bldlib
         if [ $? -ne 0 ]; then exit 1; fi;
@@ -262,6 +268,11 @@ case "$ACTION" in
         rsync_softrepo
         if [ $? -ne 0 ]; then exit 1; fi;
         ;;
+    *)
+        echo "" 1>&2
+        echo ">>> ERROR: ACTION '$ACTION' is not supported!" 1>&2
+        echo "" 1>&2
+    ;;
 esac
 
 echo ""

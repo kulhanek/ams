@@ -9,15 +9,48 @@
 function print_usage()
 {
     echo ""
-    echo "Usage: ams-sync [-h][--help] [-f][--force] <profile/alias> [action] [build]"
+    echo "Usage: ams-sync [-h][--help] <profile/alias> [action] [build]"
     echo ""
-    echo "       Actions: all amscore bldlib softrepo build dpkg (for rsync mode)"
+    echo "       Actions: amscore bldlib softrepo build dpkg rmindx (for rsync mode)"
+    echo "                exec (for exec mode) only via profile"
     echo ""
 }
 
 # ------------------------------------------------
 
-function read_profile()
+function get_profile_action()
+{
+    # input $1 - action from command line
+
+    export AMS_SYNC_ACTION="`grep ACTION $PROFILE | awk '{print $2;}'`"
+    if [ -n  "$AMS_SYNC_ACTION" ]; then
+    echo "  Action:                 $AMS_SYNC_ACTION"
+        case "$AMS_SYNC_ACTION" in
+            "amscore" | "bldlib" | "softrepo" | "build" | "dpkg" | "rmindx" | "exec")
+                ;;
+            *)
+                echo "" 1>&2
+                echo ">>> ERROR: ACTION key is incorrect!" 1>&2
+                echo "    Supported actions: amscore bldlib softrepo build dpkg exec"
+                echo "" 1>&2
+                exit 1
+                ;;
+        esac
+        if [ -n "$1" ]; then
+            echo "" 1>&2
+            echo ">>> ERROR: ACTION is specified both in the profile ($AMS_SYNC_ACTION) and via the command line ($1)!" 1>&2
+            echo "" 1>&2
+            exit 1
+        fi
+    else
+        AMS_SYNC_ACTION="$1"
+    fi
+
+}
+
+# ------------------------------------------------
+
+function read_profile_rsync()
 {
     export AMS_SRC_HOST="`grep SOURCE "$PROFILE" | awk '{print $2;}'`"
     echo "  Source:                 $AMS_SRC_HOST"
@@ -55,9 +88,15 @@ function read_profile()
         exit 1
     fi
 
+    if [ "$AMS_SYNC_ACTION" == "dpkg" ]; then
     export AMS_DST_DPKGROOT="`grep DST_DPKGROOT "$PROFILE" | awk '{print $2;}'`"
-    if [ -n "$AMS_DST_DPKGROOT" ]; then
     echo "  Destination package:    $AMS_DST_DPKGROOT"
+    if [ -z "$AMS_DST_DPKGROOT" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DST_DPKGROOT key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
     fi
 
     export AMS_DST_SOFTMODS="`grep DST_SOFTMODS "$PROFILE" | awk '{print $2;}'`"
@@ -118,92 +157,49 @@ function read_profile()
         exit 1
     fi
 
-    export AMS_SYNC_ACTION="`grep ACTION $PROFILE | awk '{print $2;}'`"
-    if [ -n  "$AMS_SYNC_ACTION" ]; then
-    echo "  Action:                 $AMS_SYNC_ACTION"
-        case "$AMS_SYNC_ACTION" in
-            "all" | "amscore" | "bldlib" | "softrepo" | "build" | "dpkg" )
-                ;;
-            *)
-                echo "" 1>&2
-                echo ">>> ERROR: ACTION key is incorrect!" 1>&2
-                echo "" 1>&2
-                exit 1
-                ;;
-        esac
-    fi
-
+    if [ "$AMS_SYNC_DIRECTION" == "pull" ]; then
     export AMS_MASTER_INDEX="`grep MASTER_INDEX "$PROFILE" | awk '{print $2;}'`"
-    if [ -n "$AMS_MASTER_INDEX" ]; then
     echo "  Master index:           $AMS_MASTER_INDEX"
+    if [ -z "$AMS_SYNC_SITES" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: SITES key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
     fi
 }
 
 # ------------------------------------------------
 
-export AMS_FORCE_SYNC="NO"
-SHIFT="-"
-while [ -n "$SHIFT" ]; do
-    SHIFT=""
-    case $1 in
-        '-h'|'--help')
-            print_usage
-            exit 0
-        ;;
-        '-f'|'--force')
-            export AMS_FORCE_SYNC="YES"
-            shift
-            SHIFT="-"
-        ;;
-    esac
-done
+function read_profile_exec()
+{
+    export AMS_WORKING_DIR="`grep CWD "$PROFILE" | awk '{print $2;}'`"
+    echo "  Source:                 $AMS_SRC_HOST"
+    if [ -z "$AMS_WORKING_DIR" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: CWD key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
 
-if [ $# -ne 1 ] && [ $# -ne 2 ] && [ $# -ne 3 ]; then
-    echo "" 1>&2
-    echo ">>> ERROR: Incorrect number of parameters!" 1>&2
-    print_usage
-    exit 1
-fi
-
-if [ $# -ge 2 ]; then
-    case $2 in
-        "all" | "amscore" | "bldlib" | "softrepo" | "build" | "dpkg" )
-        ;;
-        *)
-            echo "" 1>&2
-            echo ">>> ERROR: Incorrect action '$2'!" 1>&2
-            print_usage
-            exit 1
-        ;;
-    esac
-fi
-
-# check if AMS_ROOT is set -----------------------
-
-if [ -z "$AMS_ROOT" ]; then
-    echo "" 1>&2
-    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
-    echo "" 1>&2
-    exit 1
-fi
+    export AMS_COMMAND="`grep CMD "$PROFILE" | awk '{print $2;}'`"
+    echo "  Source softmods:        $AMS_SRC_SOFTMODS"
+    if [ -z "$AMS_COMMAND" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: CMD key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+}
 
 # ------------------------------------------------
 
 function sync_profile() {
 
-    PROFILE="$AMS_ROOT/etc/sync/$1.conf"
-    export AMS_SYNC_PROFILE="$1"
-
-    if ! [ -f "$PROFILE" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: Profile $1 is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-
     echo ""
-    echo "# AMS Synchronization "
+    echo "# AMS Synchronization"
     echo "# ------------------------------------------------"
+    echo "# Profile: $AMS_SYNC_PROFILE"
 
 # check/create session lock
     if [ -f "$AMS_ROOT/var/sync/$AMS_SYNC_PROFILE/lock.pid" ]; then
@@ -231,7 +227,7 @@ function sync_profile() {
     fi
 
 # read profile
-    read_profile
+    read_profile_rsync
 
 # check authentication credentials
     echo ""
@@ -294,18 +290,7 @@ function sync_profile() {
                 echo "" 1>&2
                 exit 1
             fi
-            if [ -n "$AMS_SYNC_ACTION" ] && [ -n "$2" ]; then
-                echo "" 1>&2
-                echo ">>> ERROR: ACTION is specified both via the profile and command argument!" 1>&2
-                echo "" 1>&2
-                exit 1
-            fi
-
-            if [ -n "$AMS_SYNC_ACTION" ]; then
-                $AMS_ROOT/share/sync/rsync/ams-rsync-push "$AMS_SYNC_ACTION"
-            else
-                $AMS_ROOT/share/sync/rsync/ams-rsync-push "$2" "$3"
-            fi
+            $AMS_ROOT/share/sync/rsync/ams-rsync-push "$AMS_SYNC_ACTION" "$3"
             ;;
     # -----------------------------
         "pull" )
@@ -317,11 +302,7 @@ function sync_profile() {
                 echo "" 1>&2
                 exit 1
             fi
-            if [ -n "$AMS_SYNC_ACTION" ]; then
-                $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$AMS_SYNC_ACTION"
-            else
-                $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$2" "$3"
-            fi
+            $AMS_ROOT/share/sync/rsync/ams-rsync-pull "$AMS_SYNC_ACTION" "$3"
             ;;
     # -----------------------------
         *)
@@ -338,12 +319,103 @@ function sync_profile() {
 
 # ------------------------------------------------
 
+function exec_profile() {
+
+    echo ""
+    echo "# AMS Command Execution"
+    echo "# ------------------------------------------------"
+    echo "# Profile:           $AMS_SYNC_PROFILE"
+    echo "# Working directory: $AMS_WORKING_DIR"
+    echo "# Command:           $AMS_COMMAND"
+
+    cd $AMS_WORKING_DIR
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Unable to set the working directory '$AMS_WORKING_DIR'!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    $AMS_COMMAND
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Unable to execute the command '$AMS_COMMAND'!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+}
+
+# ------------------------------------------------
+
+function run_profile()
+{
+    PROFILE="$AMS_ROOT/etc/sync/$1.conf"
+    if ! [ -f "$PROFILE" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Profile '$1' is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+    export AMS_SYNC_PROFILE="$1"
+
+    # decode action
+    get_profile_action "$2"
+
+    case "$AMS_SYNC_ACTION" in
+    # -----------------------------
+        "exec" )
+            exec_profile "$@"
+        ;;
+        *)
+            sync_profile "$@"
+        ;;
+    esac
+}
+
+# ------------------------------------------------
+
+SHIFT="-"
+while [ -n "$SHIFT" ]; do
+    SHIFT=""
+    case $1 in
+        '-h'|'--help')
+            print_usage
+            exit 0
+        ;;
+    esac
+done
+
+if [ $# -lt 1 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Incorrect number of parameters!" 1>&2
+    print_usage
+    exit 1
+fi
+
+# check if AMS_ROOT is set -----------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
 if [ -f "$AMS_ROOT/etc/sync/$1.alias" ]; then
-   for PROFILE in `cat "$AMS_ROOT/etc/sync/$1.alias"`; do
-      sync_profile "$PROFILE"
-   done
+    echo ""
+    echo " >>> ALIAS: $1"
+
+    while read LINE; do
+        if [ -n "$LINE" ]; then
+            echo ""
+            echo "# Alias '$1' command: $LINE"
+            echo "# ------------------------------------------------------------------------------"
+            run_profile $LINE < /dev/null
+        fi
+    done < <( cat "$AMS_ROOT/etc/sync/$1.alias" )
 else
-   sync_profile "$@"
+   run_profile "$@"
 fi
 
 

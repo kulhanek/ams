@@ -16,6 +16,7 @@ function show_log_error()
 {
     echo "" 1>&2
     echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    echo "    Last 10 lines ..." 1>&2
     tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
     echo "" 1>&2
 }
@@ -63,7 +64,7 @@ function check_builds(){
 
     while [ $# -ne 0 ]; do
         ABUILD="$1"
-        printf ">>> %-40s\n" "$ABUILD"  | tee -a $LOG_FILE
+        printf ">>> %-60s\n" "$ABUILD"  | tee -a $LOG_FILE
         APREFIX="`dirname $ABUILD`"
         ABUILD="`basename $ABUILD`"
         if [ "$APREFIX" == "." ]; then APREFIX=""; fi
@@ -103,7 +104,7 @@ function add_builds_to_map(){
     echo "" | tee -a $LOG_FILE
 
     for BUILD in $INSTALL_BUILDS; do
-        printf "Adding %-40s ..." $BUILD | tee -a $LOG_FILE
+        printf "Adding %-60s ..." $BUILD | tee -a $LOG_FILE
         PREFIX="`dirname $BUILD`"
         BUILD="`basename $BUILD`"
         if [ "$PREFIX" == "." ]; then PREFIX=""; fi

@@ -16,6 +16,7 @@ function show_log_error()
 {
     echo "" 1>&2
     echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    echo "    Last 10 lines ..." 1>&2
     tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
     echo "" 1>&2
 }
@@ -37,7 +38,7 @@ function gen_list_of_packages()
         for FILTER in "$@"; do
             printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
             for BUILD in `ams-cache --site "$SITE" getbuilds "$FILTER"`; do
-                printf "    |-> %-40s\n" "$BUILD" | tee -a $LOG_FILE
+                printf "    |-> %-60s\n" "$BUILD" | tee -a $LOG_FILE
                 # remove build from the map
                 ams-map-manip rmbuilds "$SITE" "$BUILD" >> $LOG_FILE 2>&1
             done
@@ -122,14 +123,7 @@ print_header
 if [ "`id -u -n`" != "infinity" ]; then
     echo "" 2>&1
     echo ">>> ERROR: This script must be run by the infinity user!"  2>&1
-    print_usage  2>&1
-    exit 1
-fi
-
-if [ $# -le 0 ]; then
-    echo "" 1>&2
-    echo ">>> ERROR: Incorrect number of arguments!" 1>&2
-    print_usage 2>&1
+    echo "" 2>&1
     exit 1
 fi
 

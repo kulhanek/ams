@@ -7,7 +7,7 @@
 #
 # ams-rsync-push [action] [build]
 #
-# actions: all amscore dpkg softrepo build
+# actions: rmindx amscore dpkg softrepo build
 #
 
 # we have piped commands and all must succeed
@@ -80,7 +80,8 @@ show_log_error()
 {
     echo "" 1>&2
     echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
-    tail -10 "$LOG_FILE" 1>&2
+    echo "    Last 10 lines ..." 1>&2
+    tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
     echo "" 1>&2
 }
 
@@ -362,6 +363,11 @@ ACTION="$1"
 if [ -z "$ACTION" ]; then ACTION="all"; fi;
 
 case "$ACTION" in
+    "rmindx")
+        rm -f "$NEW_INDEX"
+        rm -f "$OLD_INDEX"
+        if [ $? -ne 0 ]; then exit 1; fi;
+        ;;
     "amscore")
         rsync_amscore_cache
         if [ $? -ne 0 ]; then exit 1; fi;
@@ -384,14 +390,11 @@ case "$ACTION" in
         rsync_build "$2"
         if [ $? -ne 0 ]; then exit 1; fi;
         ;;
-    "all")
-        rsync_amscore_cache
-        if [ $? -ne 0 ]; then exit 1; fi;
-        rsync_softrepo
-        if [ $? -ne 0 ]; then exit 1; fi;
-        rsync_amscore
-        if [ $? -ne 0 ]; then exit 1; fi;
-        ;;
+    *)
+        echo "" 1>&2
+        echo ">>> ERROR: ACTION '$ACTION' is not supported!" 1>&2
+        echo "" 1>&2
+    ;;
 esac
 
 echo ""
