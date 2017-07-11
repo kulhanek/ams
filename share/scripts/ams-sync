@@ -336,7 +336,7 @@ function exec_profile() {
         exit 1
     fi
 
-    $AMS_COMMAND
+    eval "$AMS_COMMAND"
     if [ $? -ne 0 ]; then
         echo "" 1>&2
         echo ">>> ERROR: Unable to execute the command '$AMS_COMMAND'!" 1>&2
