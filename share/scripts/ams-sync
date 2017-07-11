@@ -182,7 +182,7 @@ function read_profile_exec()
         exit 1
     fi
 
-    export AMS_COMMAND="`grep CMD "$PROFILE" | awk 'for(i=2;i<=NF;i++){printf("%s ",$i);}'`"
+    export AMS_COMMAND="`grep CMD "$PROFILE" | awk '{ for(i=2;i<=NF;i++) {printf("%s ",$i);} }'`"
     echo "  Command:           $AMS_COMMAND"
     if [ -z "$AMS_COMMAND" ]; then
         echo "" 1>&2
