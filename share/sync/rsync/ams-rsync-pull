@@ -188,7 +188,7 @@ rsync_softrepo()
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
     SITES="`echo $AMS_SYNC_SITES | tr ' ' '\n' | awk '{ if( NR > 1 ) printf(","); printf("%s",$1) }'`"
-    $AMS_ROOT/bin/ams-repoindex-create --personal --sites "$SITES" "$NEW_INDEX" --verbose | tee -a $LOG_FILE
+    $AMS_ROOT/bin/ams-repoindex-create-ams --personal --sites "$SITES" "$NEW_INDEX" --verbose | tee -a $LOG_FILE
     if [ $? -ne 0 ]; then exit 1; fi;
 
     echo "# Changed builds ..." | tee -a $LOG_FILE

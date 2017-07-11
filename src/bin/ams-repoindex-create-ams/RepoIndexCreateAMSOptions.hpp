@@ -61,7 +61,7 @@ public:
                 OutputFile,                          /* argument name */
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
-                "output",                        /* parametr name */
+                "index",                        /* parametr name */
                 "name of created index file")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(CSmallString,                           /* option type */

@@ -1,5 +1,5 @@
-#ifndef RepoIndexCreateOptionsH
-#define RepoIndexCreateOptionsH
+#ifndef RepoIndexCreateFDirsOptionsH
+#define RepoIndexCreateFDirsOptionsH
 // =============================================================================
 // AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -25,10 +25,10 @@
 
 //------------------------------------------------------------------------------
 
-class CRepoIndexCreateOptions : public CSimpleOptions {
+class CRepoIndexCreateFDirsOptions : public CSimpleOptions {
 public:
     // constructor - tune option setup
-    CRepoIndexCreateOptions(void);
+    CRepoIndexCreateFDirsOptions(void);
 
     // program name and description -----------------------------------------------
     CSO_PROG_NAME_BEGIN
@@ -46,10 +46,9 @@ public:
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
     // args ---------------------------------
-    CSO_ARG(CSmallString,ScannedDir)
     CSO_ARG(CSmallString,OutputFile)
+    CSO_ARG(CSmallString,ScannedDir)
     // options ------------------------------
-    CSO_OPT(bool,FullIndex)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -58,27 +57,18 @@ public:
     CSO_MAP_BEGIN
     //----------------------------------------------------------------------
     CSO_MAP_ARG(CSmallString,                   /* argument type */
+                OutputFile,                          /* argument name */
+                NULL,                           /* default value */
+                true,                           /* is argument mandatory */
+                "index",                        /* parametr name */
+                "name of created index file")   /* argument description */
+    //----------------------------------------------------------------------
+    CSO_MAP_ARG(CSmallString,                   /* argument type */
                 ScannedDir,                          /* argument name */
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
                 "scanneddir",                        /* parametr name */
                 "name of scanned directory")   /* argument description */
-    //----------------------------------------------------------------------
-    CSO_MAP_ARG(CSmallString,                   /* argument type */
-                OutputFile,                          /* argument name */
-                NULL,                           /* default value */
-                true,                           /* is argument mandatory */
-                "output",                        /* parametr name */
-                "name of created index file")   /* argument description */
-    //----------------------------------------------------------------------
-    CSO_MAP_OPT(bool,                           /* option type */
-                FullIndex,                        /* option name */
-                false,                          /* default value */
-                false,                          /* is option mandatory */
-                'f',                           /* short option name */
-                "full",                      /* long option name */
-                NULL,                           /* parametr name */
-                "include more (local) stat data to the index")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */

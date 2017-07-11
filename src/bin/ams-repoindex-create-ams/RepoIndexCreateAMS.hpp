@@ -72,7 +72,6 @@ private:
     int                             NumOfUniqueBuilds;
     int                             NumOfNonSoftRepoBuilds;
     int                             NumOfSharedBuilds;
-    int                             NumOfStats;
     std::set<CBuildId>              UniqueBuilds;
     std::set<std::string>           UniqueBuildPaths;
     std::map<CBuildId,CFileName>    BuildPaths;

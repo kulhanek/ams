@@ -4,19 +4,18 @@
 
 # program objects --------------------------------------------------------------
 SET(CMD_SRC
-        RepoIndexCreate.cpp
-        RepoIndexCreateOptions.cpp
-        sha1.cpp
+        RepoIndexCreateFDirs.cpp
+        RepoIndexCreateFDirsOptions.cpp
         )
 
 # final build ------------------------------------------------------------------
-ADD_EXECUTABLE(ams-repoindex-fdirs ${CMD_SRC})
-ADD_DEPENDENCIES(ams-repoindex-fdirs ams_shared)
+ADD_EXECUTABLE(ams-repoindex-create-fdirs ${CMD_SRC})
+ADD_DEPENDENCIES(ams-repoindex-create-fdirs ams_shared)
 
-TARGET_LINK_LIBRARIES(ams-repoindex-fdirs ${AMS_LIBS})
+TARGET_LINK_LIBRARIES(ams-repoindex-create-fdirs ${AMS_LIBS})
 
 INSTALL(TARGETS
-            ams-repoindex-fdirs
+            ams-repoindex-create-fdirs
         DESTINATION
             bin
         )

@@ -61,7 +61,6 @@ CRepoIndexCreateAMS::CRepoIndexCreateAMS(void)
     NumOfAllBuilds = 0;
     NumOfNonSoftRepoBuilds = 0;
     NumOfSharedBuilds = 0;
-    NumOfStats = 0;
 }
 
 //==============================================================================
@@ -146,7 +145,7 @@ bool CRepoIndexCreateAMS::Run(void)
 
     vout << endl;
     vout << "# Statistics ..." << endl;
-    vout << "  > Number of stat objects  = " << NumOfStats << endl;
+    vout << "  > Number of stat objects  = " << index.NumOfStats << endl;
 
     vout << endl;
     vout << "# Saving index ..." << endl;

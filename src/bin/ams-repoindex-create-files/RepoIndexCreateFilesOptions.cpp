@@ -18,28 +18,28 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "RepoIndexCreateOptions.hpp"
+#include "RepoIndexCreateFilesOptions.hpp"
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CRepoIndexCreateOptions::CRepoIndexCreateOptions(void)
+CRepoIndexCreateFilesOptions::CRepoIndexCreateFilesOptions(void)
 {
     SetShowMiniUsage(true);
-    SetAllowProgArgs(false);
+    SetAllowProgArgs(true);
 }
 
 //------------------------------------------------------------------------------
 
-int CRepoIndexCreateOptions::CheckOptions(void)
+int CRepoIndexCreateFilesOptions::CheckOptions(void)
 {
     return(SO_CONTINUE);
 }
 
 //------------------------------------------------------------------------------
 
-int CRepoIndexCreateOptions::FinalizeOptions(void)
+int CRepoIndexCreateFilesOptions::FinalizeOptions(void)
 {
     bool ret_opt = false;
 
@@ -63,7 +63,7 @@ int CRepoIndexCreateOptions::FinalizeOptions(void)
 
 //------------------------------------------------------------------------------
 
-int CRepoIndexCreateOptions::CheckArguments(void)
+int CRepoIndexCreateFilesOptions::CheckArguments(void)
 {
     return(SO_CONTINUE);
 }

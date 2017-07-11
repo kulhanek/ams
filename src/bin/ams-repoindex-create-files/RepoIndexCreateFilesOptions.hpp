@@ -1,5 +1,5 @@
-#ifndef RepoIndexCreateOptionsH
-#define RepoIndexCreateOptionsH
+#ifndef RepoIndexCreateFilesOptionsH
+#define RepoIndexCreateFilesOptionsH
 // =============================================================================
 // AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -25,14 +25,14 @@
 
 //------------------------------------------------------------------------------
 
-class CRepoIndexCreateOptions : public CSimpleOptions {
+class CRepoIndexCreateFilesOptions : public CSimpleOptions {
 public:
     // constructor - tune option setup
-    CRepoIndexCreateOptions(void);
+    CRepoIndexCreateFilesOptions(void);
 
     // program name and description -----------------------------------------------
     CSO_PROG_NAME_BEGIN
-    "ams-repoindex-files"
+    "ams-repoindex-create-files"
     CSO_PROG_NAME_END
 
     CSO_PROG_DESC_BEGIN
@@ -48,29 +48,19 @@ public:
     CSO_PROG_ARGS_SHORT_DESC_END
 
     CSO_PROG_ARGS_LONG_DESC_BEGIN
-    "index - output name of index"
+    "index - name of created index file"
     "file1 - file to be indexed"
     CSO_PROG_ARGS_LONG_DESC_END
 
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
     // options ------------------------------
-    CSO_OPT(bool,FullIndex)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
     CSO_LIST_END
 
     CSO_MAP_BEGIN
-    //----------------------------------------------------------------------
-    CSO_MAP_OPT(bool,                           /* option type */
-                FullIndex,                        /* option name */
-                false,                          /* default value */
-                false,                          /* is option mandatory */
-                'f',                           /* short option name */
-                "full",                      /* long option name */
-                NULL,                           /* parametr name */
-                "include more (local) stat data to the index")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */

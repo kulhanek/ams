@@ -20,9 +20,9 @@ ADD_SUBDIRECTORY(ams-cache)
 ADD_SUBDIRECTORY(ams-map-manip)
 ADD_SUBDIRECTORY(ams-list-dirs)
 ADD_SUBDIRECTORY(ams-repoindex-create-ams)
+ADD_SUBDIRECTORY(ams-repoindex-create-fdirs)
+ADD_SUBDIRECTORY(ams-repoindex-create-files)
 ADD_SUBDIRECTORY(ams-repoindex-diff)
-ADD_SUBDIRECTORY(ams-repoindex-fdirs)
-ADD_SUBDIRECTORY(ams-repoindex-files)
 
 # actions ----------------------------------------
 ADD_SUBDIRECTORY(actions)
