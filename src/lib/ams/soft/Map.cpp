@@ -1044,6 +1044,7 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
     SFullBuild      best_build;
     double          best_verindx = 0.0;
     CSmallString    best_mode;
+    CSmallString    best_core;
 
     while( ibt != ibe ){
 
@@ -1069,29 +1070,47 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
         }
 
         double verindx = 0.0;
+        CSmallString name,vers,arch;
         CSmallString mode = "single";
+        CSmallString core_build;
 
         CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
         if( p_bld != NULL ){
             p_bld->GetAttribute("verindx",verindx);
+            p_bld->GetAttribute("name",name);
+            p_bld->GetAttribute("vers",vers);
+            p_bld->GetAttribute("arch",arch);
             p_bld->GetAttribute("mode",mode);
+            core_build << name << ":" << vers << ":" << arch;
         }
 
-        if( (ibt == builds.begin()) || (verindx > best_verindx) ){
+        if( ibt == builds.begin() ){
             best_build = bld;
             best_verindx = verindx;
             best_mode = mode;
+            best_core = core_build;
         }
-        if( (verindx == best_verindx) && ( mode == "single") ){
-            best_build = bld;
-            best_verindx = verindx;
-            best_mode = mode;
-        }
-        if( best_mode != "single" ){
-            if( (verindx == best_verindx) && ( mode == "node") ){
+
+        if( verindx > best_verindx ){
+            if( best_core != core_build ){
                 best_build = bld;
                 best_verindx = verindx;
                 best_mode = mode;
+                best_core = core_build;
+            }
+        }
+        if( (verindx >= best_verindx) && ( mode == "single") ){
+            best_build = bld;
+            best_verindx = verindx;
+            best_mode = mode;
+            best_core = core_build;
+        }
+        if( best_mode != "single" ){
+            if( (verindx >= best_verindx) && ( mode == "node") ){
+                best_build = bld;
+                best_verindx = verindx;
+                best_mode = mode;
+                best_core = core_build;
             }
         }
 
