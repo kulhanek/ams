@@ -174,7 +174,7 @@ function read_profile_rsync()
 function read_profile_exec()
 {
     export AMS_WORKING_DIR="`grep CWD "$PROFILE" | awk '{print $2;}'`"
-    echo "  Source:                 $AMS_SRC_HOST"
+    echo "  Working directory:      $AMS_WORKING_DIR"
     if [ -z "$AMS_WORKING_DIR" ]; then
         echo "" 1>&2
         echo ">>> ERROR: CWD key is not defined!" 1>&2
@@ -183,7 +183,7 @@ function read_profile_exec()
     fi
 
     export AMS_COMMAND="`grep CMD "$PROFILE" | awk '{print $2;}'`"
-    echo "  Source softmods:        $AMS_SRC_SOFTMODS"
+    echo "  Command:                $AMS_COMMAND"
     if [ -z "$AMS_COMMAND" ]; then
         echo "" 1>&2
         echo ">>> ERROR: CMD key is not defined!" 1>&2
