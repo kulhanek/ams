@@ -1844,7 +1844,7 @@ bool CMap::RefactorBuild(CFileName buildname)
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&xml_doc);
-    xml_printer.SetPrintAsItIs(true);
+    xml_printer.SetPrintAsItIs(false);
 
     if( xml_printer.Print(buildname) == false ){
         CSmallString error;
