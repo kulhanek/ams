@@ -1535,10 +1535,10 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_depe
     while( (p_mele = I.GetNextChildElement()) != NULL ) {
         bool result = false;
         if( p_mele->GetName() == "depend" ) {
-            if( p_mele->NumOfAttributes() != 1 ) {
+            if( p_mele->NumOfAttributes() != 2 ) {
                 vout << endl << endl;
                 vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
-                vout << "            Only one attribute 'module' can be specified for this element." << endl;
+                vout << "            Only two attributes (name/type) can be specified for this element." << endl;
                 vout << endl;
                 return(false);
             }
