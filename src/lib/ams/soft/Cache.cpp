@@ -670,31 +670,15 @@ bool CCache::CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_mod
 {
     if( p_doc == NULL ) return(false);
 
-    CXMLIterator    I(p_doc);
-    CSmallString    attname;
-
-    bool skip_verdocs = false;
-
-    while( I.GetNextAttributeName(attname) == true ) {
-        bool result = false;
-        if( attname == "skipverdoc" ) {
-            CSmallString value;
-            p_doc->GetAttribute("skipverdoc",value);
-            if( (value == "true") || (value == "false") ) result = true;
-            if( value == "true" ) skip_verdocs = true;
-        }
-
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'versions' element!" << endl;
-            vout << "            '" << attname << "' is unsupported attribute, its value is empty or does not contain valid value." << endl;
-            vout << "            Allowed attributes are: skipverdoc." << endl;
-            vout << endl;
-            return(false);
-        }
+    if( p_doc->NumOfAttributes() != 0 ) {
+        vout << endl << endl;
+        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'documentation' element!" << endl;
+        vout << "            No attributes are permitted but '" << p_doc->NumOfAttributes() << "' was/were found." << endl;
+        vout << endl;
+        return(false);
     }
 
-    bool ver_doc = false;
+    CXMLIterator    I(p_doc);
 
     // subblocks
     CXMLElement* p_mele;
@@ -706,7 +690,6 @@ bool CCache::CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_mod
         }
         if( p_mele->GetName() == "versions" ) {
             if( CheckModuleVersionsDocSyntax(vout,p_module,p_mele) == false ) return(false);
-            ver_doc = true;
             result = true;
         }
         if( result == false ) {
@@ -717,10 +700,6 @@ bool CCache::CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_mod
             vout << endl;
             return(false);
         }
-    }
-
-    if( (ver_doc == false) && (skip_verdocs == false) ){
-        vout << "<blue>>>> WARNING:</blue> 'versions' element is missing in documentation section! ";
     }
 
     return(true);
