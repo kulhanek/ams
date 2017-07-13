@@ -1542,108 +1542,45 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_depe
                 vout << endl;
                 return(false);
             }
-            CSmallString value;
-            p_mele->GetAttribute("module",value);
-            if( value == NULL ) {
+            CSmallString name;
+            p_mele->GetAttribute("name",name);
+            if( name == NULL ) {
                 vout << endl << endl;
                 vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
-                vout << "            'module' attribute is not specified or its value is empty." << endl;
+                vout << "            'name' attribute is not specified or its value is empty." << endl;
                 vout << endl;
                 return(false);
             }
-            if( TestModuleByPartialName(value) == false ){
+            if( TestModuleByPartialName(name) == false ){
                 vout << endl << endl;
                 vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
-                vout << "            Specified module dependency '" << value << "' does not exist in the cache." << endl;
+                vout << "            Specified module dependency '" << name << "' does not exist in the cache." << endl;
+                vout << endl;
+                return(false);
+            }
+            CSmallString type;
+            p_mele->GetAttribute("type",type);
+            if( type == NULL ) {
+                vout << endl << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
+                vout << "            'type' attribute is not specified or its value is empty." << endl;
+                vout << endl;
+                return(false);
+            }
+            if( (type != "add") && (type != "post") && (type != "sync") && (type != "conflict")  ){
+                vout << endl << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
+                vout << "            Specified dependency type '" << type << "' is nt supported (add/post/sync/conflict)." << endl;
                 vout << endl;
                 return(false);
             }
             result = true;
         }
-        if( p_mele->GetName() == "postdepend" ) {
-            if( p_mele->NumOfAttributes() != 1 ) {
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'postdepend' element!" << endl;
-                vout << "            Only one attribute 'module' can be specified for this element." << endl;
-                vout << endl;
-                return(false);
-            }
-            CSmallString value;
-            p_mele->GetAttribute("module",value);
-            if( value == NULL ) {
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'postdepend' element!" << endl;
-                vout << "            'module' attribute is not specified or its value is empty." << endl;
-                vout << endl;
-                return(false);
-            }
-            if( TestModuleByPartialName(value) == false ){
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'postdepend' element!" << endl;
-                vout << "            Specified module dependency '" << value << "' does not exist in the cache." << endl;
-                vout << endl;
-                return(false);
-            }
-            result = true;
-        }
-        if( p_mele->GetName() == "conflict" ) {
-            if( p_mele->NumOfAttributes() != 1 ) {
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'conflict' element!" << endl;
-                vout << "            Only one attribute 'module' can be specified for this element." << endl;
-                vout << endl;
-                return(false);
-            }
-            CSmallString value;
-            p_mele->GetAttribute("module",value);
-            if( value == NULL ) {
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'conflict' element!" << endl;
-                vout << "            'module' attribute is not specified or its value is empty." << endl;
-                vout << endl;
-                return(false);
-            }
-            if( TestModuleByPartialName(value) == false ){
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'conflict' element!" << endl;
-                vout << "            Specified module dependency '" << value << "' does not exist in the cache." << endl;
-                vout << endl;
-                return(false);
-            }
-            result = true;
-        }
-        if( p_mele->GetName() == "syncdepend" ) {
-            if( p_mele->NumOfAttributes() != 1 ) {
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'syncdepend' element!" << endl;
-                vout << "            Only one attribute 'module' can be specified for this element." << endl;
-                vout << endl;
-                return(false);
-            }
-            CSmallString value;
-            p_mele->GetAttribute("module",value);
-            if( value == NULL ) {
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'syncdepend' element!" << endl;
-                vout << "            'module' attribute is not specified or its value is empty." << endl;
-                vout << endl;
-                return(false);
-            }
-            if( TestModuleByPartialName(value) == false ){
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'syncdepend' element!" << endl;
-                vout << "            Specified module dependency '" << value << "' does not exist in the cache." << endl;
-                vout << endl;
-                return(false);
-            }
-            result = true;
-        }
-
         if( result == false ) {
             vout << endl << endl;
             vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dependencies' element!" << endl;
             vout << "            Unsupported subelement - '" << p_mele->GetName() << "'." << endl;
-            vout << "            Allowed subelements are: depend, postdepend, syncdepend, conflict." << endl;
+            vout << "            Allowed subelements are: depend." << endl;
             vout << endl;
             return(false);
         }

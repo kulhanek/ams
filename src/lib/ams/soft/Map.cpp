@@ -1684,12 +1684,12 @@ void CMap::RemoveOrphanSites(std::ostream& vout)
 
 void CMap::RemoveOrphanBuilds(std::ostream& vout)
 {
-    RemoveOrphanBuildsFromDir("",vout);
+    RemoveOrphanBuilds("",vout);
 }
 
 //------------------------------------------------------------------------------
 
-void CMap::RemoveOrphanBuildsFromDir(CFileName buildlib, std::ostream& vout)
+void CMap::RemoveOrphanBuilds(CFileName buildlib, std::ostream& vout)
 {
     CFileName root_dir = AMSGlobalConfig.GetETCDIR() / "map" / "builds";
 
@@ -1732,12 +1732,128 @@ void CMap::RemoveOrphanBuildsFromDir(CFileName buildlib, std::ostream& vout)
 
         } else {
             if( CFileSystem::IsDirectory(root_dir / full_name) == true ){
-                RemoveOrphanBuildsFromDir(full_name,vout);
+                RemoveOrphanBuilds(full_name,vout);
             }
         }
 
     }
     dir_enum.EndFindFile();
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CMap::RefactorBuilds(std::ostream& vout)
+{
+    return(RefactorBuilds("",vout));
+}
+
+//------------------------------------------------------------------------------
+
+bool CMap::RefactorBuilds(CFileName buildlib, std::ostream& vout)
+{
+    bool result = true;
+
+    CFileName root_dir = AMSGlobalConfig.GetETCDIR() / "map" / "builds";
+
+    CDirectoryEnum dir_enum(root_dir / buildlib);
+
+    dir_enum.StartFindFile("*");
+    CFileName file;
+    while( dir_enum.FindFile(file) ) {
+        if( file == "." ) continue;
+        if( file == ".." ) continue;
+        CFileName full_name = buildlib / file;
+        if( fnmatch("*.bld",file,0) == 0 ){
+            vout << setw(80) << left << full_name << endl;
+            result &= RefactorBuild(root_dir / full_name);
+        } else {
+            if( CFileSystem::IsDirectory(root_dir / full_name) == true ){
+                result &= RefactorBuilds(full_name,vout);
+            }
+        }
+
+    }
+    dir_enum.EndFindFile();
+    return(result);
+}
+
+//------------------------------------------------------------------------------
+
+bool CMap::RefactorBuild(CFileName buildname)
+{
+    CXMLDocument    xml_doc;
+    CXMLParser      xml_parser;
+    xml_parser.SetOutputXMLNode(&xml_doc);
+
+    if( xml_parser.Parse(buildname) == false ) {
+        CSmallString error;
+        error <<  "unable to parse build file (" << buildname << ")";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    CXMLElement* p_deps = xml_doc.GetChildElementByPath("build/dependencies");
+    CXMLElement* p_dep = NULL;
+    if( p_deps ){
+        p_dep = p_deps->GetFirstChildElement();
+    }
+    while( p_dep != NULL ){
+        if( p_dep->GetName() == "depend" ){
+            CSmallString name;
+            if( p_dep->GetAttribute("module",name) == true ){
+                p_dep->RemoveAttribute("module");
+                p_dep->SetAttribute("name",name);
+            }
+            CSmallString type;
+            if( p_dep->GetAttribute("type",type) == false ){
+                p_dep->SetAttribute("type","add");
+            }
+        }
+        if( p_dep->GetName() == "postdepend" ){
+            p_dep->SetName("depend");
+            CSmallString name;
+            if( p_dep->GetAttribute("module",name) == true ){
+                p_dep->RemoveAttribute("module");
+                p_dep->SetAttribute("name",name);
+            }
+            p_dep->SetAttribute("type","post");
+        }
+        if( p_dep->GetName() == "syncdepend" ){
+            p_dep->SetName("depend");
+            CSmallString name;
+            if( p_dep->GetAttribute("build",name) == true ){
+                p_dep->RemoveAttribute("build");
+                p_dep->SetAttribute("name",name);
+            }
+            p_dep->SetAttribute("type","sync");
+        }
+        if( p_dep->GetName() == "conflict" ){
+            p_dep->SetName("depend");
+            CSmallString name;
+            if( p_dep->GetAttribute("module",name) == true ){
+                p_dep->RemoveAttribute("module");
+                p_dep->SetAttribute("name",name);
+            }
+            p_dep->SetAttribute("type","conflict");
+        }
+
+        p_dep = p_dep->GetNextSiblingElement();
+    }
+
+    CXMLPrinter xml_printer;
+    xml_printer.SetPrintedXMLNode(&xml_doc);
+    xml_printer.SetPrintAsItIs(true);
+
+    if( xml_printer.Print(buildname) == false ){
+        CSmallString error;
+        error << "unable to save module file '" << buildname << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    return(true);
 }
 
 //==============================================================================
@@ -2401,16 +2517,20 @@ void CMap::AddSyncDeps(const CSmallString& site_name,const CSmallString& build_n
         return;
     }
 
-    CXMLElement* p_ele = xml_doc.GetChildElementByPath("build/dependencies/syncdepend");
-    while( p_ele != NULL ) {
+    CXMLElement* p_deps = xml_doc.GetChildElementByPath("build/dependencies");
+    CXMLElement* p_dep = NULL;
+    if( p_deps ){
+        p_dep = p_deps->GetFirstChildElement("depend");
+    }
+    while( p_dep != NULL ) {
         std::string sync_build_name;
-        if( p_ele->GetAttribute("build",sync_build_name) == true ){
+        if( p_dep->GetAttribute("name",sync_build_name) == true ){
             if( find(deps.begin(), deps.end(), sync_build_name) == deps.end() ){
                 deps.push_back(sync_build_name);
                 if( deep ) AddSyncDeps(site_name,sync_build_name,prefix,deps,true);
             }
         }
-        p_ele = p_ele->GetNextSiblingElement("syncdepend");
+        p_dep = p_dep->GetNextSiblingElement("depend");
     }
 }
 

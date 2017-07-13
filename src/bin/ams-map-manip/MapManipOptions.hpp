@@ -74,6 +74,7 @@ public:
     "      <green>cpmap</green>         site1 sites2 - copy map from <u>site1</u> to <u>site2</u>\n"
     "      <green>rmorphansites</green>              - remove maps for sites that are not in AMS database\n"
     "      <green>rmorphanbuilds</green>             - remove builds that have AMS_PACKAGE_DIR set but that package directory does not exist\n"
+    "      <green>refbulds</green>                   - refactor all builds\n"
     "      <green>distribute</green>                 - distribute documentation and builds to individual site caches\n"
     "      <green>aliases</green>                    - print site aliases\n"
     "      <green>undo</green>                       - undo last map change\n"

@@ -561,23 +561,26 @@ void CPrintEngine::PrintRawDependencies(void)
         }
 
         while( (p_lele = D.GetNextChildElement()) != NULL  ) {
-            CSmallString dname;
-            p_lele->GetAttribute("module",dname);
-            char cross_ref = '\\';
-            if( Cache.TestCrossDependency(dname,name) == true ) {
-                cross_ref = 'X';
-            }
-            if( p_lele->GetName() == "conflict" ) {
-                vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
-            }
             if( p_lele->GetName() == "depend" ) {
-                vout <<  "<green>   + " << cross_ref << left << " " << dname << "</green>" << endl;
-            }
-            if( p_lele->GetName() == "postdepend" ) {
-                vout <<  "<blue>   p " << cross_ref << left << " " << dname << "</blue>" << endl;
-            }
-            if( p_lele->GetName() == "syncdepend" ) {
-                vout <<  "<yellow>   > " << cross_ref << left << " " << dname << "</yellow>" << endl;
+                CSmallString dname;
+                p_lele->GetAttribute("name",dname);
+                char cross_ref = '\\';
+                if( Cache.TestCrossDependency(dname,name) == true ) {
+                    cross_ref = 'X';
+                }
+                CSmallString type;
+                p_lele->GetAttribute("type",type);
+                if( type == "add" ){
+                    vout <<  "<green>   + " << cross_ref << left << " " << dname << "</green>" << endl;
+                } else if ( type == "sync" ){
+                    vout <<  "<yellow>   > " << cross_ref << left << " " << dname << "</yellow>" << endl;
+                } else if ( type == "post" ){
+                    vout <<  "<blue>   p " << cross_ref << left << " " << dname << "</blue>" << endl;
+                } else if ( type == "conflict" ){
+                    vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
+                } {
+                    vout <<  "- UNSUPPORTED TYPE -" << endl;
+                }
             }
         }
 
@@ -607,23 +610,26 @@ void CPrintEngine::PrintRawDependencies(void)
             }
 
             while( (p_lele = D.GetNextChildElement()) != NULL  ) {
-                CSmallString dname;
-                p_lele->GetAttribute("module",dname);
-                char cross_ref = '\\';
-                if( Cache.TestCrossDependency(dname,name) == true ) {
-                    cross_ref = 'X';
-                }
-                if( p_lele->GetName() == "conflict" ) {
-                    vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
-                }
                 if( p_lele->GetName() == "depend" ) {
-                    vout <<  "<green>   + " << cross_ref << left << " " << dname << "</green>" << endl;
-                }
-                if( p_lele->GetName() == "postdepend" ) {
-                    vout <<  "<blue>   p " << cross_ref << left << " " << dname << "</blue>" << endl;
-                }
-                if( p_lele->GetName() == "syncdepend" ) {
-                    vout <<  "<yellow>   > " << cross_ref << left << " " << dname << "</yellow>" << endl;
+                    CSmallString dname;
+                    p_lele->GetAttribute("name",dname);
+                    char cross_ref = '\\';
+                    if( Cache.TestCrossDependency(dname,name) == true ) {
+                        cross_ref = 'X';
+                    }
+                    CSmallString type;
+                    p_lele->GetAttribute("type",type);
+                    if( type == "add" ){
+                        vout <<  "<green>   + " << cross_ref << left << " " << dname << "</green>" << endl;
+                    } else if ( type == "sync" ){
+                        vout <<  "<yellow>   > " << cross_ref << left << " " << dname << "</yellow>" << endl;
+                    } else if ( type == "post" ){
+                        vout <<  "<blue>   p " << cross_ref << left << " " << dname << "</blue>" << endl;
+                    } else if ( type == "conflict" ){
+                        vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
+                    } {
+                        vout <<  "- UNSUPPORTED TYPE -" << endl;
+                    }
                 }
             }
 
@@ -793,17 +799,19 @@ bool CPrintEngine::PrintModModuleInfo(const CSmallString& mod_name)
         CXMLIterator    I(p_ele);
         CXMLElement*     p_sele;
         while( (p_sele = I.GetNextChildElement()) != NULL ) {
-            if( p_sele->GetName() == "conflict" ) {
-                CSmallString lmodule;
-                p_sele->GetAttribute("module",lmodule);
-                if( AMSGlobalConfig.IsModuleActive(lmodule) == true ) {
+            if( p_sele->GetName() == "depend" ) {
+                CSmallString lmodule,ltype;
+                p_sele->GetAttribute("name",lmodule);
+                p_sele->GetAttribute("type",ltype);
+                if( ltype == "add" ){
+                    vout << " INFO:    additional module is required, it will be pre-loaded if 'add' action is used ... " << endl;
+                }
+                if( ltype == "post" ){
+                    vout << " INFO:    additional module is required, it will be post-loaded if 'add' action is used ... " << endl;
+                }
+                if( ltype == "conflict" ){
                     vout << " WARNING: active module in conflict, it will be unloaded if 'add' action is used ... " << endl;
                 }
-            }
-            if( p_sele->GetName() == "depend" ) {
-                CSmallString lmodule;
-                p_sele->GetAttribute("module",lmodule);
-                vout << " INFO:    additional module is required, it will be loaded if 'add' action is used ... " << endl;
             }
         }
     }

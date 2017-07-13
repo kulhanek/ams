@@ -467,44 +467,47 @@ bool CActions::SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_con
     int count = 0;
 
     while( (p_sele = I.GetNextChildElement()) != NULL ) {
-        if( p_sele->GetName() == "conflict" ) {
-            CSmallString lmodule;
-            p_sele->GetAttribute("module",lmodule);
-            if( AMSGlobalConfig.IsModuleActive(lmodule) == true ) {
-                if( GlobalPrintLevel != EAPL_NONE ) {
-                    vout << "  WARNING: active module in conflict, unloading ... " << endl;
-                }
-                result &= RemoveModule(vout,lmodule) == EAE_STATUS_OK;
-            }
-        }
         if( p_sele->GetName() == "depend" ) {
-            CSmallString lmodule;
-            CSmallString lmodname;
-            CSmallString lmodver;
-            p_sele->GetAttribute("module",lmodule);
+            CSmallString lname,ltype;
+            p_sele->GetAttribute("name",lname);
+            p_sele->GetAttribute("type",ltype);
+            if ( ltype == "add" ) {
 
-            CUtils::ParseModuleName(lmodule,lmodname,lmodver);
-            // is module already added?
-            bool found = false;
-            for(unsigned int i=0; i<DepList.size(); i++) {
-                if( DepList[i] == lmodname ) {
-                    found = true;
-                    break;
+                CSmallString lmodname;
+                CSmallString lmodver;
+
+                CUtils::ParseModuleName(lname,lmodname,lmodver);
+                // is module already added?
+                bool found = false;
+                for(unsigned int i=0; i<DepList.size(); i++) {
+                    if( DepList[i] == lmodname ) {
+                        found = true;
+                        break;
+                    }
                 }
-            }
-            if( GlobalPrintLevel != EAPL_NONE ) {
-                if( Level == 1 ) {
-                    vout << "  INFO:    additional module " << lmodule << " is required, loading ... " << endl;
-                    count++;
+                if( GlobalPrintLevel != EAPL_NONE ) {
+                    if( Level == 1 ) {
+                        vout << "  INFO:    additional module " << lname << " is required, loading ... " << endl;
+                        count++;
+                    }
+                    if( found == true ) {
+                        vout << "           " << lname << " is skipped due to cyclic dependency" << endl;
+                    }
                 }
-                if( found == true ) {
-                    vout << "           " << lmodule << " is skipped due to cyclic dependency" << endl;
+
+                if( found == false) {
+                    result &= AddModule(vout,lname,true) == EAE_STATUS_OK;
+                }
+
+            } else if( ltype == "conflict" ) {
+                if( AMSGlobalConfig.IsModuleActive(lname) == true ) {
+                    if( GlobalPrintLevel != EAPL_NONE ) {
+                        vout << "  WARNING: active module in conflict, unloading ... " << endl;
+                    }
+                    result &= RemoveModule(vout,lname) == EAE_STATUS_OK;
                 }
             }
 
-            if( found == false) {
-                result &= AddModule(vout,lmodule,true) == EAE_STATUS_OK;
-            }
         }
     }
 
@@ -538,32 +541,36 @@ bool CActions::SolveModulePostDependencies(std::ostream& vout,CXMLElement* p_dep
     int count = 0;
 
     while( (p_sele = I.GetNextChildElement()) != NULL ) {
-        if( p_sele->GetName() == "postdepend" ) {
-            CSmallString lmodule;
-            CSmallString lmodname;
-            CSmallString lmodver;
-            p_sele->GetAttribute("module",lmodule);
+        if( p_sele->GetName() == "depend" ) {
+            CSmallString lname, ltype;
+            p_sele->GetAttribute("name",lname);
+            p_sele->GetAttribute("type",ltype);
 
-            CUtils::ParseModuleName(lmodule,lmodname,lmodver);
-            // is module already added?
-            bool found = false;
-            for(unsigned int i=0; i<DepList.size(); i++) {
-                if( DepList[i] == lmodname ) {
-                    found = true;
-                    break;
-                }
-            }
-            if( GlobalPrintLevel != EAPL_NONE ) {
-                if( Level == 1 ) {
-                    vout << "  INFO:    additional module " << lmodule << " is required, loading ... " << endl;
-                    count++;
-                }
-                if( found == true ) {
-                    vout << "           " << lmodule << " is skipped due to cyclic dependency" << endl;
-                }
-            }
+            if( ltype == "post" ){
+                CSmallString lmodname;
+                CSmallString lmodver;
 
-            if( found == false) result &= AddModule(vout,lmodule,true) != EAE_STATUS_OK;
+                CUtils::ParseModuleName(lname,lmodname,lmodver);
+                // is module already added?
+                bool found = false;
+                for(unsigned int i=0; i<DepList.size(); i++) {
+                    if( DepList[i] == lmodname ) {
+                        found = true;
+                        break;
+                    }
+                }
+                if( GlobalPrintLevel != EAPL_NONE ) {
+                    if( Level == 1 ) {
+                        vout << "  INFO:    additional module " << lname << " is required, loading ... " << endl;
+                        count++;
+                    }
+                    if( found == true ) {
+                        vout << "           " << lname << " is skipped due to cyclic dependency" << endl;
+                    }
+                }
+
+                if( found == false) result &= AddModule(vout,lname,true) != EAE_STATUS_OK;
+            }
         }
     }
 

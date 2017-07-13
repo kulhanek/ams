@@ -45,13 +45,11 @@
                   priority="normal/modaction"/>
         <script name="" type="child" priority="normal/modaction"/>
         <dependencies>
-            <conflict module=""/>
-            <depend module=""/>
+            <depend name="" type="add/post/sync/conflict"/>
         </dependencies>
     </build>
     <dependencies>
-        <conflict module=""/>
-        <depend module=""/>
+        <depend name="" type="add/post/sync/conflict"/>
     </dependencies>
     <default ver="" arch="" para=""/>
 </module>

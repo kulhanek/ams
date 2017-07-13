@@ -158,6 +158,9 @@ public:
     /// remove orphan bulds
     void RemoveOrphanBuilds(std::ostream& vout);
 
+    /// refactor builds
+    bool RefactorBuilds(std::ostream& vout);
+
     /// perform whole mapping procedure
     bool DistributeAll(std::ostream& vout);
 
@@ -202,10 +205,12 @@ private:
     void ListPrefixes(std::vector<std::string>& prefixes);
     const CSmallString GetBuildName(const CSmallString& site_name,const CSmallString& build_name,
                                    const CSmallString& prefix);
-    void RemoveOrphanBuildsFromDir(CFileName buildlib, std::ostream& vout);
+    void RemoveOrphanBuilds(CFileName buildlib, std::ostream& vout);
     CXMLElement* PopulateCache(const CSmallString& site_name,const CSmallString& module,const CSmallString& prefix,CSmallString& best_ver);
     void PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& my_build,
                           const CSmallString& prefix);
+    bool RefactorBuilds(CFileName buildlib, std::ostream& vout);
+    bool RefactorBuild(CFileName buildname);
  };
 
 //------------------------------------------------------------------------------
