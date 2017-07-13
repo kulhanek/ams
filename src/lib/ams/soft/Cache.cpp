@@ -1567,10 +1567,10 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_depe
                 vout << endl;
                 return(false);
             }
-            if( (type != "add") && (type != "post") && (type != "sync") && (type != "conflict")  ){
+            if( (type != "add") && (type != "post") && (type != "sync") && (type != "conflict") && (type != "deb") ){
                 vout << endl << endl;
                 vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
-                vout << "            Specified dependency type '" << type << "' is nt supported (add/post/sync/conflict)." << endl;
+                vout << "            Specified dependency type '" << type << "' is nt supported (add/post/sync/conflict/deb)." << endl;
                 vout << endl;
                 return(false);
             }
