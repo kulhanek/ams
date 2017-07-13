@@ -218,18 +218,6 @@ private:
     bool CheckModuleVersionDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_verdoc);
 
     /// check syntax of documentation element
-    bool CheckModuleVerLicSyntax(CVerboseStr& vout,CXMLElement* p_verlic);
-
-    /// check syntax of documentation element
-    bool CheckModuleVerManSyntax(CVerboseStr& vout,CXMLElement* p_verman);
-
-    /// check syntax of documentation element
-    bool CheckModuleVerWWWSyntax(CVerboseStr& vout,CXMLElement* p_verwww);
-
-    /// check syntax of documentation element
-    bool CheckModuleVerParSyntax(CVerboseStr& vout,CXMLElement* p_verpar);
-
-    /// check syntax of documentation element
     bool CheckModuleVerInfoSyntax(CVerboseStr& vout,CXMLElement* p_verinfo);
 
     /// check syntax of ACL element

@@ -827,22 +827,6 @@ bool CCache::CheckModuleVersionDocSyntax(CVerboseStr& vout,CXMLElement* p_module
     CXMLElement* p_mele;
     while( (p_mele = I.GetNextChildElement()) != NULL ) {
         bool result = false;
-        if( p_mele->GetName() == "www" ) {
-            if( CheckModuleVerWWWSyntax(vout,p_mele) == false ) return(false);
-            result = true;
-        }
-        if( p_mele->GetName() == "licence" ) {
-            if( CheckModuleVerLicSyntax(vout,p_mele) == false ) return(false);
-            result = true;
-        }
-        if( p_mele->GetName() == "manual" ) {
-            if( CheckModuleVerManSyntax(vout,p_mele) == false ) return(false);
-            result = true;
-        }
-        if( p_mele->GetName() == "parallel" ) {
-            if( CheckModuleVerParSyntax(vout,p_mele) == false ) return(false);
-            result = true;
-        }
         if( p_mele->GetName() == "info" ) {
             if( CheckModuleVerInfoSyntax(vout,p_mele) == false ) return(false);
             result = true;
@@ -851,117 +835,7 @@ bool CCache::CheckModuleVersionDocSyntax(CVerboseStr& vout,CXMLElement* p_module
             vout << endl << endl;
             vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'version' element!" << endl;
             vout << "            Unsupported subelement - '" << p_mele->GetName() << "'" << endl;
-            vout << "            Allowed subelements are: www, licence, manual, parallel,info." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVerLicSyntax(CVerboseStr& vout,CXMLElement* p_verlic)
-{
-    if( p_verlic == NULL ) return(false);
-
-    if( p_verlic->NumOfAttributes() != 0 ) {
-        vout << endl << endl;
-        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'licence' element!" << endl;
-        vout << "            No attributes are permitted but '" << p_verlic->NumOfAttributes() << "' was/were found." << endl;
-        vout << endl;
-        return(false);
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVerManSyntax(CVerboseStr& vout,CXMLElement* p_verman)
-{
-    if( p_verman == NULL ) return(false);
-
-    // test attributes
-    CXMLIterator    I(p_verman);
-    CSmallString    attname;
-
-    while( I.GetNextAttributeName(attname) == true ) {
-        bool result = false;
-        if( attname == "url" ) {
-            CSmallString url;
-            p_verman->GetAttribute("url",url);
-            result = url != NULL;
-        }
-
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'manual' element!" << endl;
-            vout << "            '" << attname << "' is unsupported attribute, its value is empty or does not contain valid value." << endl;
-            vout << "            Allowed attributes are: url." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVerWWWSyntax(CVerboseStr& vout,CXMLElement* p_verwww)
-{
-    if( p_verwww == NULL ) return(false);
-
-    // test attributes
-    CXMLIterator    I(p_verwww);
-    CSmallString    attname;
-
-    while( I.GetNextAttributeName(attname) == true ) {
-        bool result = false;
-        if( attname == "url" ) {
-            CSmallString url;
-            p_verwww->GetAttribute("url",url);
-            result = url != NULL;
-        }
-
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'www' element!" << endl;
-            vout << "            '" << attname << "' is unsupported attribute, its value is empty or does not contain valid value." << endl;
-            vout << "            Allowed attributes are: url." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVerParSyntax(CVerboseStr& vout,CXMLElement* p_verpar)
-{
-    if( p_verpar == NULL ) return(false);
-
-    // test attributes
-    CXMLIterator    I(p_verpar);
-    CSmallString    attname;
-
-    while( I.GetNextAttributeName(attname) == true ) {
-        bool result = false;
-        if( attname == "url" ) {
-            CSmallString url;
-            p_verpar->GetAttribute("url",url);
-            result = url != NULL;
-        }
-
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'parallel' element!" << endl;
-            vout << "            '" << attname << "' is unsupported attribute, its value is empty or does not contain valid value." << endl;
-            vout << "            Allowed attributes are: url." << endl;
+            vout << "            Allowed subelements are: info." << endl;
             vout << endl;
             return(false);
         }
