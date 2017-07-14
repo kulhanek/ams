@@ -579,7 +579,7 @@ void CPrintEngine::PrintRawDependencies(void)
                 } else if ( type == "rm" ){
                     vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
                 } else if ( type == "deb" ){
-                    vout << "<purple>   - " << cross_ref << left << " " << dname << "</purple>" << endl;
+                    vout << "<purple>   * " << cross_ref << left << " " << dname << "</purple>" << endl;
                 } else {
                     vout <<  "- UNSUPPORTED TYPE -" << endl;
                 }
@@ -630,7 +630,7 @@ void CPrintEngine::PrintRawDependencies(void)
                     } else if ( type == "rm" ){
                         vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
                     } else if ( type == "deb" ){
-                        vout << "<purple>   - " << cross_ref << left << " " << dname << "</purple>" << endl;
+                        vout << "<purple>   * " << cross_ref << left << " " << dname << "</purple>" << endl;
                     } else {
                         vout <<  "- UNSUPPORTED TYPE -" << endl;
                     }
