@@ -197,7 +197,7 @@ private:
     bool DistributeSiteMap(std::ostream& vout,CSite* p_site);
     bool DistributeSiteModuleMap(std::ostream& vout, CXMLElement* p_mod,CSite* p_site);
     bool InjectBuildIntoSite(CXMLElement* p_builds,const CSmallString& prefix,const CSmallString& build);
-    bool InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallString& site);
+    bool InjectRootDoc(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallString& site);
     bool InjectVerIndx(CXMLElement* p_build);
     void GetAllSites(std::list<std::string>& sites);
     bool BackupMap(void);

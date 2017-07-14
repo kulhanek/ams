@@ -2271,7 +2271,7 @@ bool CMap::DistributeSiteModuleMap(std::ostream& vout, CXMLElement* p_mod,CSite*
     p_mele->CreateChildText("\n",true);
 
     // create other elements  ----------------------------------------------
-    if( InjectRootDocumentation(p_mod,p_mele,site) == false ) {
+    if( InjectRootDoc(p_mod,p_mele,site) == false ) {
         ES_ERROR("unable to inject documentation");
         return(false);
     }
@@ -2428,7 +2428,7 @@ bool CMap::InjectBuildIntoSite(CXMLElement* p_builds,const CSmallString& prefix,
 
 //------------------------------------------------------------------------------
 
-bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallString& site)
+bool CMap::InjectRootDoc(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallString& site)
 {
     CSmallString mname;
     p_mele->GetAttribute("name",mname);
@@ -2501,7 +2501,7 @@ bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const
         return(false);
     }
     // documentation ----------------------------------------
-    CXMLElement* p_doc = p_docxml->GetChildElementByPath("module/documentation");
+    CXMLElement* p_doc = p_docxml->GetChildElementByPath("module/doc");
     if( p_doc != NULL ) {
         if( p_doc->DuplicateNode(p_mele) == false ) {
             CSmallString error;
@@ -2525,7 +2525,7 @@ bool CMap::InjectRootDocumentation(CXMLElement* p_sele,CXMLElement* p_mele,const
     }
 
     // dependencies ----------------------------------------
-    CXMLElement* p_deps = p_docxml->GetChildElementByPath("module/dependencies");
+    CXMLElement* p_deps = p_docxml->GetChildElementByPath("module/deps");
     if( p_deps != NULL ) {
         if( p_deps->DuplicateNode(p_mele) == false ) {
             CSmallString error;
