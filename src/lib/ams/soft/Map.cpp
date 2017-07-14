@@ -1959,7 +1959,6 @@ bool CMap::RefactorDoc(CFileName docname)
     xml_printer.RegisterLinearElement("a");
     xml_printer.RegisterLinearElement("b");
     xml_printer.RegisterLinearElement("i");
-    xml_printer.RegisterLinearElement("li");
 
     xml_printer.RegisterPreformatedElement("pre");
 
@@ -1974,6 +1973,9 @@ bool CMap::RefactorDoc(CFileName docname)
     xml_printer.RegisterBlockElement("h9");
     xml_printer.RegisterBlockElement("p");
     xml_printer.RegisterBlockElement("div");
+    xml_printer.RegisterBlockElement("ul");
+    xml_printer.RegisterBlockElement("ol");
+    xml_printer.RegisterBlockElement("li");
 
     if( xml_printer.Print(docname) == false ){
         CSmallString error;
