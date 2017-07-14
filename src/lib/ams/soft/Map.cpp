@@ -1959,6 +1959,7 @@ bool CMap::RefactorDoc(CFileName docname)
     xml_printer.RegisterLinearElement("a");
     xml_printer.RegisterLinearElement("b");
     xml_printer.RegisterLinearElement("i");
+    xml_printer.RegisterLinearElement("li");
 
     xml_printer.RegisterPreformatedElement("pre");
 
