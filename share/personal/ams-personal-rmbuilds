@@ -36,6 +36,8 @@ function gen_list_of_packages()
     for SITE in `site listavail 2>&1`; do
         echo ">>> Site: $SITE" | tee -a $LOG_FILE
         for FILTER in "$@"; do
+            # remove prefix if any
+            FILTER="`basename $FILTER`"
             printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
             for BUILD in `ams-cache --site "$SITE" getbuilds "$FILTER"`; do
                 printf "    |-> %-60s\n" "$BUILD" | tee -a $LOG_FILE
