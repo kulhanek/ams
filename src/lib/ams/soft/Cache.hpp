@@ -42,7 +42,7 @@
     <build ver="" arch="" para="">
         <variable name="" value=""
                   operation="append/preppend/set"
-                  priority="normal/modaction"/>
+                  priority="normal/modaction/dependency"/>
         <script name="" type="child" priority="normal/modaction"/>
         <deps>
             <dep name="" type="add/post/sync/rm/deb"/>

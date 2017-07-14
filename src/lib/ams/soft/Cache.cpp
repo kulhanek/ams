@@ -1062,7 +1062,7 @@ bool CCache::CheckModuleVariableSyntax(CVerboseStr& vout,CXMLElement* p_variable
         if( attname == "priority" ) {
             CSmallString value;
             p_variable->GetAttribute("priority",value);
-            if( (value == "normal") || (value == "modaction") ) result = true;
+            if( (value == "normal") || (value == "modaction") || (value == "dependency") ) result = true;
         }
 
         if( attname == "secret" ) {
