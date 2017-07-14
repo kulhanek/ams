@@ -1269,7 +1269,7 @@ bool CCache::CheckModuleDepsSyntax(CVerboseStr& vout,CXMLElement* p_deps)
                 vout << endl;
                 return(false);
             }
-            if( (type != "pre") && (type != "post") && (type != "sync") ){
+            if( (type == "pre") || (type == "post") || (type == "sync") ){
                 if( TestModuleByPartialName(name) == false ){
                     vout << endl << endl;
                     vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
