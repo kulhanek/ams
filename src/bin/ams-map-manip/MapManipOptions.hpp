@@ -75,6 +75,7 @@ public:
     "      <green>rmorphansites</green>              - remove maps for sites that are not in AMS database\n"
     "      <green>rmorphanbuilds</green>             - remove builds that have AMS_PACKAGE_DIR set but that package directory does not exist\n"
     "      <green>refbuilds</green>                  - refactor all builds\n"
+    "      <green>refdocs</green>                    - refactor all docs\n"
     "      <green>distribute</green>                 - distribute documentation and builds to individual site caches\n"
     "      <green>aliases</green>                    - print site aliases\n"
     "      <green>undo</green>                       - undo last map change\n"

@@ -161,6 +161,9 @@ public:
     /// refactor builds
     bool RefactorBuilds(std::ostream& vout);
 
+    /// refactor documentation files
+    bool RefactorDocs(std::ostream& vout);
+
     /// perform whole mapping procedure
     bool DistributeAll(std::ostream& vout);
 
@@ -211,6 +214,9 @@ private:
                           const CSmallString& prefix);
     bool RefactorBuilds(CFileName buildlib, std::ostream& vout);
     bool RefactorBuild(CFileName buildname);
+    void RefactorDeps(CXMLElement* p_deps);
+    bool RefactorDocs(CFileName buildlib, std::ostream& vout);
+    bool RefactorDoc(CFileName docname);
  };
 
 //------------------------------------------------------------------------------

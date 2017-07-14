@@ -85,6 +85,7 @@ int CMapManipOptions::CheckArguments(void)
         if( GetProgArg(0) == "numofundos" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "undo" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "refbuilds" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "refdocs" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "distribute" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "rmorphansites" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "rmorphanbuilds" ) return(SO_CONTINUE);

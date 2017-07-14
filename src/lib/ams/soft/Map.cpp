@@ -1795,12 +1795,37 @@ bool CMap::RefactorBuild(CFileName buildname)
     }
 
     CXMLElement* p_deps = xml_doc.GetChildElementByPath("build/dependencies");
+    if( p_deps == NULL ){
+        p_deps = xml_doc.GetChildElementByPath("build/deps");
+    }
+    RefactorDeps(p_deps);
+
+    CXMLPrinter xml_printer;
+    xml_printer.SetPrintedXMLNode(&xml_doc);
+    xml_printer.SetPrintAsItIs(false);
+
+    if( xml_printer.Print(buildname) == false ){
+        CSmallString error;
+        error << "unable to save build file '" << buildname << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CMap::RefactorDeps(CXMLElement* p_deps)
+{
     CXMLElement* p_dep = NULL;
     if( p_deps ){
+        p_deps->SetName("deps");
         p_dep = p_deps->GetFirstChildElement();
     }
     while( p_dep != NULL ){
-        if( p_dep->GetName() == "depend" ){
+        if( (p_dep->GetName() == "dep") || (p_dep->GetName() == "depend") ){
+            p_dep->SetName("dep");
             CSmallString name;
             if( p_dep->GetAttribute("module",name) == true ){
                 p_dep->RemoveAttribute("module");
@@ -1808,7 +1833,12 @@ bool CMap::RefactorBuild(CFileName buildname)
             }
             CSmallString type;
             if( p_dep->GetAttribute("type",type) == false ){
-                p_dep->SetAttribute("type","add");
+                p_dep->SetAttribute("type","pre");
+            }
+            if( p_dep->GetAttribute("type",type) == true ){
+                if( type == "add" ) {
+                    p_dep->SetAttribute("type","pre");
+                }
             }
         }
         if( p_dep->GetName() == "postdepend" ){
@@ -1841,14 +1871,91 @@ bool CMap::RefactorBuild(CFileName buildname)
 
         p_dep = p_dep->GetNextSiblingElement();
     }
+}
+
+//------------------------------------------------------------------------------
+
+bool CMap::RefactorDocs(std::ostream& vout)
+{
+    return(RefactorDocs("",vout));
+}
+
+//------------------------------------------------------------------------------
+
+bool CMap::RefactorDocs(CFileName buildlib, std::ostream& vout)
+{
+    bool result = true;
+
+    CFileName root_dir = AMSGlobalConfig.GetETCDIR() / "map" / "docs";
+
+    CDirectoryEnum dir_enum(root_dir / buildlib);
+
+    dir_enum.StartFindFile("*");
+    CFileName file;
+    while( dir_enum.FindFile(file) ) {
+        if( file == "." ) continue;
+        if( file == ".." ) continue;
+        CFileName full_name = buildlib / file;
+        if( fnmatch("*.doc",file,0) == 0 ){
+            vout << setw(80) << left << full_name << endl;
+            result &= RefactorDoc(root_dir / full_name);
+        } else {
+            if( CFileSystem::IsDirectory(root_dir / full_name) == true ){
+                result &= RefactorDocs(full_name,vout);
+            }
+        }
+
+    }
+    dir_enum.EndFindFile();
+    return(result);
+}
+
+//------------------------------------------------------------------------------
+
+bool CMap::RefactorDoc(CFileName docname)
+{
+    CXMLDocument    xml_doc;
+    CXMLParser      xml_parser;
+    xml_parser.EnableWhiteCharacters(true);
+    xml_parser.SetOutputXMLNode(&xml_doc);
+
+    if( xml_parser.Parse(docname) == false ) {
+        CSmallString error;
+        error <<  "unable to parse doc file (" << docname << ")";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    CXMLElement* p_doc = xml_doc.GetChildElementByPath("module/documentation");
+    if( p_doc == NULL ){
+        p_doc = xml_doc.GetChildElementByPath("module/doc");
+    }
+    if( p_doc ){
+        p_doc->SetName("doc");
+        CXMLElement* p_vers = p_doc->GetFirstChildElement("versions");
+        if( p_vers ){
+            delete p_vers;
+        }
+        CXMLElement* p_info = p_doc->GetFirstChildElement("info");
+        if( p_info ){
+            p_doc->CopyChildNodesFrom(p_info);
+            delete p_info;
+        }
+    }
+
+    CXMLElement* p_deps = xml_doc.GetChildElementByPath("module/dependencies");
+    if( p_deps == NULL ){
+        p_deps = xml_doc.GetChildElementByPath("module/deps");
+    }
+    RefactorDeps(p_deps);
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&xml_doc);
-    xml_printer.SetPrintAsItIs(false);
+    xml_printer.SetPrintAsItIs(true);
 
-    if( xml_printer.Print(buildname) == false ){
+    if( xml_printer.Print(docname) == false ){
         CSmallString error;
-        error << "unable to save module file '" << buildname << "'";
+        error << "unable to save doc file '" << docname << "'";
         ES_ERROR(error);
         return(false);
     }

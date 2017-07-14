@@ -225,6 +225,10 @@ bool CMapManip::Run(void)
         return(Map.RefactorBuilds(vout));
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "refdocs" ) {
+        return(Map.RefactorDocs(vout));
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "numofundos" ) {
         vout << Map.GetNumOfUndoMapChanges() << endl;
         return(true);
