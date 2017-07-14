@@ -169,7 +169,7 @@ bool CCacheCmd::Run(void)
         vout << endl;
 
         // check syntax
-        vout << "#  Checking the cache syntax ... " << endl;
+        vout << "#  Checking the cache syntax for the site : " << AMSGlobalConfig.GetActiveSiteName() << endl;
         if( Cache.CheckCacheSyntax(vout) == false) return(false);
         vout << endl;
 
@@ -407,7 +407,7 @@ bool CCacheCmd::Run(void)
             vout << endl;
 
             // check syntax
-            vout << "#  Checking the cache syntax ... " << endl;
+            vout << "#  Checking the cache syntax for the site : " << Site.GetName() << endl;
             if( Cache.CheckCacheSyntax(vout) == false) return(false);
             vout << endl;
             it++;
