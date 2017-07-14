@@ -1956,6 +1956,12 @@ bool CMap::RefactorDoc(CFileName docname)
     xml_printer.SetPrintedXMLNode(&xml_doc);
     xml_printer.SetPrintAsItIs(false);
 
+    xml_printer.RegisterLinearElement("a");
+    xml_printer.RegisterLinearElement("b");
+    xml_printer.RegisterLinearElement("i");
+
+    xml_printer.RegisterPreformatedElement("pre");
+
     if( xml_printer.Print(docname) == false ){
         CSmallString error;
         error << "unable to save doc file '" << docname << "'";
