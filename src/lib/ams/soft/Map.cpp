@@ -1962,6 +1962,18 @@ bool CMap::RefactorDoc(CFileName docname)
 
     xml_printer.RegisterPreformatedElement("pre");
 
+    xml_printer.RegisterBlockElement("h1");
+    xml_printer.RegisterBlockElement("h2");
+    xml_printer.RegisterBlockElement("h3");
+    xml_printer.RegisterBlockElement("h4");
+    xml_printer.RegisterBlockElement("h5");
+    xml_printer.RegisterBlockElement("h6");
+    xml_printer.RegisterBlockElement("h7");
+    xml_printer.RegisterBlockElement("h8");
+    xml_printer.RegisterBlockElement("h9");
+    xml_printer.RegisterBlockElement("p");
+    xml_printer.RegisterBlockElement("div");
+
     if( xml_printer.Print(docname) == false ){
         CSmallString error;
         error << "unable to save doc file '" << docname << "'";
