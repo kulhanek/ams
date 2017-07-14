@@ -1976,6 +1976,8 @@ bool CMap::RefactorDoc(CFileName docname)
     xml_printer.RegisterBlockElement("ol");
     xml_printer.RegisterBlockElement("li");
 
+    xml_printer.RegisterTabResetElement("doc");
+
     if( xml_printer.Print(docname) == false ){
         CSmallString error;
         error << "unable to save doc file '" << docname << "'";
