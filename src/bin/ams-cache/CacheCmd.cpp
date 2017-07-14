@@ -456,7 +456,7 @@ bool CCacheCmd::Run(void)
             // check syntax
             vout << low;
             // print data
-            PrintEngine.PrintRawModes();
+            PrintEngine.PrintRawDebDependencies();
             it++;
         }
         return(true);
