@@ -1973,7 +1973,6 @@ bool CMap::RefactorDoc(CFileName docname)
     xml_printer.RegisterBlockElement("h9");
     xml_printer.RegisterBlockElement("p");
     xml_printer.RegisterBlockElement("div");
-    xml_printer.RegisterBlockElement("ul");
     xml_printer.RegisterBlockElement("ol");
     xml_printer.RegisterBlockElement("li");
 
