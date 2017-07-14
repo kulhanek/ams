@@ -1941,6 +1941,9 @@ bool CMap::RefactorDoc(CFileName docname)
             p_doc->CopyChildNodesFrom(p_info);
             delete p_info;
         }
+        if( p_doc->HasChildNodes() == false ){
+            delete p_doc;
+        }
     }
 
     CXMLElement* p_deps = xml_doc.GetChildElementByPath("module/dependencies");
