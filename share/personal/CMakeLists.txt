@@ -3,7 +3,11 @@
 # ==============================================================================
 
 INSTALL(FILES
-            ams-personal
+            ams-personal-gensshkeys
+            ams-personal-showsshkey
+            ams-personal-useradd
+            ams-personal-addbuilds
+            ams-personal-rmbuilds
        DESTINATION
             share/personal
         PERMISSIONS
