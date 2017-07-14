@@ -1947,10 +1947,28 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         p_ele = p_mele->CreateChildElement("h2");
         p_ele->CreateChildText("Description");
         // insert contents
+        PreprocessHelpHeaders(p_doc);
         p_mele->CopyChildNodesFrom(p_doc);
     }
 
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CPrintEngine::PreprocessHelpHeaders(CXMLElement* p_ele)
+{
+    if( p_ele == NULL ) return;
+    CSmallString name = p_ele->GetName();
+    if( (name == "h2") || (name == "h3") || (name == "h4") || (name == "h5") || (name == "h6") || (name == "h7") ){
+        p_ele->SetName("h2");
+    }
+
+    CXMLElement* p_chld = p_ele->GetFirstChildElement();
+    while( p_chld ){
+        PreprocessHelpHeaders(p_chld);
+        p_chld = p_chld->GetNextSiblingElement();
+    }
 }
 
 //------------------------------------------------------------------------------

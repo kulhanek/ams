@@ -155,6 +155,8 @@ private:
     CXMLDocument    SystemConfig;   // print engine configuration
     CXMLDocument    UserConfig;     // user print configuration
     CXMLDocument    HTMLHelp;       // module help document
+
+    void PreprocessHelpHeaders(CXMLElement* p_ele);
 };
 
 //-----------------------------------------------------------------------------
