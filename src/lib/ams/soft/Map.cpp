@@ -1916,7 +1916,7 @@ bool CMap::RefactorDoc(CFileName docname)
 {
     CXMLDocument    xml_doc;
     CXMLParser      xml_parser;
-    xml_parser.EnableWhiteCharacters(true);
+    xml_parser.EnableWhiteCharacters(false);
     xml_parser.SetOutputXMLNode(&xml_doc);
 
     if( xml_parser.Parse(docname) == false ) {
@@ -1951,7 +1951,7 @@ bool CMap::RefactorDoc(CFileName docname)
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&xml_doc);
-    xml_printer.SetPrintAsItIs(true);
+    xml_printer.SetPrintAsItIs(false);
 
     if( xml_printer.Print(docname) == false ){
         CSmallString error;
