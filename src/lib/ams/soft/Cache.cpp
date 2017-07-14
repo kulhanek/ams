@@ -603,7 +603,7 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
             result = true;
         }
         if( p_mele->GetName() == "deps" ) {
-            if( CheckModuleDependenciesSyntax(vout,p_mele) == false ) return(false);
+            if( CheckModuleDepsSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
         if( p_mele->GetName() == "default" ) {
@@ -611,7 +611,7 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
             result = true;
         }
         if( p_mele->GetName() == "doc" ) {
-            if( CheckModuleDocumentationSyntax(vout,p_module,p_mele) == false ) return(false);
+            if( CheckModuleDocSyntax(vout,p_module,p_mele) == false ) return(false);
             result = true;
             doc_available = true;
         }
@@ -664,7 +664,7 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
     }
 
     if( doc_available == false ){
-        vout << "<blue>>>> WARNING:</blue> 'documentation' element is missing! ";
+        vout << "<blue>>>> WARNING:</blue> 'doc' element is missing! ";
     }
 
     return(true);
@@ -674,7 +674,7 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CCache::CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_doc)
+bool CCache::CheckModuleDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_doc)
 {
     if( p_doc == NULL ) return(false);
 
@@ -918,7 +918,7 @@ bool CCache::CheckModuleBuildSyntax(CVerboseStr& vout,CXMLElement* p_build)
             result = true;
         }
         if( p_mele->GetName() == "deps" ) {
-            if( CheckModuleDependenciesSyntax(vout,p_mele) == false ) return(false);
+            if( CheckModuleDepsSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
         if( p_mele->GetName() == "acl" ) {
@@ -1218,7 +1218,7 @@ bool CCache::CheckModuleScriptSyntax(CVerboseStr& vout,CXMLElement* p_script)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_deps)
+bool CCache::CheckModuleDepsSyntax(CVerboseStr& vout,CXMLElement* p_deps)
 {
     if( p_deps == NULL ) return(false);
 
@@ -1253,13 +1253,6 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_deps
                 vout << endl;
                 return(false);
             }
-            if( TestModuleByPartialName(name) == false ){
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
-                vout << "            Specified module dependency '" << name << "' does not exist in the cache." << endl;
-                vout << endl;
-                return(false);
-            }
             CSmallString type;
             p_mele->GetAttribute("type",type);
             if( type == NULL ) {
@@ -1276,6 +1269,16 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_deps
                 vout << endl;
                 return(false);
             }
+            if( (type != "pre") && (type != "post") && (type != "sync") ){
+                if( TestModuleByPartialName(name) == false ){
+                    vout << endl << endl;
+                    vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
+                    vout << "            Specified module dependency '" << name << "' does not exist in the cache." << endl;
+                    vout << endl;
+                    return(false);
+                }
+            }
+
             result = true;
         }
         if( result == false ) {
@@ -2078,35 +2081,8 @@ bool CCache::SetVariableValue(CXMLElement* p_rele,
 CXMLElement* CCache::GetModuleDescription(CXMLElement* p_module)
 {
     if( p_module == NULL ) return(NULL);
-    CXMLElement* p_doc = p_module->GetChildElementByPath("documentation/info");
+    CXMLElement* p_doc = p_module->GetChildElementByPath("doc");
     return(p_doc);
-}
-
-//------------------------------------------------------------------------------
-
-CXMLElement* CCache::GetModuleDescription(CXMLElement* p_module,
-        const CSmallString& ver)
-{
-    if( p_module == NULL ) return(NULL);
-    CXMLElement* p_doc = p_module->GetChildElementByPath("documentation/versions");
-    CXMLIterator I(p_doc);
-    CXMLElement* p_vdoc;
-
-    // particular doc for version
-    while( (p_vdoc = I.GetNextChildElement("version")) ) {
-        CSmallString lver;
-        p_vdoc->GetAttribute("value",lver);
-        if( lver == ver ) {
-            p_vdoc = p_vdoc->GetChildElementByPath("info");
-            if( p_vdoc != NULL ) return(p_vdoc);
-            break;
-        }
-    }
-
-    // global documentation
-    // p_vdoc = p_module->GetChildElementByPath("documentation/info");
-    // currently no global documentation
-    return(NULL);
 }
 
 //------------------------------------------------------------------------------

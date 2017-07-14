@@ -1919,8 +1919,6 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
     }
     p_ele->CreateChildText(title);
 
-    bool specific_version_info = false;
-
     if( (versions.size() > 0) && (vers == NULL) ){
 
         // create list of versions
@@ -1931,7 +1929,6 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         CSmallString svers = "Available versions: ";
         while( it != ie ){
             std::string version = *it;
-            if( Cache.GetModuleDescription(p_module,version) != NULL ) specific_version_info = true;
             if( it != versions.begin() ) svers << ", ";
             bool defver = dver == CSmallString(version);
             if( defver ) svers << "<b>";
@@ -1944,11 +1941,6 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         p_ele->CreateChildText(svers);
     }
 
-    if( (specific_version_info == true) && (vers == NULL) ){
-        p_ele = p_mele->CreateChildElement("p");
-        p_ele->CreateChildText("Notice: This module contains specific documentation for individual module versions.");
-    }
-
     CXMLElement* p_doc = Cache.GetModuleDescription(p_module);
     if(  p_doc != NULL  ){
         // create title
@@ -1956,35 +1948,6 @@ bool CPrintEngine::AddHelp(const CSmallString& mod_name)
         p_ele->CreateChildText("Description");
         // insert contents
         p_mele->CopyChildNodesFrom(p_doc);
-    }
-
-    // specific version comments
-    if( vers == NULL ){
-        std::vector<std::string>::iterator it = versions.begin();
-        std::vector<std::string>::iterator ie = versions.end();
-
-        while( it != ie ){
-            std::string version = *it;
-            CXMLElement* p_doc = Cache.GetModuleDescription(p_module,version);
-            if(  p_doc != NULL  ){
-                // create title
-                p_ele = p_mele->CreateChildElement("h2");
-                p_ele->CreateChildText("Module version: " + name + ":" + CSmallString(version));
-                // insert contents
-                p_mele->CopyChildNodesFrom(p_doc);
-            }
-            it++;
-        }
-    } else {
-        CXMLElement* p_doc = Cache.GetModuleDescription(p_module,vers);
-        if( p_doc != NULL ){
-            // create title
-            p_ele = p_mele->CreateChildElement("h2");
-            p_ele->CreateChildText("Module version: " + name + ":" + vers);
-
-            // insert contents
-            p_mele->CopyChildNodesFrom(p_doc);
-        }
     }
 
     return(true);

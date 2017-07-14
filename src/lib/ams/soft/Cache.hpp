@@ -102,9 +102,6 @@ public:
     /// get module description
     CXMLElement* GetModuleDescription(CXMLElement* p_module);
 
-    /// get module description
-    CXMLElement* GetModuleDescription(CXMLElement* p_module,const CSmallString& ver);
-
     /// search cache for modules matching pattern
     bool SearchCache(const CSmallString& pattern,
                             std::vector<CXMLElement*>& hits);
@@ -213,7 +210,7 @@ private:
     bool CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module);
 
     /// check syntax of documentation element
-    bool CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_doc);
+    bool CheckModuleDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_doc);
 
     /// check syntax of ACL element
     bool CheckModuleACLSyntax(CVerboseStr& vout,CXMLElement* p_builds);
@@ -228,7 +225,7 @@ private:
     bool CheckModuleSetupSyntax(CVerboseStr& vout,CXMLElement* p_setup);
 
     /// check syntax of dependecies element
-    bool CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_dependencies);
+    bool CheckModuleDepsSyntax(CVerboseStr& vout,CXMLElement* p_dependencies);
 
     /// check syntax of default element
     bool CheckModuleDefaultSyntax(CVerboseStr& vout,CXMLElement* p_default);
