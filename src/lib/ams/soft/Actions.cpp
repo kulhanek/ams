@@ -249,18 +249,18 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
         reactivating = true;
     }
 
-    // now solve module dependencies ---------------
+    // now solve module desps ---------------
 
     // prepare module environment for dependency
-    if( ShellProcessor.PrepareModuleEnvironmentForDependencies(p_build) == false ) {
+    if( ShellProcessor.PrepareModuleEnvironmentForDeps(p_build) == false ) {
         CSmallString error;
-        error << "unable to solve dependencies for module '" << name << "' (PrepareModuleEnvironmentForDependencies)";
+        error << "unable to solve dependencies for module '" << name << "' (PrepareModuleEnvironmentForDeps)";
         ES_ERROR(error);
         Level--;
         return(EAE_DEPENDENCY_ERROR);
     }
 
-    if( SolveModuleDependencies(vout,p_module) == false ) {
+    if( SolveModuleDeps(vout,p_module) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (root)";
         ES_ERROR(error);
@@ -268,7 +268,7 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
         return(EAE_DEPENDENCY_ERROR);
     }
 
-    if( SolveModuleDependencies(vout,p_build) == false ) {
+    if( SolveModuleDeps(vout,p_build) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (build)";
         ES_ERROR(error);
@@ -332,7 +332,7 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
         }
     }
 
-    if( SolveModulePostDependencies(vout,p_build) == false ) {
+    if( SolveModulePostDeps(vout,p_build) == false ) {
         CSmallString error;
         error << "unable to solve post dependencies for module '" << name << "' (build)";
         ES_ERROR(error);
@@ -448,12 +448,12 @@ void CActions::SetModuleExportFlag(bool set)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_container)
+bool CActions::SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container)
 {
     CXMLElement* p_ele = NULL;
 
     if( p_dep_container != NULL ) {
-        p_ele = p_dep_container->GetFirstChildElement("dependencies");
+        p_ele = p_dep_container->GetFirstChildElement("deps");
     }
 
     if( p_ele == NULL ) {
@@ -467,11 +467,11 @@ bool CActions::SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_con
     int count = 0;
 
     while( (p_sele = I.GetNextChildElement()) != NULL ) {
-        if( p_sele->GetName() == "depend" ) {
+        if( p_sele->GetName() == "dep" ) {
             CSmallString lname,ltype;
             p_sele->GetAttribute("name",lname);
             p_sele->GetAttribute("type",ltype);
-            if ( ltype == "add" ) {
+            if ( ltype == "pre" ) {
 
                 CSmallString lmodname;
                 CSmallString lmodver;
@@ -499,7 +499,7 @@ bool CActions::SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_con
                     result &= AddModule(vout,lname,true) == EAE_STATUS_OK;
                 }
 
-            } else if( ltype == "conflict" ) {
+            } else if( ltype == "rm" ) {
                 if( AMSGlobalConfig.IsModuleActive(lname) == true ) {
                     if( GlobalPrintLevel != EAPL_NONE ) {
                         vout << "  WARNING: active module in conflict, unloading ... " << endl;
@@ -522,12 +522,12 @@ bool CActions::SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_con
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::SolveModulePostDependencies(std::ostream& vout,CXMLElement* p_dep_container)
+bool CActions::SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_container)
 {
     CXMLElement* p_ele = NULL;
 
     if( p_dep_container != NULL ) {
-        p_ele = p_dep_container->GetFirstChildElement("dependencies");
+        p_ele = p_dep_container->GetFirstChildElement("deps");
     }
 
     if( p_ele == NULL ) {

@@ -44,13 +44,17 @@
                   operation="append/preppend/set"
                   priority="normal/modaction"/>
         <script name="" type="child" priority="normal/modaction"/>
-        <dependencies>
-            <depend name="" type="add/post/sync/conflict"/>
-        </dependencies>
+        <deps>
+            <dep name="" type="add/post/sync/rm/deb"/>
+        </deps>
     </build>
-    <dependencies>
-        <depend name="" type="add/post/sync/conflict"/>
-    </dependencies>
+    <deps>
+        <dep name="" type="add/post/sync/rm/deb"/>
+    </deps>
+    <acl>
+    </acl>
+    <doc>
+    </doc>
     <default ver="" arch="" para=""/>
 </module>
 */
@@ -210,15 +214,6 @@ private:
 
     /// check syntax of documentation element
     bool CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_doc);
-
-    /// check syntax of documentation element
-    bool CheckModuleVersionsDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_versdoc);
-
-    /// check syntax of documentation element
-    bool CheckModuleVersionDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_verdoc);
-
-    /// check syntax of documentation element
-    bool CheckModuleVerInfoSyntax(CVerboseStr& vout,CXMLElement* p_verinfo);
 
     /// check syntax of ACL element
     bool CheckModuleACLSyntax(CVerboseStr& vout,CXMLElement* p_builds);

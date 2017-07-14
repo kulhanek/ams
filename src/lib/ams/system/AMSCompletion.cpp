@@ -148,7 +148,7 @@ bool CAMSCompletion::GetSuggestions(void)
         // what part should be completed?
         switch(CWord) {
         case 1:
-            AddSuggestions("rebuild rebuildall dependencies syntax syntaxall");
+            AddSuggestions("rebuild rebuildall deps syntax syntaxall");
             FilterSuggestions();
             PrintSuggestions();
             return(true);

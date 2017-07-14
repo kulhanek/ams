@@ -46,7 +46,7 @@ CShellProcessor::CShellProcessor(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CShellProcessor::PrepareModuleEnvironmentForDependencies(CXMLElement* p_build)
+bool CShellProcessor::PrepareModuleEnvironmentForDeps(CXMLElement* p_build)
 {
     CXMLElement* p_setup = NULL;
     if( p_build != NULL ) p_setup = p_build->GetFirstChildElement("setup");

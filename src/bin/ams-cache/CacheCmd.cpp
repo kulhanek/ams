@@ -177,7 +177,7 @@ bool CCacheCmd::Run(void)
     }
 
     //-----------------------------------------------
-    else if( Options.GetArgAction() == "dependencies" ) {
+    else if( Options.GetArgAction() == "deps" ) {
         // initialze AMS cache
         if( Cache.LoadCache() == false) {
             ES_ERROR("unable to load AMS cache");
@@ -193,7 +193,7 @@ bool CCacheCmd::Run(void)
         // set output stream
         PrintEngine.SetOutputStream(vout);
 
-        // print dependencies
+        // print deps
         PrintEngine.PrintRawDependencies();
         return(true);
     }

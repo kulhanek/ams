@@ -177,7 +177,7 @@ public:
     bool IsBuild(const CSmallString& site_name,const CSmallString& build_name,
                  const CSmallString& prefix);
 
-    /// print sync dependencies
+    /// print sync deps
     void ShowSyncDeps(std::ostream& vout,const CSmallString& site_name,
                       const CSmallString& build,const CSmallString& prefix,bool deep);
 

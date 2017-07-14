@@ -51,7 +51,7 @@ public:
 
     // setup methods -------------------------------------------------------------
     /// update environment according to module specification and variable priority
-    bool PrepareModuleEnvironmentForDependencies(CXMLElement* p_build);
+    bool PrepareModuleEnvironmentForDeps(CXMLElement* p_build);
     bool PrepareModuleEnvironmentForModActionI(CXMLElement* p_build);
     bool PrepareModuleEnvironmentForModActionII(CXMLElement* p_build);
     bool PrepareModuleEnvironmentForLowPriority(CXMLElement* p_build,

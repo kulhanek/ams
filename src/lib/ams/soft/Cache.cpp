@@ -602,7 +602,7 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
             if( CheckModuleBuildsSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
-        if( p_mele->GetName() == "dependencies" ) {
+        if( p_mele->GetName() == "deps" ) {
             if( CheckModuleDependenciesSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
@@ -610,7 +610,7 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
             if( CheckModuleDefaultSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
-        if( p_mele->GetName() == "documentation" ) {
+        if( p_mele->GetName() == "doc" ) {
             if( CheckModuleDocumentationSyntax(vout,p_module,p_mele) == false ) return(false);
             result = true;
             doc_available = true;
@@ -623,16 +623,24 @@ bool CCache::CheckModuleSyntax(CVerboseStr& vout,CXMLElement* p_module)
             vout << endl << endl;
             vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'module' element!" << endl;
             vout << "            Unsupported subelement - '" << p_mele->GetName() << "'" << endl;
-            vout << "            Allowed subelements are: builds, dependencies, documentation, acl, default." << endl;
+            vout << "            Allowed subelements are: builds, deps, doc, acl, default." << endl;
             vout << endl;
             return(false);
         }
     }
 
-    if( I.GetNumberOfChildElements("dependencies") > 1 ) {
+    if( I.GetNumberOfChildElements("deps") > 1 ) {
         vout << endl << endl;
         vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'module' element!" << endl;
-        vout << "            Only one 'dependencies' element is allowed in 'module' element." << endl;
+        vout << "            Only one 'deps' element is allowed in 'module' element." << endl;
+        vout << endl;
+        return(false);
+    }
+
+    if( I.GetNumberOfChildElements("doc") > 1 ) {
+        vout << endl << endl;
+        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'module' element!" << endl;
+        vout << "            Only one 'doc' element is allowed in 'module' element." << endl;
         vout << endl;
         return(false);
     }
@@ -672,167 +680,8 @@ bool CCache::CheckModuleDocumentationSyntax(CVerboseStr& vout,CXMLElement* p_mod
 
     if( p_doc->NumOfAttributes() != 0 ) {
         vout << endl << endl;
-        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'documentation' element!" << endl;
+        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'doc' element!" << endl;
         vout << "            No attributes are permitted but '" << p_doc->NumOfAttributes() << "' was/were found." << endl;
-        vout << endl;
-        return(false);
-    }
-
-    CXMLIterator    I(p_doc);
-
-    // subblocks
-    CXMLElement* p_mele;
-    while( (p_mele = I.GetNextChildElement()) != NULL ) {
-        bool result = false;
-        if( p_mele->GetName() == "info" ) {
-            if( CheckModuleVerInfoSyntax(vout,p_mele) == false ) return(false);
-            result = true;
-        }
-        if( p_mele->GetName() == "versions" ) {
-            if( CheckModuleVersionsDocSyntax(vout,p_module,p_mele) == false ) return(false);
-            result = true;
-        }
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'documentation' element!" << endl;
-            vout << "            Unsupported subelement - '" << p_mele->GetName() << "'" << endl;
-            vout << "            Allowed subelements are: info, versions." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVersionsDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_versdoc)
-{
-    if( p_versdoc == NULL ) return(false);
-
-    // list all versions
-    list<CSmallString> vers;
-    GetAllModuleVersions(p_module,vers);
-
-    if( p_versdoc->NumOfAttributes() != 0 ) {
-        vout << endl << endl;
-        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'versions' element!" << endl;
-        vout << "            No attributes are permitted but '" << p_versdoc->NumOfAttributes() << "' was/were found." << endl;
-        vout << endl;
-        return(false);
-    }
-
-    CXMLIterator    I(p_versdoc);
-
-     // subblocks
-    CXMLElement* p_mele;
-    while( (p_mele = I.GetNextChildElement()) != NULL ) {
-        bool result = false;
-        if( p_mele->GetName() == "version" ) {
-            if( CheckModuleVersionDocSyntax(vout,p_module,p_mele) == false ) return(false);
-            result = true;
-
-            CSmallString value;
-            p_mele->GetAttribute("value",value);
-            // remove version
-            vers.remove(value);
-        }
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'versions' element!" << endl;
-            vout << "            Unsupported subelement - '" << p_mele->GetName() << "'" << endl;
-            vout << "            Allowed subelements are: version." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-    // are there any undocumented versions
-    if( vers.size() > 0 ){
-        vout << "<blue>>>> WARNING:</blue> Undocumented versions: ";
-        list<CSmallString>::iterator    it = vers.begin();
-        list<CSmallString>::iterator    ie = vers.end();
-
-        while( it != ie ){
-            if( it != vers.begin() ) vout << ", ";
-            vout << (*it);
-            it++;
-        }
-        vout << "! ";
-    }
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVersionDocSyntax(CVerboseStr& vout,CXMLElement* p_module,CXMLElement* p_verdoc)
-{
-    if( p_verdoc == NULL ) return(false);
-    if( p_module == NULL ) return(false);
-
-    // test attributes
-    CXMLIterator    I(p_verdoc);
-    CSmallString    attname;
-
-    while( I.GetNextAttributeName(attname) == true ) {
-        bool result = false;
-        if( attname == "value" ) {
-            CSmallString value;
-            p_verdoc->GetAttribute("value",value);
-
-            // try to find the version
-            if( CheckModuleVersion(p_module,value) == false ){
-                vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'version' element!" << endl;
-                vout << "            Version '" << value << "' does not have any build." << endl;
-                vout << endl;
-                return(false);
-            }
-            result = true;
-        }
-
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'version' element!" << endl;
-            vout << "            '" << attname << "' is unsupported attribute, its value is empty or does not contain valid value." << endl;
-            vout << "            Allowed attributes are: value." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-     // test subblocks
-    CXMLElement* p_mele;
-    while( (p_mele = I.GetNextChildElement()) != NULL ) {
-        bool result = false;
-        if( p_mele->GetName() == "info" ) {
-            if( CheckModuleVerInfoSyntax(vout,p_mele) == false ) return(false);
-            result = true;
-        }
-        if( result == false ) {
-            vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'version' element!" << endl;
-            vout << "            Unsupported subelement - '" << p_mele->GetName() << "'" << endl;
-            vout << "            Allowed subelements are: info." << endl;
-            vout << endl;
-            return(false);
-        }
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CCache::CheckModuleVerInfoSyntax(CVerboseStr& vout,CXMLElement* p_verinfo)
-{
-    if( p_verinfo == NULL ) return(false);
-
-    if( p_verinfo->NumOfAttributes() != 0 ) {
-        vout << endl << endl;
-        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'info' element!" << endl;
-        vout << "            No attributes are permitted but '" << p_verinfo->NumOfAttributes() << "' was/were found." << endl;
         vout << endl;
         return(false);
     }
@@ -1068,7 +917,7 @@ bool CCache::CheckModuleBuildSyntax(CVerboseStr& vout,CXMLElement* p_build)
             if( CheckModuleSetupSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
-        if( p_mele->GetName() == "dependencies" ) {
+        if( p_mele->GetName() == "deps" ) {
             if( CheckModuleDependenciesSyntax(vout,p_mele) == false ) return(false);
             result = true;
         }
@@ -1080,7 +929,7 @@ bool CCache::CheckModuleBuildSyntax(CVerboseStr& vout,CXMLElement* p_build)
             vout << endl << endl;
             vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'build' element!" << endl;
             vout << "            Unsupported subelement - '" << p_mele->GetName() << "'." << endl;
-            vout << "            Allowed subelements are: setup, dependencies, acl." << endl;
+            vout << "            Allowed subelements are: setup, deps, acl." << endl;
             vout << endl;
             return(false);
         }
@@ -1094,10 +943,10 @@ bool CCache::CheckModuleBuildSyntax(CVerboseStr& vout,CXMLElement* p_build)
         return(false);
     }
 
-    if( I.GetNumberOfChildElements("dependencies") > 1 ) {
+    if( I.GetNumberOfChildElements("deps") > 1 ) {
         vout << endl << endl;
         vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'build' element!" << endl;
-        vout << "            Only one 'dependencies' element is allowed in 'build' element." << endl;
+        vout << "            Only one 'deps' element is allowed in 'build' element." << endl;
         vout << endl;
         return(false);
     }
@@ -1369,28 +1218,28 @@ bool CCache::CheckModuleScriptSyntax(CVerboseStr& vout,CXMLElement* p_script)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_dependencies)
+bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_deps)
 {
-    if( p_dependencies == NULL ) return(false);
+    if( p_deps == NULL ) return(false);
 
-    if( p_dependencies->NumOfAttributes() > 0 ) {
+    if( p_deps->NumOfAttributes() > 0 ) {
         vout << endl << endl;
-        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dependencies' element!" << endl;
+        vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'deps' element!" << endl;
         vout << "            No attrributes are supported for this element." << endl;
         vout << endl;
         return(false);
     }
 
     // subblocks
-    CXMLIterator    I(p_dependencies);
+    CXMLIterator    I(p_deps);
     CXMLElement*     p_mele;
 
     while( (p_mele = I.GetNextChildElement()) != NULL ) {
         bool result = false;
-        if( p_mele->GetName() == "depend" ) {
+        if( p_mele->GetName() == "dep" ) {
             if( p_mele->NumOfAttributes() != 2 ) {
                 vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
                 vout << "            Only two attributes (name/type) can be specified for this element." << endl;
                 vout << endl;
                 return(false);
@@ -1399,14 +1248,14 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_depe
             p_mele->GetAttribute("name",name);
             if( name == NULL ) {
                 vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
                 vout << "            'name' attribute is not specified or its value is empty." << endl;
                 vout << endl;
                 return(false);
             }
             if( TestModuleByPartialName(name) == false ){
                 vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
                 vout << "            Specified module dependency '" << name << "' does not exist in the cache." << endl;
                 vout << endl;
                 return(false);
@@ -1415,15 +1264,15 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_depe
             p_mele->GetAttribute("type",type);
             if( type == NULL ) {
                 vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
                 vout << "            'type' attribute is not specified or its value is empty." << endl;
                 vout << endl;
                 return(false);
             }
-            if( (type != "add") && (type != "post") && (type != "sync") && (type != "conflict") && (type != "deb") ){
+            if( (type != "pre") && (type != "post") && (type != "sync") && (type != "rm") && (type != "deb") ){
                 vout << endl << endl;
-                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'depend' element!" << endl;
-                vout << "            Specified dependency type '" << type << "' is nt supported (add/post/sync/conflict/deb)." << endl;
+                vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dep' element!" << endl;
+                vout << "            Specified dependency type '" << type << "' is nt supported (pre/post/sync/rm/deb)." << endl;
                 vout << endl;
                 return(false);
             }
@@ -1431,9 +1280,9 @@ bool CCache::CheckModuleDependenciesSyntax(CVerboseStr& vout,CXMLElement* p_depe
         }
         if( result == false ) {
             vout << endl << endl;
-            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'dependencies' element!" << endl;
+            vout << "<red>>>> ERROR:</red>: Syntax error in XML module specification - 'deps' element!" << endl;
             vout << "            Unsupported subelement - '" << p_mele->GetName() << "'." << endl;
-            vout << "            Allowed subelements are: depend." << endl;
+            vout << "            Allowed subelements are: dep." << endl;
             vout << endl;
             return(false);
         }
@@ -1817,8 +1666,8 @@ bool CCache::TestCrossDependency(const CSmallString& module,const CSmallString& 
     CSmallString depname;
     depname = CUtils::GetModuleName(depmodule);
 
-    // test global module dependencies
-    CXMLElement* p_dele = p_mod->GetFirstChildElement("dependencies");
+    // test global module deps
+    CXMLElement* p_dele = p_mod->GetFirstChildElement("deps");
     if( p_dele ) p_dele = p_dele->GetFirstChildElement();
 
     while( p_dele != NULL ){
@@ -1829,19 +1678,22 @@ bool CCache::TestCrossDependency(const CSmallString& module,const CSmallString& 
         p_dele = p_dele->GetNextSiblingElement();
     }
 
-    // test build dependencies
+    // test build deps
     CXMLElement* p_build = p_mod->GetChildElementByPath("builds/build");
     while( p_build != NULL ){
 
-        CXMLElement* p_dele = p_build->GetFirstChildElement("dependencies");
-        if( p_dele ) p_dele = p_dele->GetFirstChildElement();
+        CXMLElement* p_dele = p_build->GetFirstChildElement("deps");
+        if( p_dele ) p_dele = p_dele->GetFirstChildElement("dep");
 
         while( p_dele != NULL ){
-            CSmallString ldepmod;
-            p_dele->GetAttribute("module",ldepmod);
-            CSmallString ldepname = CUtils::GetModuleName(ldepmod);
-            if( ldepname == depname ) return(true);
-            p_dele = p_dele->GetNextSiblingElement();
+            CSmallString ldepmod,ltype;
+            p_dele->GetAttribute("name",ldepmod);
+            p_dele->GetAttribute("type",ltype);
+            if( (ltype == "pre") || (ltype == "post") ){
+                CSmallString ldepname = CUtils::GetModuleName(ldepmod);
+                if( ldepname == depname ) return(true);
+            }
+            p_dele = p_dele->GetNextSiblingElement("dep");
         }
         p_build = p_build->GetNextSiblingElement("build");
     }

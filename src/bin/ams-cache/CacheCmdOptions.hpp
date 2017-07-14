@@ -54,7 +54,7 @@ public:
     "   <green>rebuild</green>         rebuild cache from module files\n"
     "   <green>split</green>           split cache to individual module files\n"
     "   <green>splitmore</green>       split cache to individual build files\n"
-    "   <green>dependencies</green>    print dependency info among modules\n"
+    "   <green>deps</green>            print dependency info among modules\n"
     "   <green>syntax</green>          check syntax of cache\n"
     "   <green>allmods</green>         print all modules\n"
     "   <green>allbuilds</green>       print all builds\n"

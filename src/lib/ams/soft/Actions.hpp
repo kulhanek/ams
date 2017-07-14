@@ -97,11 +97,11 @@ private:
     std::vector<CSmallString>   DepList;            // dependency list - to avoid dependency cycles
 
     // actions related ------------------------------
-    /// solve module dependencies
-    bool SolveModuleDependencies(std::ostream& vout,CXMLElement* p_dep_container);
+    /// solve module deps
+    bool SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container);
 
-    /// solve module dependencies  -  after module is activated
-    bool SolveModulePostDependencies(std::ostream& vout,CXMLElement* p_dep_container);
+    /// solve module desp  -  after module is activated
+    bool SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_container);
 
     /// determine acceptable architecture for module
     bool DetermineArchitecture(std::ostream& vout,CXMLElement* p_module,

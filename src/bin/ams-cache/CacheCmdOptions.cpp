@@ -71,7 +71,7 @@ int CCacheCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "rebuild" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "split" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "splitmore" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "dependencies" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "deps" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "syntax" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "allmods" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "allbuilds" ) return(SO_CONTINUE);

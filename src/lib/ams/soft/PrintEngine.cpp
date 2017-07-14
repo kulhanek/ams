@@ -549,10 +549,10 @@ void CPrintEngine::PrintRawDependencies(void)
         CSmallString name;
         p_mele->GetAttribute("name",name);
 
-        // traverse dependencies - intermodule
+        // traverse deps - intermodule
         CXMLElement* p_dele;
 
-        p_dele = p_mele->GetFirstChildElement("dependencies");
+        p_dele = p_mele->GetFirstChildElement("deps");
         CXMLIterator    D(p_dele);
         CXMLElement*    p_lele;
 
@@ -561,7 +561,7 @@ void CPrintEngine::PrintRawDependencies(void)
         }
 
         while( (p_lele = D.GetNextChildElement()) != NULL  ) {
-            if( p_lele->GetName() == "depend" ) {
+            if( p_lele->GetName() == "dep" ) {
                 CSmallString dname;
                 p_lele->GetAttribute("name",dname);
                 char cross_ref = '\\';
@@ -570,21 +570,23 @@ void CPrintEngine::PrintRawDependencies(void)
                 }
                 CSmallString type;
                 p_lele->GetAttribute("type",type);
-                if( type == "add" ){
+                if( type == "pre" ){
                     vout <<  "<green>   + " << cross_ref << left << " " << dname << "</green>" << endl;
                 } else if ( type == "sync" ){
                     vout <<  "<yellow>   > " << cross_ref << left << " " << dname << "</yellow>" << endl;
                 } else if ( type == "post" ){
                     vout <<  "<blue>   p " << cross_ref << left << " " << dname << "</blue>" << endl;
-                } else if ( type == "conflict" ){
+                } else if ( type == "rm" ){
                     vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
-                } {
+                } else if ( type == "deb" ){
+                    vout << "<purple>   - " << cross_ref << left << " " << dname << "</purple>" << endl;
+                } else {
                     vout <<  "- UNSUPPORTED TYPE -" << endl;
                 }
             }
         }
 
-        // traverse dependencies - interbuilds
+        // traverse deps - interbuilds
         CXMLElement* p_bele;
         p_bele = p_mele->GetChildElementByPath("builds/build");
 
@@ -601,7 +603,7 @@ void CPrintEngine::PrintRawDependencies(void)
 
             CXMLElement* p_dele;
 
-            p_dele = p_bele->GetFirstChildElement("dependencies");
+            p_dele = p_bele->GetFirstChildElement("deps");
             CXMLIterator    D(p_dele);
             CXMLElement*    p_lele;
 
@@ -610,7 +612,7 @@ void CPrintEngine::PrintRawDependencies(void)
             }
 
             while( (p_lele = D.GetNextChildElement()) != NULL  ) {
-                if( p_lele->GetName() == "depend" ) {
+                if( p_lele->GetName() == "dep" ) {
                     CSmallString dname;
                     p_lele->GetAttribute("name",dname);
                     char cross_ref = '\\';
@@ -619,15 +621,17 @@ void CPrintEngine::PrintRawDependencies(void)
                     }
                     CSmallString type;
                     p_lele->GetAttribute("type",type);
-                    if( type == "add" ){
+                    if( type == "pre" ){
                         vout <<  "<green>   + " << cross_ref << left << " " << dname << "</green>" << endl;
                     } else if ( type == "sync" ){
                         vout <<  "<yellow>   > " << cross_ref << left << " " << dname << "</yellow>" << endl;
                     } else if ( type == "post" ){
                         vout <<  "<blue>   p " << cross_ref << left << " " << dname << "</blue>" << endl;
-                    } else if ( type == "conflict" ){
+                    } else if ( type == "rm" ){
                         vout << "<red>   - " << cross_ref << left << " " << dname << "</red>" << endl;
-                    } {
+                    } else if ( type == "deb" ){
+                        vout << "<purple>   - " << cross_ref << left << " " << dname << "</purple>" << endl;
+                    } else {
                         vout <<  "- UNSUPPORTED TYPE -" << endl;
                     }
                 }
@@ -788,28 +792,28 @@ bool CPrintEngine::PrintModModuleInfo(const CSmallString& mod_name)
         vout << endl;
     }
 
-    // now show module dependencies ---------------
+    // now show module desp ---------------
     CXMLElement* p_ele = NULL;
 
     if( p_module != NULL ) {
-        p_ele = p_module->GetFirstChildElement("dependencies");
+        p_ele = p_module->GetFirstChildElement("deps");
     }
 
     if( p_ele != NULL ) {
         CXMLIterator    I(p_ele);
         CXMLElement*     p_sele;
         while( (p_sele = I.GetNextChildElement()) != NULL ) {
-            if( p_sele->GetName() == "depend" ) {
+            if( p_sele->GetName() == "dep" ) {
                 CSmallString lmodule,ltype;
                 p_sele->GetAttribute("name",lmodule);
                 p_sele->GetAttribute("type",ltype);
-                if( ltype == "add" ){
+                if( ltype == "pre" ){
                     vout << " INFO:    additional module is required, it will be pre-loaded if 'add' action is used ... " << endl;
                 }
                 if( ltype == "post" ){
                     vout << " INFO:    additional module is required, it will be post-loaded if 'add' action is used ... " << endl;
                 }
-                if( ltype == "conflict" ){
+                if( ltype == "rm" ){
                     vout << " WARNING: active module in conflict, it will be unloaded if 'add' action is used ... " << endl;
                 }
             }
