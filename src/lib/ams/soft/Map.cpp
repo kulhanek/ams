@@ -1839,6 +1839,9 @@ void CMap::RefactorDeps(CXMLElement* p_deps)
                 if( type == "add" ) {
                     p_dep->SetAttribute("type","pre");
                 }
+                if( type == "conflict" ) {
+                    p_dep->SetAttribute("type","rm");
+                }
             }
         }
         if( p_dep->GetName() == "postdepend" ){
