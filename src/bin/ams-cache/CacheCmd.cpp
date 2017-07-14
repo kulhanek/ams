@@ -414,7 +414,53 @@ bool CCacheCmd::Run(void)
         }
         return(true);
     }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "debdepsall" ) {
 
+        if( LoadSiteAliases() == false ) return(false);
+        GetSites(Options.GetOptSites());
+
+        list<string>::iterator it = SiteList.begin();
+        list<string>::iterator ie = SiteList.end();
+
+        // set output stream
+        PrintEngine.SetOutputStream(vout);
+
+
+        while( it != ie ){
+            CAmsUUID     site_id = CUtils::GetSiteID(*it);
+            CSmallString site_sid = site_id.GetFullStringForm();
+
+            if( ! site_id.IsValidUUID() ){
+                CSmallString error;
+                error << "site '" << site_sid << "' does not exist";
+                ES_ERROR(error);
+                return(false);
+            }
+
+            AMSGlobalConfig.SetActiveSiteID(site_sid);
+
+            if( Site.LoadConfig() == false ) {
+                CSmallString error;
+                error << "unable to read site configuration " << site_sid;
+                ES_ERROR(error);
+                return(false);
+            }
+
+            // rebuild cache
+            vout << high;
+            vout << "#  Building the AMS cache for the site : " << Site.GetName() << endl;
+            if( Cache.RebuildCache(vout,false) == false) return(false);
+            vout << endl;
+
+            // check syntax
+            vout << low;
+            // print data
+            PrintEngine.PrintRawModes();
+            it++;
+        }
+        return(true);
+    }
     //-----------------------------------------------
     else {
         CSmallString error;

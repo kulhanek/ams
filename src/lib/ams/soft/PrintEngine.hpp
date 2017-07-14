@@ -79,6 +79,7 @@ public:
     void PrintRawSites(void);
     void PrintRawSystemVersion(void);
     void PrintRawDependencies(void);
+    void PrintRawDebDependencies(void);
     void PrintRawArchs(void);
     void PrintRawModes(void);
 

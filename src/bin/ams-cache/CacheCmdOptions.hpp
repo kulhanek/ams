@@ -65,7 +65,8 @@ public:
     "\n"
     "Supported actions for all sites or site aliases:\n"
     "   <green>rebuildall</green>      rebuild site caches for specified sites\n"
-    "   <green>syntaxall</green>       check cache syntax for specified sites"
+    "   <green>syntaxall</green>       check cache syntax for specified sites\n"
+    "   <green>debdepsall</green>      list dependencies on deb packages"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

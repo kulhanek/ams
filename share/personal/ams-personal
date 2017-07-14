@@ -22,6 +22,8 @@ function print_usage()
     echo "       update                              update all local builds"
     echo "       upgrade                             upgrade modules to the most recent builds (by verindx, only single modes)"
     echo "                                              and update all local builds"
+    echo "       debdeps                             install dependent system packages"
+    echo ""
     echo "   Personal site setup:"
     echo "       gensshkeys         setup sshkeys for the local infinity user"
     echo "       showsshkey         show the public key of the local infinity user"
@@ -252,6 +254,14 @@ case "$ACTION" in
 # -----------------------------
     "rmbuilds" )
         sudo -u infinity -i $AMS_ROOT/share/personal/ams-personal-rmbuilds "$@"
+        ;;
+# -----------------------------
+    "debdeps" )
+        PKGS="`ams-cache debdepsall | sort -u`"
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+        sudo apt-get install $PKGS
         ;;
 # -----------------------------
     "gensshkeys" )

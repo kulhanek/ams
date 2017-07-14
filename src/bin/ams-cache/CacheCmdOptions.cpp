@@ -79,6 +79,8 @@ int CCacheCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "modes" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "rebuildall" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "syntaxall" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "debdepsall" ) return(SO_CONTINUE);
+
         if( (GetProgArg(0) == "getvariable") ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
