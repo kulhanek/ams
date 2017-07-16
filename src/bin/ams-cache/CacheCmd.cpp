@@ -423,9 +423,7 @@ bool CCacheCmd::Run(void)
         list<string>::iterator it = SiteList.begin();
         list<string>::iterator ie = SiteList.end();
 
-        // set output stream
-        PrintEngine.SetOutputStream(vout);
-
+        std::set<CSmallString> debdeps;
 
         while( it != ie ){
             CAmsUUID     site_id = CUtils::GetSiteID(*it);
@@ -453,12 +451,19 @@ bool CCacheCmd::Run(void)
             if( Cache.RebuildCache(vout,false) == false) return(false);
             vout << endl;
 
-            // check syntax
-            vout << low;
-            // print data
-            PrintEngine.PrintRawDebDependencies();
+            Cache.GetDebDependencies(debdeps);
             it++;
         }
+
+        std::set<CSmallString>::iterator dit = debdeps.begin();
+        std::set<CSmallString>::iterator die = debdeps.end();
+
+        vout << low;
+        while( dit != die ){
+            vout << *dit << endl;
+            dit++;
+        }
+
         return(true);
     }
     //-----------------------------------------------

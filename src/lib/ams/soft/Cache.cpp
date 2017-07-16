@@ -2197,6 +2197,73 @@ bool CCache::GetSortedModuleVersions(const CSmallString& mod_name,std::vector<st
     return(true);
 }
 
+//------------------------------------------------------------------------------
+
+void CCache::GetDebDependencies(std::set<CSmallString>& debdeps)
+{
+    CXMLElement* p_sele = GetRootElementOfCache();
+    if( p_sele == NULL ){
+        RUNTIME_ERROR("unable to find cache element");
+    }
+
+    CXMLIterator    I(p_sele);
+    CXMLElement*     p_mele;
+    while( (p_mele = I.GetNextChildElement("module")) != NULL  ) {
+        CSmallString name;
+        p_mele->GetAttribute("name",name);
+
+        // traverse deps - intermodule
+        CXMLElement* p_dele;
+
+        p_dele = p_mele->GetFirstChildElement("deps");
+        CXMLIterator    D(p_dele);
+        CXMLElement*    p_lele;
+
+        while( (p_lele = D.GetNextChildElement()) != NULL  ) {
+            if( p_lele->GetName() == "dep" ) {
+                CSmallString dname;
+                CSmallString type;
+                p_lele->GetAttribute("name",dname);
+                p_lele->GetAttribute("type",type);
+                if( type == "deb" ) debdeps.insert(dname);
+            }
+        }
+
+        // traverse deps - interbuilds
+        CXMLElement* p_bele;
+        p_bele = p_mele->GetChildElementByPath("builds/build");
+
+        while( p_bele != NULL ){
+
+            CSmallString ver;
+            CSmallString arch;
+            CSmallString mode;
+            p_bele->GetAttribute("ver",ver);
+            p_bele->GetAttribute("arch",arch);
+            p_bele->GetAttribute("mode",mode);
+
+            CXMLElement* p_dele;
+
+            p_dele = p_bele->GetFirstChildElement("deps");
+            CXMLIterator    D(p_dele);
+            CXMLElement*    p_lele;
+
+            while( (p_lele = D.GetNextChildElement()) != NULL  ) {
+                if( p_lele->GetName() == "dep" ) {
+                    CSmallString dname;
+                    CSmallString type;
+                    p_lele->GetAttribute("name",dname);
+                    p_lele->GetAttribute("type",type);
+                    if( type == "deb" ) debdeps.insert(dname);
+                }
+            }
+
+            p_bele = p_bele->GetNextSiblingElement("build");
+        }
+
+    }
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

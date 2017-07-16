@@ -82,7 +82,7 @@ function check_builds(){
                 if [ -n "$PREFIX" ]; then SYNC_BUILD="$PREFIX/$SYNC_BUILD"; fi
                 INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
                 ((NBUILDS++))
-            done
+            done          
             if [ -n "$PREFIX" ]; then BUILD="$PREFIX/$BUILD"; fi
             INSTALL_BUILDS="$INSTALL_BUILDS $BUILD"
             ((NBUILDS++))

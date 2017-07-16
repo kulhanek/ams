@@ -2,10 +2,5 @@
 // AMS - Advanced Module System
 // -----------------------------------------------------------------------------
 
-ams-personal
-- test if user is in sudo group for administrative task
-- test if user is root or infinity -> exit
-- include also regular module dependencies (depend) and process them through bestbuild
-
 hosts.xml
 - surrogate machines ...

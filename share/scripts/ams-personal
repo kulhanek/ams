@@ -257,7 +257,10 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "debdeps" )
-        PKGS="`ams-cache debdepsall | sort -u`"
+        echo ""
+        echo "# Installing system dependent packages:"
+        echo "# ------------------------------------------------------------------------------"
+        PKGS="`ams-cache debdepsall`"
         if [ $? -ne 0 ]; then
             exit 1
         fi

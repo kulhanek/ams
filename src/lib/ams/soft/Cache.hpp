@@ -30,6 +30,7 @@
 #include <VerboseStr.hpp>
 #include <vector>
 #include <list>
+#include <set>
 #include <string>
 
 //-----------------------------------------------------------------------------
@@ -166,6 +167,9 @@ public:
 
     /// return list of all versions
     void GetAllModuleVersions(CXMLElement* p_module, std::list<CSmallString>& vers);
+
+    /// get deb pakackage dependencies
+    void GetDebDependencies(std::set<CSmallString>& debdeps);
 
     /// remove all builds with given architecture token
     void RemoveBuildsWithArchToken(const CSmallString& token);

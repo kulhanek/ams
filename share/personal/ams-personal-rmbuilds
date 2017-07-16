@@ -39,11 +39,16 @@ function gen_list_of_packages()
             # remove prefix if any
             FILTER="`basename $FILTER`"
             printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
+            I=0
             for BUILD in `ams-cache --site "$SITE" getbuilds "$FILTER"`; do
                 printf "    |-> %-60s\n" "$BUILD" | tee -a $LOG_FILE
                 # remove build from the map
                 ams-map-manip rmbuilds "$SITE" "$BUILD" >> $LOG_FILE 2>&1
+                ((I++))
             done
+            if [ "$I" -eq 0 ]; then
+                printf "    |-> nothing removed\n"
+            fi
         done
     done
 
