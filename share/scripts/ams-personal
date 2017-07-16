@@ -137,6 +137,15 @@ while [ -n "$SHIFT" ]; do
     esac
 done
 
+# -----------------------------------------------------------------------------------------
+
+if [ "`id -g -n`" == "infinity" ] || [ "`id -u -n`" == "root" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: The ams-personal command cannot be run by 'infinity' or 'root' users!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
 if [ $# -lt 1 ]; then
     echo "" 1>&2
     echo ">>> ERROR: Incorrect number of arguments!" 1>&2
@@ -172,13 +181,6 @@ if [ -z "$AMS_ROOT" ]; then
     echo "           You need to modify your startup files by running the command:" 1>&2
     echo ""
     echo "           $ ams-personal initenv" 1>&2
-    echo "" 1>&2
-    exit 1
-fi
-
-if [ "`id -g -n`" == "infinity" ] || [ "`id -u -n`" == "root" ]; then
-    echo "" 1>&2
-    echo ">>> ERROR: The ams-personal command cannot be run by 'infinity' or 'root' users!" 1>&2
     echo "" 1>&2
     exit 1
 fi
