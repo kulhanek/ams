@@ -423,6 +423,7 @@ if [ -f "$AMS_ROOT/etc/sync/$1.alias" ]; then
             echo "# Alias '$1' command: $LINE"
             echo "# ------------------------------------------------------------------------------"
             run_profile $LINE < /dev/null
+            if [ $? -ne 0 ]; then exit 1; fi
         fi
     done < <( cat "$AMS_ROOT/etc/sync/$1.alias" )
 else
