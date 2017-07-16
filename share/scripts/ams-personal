@@ -146,11 +146,14 @@ fi
 
 # -----------------------------------------------------------------------------------------
 
+ACTION="$1"
+shift
+
 # this action does not require full Infinity activation
 
 case "$ACTION" in
 # -----------------------------
-    "initenv" )
+    "envinit" )
         initenv_print_header
         initenv_backup_old_files || exit 1
         initenv_create_new_files || exit 1
@@ -187,9 +190,6 @@ if [ $? -ne 0 ]; then
     echo "" 1>&2
     exit 1
 fi
-
-ACTION="$1"
-shift
 
 case "$ACTION" in
 # -----------------------------
