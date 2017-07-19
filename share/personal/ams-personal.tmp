@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export AMS_PERSONAL_ROOT="${AMS_PERSONAL_ROOT}"
+export AMS_PERSONAL_ROOT=@AMS_PERSONAL_ROOT@
 $AMS_PERSONAL_ROOT/share/personal/ams-personal "$@"
 
 

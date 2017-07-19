@@ -3,7 +3,7 @@
 # ==============================================================================
 
 SET(AMS_PERSONAL_ROOT ${CMAKE_PREFIX_PATH})
-CONFIGURE_FILE(../personal/ams-personal.tmp ams-personal)
+CONFIGURE_FILE(../personal/ams-personal.tmp ams-personal @ONLY)
 
 INSTALL(FILES
             ams-sync
