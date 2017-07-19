@@ -56,7 +56,7 @@ INCLUDE_DIRECTORIES(${HIPOLY_ROOT}/src/lib/hipoly/xml SYSTEM)
 LINK_DIRECTORIES(${HIPOLY_ROOT}/lib)
 SET(HIPOLY_LIB_NAME hipoly)
 
-# boost =======================
+# BOOST ------------------------------------------
 FIND_PACKAGE(Boost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} SYSTEM)
 
