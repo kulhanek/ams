@@ -3,6 +3,7 @@
 # ==============================================================================
 
 SET(AMS_PERSONAL_ROOT "${CMAKE_PREFIX_PATH}")
+MESSAGE(FATAL_ERROR "${AMS_PERSONAL_ROOT}")
 CONFIGURE_FILE(../personal/ams-personal.tmp ams-personal @ONLY)
 
 INSTALL(FILES
