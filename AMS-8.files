@@ -1,6 +1,8 @@
 TODO
 etc/boot/CMakeLists.txt
 etc/CMakeLists.txt
+share/personal/ams-personal
+share/personal/ams-personal.tmp
 share/scripts/CMakeLists.txt
 share/sync/rsync/CMakeLists.txt
 share/sync/CMakeLists.txt
@@ -172,7 +174,6 @@ src/bin/ams-repoindex-create-fdirs/sha1.cpp
 src/bin/ams-repoindex-create-fdirs/sha1.hpp
 share/sync/rsync/ams-rsync-pull
 share/sync/rsync/ams-exclude-rules-blds
-share/scripts/ams-personal
 share/personal/ams-personal-rmbuilds
 share/personal/ams-personal-showsshkey
 src/bin/ams-repoindex-create-files/CMakeLists.txt

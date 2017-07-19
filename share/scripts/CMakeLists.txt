@@ -2,6 +2,9 @@
 # Advanced Module System (AMS) CMake File
 # ==============================================================================
 
+SET(AMS_PERSONAL_ROOT ${CMAKE_PREFIX_PATH})
+CONFIGURE_FILE(../personal/ams-personal.tmp ams-personal)
+
 INSTALL(FILES
             ams-sync
             ams-personal

@@ -8,6 +8,8 @@ INSTALL(FILES
             ams-personal-useradd
             ams-personal-addbuilds
             ams-personal-rmbuilds
+            ams-personal-envinit
+            ams-personal
        DESTINATION
             share/personal
         PERMISSIONS
