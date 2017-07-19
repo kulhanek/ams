@@ -149,7 +149,7 @@ fi
 case "$ACTION" in
 # -----------------------------
     "addmodules" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
         echo ""
         echo "# AMS modules for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(","); printf("%s",$1); i++;}' `"
         echo "# ------------------------------------------------------------------------------"
@@ -170,7 +170,7 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "addcorebuilds" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib  || exit 1
         echo ""
         echo "# AMS core builds for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(","); printf("%s",$1); i++;}' `"
         echo "# ------------------------------------------------------------------------------"
@@ -187,11 +187,12 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "update" )
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal softrepo
         ;;
 # -----------------------------
     "upgrade" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
         echo ""
         echo "# AMS best builds for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(","); printf("%s",$1); i++;}' `"
         echo "# ------------------------------------------------------------------------------"
@@ -215,6 +216,7 @@ case "$ACTION" in
         echo ""
         echo "# Installing system dependent packages:"
         echo "# ------------------------------------------------------------------------------"
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
         PKGS="`ams-cache debdepsall`"
         if [ $? -ne 0 ]; then
             exit 1
