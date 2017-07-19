@@ -1,0 +1,12 @@
+src/lib/ams/system
+src/lib/torque
+share/sync/rsync
+share/dpkg/DEBIAN
+share/dpkg
+share/personal
+share/skel
+src/bin/ams-repoindex-fdirs
+share/scripts
+src/bin/ams-repoindex-files
+.
+share/personal/actions

@@ -8,3 +8,5 @@ Makefile
 /lib
 /include
 /test
+/etc
+AMS-8.creator.user
