@@ -58,6 +58,8 @@ function sync_deps() {
     local BUILD
     local SYNC_BUILD
 
+    INSTALL_BUILDS="$INSTALL_BUILDS $1"
+
     PREFIX="`dirname $1`"
     BUILD="`basename $1`"
     if [ "$PREFIX" == "." ]; then PREFIX=""; fi
@@ -65,7 +67,6 @@ function sync_deps() {
         SYNC_BUILD=`ams-map-manip --prefix "$PREFIX" bestbuild personal "$SYNC_BUILD"`
         if [ -n "$SYNC_BUILD" ]; then
             printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
-            INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
             sync_deps "$SYNC_BUILD"
             ((NBUILDS++))
         fi
