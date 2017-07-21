@@ -1005,6 +1005,20 @@ void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const
 void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
                          const CSmallString& prefix)
 {
+    // find build and prefix
+    vout << high;
+    CSmallString build = GetBestBuild(vout,site_name,module,prefix);
+    if( build != NULL ){
+        vout << low;
+        vout << build << endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CMap::GetBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                         const CSmallString& prefix)
+{
     // prepare cache
     Cache.ClearCache();
 
@@ -1012,12 +1026,11 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
     CSmallString name,ver;
 
     CXMLElement* p_module = PopulateCache(site_name,module,prefix,ver);
-    if( p_module == NULL ) return;
+    if( p_module == NULL ) return("");
 
     CUtils::ParseModuleName(module,name);
 
     // generate default build
-    vout << high;
     CSmallString arch,mode;
     Actions.SetActionPrintLevel(EAPL_VERBOSE);
     Actions.CompleteModule(vout,p_module,name,ver,arch,mode);
@@ -1025,7 +1038,8 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
     // find build and prefix
     CSmallString build = name;
     build << ":" << ver << ":" << arch << ":" << mode;
-    PrintBestBuild(vout,site_name,build,prefix);
+    build = GetBestBuildWithPrefix(site_name,build,prefix);
+    return(build);
 }
 
 //------------------------------------------------------------------------------
@@ -1139,7 +1153,7 @@ CXMLElement* CMap::PopulateCache(const CSmallString& site_name,const CSmallStrin
 
 // get prefix for FULL build
 
-void CMap::PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& my_build,
+const CSmallString CMap::GetBestBuildWithPrefix(const CSmallString& site_name,const CSmallString& my_build,
                       const CSmallString& prefix)
 {
     std::set<SFullBuild>  builds;
@@ -1173,7 +1187,7 @@ void CMap::PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const
     }
 
     // no build was found
-    if( builds.size() == 0 ) return;
+    if( builds.size() == 0 ) return("");
 
     // in ideal case - here we should have only one build
 
@@ -1183,17 +1197,15 @@ void CMap::PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const
 
     CSmallString my_prefix = prefix;
 
-    vout << high;
-
     while( ibt != ibe ){
         SFullBuild bld = *ibt;
-        vout << "|> " << bld.prefix << "/" << bld.build << endl;
         my_prefix = bld.prefix;
         ibt++;
     }
 
-    vout << low;
-    vout << my_prefix << "/" << my_build;
+    CSmallString final;
+    final << my_prefix << "/" << my_build;
+    return(final);
 }
 
 //------------------------------------------------------------------------------

@@ -210,13 +210,15 @@ private:
                                    const CSmallString& prefix);
     void RemoveOrphanBuilds(CFileName buildlib, std::ostream& vout);
     CXMLElement* PopulateCache(const CSmallString& site_name,const CSmallString& module,const CSmallString& prefix,CSmallString& best_ver);
-    void PrintBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& my_build,
-                          const CSmallString& prefix);
     bool RefactorBuilds(CFileName buildlib, std::ostream& vout);
     bool RefactorBuild(CFileName buildname);
     void RefactorDeps(CXMLElement* p_deps);
     bool RefactorDocs(CFileName buildlib, std::ostream& vout);
     bool RefactorDoc(CFileName docname);
+    const CSmallString GetBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                             const CSmallString& prefix);
+    const CSmallString GetBestBuildWithPrefix(const CSmallString& site_name,const CSmallString& my_build,
+                          const CSmallString& prefix);
  };
 
 //------------------------------------------------------------------------------
