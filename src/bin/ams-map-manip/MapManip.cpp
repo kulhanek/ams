@@ -25,6 +25,7 @@
 #include <AMSGlobalConfig.hpp>
 #include <Map.hpp>
 #include <Site.hpp>
+#include <User.hpp>
 #include <Cache.hpp>
 #include <DirectoryEnum.hpp>
 #include <AmsUUID.hpp>
