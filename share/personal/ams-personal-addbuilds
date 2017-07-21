@@ -64,7 +64,8 @@ function sync_deps() {
     BUILD="`basename $1`"
     if [ "$PREFIX" == "." ]; then PREFIX=""; fi
     for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" showsyncdeps personal "$BUILD"`; do
-        SYNC_BUILD=`ams-map-manip --prefix "$PREFIX" bestbuild personal "$SYNC_BUILD"`
+        # do not use prefix in the next call - SYNC_BUILD is without prefix, which need to be autodetermined
+        SYNC_BUILD=`ams-map-manip bestbuild personal "$SYNC_BUILD"`
         if [ -n "$SYNC_BUILD" ]; then
             printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
             sync_deps "$SYNC_BUILD"
