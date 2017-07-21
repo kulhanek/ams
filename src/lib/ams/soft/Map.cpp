@@ -2652,20 +2652,16 @@ void CMap::AddSyncDeps(const CSmallString& site_name,const CSmallString& build_n
         return;
     }
 
-    CXMLElement* p_deps = xml_doc.GetChildElementByPath("build/dependencies");
-    CXMLElement* p_dep = NULL;
-    if( p_deps ){
-        p_dep = p_deps->GetFirstChildElement("depend");
-    }
+    CXMLElement* p_dep = xml_doc.GetChildElementByPath("build/deps/dep");
     while( p_dep != NULL ) {
-        std::string sync_build_name;
-        if( p_dep->GetAttribute("name",sync_build_name) == true ){
-            if( find(deps.begin(), deps.end(), sync_build_name) == deps.end() ){
-                deps.push_back(sync_build_name);
-                if( deep ) AddSyncDeps(site_name,sync_build_name,prefix,deps,true);
+        std::string any_build_name;
+        if( p_dep->GetAttribute("name",any_build_name) == true ){
+            if( find(deps.begin(), deps.end(), any_build_name) == deps.end() ){
+                deps.push_back(any_build_name);
+                if( deep ) AddSyncDeps(site_name,any_build_name,prefix,deps,true);
             }
         }
-        p_dep = p_dep->GetNextSiblingElement("depend");
+        p_dep = p_dep->GetNextSiblingElement("dep");
     }
 }
 
