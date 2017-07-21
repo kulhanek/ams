@@ -274,6 +274,7 @@ bool CMapManip::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "bestbuild" ) {
         // init host data
+        User.InitGlobalSetup();
         Host.InitGlobalSetup();
         Host.InitHostFile();
         Host.InitHost();
