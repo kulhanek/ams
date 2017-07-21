@@ -118,7 +118,6 @@ int CMapManipOptions::CheckArguments(void)
         if( GetProgArg(0) == "bestbuild" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "isbuild" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "showsyncdeps" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "deepsyncdeps" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "getpkgdir" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "setdefault" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "rmdefault" ) return(SO_CONTINUE);

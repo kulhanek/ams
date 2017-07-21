@@ -2622,32 +2622,14 @@ const CSmallString CMap::GetBuildName(const CSmallString& site_name,
 //------------------------------------------------------------------------------
 
 void CMap::ShowSyncDeps(std::ostream& vout,const CSmallString& site_name,
-                        const CSmallString& build,const CSmallString& prefix,bool deep)
+                        const CSmallString& build,const CSmallString& prefix)
 {
-    std::list<std::string> deps;
-    AddSyncDeps(site_name,build,prefix,deps,deep);
+    std::set<std::string> deps;
 
-    deps.sort();
-    deps.unique();
-
-    std::list<std::string>::iterator it = deps.begin();
-    std::list<std::string>::iterator ie = deps.end();
-
-    while( it != ie ){
-        vout << *it << endl;
-        it++;
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void CMap::AddSyncDeps(const CSmallString& site_name,const CSmallString& build_name,
-                       const CSmallString& prefix,std::list<std::string>& deps,bool deep)
-{
     CFileName full_build_name;
 
     // is prefix specific
-    full_build_name = GetBuildName(site_name,build_name,prefix);
+    full_build_name = GetBuildName(site_name,build,prefix);
     if( full_build_name == NULL ){
         ES_ERROR("build does not exist");
         return;
@@ -2666,14 +2648,19 @@ void CMap::AddSyncDeps(const CSmallString& site_name,const CSmallString& build_n
 
     CXMLElement* p_dep = xml_doc.GetChildElementByPath("build/deps/dep");
     while( p_dep != NULL ) {
-        std::string any_build_name;
-        if( p_dep->GetAttribute("name",any_build_name) == true ){
-            if( find(deps.begin(), deps.end(), any_build_name) == deps.end() ){
-                deps.push_back(any_build_name);
-                if( deep ) AddSyncDeps(site_name,any_build_name,prefix,deps,true);
-            }
+        std::string name;
+        if( p_dep->GetAttribute("name",name) == true ){
+            deps.insert(name);
         }
         p_dep = p_dep->GetNextSiblingElement("dep");
+    }
+
+    std::set<std::string>::iterator it = deps.begin();
+    std::set<std::string>::iterator ie = deps.end();
+
+    while( it != ie ){
+        vout << *it << endl;
+        it++;
     }
 }
 

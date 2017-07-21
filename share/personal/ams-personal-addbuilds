@@ -52,7 +52,27 @@ function sync_ams_builds(){
 
 # --------------------------------------
 
-function check_builds(){
+function sync_deps() {
+
+    local PREFIX
+    local BUILD
+    local SYNC_BUILD
+
+    PREFIX="`dirname $1`"
+    BUILD="`basename $2`"
+    if [ "$PREFIX" == "." ]; then PREFIX=""; fi
+    for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" showsyncdeps personal "$BUILD"`; do
+        SYNC_BUILD=`ams-map-manip --prefix "$PREFIX" bestbuild personal "$SYNC_BUILD"`
+        printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
+        INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
+        sync_deps "$SYNC_BUILD"
+        ((NBUILDS++))
+    done
+}
+
+# --------------------------------------
+
+function check_builds() {
 
     echo "" | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
@@ -62,6 +82,7 @@ function check_builds(){
     echo "# Number of requests : $#" | tee -a $LOG_FILE
     echo ""
 
+    INSTALL_BUILDS=""
     while [ $# -ne 0 ]; do
         ABUILD="$1"
         printf ">>> %-60s\n" "$ABUILD"  | tee -a $LOG_FILE
@@ -72,18 +93,7 @@ function check_builds(){
         NBUILDS=0
         for BUILD in $BUILDS; do
             printf "    %s\n" $BUILD  | tee -a $LOG_FILE
-            PREFIX="`dirname $BUILD`"
-            BUILD="`basename $BUILD`"
-            if [ "$PREFIX" == "." ]; then PREFIX=""; fi
-            for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" deepsyncdeps personal "$BUILD"`; do
-                printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
-                if [ -n "$PREFIX" ]; then SYNC_BUILD="$PREFIX/$SYNC_BUILD"; fi
-                INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
-                ((NBUILDS++))
-            done          
-            if [ -n "$PREFIX" ]; then BUILD="$PREFIX/$BUILD"; fi
-            INSTALL_BUILDS="$INSTALL_BUILDS $BUILD"
-            ((NBUILDS++))
+            sync_deps "$BUILD"
         done
         printf "    Number of builds: %d\n" $NBUILDS  | tee -a $LOG_FILE
         shift
