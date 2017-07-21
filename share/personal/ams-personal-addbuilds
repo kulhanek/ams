@@ -63,10 +63,12 @@ function sync_deps() {
     if [ "$PREFIX" == "." ]; then PREFIX=""; fi
     for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" showsyncdeps personal "$BUILD"`; do
         SYNC_BUILD=`ams-map-manip --prefix "$PREFIX" bestbuild personal "$SYNC_BUILD"`
-        printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
-        INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
-        sync_deps "$SYNC_BUILD"
-        ((NBUILDS++))
+        if [ -n "$SYNC_BUILD" ]; then
+            printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
+            INSTALL_BUILDS="$INSTALL_BUILDS $SYNC_BUILD"
+            sync_deps "$SYNC_BUILD"
+            ((NBUILDS++))
+        fi
     done
 }
 

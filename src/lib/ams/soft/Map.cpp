@@ -2649,7 +2649,10 @@ void CMap::ShowSyncDeps(std::ostream& vout,const CSmallString& site_name,
     CXMLElement* p_dep = xml_doc.GetChildElementByPath("build/deps/dep");
     while( p_dep != NULL ) {
         std::string name;
-        if( p_dep->GetAttribute("name",name) == true ){
+        p_dep->GetAttribute("name",name);
+        CSmallString type;
+        p_dep->GetAttribute("type",type);
+        if( (type == "pre") || (type == "post") || (type == "sync") ){
             deps.insert(name);
         }
         p_dep = p_dep->GetNextSiblingElement("dep");
