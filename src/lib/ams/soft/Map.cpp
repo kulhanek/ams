@@ -1002,12 +1002,26 @@ void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const
 
 //------------------------------------------------------------------------------
 
-void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
-                         const CSmallString& prefix)
+void CMap::ShowUpgradedBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                                const CSmallString& prefix)
 {
     // find build and prefix
     vout << high;
-    CSmallString build = GetBestBuild(vout,site_name,module,prefix);
+    CSmallString build = GetBestBuild(vout,site_name,module,prefix,true);
+    if( build != NULL ){
+        vout << low;
+        vout << build << endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                                const CSmallString& prefix)
+{
+    // find build and prefix
+    vout << high;
+    CSmallString build = GetBestBuild(vout,site_name,module,prefix,false);
     if( build != NULL ){
         vout << low;
         vout << build << endl;
@@ -1017,7 +1031,7 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
 //------------------------------------------------------------------------------
 
 const CSmallString CMap::GetBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
-                         const CSmallString& prefix)
+                                const CSmallString& prefix,bool upgrade)
 {
     CSmallString build;
 
@@ -1026,23 +1040,26 @@ const CSmallString CMap::GetBestBuild(std::ostream& vout,const CSmallString& sit
         Cache.ClearCache();
 
         // populate cache by builds
-        CSmallString name,ver;
+        CSmallString name,ver,arch,mode;
 
         CXMLElement* p_module = PopulateCache(site_name,module,prefix,ver);
         if( p_module == NULL ) return("");
 
-        CUtils::ParseModuleName(module,name);
+        if( upgrade ){
+            CUtils::ParseModuleName(module,name);
+        } else {
+            CUtils::ParseModuleName(module,name,ver,arch,mode);
+        }
 
         // generate default build
-        CSmallString arch,mode;
         Actions.SetActionPrintLevel(EAPL_VERBOSE);
         Actions.CompleteModule(vout,p_module,name,ver,arch,mode);
 
-        // find build and prefix
         build << name << ":" << ver << ":" << arch << ":" << mode;
     } else {
         build = module;
     }
+    // find build and prefix
     build = GetBestBuildWithPrefix(site_name,build,prefix);
     return(build);
 }
@@ -1058,7 +1075,7 @@ CXMLElement* CMap::PopulateCache(const CSmallString& site_name,const CSmallStrin
     std::set<SFullBuild>  builds;
 
     CSmallString name,ver,arch,mode;
-    CUtils::ParseModuleName(module,name,ver,arch,mode);
+    CUtils::ParseModuleName(module,name);
 
     CXMLElement* p_mele = p_cele->CreateChildElement("module");
     p_mele->SetAttribute("name",name);

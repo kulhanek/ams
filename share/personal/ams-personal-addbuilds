@@ -70,11 +70,11 @@ function sync_deps() {
         # do not use prefix in the next call - SYNC_BUILD is without prefix, which need to be autodetermined
         FULL_SYNC_BUILD=`ams-map-manip bestbuild personal "$SYNC_BUILD"`
         if [ -n "$FULL_SYNC_BUILD" ]; then
-            printf "      |-> %-40s => %-40s" "$SYNC_BUILD" "$FULL_SYNC_BUILD" | tee -a $LOG_FILE
+            printf "      |-> %-40s => %-40s\n" "$SYNC_BUILD" "$FULL_SYNC_BUILD" | tee -a $LOG_FILE
             sync_deps "$FULL_SYNC_BUILD"
             ((NBUILDS++))
         else
-            printf "      |-> %-40s => NOT FOUND" "$SYNC_BUILD" | tee -a $LOG_FILE
+            printf "      |-> %-40s => NOT FOUND\n" "$SYNC_BUILD" | tee -a $LOG_FILE
         fi
     done
 }

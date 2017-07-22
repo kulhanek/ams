@@ -125,7 +125,11 @@ public:
 
     /// print best build for module employing prefix/site/autoprefix
     void ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
-                         const CSmallString& prefix);
+                                    const CSmallString& prefix);
+
+    /// print best build for module employing prefix/site/autoprefix
+    void ShowUpgradedBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
+                                    const CSmallString& prefix);
 
     /// print AMS_PACKAGE_DIR
     bool ShowPkgDir(std::ostream& vout,const CSmallString& site_name,
@@ -214,7 +218,7 @@ private:
     bool RefactorDocs(CFileName buildlib, std::ostream& vout);
     bool RefactorDoc(CFileName docname);
     const CSmallString GetBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
-                             const CSmallString& prefix);
+                             const CSmallString& prefix,bool upgrade);
     const CSmallString GetBestBuildWithPrefix(const CSmallString& site_name,const CSmallString& my_build,
                           const CSmallString& prefix);
  };

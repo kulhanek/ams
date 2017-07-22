@@ -199,7 +199,7 @@ case "$ACTION" in
         CORE_BUILDS=""
         for SITE in `site listavail 2>&1`; do
             for MOD in `ams-cache --site $SITE allmods`; do
-                CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
+                CORE_BUILDS="$CORE_BUILDS `ams-map-manip upgradebuild $SITE $MOD`"
             done
         done
         CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"

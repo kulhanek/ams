@@ -55,6 +55,7 @@ public:
     "      <green>showbuilds</green>     prefix filter - show builds from <u>prefix</u> satisfying <u>filter</u>\n"
     "      <green>isbuild</green>        site   build  - test if <u>build</u> exists for given site\n"
     "      <green>showautobuilds</green> site   filter - show builds satisfying <u>filter</u> from <u>prefix</u>/<u>site</u>/<u>autoprefix</u>\n"
+    "      <green>upgradebuild</green>   site   module - show upgraded build for <u>module</u> from <u>prefix</u>/<u>site</u>/<u>autoprefix</u>\n"
     "      <green>bestbuild</green>      site   module - show best build for <u>module</u> from <u>prefix</u>/<u>site</u>/<u>autoprefix</u>\n"
     "      <green>showsyncdeps</green>   site   build  - show sync dependencies for <u>build</u>\n"
     "      <green>getpkgdir</green>      site   build  - get value of AMS_PACKAGE_DIR for <u>build</u> (only one build)\n"

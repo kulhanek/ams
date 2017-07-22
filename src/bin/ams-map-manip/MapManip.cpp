@@ -289,6 +289,22 @@ bool CMapManip::Run(void)
         return(true);
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "upgradebuild" ) {
+        // init host data
+        User.InitGlobalSetup();
+        Host.InitGlobalSetup();
+        Host.InitHostFile();
+        Host.InitHost();
+
+        if( Options.IsOptPrefixSet() ){
+            if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
+        } else {
+            if( Map.LoadAutoPrefixes(AMSGlobalConfig.GetActiveSiteName()) == false ) return(false);
+        }
+        Map.ShowUpgradedBuild(vout,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetOptPrefix());
+        return(true);
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "showsyncdeps" ) {
         if( Options.IsOptPrefixSet() ){
             if( Map.LoadAutoPrefixes(Options.GetOptPrefix()) == false ) return(false);
