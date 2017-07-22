@@ -1048,7 +1048,9 @@ const CSmallString CMap::GetBestBuild(std::ostream& vout,const CSmallString& sit
         if( upgrade ){
             CUtils::ParseModuleName(module,name);
         } else {
-            CUtils::ParseModuleName(module,name,ver,arch,mode);
+            CSmallString lver;
+            CUtils::ParseModuleName(module,name,lver,arch,mode);
+            if( lver != NULL ) ver = lver;
         }
 
         // generate default build
