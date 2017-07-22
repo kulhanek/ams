@@ -1019,25 +1019,30 @@ void CMap::ShowBestBuild(std::ostream& vout,const CSmallString& site_name,const 
 const CSmallString CMap::GetBestBuild(std::ostream& vout,const CSmallString& site_name,const CSmallString& module,
                          const CSmallString& prefix)
 {
-    // prepare cache
-    Cache.ClearCache();
+    CSmallString build;
 
-    // populate cache by builds
-    CSmallString name,ver;
+    if( IsBuild(site_name,module,prefix) == false ){
+        // prepare cache
+        Cache.ClearCache();
 
-    CXMLElement* p_module = PopulateCache(site_name,module,prefix,ver);
-    if( p_module == NULL ) return("");
+        // populate cache by builds
+        CSmallString name,ver;
 
-    CUtils::ParseModuleName(module,name);
+        CXMLElement* p_module = PopulateCache(site_name,module,prefix,ver);
+        if( p_module == NULL ) return("");
 
-    // generate default build
-    CSmallString arch,mode;
-    Actions.SetActionPrintLevel(EAPL_VERBOSE);
-    Actions.CompleteModule(vout,p_module,name,ver,arch,mode);
+        CUtils::ParseModuleName(module,name);
 
-    // find build and prefix
-    CSmallString build = name;
-    build << ":" << ver << ":" << arch << ":" << mode;
+        // generate default build
+        CSmallString arch,mode;
+        Actions.SetActionPrintLevel(EAPL_VERBOSE);
+        Actions.CompleteModule(vout,p_module,name,ver,arch,mode);
+
+        // find build and prefix
+        build << name << ":" << ver << ":" << arch << ":" << mode;
+    } else {
+        build = module;
+    }
     build = GetBestBuildWithPrefix(site_name,build,prefix);
     return(build);
 }

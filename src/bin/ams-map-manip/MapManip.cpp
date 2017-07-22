@@ -326,8 +326,9 @@ void CMapManip::Finalize(void)
     vout << "# ams-map-manip (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
-    vout << low;
-    if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
+    // due to usage in ams-personal, print errors only when explicitly requested via --verbose
+    if( ErrorSystem.IsAnyRecord() && Options.GetOptVerbose() ){
+        vout << low;
         ErrorSystem.PrintErrors(vout);
         vout << endl;
     }

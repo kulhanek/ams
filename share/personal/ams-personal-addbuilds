@@ -57,19 +57,24 @@ function sync_deps() {
     local PREFIX
     local BUILD
     local SYNC_BUILD
+    local FULL_SYNC_BUILD
 
     INSTALL_BUILDS="$INSTALL_BUILDS $1"
+    ((NBUILDS++))
 
     PREFIX="`dirname $1`"
     BUILD="`basename $1`"
     if [ "$PREFIX" == "." ]; then PREFIX=""; fi
-    for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" showsyncdeps personal "$BUILD"`; do
+    for SYNC_BUILD in `ams-map-manip --prefix "$PREFIX" showsyncdeps personal "$BUILD"`; do  
+        # complete incomplete build names
         # do not use prefix in the next call - SYNC_BUILD is without prefix, which need to be autodetermined
-        SYNC_BUILD=`ams-map-manip bestbuild personal "$SYNC_BUILD"`
-        if [ -n "$SYNC_BUILD" ]; then
-            printf "      |-> %-40s\n" "$SYNC_BUILD"  | tee -a $LOG_FILE
-            sync_deps "$SYNC_BUILD"
+        FULL_SYNC_BUILD=`ams-map-manip bestbuild personal "$SYNC_BUILD"`
+        if [ -n "$FULL_SYNC_BUILD" ]; then
+            printf "      |-> %-40s => %-40s" "$SYNC_BUILD" "$FULL_SYNC_BUILD" | tee -a $LOG_FILE
+            sync_deps "$FULL_SYNC_BUILD"
             ((NBUILDS++))
+        else
+            printf "      |-> %-40s => NOT FOUND" "$SYNC_BUILD" | tee -a $LOG_FILE
         fi
     done
 }
