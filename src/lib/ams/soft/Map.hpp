@@ -205,8 +205,7 @@ private:
     bool InjectVerIndx(CXMLElement* p_build);
     void GetAllSites(std::list<std::string>& sites);
     bool BackupMap(void);
-    void ListBuilds(const CSmallString& prefix,std::vector<SFullBuild>& builds);
-    void ListBuilds(const CSmallString& prefix,const CSmallString& filter,std::set<SFullBuild>& builds);
+    void ListBuilds(const CSmallString& prefix,const CSmallString& filter,std::set<SFullBuild>& builds,bool ams_package);
     void ListPrefixes(std::vector<std::string>& prefixes);
     const CSmallString GetBuildName(const CSmallString& site_name,const CSmallString& build_name,
                                    const CSmallString& prefix);

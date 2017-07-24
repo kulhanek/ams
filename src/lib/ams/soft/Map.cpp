@@ -972,10 +972,10 @@ void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const
 
     if( prefix != NULL ){
         // prefix specific
-        ListBuilds(prefix,filter,builds);
+        ListBuilds(prefix,filter,builds,true);
     } else {
         // site specific
-        ListBuilds(site_name,filter,builds);
+        ListBuilds(site_name,filter,builds,true);
 
         // autosite
         // is within autoprefix?
@@ -984,7 +984,7 @@ void CMap::ShowAutoBuilds(std::ostream& vout,const CSmallString& site_name,const
 
         while( it != ie ){
             CSmallString auto_prefix = *it;
-            ListBuilds(auto_prefix,filter,builds);
+            ListBuilds(auto_prefix,filter,builds,true);
             it++;
         }
     }
@@ -1094,10 +1094,10 @@ CXMLElement* CMap::PopulateCache(const CSmallString& site_name,const CSmallStrin
 
     if( prefix != NULL ){
         // prefix specific
-        ListBuilds(prefix,filter,builds);
+        ListBuilds(prefix,filter,builds,true);
     } else {
         // site specific
-        ListBuilds(site_name,filter,builds);
+        ListBuilds(site_name,filter,builds,true);
 
         // autosite
         // is within autoprefix?
@@ -1106,7 +1106,7 @@ CXMLElement* CMap::PopulateCache(const CSmallString& site_name,const CSmallStrin
 
         while( it != ie ){
             CSmallString auto_prefix = *it;
-            ListBuilds(auto_prefix,filter,builds);
+            ListBuilds(auto_prefix,filter,builds,true);
             it++;
         }
     }
@@ -1193,10 +1193,10 @@ const CSmallString CMap::GetBestBuildWithPrefix(const CSmallString& site_name,co
 
     if( prefix != NULL ){
         // prefix specific
-        ListBuilds(prefix,filter,builds);
+        ListBuilds(prefix,filter,builds,true);
     } else {
         // site specific
-        ListBuilds(site_name,filter,builds);
+        ListBuilds(site_name,filter,builds,true);
 
         // autosite
         // is within autoprefix?
@@ -1205,7 +1205,7 @@ const CSmallString CMap::GetBestBuildWithPrefix(const CSmallString& site_name,co
 
         while( it != ie ){
             CSmallString auto_prefix = *it;
-            ListBuilds(auto_prefix,filter,builds);
+            ListBuilds(auto_prefix,filter,builds,true);
             it++;
         }
     }
@@ -1243,10 +1243,10 @@ bool CMap::ShowPkgDir(std::ostream& vout,const CSmallString& site_name,
 
     if( prefix != NULL ){
         // prefix specific
-        ListBuilds(prefix,filter,builds);
+        ListBuilds(prefix,filter,builds,true);
     } else {
         // site specific
-        ListBuilds(site_name,filter,builds);
+        ListBuilds(site_name,filter,builds,true);
 
         // autosite
         // is within autoprefix?
@@ -1255,7 +1255,7 @@ bool CMap::ShowPkgDir(std::ostream& vout,const CSmallString& site_name,
 
         while( it != ie ){
             CSmallString auto_prefix = *it;
-            ListBuilds(auto_prefix,filter,builds);
+            ListBuilds(auto_prefix,filter,builds,true);
             it++;
         }
     }
@@ -1304,7 +1304,7 @@ bool SFullBuild::operator < (const SFullBuild& right) const
 
 //------------------------------------------------------------------------------
 
-void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std::set<SFullBuild>& builds)
+void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std::set<SFullBuild>& builds,bool ams_package)
 {
     CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
 
@@ -1330,49 +1330,29 @@ void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std:
         CFileName       full_build_name;
         CSmallString    dir;
 
-        full_build_name = path / prefix / build_name;
+        if( ams_package ){
+            full_build_name = path / prefix / build_name;
 
-        if( CFileSystem::IsFile(full_build_name) ){
+            if( CFileSystem::IsFile(full_build_name) ){
 
-            CXMLDocument    xml_doc;
-            CXMLParser      xml_parser;
-            xml_parser.SetOutputXMLNode(&xml_doc);
+                CXMLDocument    xml_doc;
+                CXMLParser      xml_parser;
+                xml_parser.SetOutputXMLNode(&xml_doc);
 
-            if( xml_parser.Parse(full_build_name) == true ) {
-                CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
-                if( p_bld != NULL ){
-                    dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
+                if( xml_parser.Parse(full_build_name) == true ) {
+                    CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
+                    if( p_bld != NULL ){
+                        dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
+                    }
                 }
             }
-        }
 
-        if( dir != NULL ){
+            if( dir != NULL ){
+                builds.insert(build);
+            }
+        } else {
             builds.insert(build);
         }
-    }
-    build_enum.EndFindFile();
-}
-
-//------------------------------------------------------------------------------
-
-void CMap::ListBuilds(const CSmallString& prefix,std::vector<SFullBuild>& builds)
-{
-    CFileName path = AMSGlobalConfig.GetETCDIR()  / "map" / "builds";
-
-    if( CFileSystem::IsDirectory(path / prefix) == false ) return;
-
-    CDirectoryEnum build_enum(path / prefix);
-
-    build_enum.StartFindFile("*.bld");
-
-    CFileName build_name;
-    while( build_enum .FindFile(build_name) ) {
-        if( build_name == "." ) continue;
-        if( build_name == ".." ) continue;
-        SFullBuild build;
-        build.prefix = prefix;
-        build.build = string(build_name.GetFileNameWithoutExt());
-        builds.push_back(build);
     }
     build_enum.EndFindFile();
 }
@@ -1389,10 +1369,10 @@ void CMap::ShowAllBuilds(std::ostream& vout)
     vector<string>::iterator it = prefixes.begin();
     vector<string>::iterator ie = prefixes.end();
 
-    vector<SFullBuild> builds;
+    set<SFullBuild> builds;
 
     while( it != ie ){
-        ListBuilds(*it,builds);
+        ListBuilds(*it,CSmallString("*"),builds,false);
         it++;
     }
 
@@ -1400,10 +1380,8 @@ void CMap::ShowAllBuilds(std::ostream& vout)
     vout << "# Prefix             Build" << endl;
     vout << "# ------------------ -----------------------------------------------------------" << endl;
 
-    sort(builds.begin(),builds.end());
-
-    vector<SFullBuild>::iterator bit = builds.begin();
-    vector<SFullBuild>::iterator bie = builds.end();
+    set<SFullBuild>::iterator bit = builds.begin();
+    set<SFullBuild>::iterator bie = builds.end();
 
     while( bit != bie ){
         vout << left << setw(20) << (*bit).prefix << " " << (*bit).build << endl;
