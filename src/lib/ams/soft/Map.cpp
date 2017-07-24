@@ -1284,10 +1284,13 @@ bool CMap::ShowPkgDir(std::ostream& vout,const CSmallString& site_name,
         return(false);
     }
     CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
-    CSmallString dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
-
-    vout << dir;
-    return(true);
+    if( p_bld != NULL ){
+        CSmallString dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
+        vout << dir;
+        return(true);
+    }
+    ES_ERROR("unable to open build element");
+    return(false);
 }
 
 //------------------------------------------------------------------------------
@@ -1323,7 +1326,29 @@ void CMap::ListBuilds(const CSmallString& prefix,const CSmallString& filter,std:
         SFullBuild build;
         build.prefix = prefix;
         build.build = string(build_name.GetFileNameWithoutExt());
-        builds.insert(build);
+
+        CFileName       full_build_name;
+        CSmallString    dir;
+
+        full_build_name = path / prefix / build_name;
+
+        if( CFileSystem::IsFile(full_build_name) ){
+
+            CXMLDocument    xml_doc;
+            CXMLParser      xml_parser;
+            xml_parser.SetOutputXMLNode(&xml_doc);
+
+            if( xml_parser.Parse(full_build_name) == true ) {
+                CXMLElement* p_bld = xml_doc.GetChildElementByPath("build");
+                if( p_bld != NULL ){
+                    dir = CCache::GetVariableValue(p_bld,"AMS_PACKAGE_DIR");
+                }
+            }
+        }
+
+        if( dir != NULL ){
+            builds.insert(build);
+        }
     }
     build_enum.EndFindFile();
 }
