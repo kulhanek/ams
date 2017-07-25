@@ -56,15 +56,16 @@ function print_usage()
 # ------------------------------------------------------------------------------
 
 function exec_debdeps() {
+    sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
     echo ""
     echo "# Installing system dependent packages:"
     echo "# ------------------------------------------------------------------------------"
-    sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
     PKGS="`ams-cache debdepsall`"
     if [ $? -ne 0 ]; then
         exit 1
     fi
-    sudo apt-get install $PKGS
+    sudo apt-get install $PKGS  || exit 1
+    echo ""
 }
 
 # ------------------------------------------------------------------------------
@@ -241,7 +242,8 @@ case "$ACTION" in
             exit 1
         fi
         sudo apt-get update
-        sudo apt-get install $PKGS
+        sudo apt-get install $PKGS || exit 1
+        echo ""
         ;;
 # -----------------------------
     "debdeps" )
