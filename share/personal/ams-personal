@@ -36,6 +36,7 @@ function print_usage()
     echo "       useradd [user]     add 'user' to the infnity group, if not provided the current user is added"
     echo "       envinit            initialize bash startup files for the current user"
     echo "       addcorebuilds      install AMS core builds"
+    echo "       amscore            upgrade AMS core packages"
     echo ""
     echo "Supported actions for ordinary user:"
     echo "   Personal site setup:"
@@ -50,6 +51,20 @@ function print_usage()
     echo "       * the user must have correct bash startup files (use 'envinit')"
     echo ""
 
+}
+
+# ------------------------------------------------------------------------------
+
+function exec_debdeps() {
+    echo ""
+    echo "# Installing system dependent packages:"
+    echo "# ------------------------------------------------------------------------------"
+    sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
+    PKGS="`ams-cache debdepsall`"
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+    sudo apt-get install $PKGS
 }
 
 # ------------------------------------------------------------------------------
@@ -162,11 +177,13 @@ case "$ACTION" in
         CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
         echo $CORE_BUILDS | tr " " "\n"
 
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS || exit 1
+        exec_debdeps || exit 1
         ;;
 # -----------------------------
     "addbuilds" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds "$@"
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds "$@" || exit 1
+        exec_debdeps || exit 1
         ;;
 # -----------------------------
     "addcorebuilds" )
@@ -183,12 +200,14 @@ case "$ACTION" in
         CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
         echo $CORE_BUILDS | tr " " "\n"
 
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS || exit 1
+        exec_debdeps || exit 1
         ;;
 # -----------------------------
     "update" )
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal softrepo
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal softrepo || exit 1
+        exec_debdeps || exit 1
         ;;
 # -----------------------------
     "upgrade" )
@@ -205,23 +224,28 @@ case "$ACTION" in
         CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
         echo $CORE_BUILDS | tr " " "\n"
 
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS || exit 1
+        exec_debdeps || exit 1
         ;;
 # -----------------------------
     "rmbuilds" )
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-rmbuilds "$@"
         ;;
 # -----------------------------
-    "debdeps" )
+    "amscore" )
         echo ""
-        echo "# Installing system dependent packages:"
+        echo "# Installing/upgrading AMS core packages:"
         echo "# ------------------------------------------------------------------------------"
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
-        PKGS="`ams-cache debdepsall`"
+        PKGS="ncbr-ams-core-8.0-personal ncbr-env-infinity-8.0-personal"
         if [ $? -ne 0 ]; then
             exit 1
         fi
+        sudo apt-get update
         sudo apt-get install $PKGS
+        ;;
+# -----------------------------
+    "debdeps" )
+        exec_debdeps || exit 1
         ;;
 # -----------------------------
     "gensshkeys" )
