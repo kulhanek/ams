@@ -10,3 +10,4 @@ Makefile
 /test
 /etc
 AMS-8.creator.user
+/share/scripts/ams-personal
