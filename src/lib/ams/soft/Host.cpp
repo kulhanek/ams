@@ -984,7 +984,7 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         INVALID_ARGUMENT("p_ele is NULL")
     }
 
-    bool ispersonal = CShell::GetSystemVariable("AMS_PERONAL") == "ON";
+    bool ispersonal = CShell::GetSystemVariable("AMS_PERSONAL") == "ON";
 
     CudaFilter = "-none-";
     CudaLib = "-none-";
