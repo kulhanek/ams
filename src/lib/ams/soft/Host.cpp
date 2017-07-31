@@ -984,6 +984,8 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         INVALID_ARGUMENT("p_ele is NULL")
     }
 
+    bool ispersonal = CShell::GetSystemVariable("AMS_PERONAL") == "ON";
+
     CudaFilter = "-none-";
     CudaLib = "-none-";
     CUDATokens.clear();
@@ -1013,7 +1015,8 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         }
 
         // does host match Hostname
-        if( fnmatch(filter,Hostname,0) != 0 ){
+        if( ! ( ( fnmatch(filter,Hostname,0) == 0 ) ||
+                ( ispersonal && (filter == "PERSONAL") ) ) ){
             CSmallString warning;
             warning << "cuda: host '" << Hostname << "' does not match filter '" << filter << "'";
             ES_WARNING(warning);
