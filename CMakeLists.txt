@@ -39,6 +39,12 @@ ENDIF(NOT DEVELOPMENT_ROOT)
 # external libraries -----------------------------------------------------------
 # ==============================================================================
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEVELOPMENT_ROOT}/projects/cmake-modules/1.0/share/modules")
+
+# boost =======================
+FIND_PACKAGE(MyBoost REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} SYSTEM)
+
 # HIPOLY -----------------------------------------
 SET(HIPOLY_ROOT ${DEVELOPMENT_ROOT}/projects/hipoly/1.0)
 INCLUDE_DIRECTORIES(${HIPOLY_ROOT}/src/lib/hipoly SYSTEM)
@@ -55,10 +61,6 @@ INCLUDE_DIRECTORIES(${HIPOLY_ROOT}/src/lib/hipoly/time SYSTEM)
 INCLUDE_DIRECTORIES(${HIPOLY_ROOT}/src/lib/hipoly/xml SYSTEM)
 LINK_DIRECTORIES(${HIPOLY_ROOT}/lib)
 SET(HIPOLY_LIB_NAME hipoly)
-
-# BOOST ------------------------------------------
-FIND_PACKAGE(Boost REQUIRED)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} SYSTEM)
 
 # W3TK -------------------------------------------
 SET(W3TK_ROOT ${DEVELOPMENT_ROOT}/projects/w3tk/1.0)
