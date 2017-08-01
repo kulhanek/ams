@@ -90,12 +90,12 @@ show_log_error()
 
 test_password_less_ssh()
 {
-    echo -n ">>> Testing connection to: $AMS_SRC_HOST ... " | tee -a $LOG_FILE
-    ssh -x -o "BatchMode=yes" -o "StrictHostKeyChecking=no" "$AMS_SRC_HOST" "/bin/echo" >> $LOG_FILE 2>&1
+    echo -n ">>> Testing connection to: $AMS_DST_HOST ... " | tee -a $LOG_FILE
+    ssh -x -o "BatchMode=yes" -o "StrictHostKeyChecking=no" "$AMS_DST_HOST" "/bin/echo" >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then
         echo "failure" | tee -a $LOG_FILE
         echo "" 1>&2
-        echo ">>> ERROR: Passwordless ssh connection with $AMS_SRC_HOST is not available!"  1>&2
+        echo ">>> ERROR: Passwordless ssh connection with $AMS_DST_HOST is not available!"  1>&2
         echo "" 1>&2
         show_log_error
         exit 1
