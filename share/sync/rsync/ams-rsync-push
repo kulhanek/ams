@@ -289,6 +289,7 @@ rsync_softrepo()
         ) < /dev/null
         if [ $? -ne 0 ]; then exit 1; fi
     done
+    if [ $? -ne 0 ]; then exit 1; fi
 
 # commit changes
     mv "$NEW_INDEX" "$OLD_INDEX"
