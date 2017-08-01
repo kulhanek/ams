@@ -18,7 +18,7 @@ cat > src/lib/ams/AMSMainHeaderConfig.hpp << EOF
 #define AMS_VERSION         "8.${GITREVS}.${GITHASH}"
 #define AMS_BUILDTIME       "${DATE}"
 EOF
-if [ $? -ne 1 ]; then exit 1; fi
+if [ $? -ne 0 ]; then exit 1; fi
 
 echo ""
 echo "AMS Revision: 8.$GITREVS.$GITHASH ($DATE)"
