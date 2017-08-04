@@ -1336,7 +1336,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "Loaded from cache ... (Cache is still valid for " << time.GetSTimeAndDay() << ")" << endl;
     } else {
     CSmallTime time(CACHE_VALIDITY);
-    vout << "No cache loaded ...   (New cache will be walid for " << time.GetSTimeAndDay() << ")" << endl;
+    vout << "No cache loaded ...   (New cache will be valid for " << time.GetSTimeAndDay() << ")" << endl;
     }
     vout << "===================================================================" << endl;
 
