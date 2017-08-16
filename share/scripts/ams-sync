@@ -340,8 +340,8 @@ function exec_profile() {
             exit 1
         fi
         echo "--------------------"
-        echo ""
     done < <( grep CMD "$PROFILE" | sed -e 's/CMD//g' )
+    echo ""
 }
 
 # ------------------------------------------------
