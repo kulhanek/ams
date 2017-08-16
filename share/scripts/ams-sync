@@ -181,15 +181,6 @@ function read_profile_exec()
         echo "" 1>&2
         exit 1
     fi
-
-    export AMS_COMMAND="`grep CMD "$PROFILE" | awk '{ for(i=2;i<=NF;i++) {printf("%s ",$i);} }'`"
-    echo "  Command:           $AMS_COMMAND"
-    if [ -z "$AMS_COMMAND" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: CMD key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
 }
 
 # ------------------------------------------------
@@ -337,17 +328,20 @@ function exec_profile() {
         exit 1
     fi
 
-    echo ""
-    echo "--------------------"
-    eval "$AMS_COMMAND"
-    if [ $? -ne 0 ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: Unable to execute the command '$AMS_COMMAND'!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-    echo "--------------------"
-    echo ""
+    while read AMS_COMMAND; do
+        echo ""
+        echo " $ $AMS_COMMAND"
+        echo "--------------------"
+        eval "$AMS_COMMAND"
+        if [ $? -ne 0 ]; then
+            echo "" 1>&2
+            echo ">>> ERROR: Unable to execute the command '$AMS_COMMAND'!" 1>&2
+            echo "" 1>&2
+            exit 1
+        fi
+        echo "--------------------"
+        echo ""
+    done < <( grep CMD "$PROFILE" | sed -e 's/CMD//g' )
 }
 
 # ------------------------------------------------
