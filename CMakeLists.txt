@@ -43,7 +43,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEVELOPMENT_ROOT}/projects/cmake-m
 
 # boost =======================
 FIND_PACKAGE(MyBoost REQUIRED)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} SYSTEM)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} SYSTEM)
 
 # HIPOLY -----------------------------------------
 SET(HIPOLY_ROOT ${DEVELOPMENT_ROOT}/projects/hipoly/1.0)
