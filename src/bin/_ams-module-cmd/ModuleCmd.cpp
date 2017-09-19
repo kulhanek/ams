@@ -400,8 +400,7 @@ void CModuleCmd::Finalize(void)
         if( ! ForcePrintErrors ) vout << endl;
     }
 
-    if( ErrorSystem.IsError() ) {
-        ExitCode = 1;
+    if( (ExitCode != 0) && (ErrorSystem.IsError()) ) {
         ShellProcessor.RollBack();
     }
 
