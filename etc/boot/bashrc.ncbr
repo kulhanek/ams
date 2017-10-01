@@ -45,6 +45,17 @@ fi
 unset MY_UMASK
 
 #-------------------------------------------------------------------------------
+# extra configuration before site setup
+#-------------------------------------------------------------------------------
+
+if [ -d "$AMS_ROOT/etc/boot/profile.d" ]; then
+    for AMS_STARTUP_SCRIPT in $AMS_ROOT/etc/boot/profile.d/*.sh ; do
+        . $AMS_STARTUP_SCRIPT
+    done
+    unset AMS_STARTUP_SCRIPT
+fi
+
+#-------------------------------------------------------------------------------
 # activate default site
 #-------------------------------------------------------------------------------
 
