@@ -561,7 +561,7 @@ void CShellProcessor::EndSubshell(void)
 
 //------------------------------------------------------------------------------
 
-void CShellProcessor::ExitSubshellIfError(void)
+void CShellProcessor::ExitIfError(void)
 {
     CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
     if( p_ele == NULL ){

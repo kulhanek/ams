@@ -93,7 +93,7 @@ public:
     void BeginSubshell(void);
 
     /// put exit escape condition
-    void ExitSubshellIfError(void);
+    void ExitIfError(void);
 
     /// capture PWD into AMS_PWD_BACKUP
     void CapturePWD(void);
@@ -109,7 +109,6 @@ public:
 
     /// end subshell via ")"
     void EndSubshell(void);
-
 
     // section of private data ---------------------------------------------------
 private:
