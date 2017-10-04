@@ -805,10 +805,10 @@ void CShellProcessor::BuildEnvironment(void)
                 printf(")\n");
             }
             if( action == "capturepwd" ){
-                printf("export AMS_PWD_BACKUP=${PWD}\n");
+                printf("export AMS_PWD_BACKUP=\"$PWD\"\n");
             }
             if( action == "restorepwd" ){
-                printf("cd $AMS_PWD_BACKUP\n");
+                printf("cd \"$AMS_PWD_BACKUP\"\n");
             }
             if( action == "cd" ){
                 CSmallString path;
