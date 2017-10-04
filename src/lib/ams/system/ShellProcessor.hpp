@@ -88,6 +88,15 @@ public:
     /// unset alias
     void UnsetAlias(const CSmallString& name);
 
+    /// begin subshell via "("
+    void BeginSubshell(void);
+
+    /// end subshell via ")"
+    void EndSubshell(void);
+
+    /// put exit escape condition
+    void ExitSubshellIfError(void);
+
     // section of private data ---------------------------------------------------
 private:
     /// list of all actions that has to executed by shell to activate/deactivate module

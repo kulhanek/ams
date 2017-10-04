@@ -535,6 +535,47 @@ void CShellProcessor::UnsetAlias(const CSmallString& name)
 //------------------------------------------------------------------------------
 //==============================================================================
 
+void CShellProcessor::BeginSubshell(void)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","begin");
+}
+
+//------------------------------------------------------------------------------
+
+void CShellProcessor::EndSubshell(void)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","end");
+}
+
+//------------------------------------------------------------------------------
+
+void CShellProcessor::ExitSubshellIfError(void)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","exitiferror");
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
 void CShellProcessor::RegisterScript(const CSmallString& name,
         const CSmallString& args,
         EScriptType type)
@@ -697,6 +738,20 @@ void CShellProcessor::BuildEnvironment(void)
                 if( name != NULL ) {
                     printf("unalias %s &> /dev/null;\n",(const char*)name);
                 }
+            }
+        }
+
+        if( p_sele->GetName() == "shell" ) {
+            CSmallString     action;
+            p_sele->GetAttribute("action",action);
+            if( action == "begin" ){
+                printf("(\n");
+            }
+            if( action == "end" ){
+                printf("(\n");
+            }
+            if( action == "exitiferror" ){
+                printf("if [ $? -ne 0 ]; then exit 1; fi;\n");
             }
         }
 
