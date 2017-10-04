@@ -572,6 +572,60 @@ void CShellProcessor::ExitSubshellIfError(void)
     p_sele->SetAttribute("action","exitiferror");
 }
 
+//------------------------------------------------------------------------------
+
+void CShellProcessor::CapturePWD(void)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","capturepwd");
+}
+
+//------------------------------------------------------------------------------
+
+void CShellProcessor::RestorePWD(void)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","restorepwd");
+}
+
+//------------------------------------------------------------------------------
+
+void CShellProcessor::ChangeCurrentDir(const CFileName& path)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","cd");
+    p_sele->SetAttribute("path",path);
+}
+
+//------------------------------------------------------------------------------
+
+void CShellProcessor::ExecuteCMD(const CSmallString& cmd)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("shell");
+    p_sele->SetAttribute("action","exec");
+    p_sele->SetAttribute("cmd",cmd);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -749,6 +803,22 @@ void CShellProcessor::BuildEnvironment(void)
             }
             if( action == "end" ){
                 printf("(\n");
+            }
+            if( action == "capturepwd" ){
+                printf("(export AMS_PWD_BACKUP=${PWD}\n");
+            }
+            if( action == "restorepwd" ){
+                printf("(cd $AMS_PWD_BACKUP\n");
+            }
+            if( action == "cd" ){
+                CSmallString path;
+                p_sele->GetAttribute("path",path);
+                printf("(cd \"%s\"\n",(const char*)path);
+            }
+            if( action == "exec" ){
+                CSmallString cmd;
+                p_sele->GetAttribute("cmd",cmd);
+                printf("(%s\n",(const char*)cmd);
             }
             if( action == "exitiferror" ){
                 printf("if [ $? -ne 0 ]; then exit 1; fi;\n");

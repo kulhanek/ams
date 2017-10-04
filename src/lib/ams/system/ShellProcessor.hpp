@@ -24,6 +24,7 @@
 
 #include <AMSMainHeader.hpp>
 #include <XMLDocument.hpp>
+#include <FileName.hpp>
 
 //-----------------------------------------------------------------------------
 
@@ -91,11 +92,24 @@ public:
     /// begin subshell via "("
     void BeginSubshell(void);
 
+    /// put exit escape condition
+    void ExitSubshellIfError(void);
+
+    /// capture PWD into AMS_PWD_BACKUP
+    void CapturePWD(void);
+
+    /// restore PWD from AMS_PWD_BACKUP
+    void RestorePWD(void);
+
+    /// change current directory
+    void ChangeCurrentDir(const CFileName& path);
+
+    /// execute command
+    void ExecuteCMD(const CSmallString& cmd);
+
     /// end subshell via ")"
     void EndSubshell(void);
 
-    /// put exit escape condition
-    void ExitSubshellIfError(void);
 
     // section of private data ---------------------------------------------------
 private:
