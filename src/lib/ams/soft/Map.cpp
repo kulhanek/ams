@@ -417,7 +417,7 @@ bool CMap::AddBuilds(std::ostream& vout,const CSmallString& site,const CSmallStr
     vout << "Build filter  : " << filter << endl;
     vout << endl;
 
-    // get prefix filter
+    // get filter
     CSmallString build_filter;
     build_filter = filter;
 
@@ -559,8 +559,15 @@ void CMap::RemoveBuildsForSites(std::ostream& vout,const CSmallString& sites,con
 
 //------------------------------------------------------------------------------
 
-void CMap::RemoveBuilds(std::ostream& vout,const CSmallString& site,const CSmallString& filter)
+void CMap::RemoveBuilds(std::ostream& vout,const CSmallString& site,const CSmallString& build_filter)
 {
+    // get filter without .bld
+    CFileName filter;
+    filter = build_filter;
+    if( filter.GetFileNameExt() == ".bld" ){
+        filter = CFileName(build_filter).GetFileNameWithoutExt();
+    }
+
     vout << endl;
     vout << "Site          : " << site << endl;
     vout << "Build filter  : " << filter << endl;
