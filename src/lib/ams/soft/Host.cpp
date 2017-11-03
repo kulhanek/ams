@@ -994,7 +994,12 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
     CUDATokens.clear();
     if( AlienHost == true ) return;
 
-    CudaVisibleDevs = CShell::GetSystemVariable("CUDA_VISIBLE_DEVICES");
+    char* p_cvds = getenv("CUDA_VISIBLE_DEVICES");
+    if( p_cvds == NULL ){
+        CudaVisibleDevs = "not set";
+    } else {
+        CudaVisibleDevs = p_cvds;
+    }
 
     bool capastokens = false;
     p_ele->GetAttribute("capastokens",capastokens);
