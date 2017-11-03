@@ -215,6 +215,7 @@ private:
     std::vector<std::string>    CUDATokens;
     CSmallString                CudaFilter;
     CSmallString                CudaLib;
+    CSmallString                CudaVisibleDevs;
     std::vector<std::string>    GPUCapabilities;        // list of GPU capabilities
 
     // network tokens

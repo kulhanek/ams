@@ -164,6 +164,7 @@ void CHost::ClearAll(void)
 
     CudaFilter = "-none-";
     CudaLib = "-none-";
+    CudaVisibleDevs = "";
 
     NetFilters = "-none-";
 
@@ -283,6 +284,7 @@ void CHost::LoadCache(void)
         if( ! sbuf.empty() ) split(CUDATokens,sbuf,is_any_of("#"));
         p_nele->GetAttribute("flt",CudaFilter);
         p_nele->GetAttribute("lib",CudaLib);
+        p_nele->GetAttribute("cvds",CudaVisibleDevs);
         string cap;
         p_nele->GetAttribute("cap",cap);
         split(GPUCapabilities,cap,is_any_of(","));
@@ -350,6 +352,7 @@ void CHost::SaveCache(void)
     p_nele->SetAttribute("tks",join(CUDATokens,"#"));
     p_nele->SetAttribute("flt",CudaFilter);
     p_nele->SetAttribute("lib",CudaLib);
+    p_nele->SetAttribute("cvds",CudaVisibleDevs);
     p_nele->SetAttribute("cap",join(GPUCapabilities,","));
 
 // special -------------
@@ -991,6 +994,8 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
     CUDATokens.clear();
     if( AlienHost == true ) return;
 
+    CudaVisibleDevs = CShell::GetSystemVariable("CUDA_VISIBLE_DEVICES");
+
     bool capastokens = false;
     p_ele->GetAttribute("capastokens",capastokens);
 
@@ -1416,6 +1421,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    Enabled       : " << "tokens/ngpus" << endl;
     vout << "    Priority      : " << pri << endl;
+    vout << "    Visible devs  : " << CudaVisibleDevs << endl;
     vout << "    Host filter   : " << CudaFilter << endl;
     if( CudaFilter != "-none-" ){
     vout << "    CUDA library  : " << CudaLib << endl;
