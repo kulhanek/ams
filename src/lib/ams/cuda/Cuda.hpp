@@ -107,9 +107,11 @@ struct cudaDeviceProp {
 
 // -----------------------------------------------------------------------------
 
-typedef CUDAresult (*CUDAGetDeviceCount)(int* count);
-typedef CUDAresult (*CUDASetDevice)(int  device);
-typedef CUDAresult (*CUDAGetDeviceProperties)(cudaDeviceProp* prop, int  device);
+typedef CUDAresult  (*CUDAGetDeviceCount)(int* count);
+typedef CUDAresult  (*CUDASetDevice)(int  device);
+typedef CUDAresult  (*CUDAGetDeviceProperties)(cudaDeviceProp* prop, int  device);
+typedef const char* (*CUDAGetErrorString)(CUDAresult error);
+typedef CUDAresult 	(*CUDAGetLastError)(void);
 
 // -----------------------------------------------------------------------------
 
@@ -142,6 +144,8 @@ private:
     CUDAGetDeviceCount      cudaGetDeviceCount;
     CUDASetDevice           cudaSetDevice;
     CUDAGetDeviceProperties cudaGetDeviceProperties;
+    CUDAGetErrorString      cudaGetErrorString;
+    CUDAGetLastError        cudaGetLastError;
 
     void DecodeCapability(cudaDeviceProp& prop,std::set<std::string>& capabilities);
 };

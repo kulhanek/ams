@@ -103,6 +103,18 @@ bool CCuda::InitSymbols(void)
         status = false;
     }
 
+    cudaGetErrorString = (CUDAGetErrorString)CudaRTLib.GetProcAddress("cudaGetErrorString");
+    if( cudaGetErrorString == NULL ){
+        ES_ERROR("unable to bind to cudaGetErrorString");
+        status = false;
+    }
+
+    cudaGetLastError = (CUDAGetLastError)CudaRTLib.GetProcAddress("cudaGetLastError");
+    if( cudaGetLastError == NULL ){
+        ES_ERROR("unable to bind to cudaGetLastError");
+        status = false;
+    }
+
     return(status);
 }
 
@@ -130,10 +142,14 @@ void CCuda::GetGPUInfo(CSmallString& raw_model,std::vector<std::string>& list,st
     if( cudaGetDeviceCount == NULL ) return;
     if( cudaSetDevice == NULL ) return;
     if( cudaGetDeviceProperties == NULL ) return;
+    if( cudaGetErrorString == NULL ) return;
+    if( cudaGetLastError == NULL ) return;
 
     int ngpus = 0;
     if( cudaGetDeviceCount(&ngpus) != CUDA_SUCCESS ){
-        ES_ERROR("unable to get number of devices");
+        CSmallString error;
+        error << "unable to call cudaGetDeviceCount (" << cudaGetErrorString(cudaGetLastError()) << ")";
+        ES_ERROR(error);
         return;
     }
 
@@ -141,9 +157,20 @@ void CCuda::GetGPUInfo(CSmallString& raw_model,std::vector<std::string>& list,st
 
     for(int devid=0; devid < ngpus; devid++){
 
-        cudaSetDevice(devid);
+        if( cudaSetDevice(devid) != CUDA_SUCCESS ) {
+            CSmallString error;
+            error << "unable to call cudaSetDevice (" << cudaGetErrorString(cudaGetLastError()) << ")";
+            ES_ERROR(error);
+            return;
+        }
+
         cudaDeviceProp deviceProp;
-        cudaGetDeviceProperties(&deviceProp, devid);
+        if( cudaGetDeviceProperties(&deviceProp, devid) != CUDA_SUCCESS ) {
+            CSmallString error;
+            error << "unable to call cudaGetDeviceProperties (" << cudaGetErrorString(cudaGetLastError()) << ")";
+            ES_ERROR(error);
+            return;
+        }
 
         deviceProp.name[255] = '\0';
         CSmallString gpudev_name(deviceProp.name);
