@@ -996,9 +996,12 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
 
     char* p_cvds = getenv("CUDA_VISIBLE_DEVICES");
     if( p_cvds == NULL ){
-        CudaVisibleDevs = "not set";
+        CudaVisibleDevs = "-none-";
     } else {
         CudaVisibleDevs = p_cvds;
+        if( CudaVisibleDevs == NULL ){
+            CudaVisibleDevs = "-empty-";
+        }
     }
 
     bool capastokens = false;
