@@ -1010,7 +1010,7 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
     bool capastokens = false;
     p_ele->GetAttribute("capastokens",capastokens);
 
-    CXMLElement* p_fele = p_ele->GetFirstChildElement("host");
+    CXMLElement* p_fele = p_ele->GetFirstChildElement();
     while( p_fele != NULL ){
         string          stokens;
         CSmallString    cudalib,filter;
