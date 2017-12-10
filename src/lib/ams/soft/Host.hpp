@@ -165,7 +165,7 @@ public:
 // section of private date -----------------------------------------------------
 private:
     CFileName                   CacheFileName;          // cache file name
-    CXMLDocument                Hosts;                  // host configuration
+    CXMLDocument                Hosts;                  // host configuration   
     CSmallString                Hostname;               // hostname
     bool                        AlienHost;              // hostname is overwritten
     CSmallString                ConfigRealm;            // group or default config

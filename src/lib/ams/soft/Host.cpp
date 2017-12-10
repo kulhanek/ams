@@ -52,6 +52,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <PrintEngine.hpp>
+#include <sys/stat.h>
 
 //------------------------------------------------------------------------------
 
@@ -987,6 +988,8 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
         INVALID_ARGUMENT("p_ele is NULL")
     }
 
+    // this works under PBSPro hooks only if it is injected on the level of pbs_mom environment initialization
+    // thus it is better to use <dev></dev>
     bool ispersonal = CShell::GetSystemVariable("AMS_PERSONAL") == "ON";
 
     CudaFilter = "-none-";
@@ -1009,30 +1012,63 @@ void CHost::InitCudaGPUTokens(CXMLElement* p_ele)
 
     CXMLElement* p_fele = p_ele->GetFirstChildElement("host");
     while( p_fele != NULL ){
-        CSmallString filter,cudalib;
-        string stokens;
+        string          stokens;
+        CSmallString    cudalib,filter;
 
-        // load config
-        bool success = true;
+        if( p_fele->GetName() == "host" ){
+            // load config
+            bool success = true;
 
-        success &= p_fele->GetAttribute("filter",filter);
-        success &= p_fele->GetAttribute("lib",cudalib);
-        success &= p_fele->GetAttribute("tokens",stokens);
+            success &= p_fele->GetAttribute("filter",filter);
+            success &= p_fele->GetAttribute("lib",cudalib);
+            success &= p_fele->GetAttribute("tokens",stokens);
 
-        // move to next record
-        p_fele = p_fele->GetNextSiblingElement("host");
+            // move to next record
+            p_fele = p_fele->GetNextSiblingElement();
 
-        if( success == false ){
-            ES_WARNING("undefined filter, lib, or tokens attributes for host element");
-            continue;
-        }
+            if( success == false ){
+                ES_WARNING("undefined filter, lib, or tokens attributes for host element");
+                continue;
+            }
 
-        // does host match Hostname
-        if( ! ( ( fnmatch(filter,Hostname,0) == 0 ) ||
-                ( ispersonal && (filter == "PERSONAL") ) ) ){
-            CSmallString warning;
-            warning << "cuda: host '" << Hostname << "' does not match filter '" << filter << "'";
-            ES_WARNING(warning);
+            // does host match Hostname
+            if( ! ( ( fnmatch(filter,Hostname,0) == 0 ) ||
+                    ( ispersonal && (filter == "PERSONAL") ) ) ){
+                CSmallString warning;
+                warning << "cuda: host '" << Hostname << "' does not match filter '" << filter << "'";
+                ES_WARNING(warning);
+                continue;
+            }
+        } else if ( p_fele->GetName() == "dev" ) {
+            // load config
+            bool success = true;
+
+            success &= p_fele->GetAttribute("name",filter);
+            success &= p_fele->GetAttribute("lib",cudalib);
+            success &= p_fele->GetAttribute("tokens",stokens);
+
+            // move to next record
+            p_fele = p_fele->GetNextSiblingElement();
+
+            if( success == false ){
+                ES_WARNING("undefined name, lib, or tokens attributes for dev element");
+                continue;
+            }
+
+            struct stat dev_stat;
+
+            // is device present?
+            if( stat(filter,&dev_stat) != 0 ){
+                CSmallString warning;
+                warning << "cuda: host '" << Hostname << "' does not have device '" << filter << "'";
+                ES_WARNING(warning);
+                continue;
+            }
+
+        } else {
+            ES_WARNING("unsupported element");
+            // move to next record
+            p_fele = p_fele->GetNextSiblingElement();
             continue;
         }
 
