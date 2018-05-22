@@ -669,8 +669,12 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     struct lscpu_desc* cpu_desc = lscpu_get(0);
     if( cpu_desc == NULL ) return;
 
-    CPURawModelName = cpu_desc->modelname;
-    CPUModelName = cpu_desc->modelname;
+    std::string values(cpu_desc->modelname);
+    vector<string> words;
+    split(words,values,is_any_of(" "),token_compress_on);
+    CPUModelName =  join(words," ");
+    CPURawModelName = CPUModelName;
+
     int count_CPU = cpu_desc->ncores;
     CPUInfoNumOfThreadsPerCore = cpu_desc->nthreads / cpu_desc->ncores;
     char* flags = cpu_desc->flags;
