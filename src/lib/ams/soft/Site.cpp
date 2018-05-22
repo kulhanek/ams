@@ -459,20 +459,21 @@ void CSite::PrintShortSiteInfo(ostream& vout)
     } else {
     vout << "# ~~~ Host info ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     }
-    vout << "# Full host name     : " << Host.GetHostName() << endl;
-    vout << "# Num of host CPUs   : " << Host.GetNumOfHostCPUs() << endl;
-    vout << "# Host SMP CPU model : " << Host.GetCPUModel() << endl;
+    vout << "# Full host name      : " << Host.GetHostName() << endl;
+    vout << "# Num of host CPUs    : " << setw(4) << left << Host.GetNumOfHostCPUs();
+   vout << " / Num of host threads : " << setw(4) << left << Host.GetNumOfHostThreads() << endl;
+    vout << "# Host SMP CPU model  : " << Host.GetCPUModel() << endl;
         if( Host.GetNumOfHostGPUs() > 0 ){
-    vout << "# Num of host GPUs   : " << Host.GetNumOfHostGPUs() << endl;
+    vout << "# Num of host GPUs    : " << Host.GetNumOfHostGPUs() << endl;
     if( Host.IsGPUModelSMP() == false ){
     for(size_t i=0; i < Host.GetGPUModels().size(); i++){
-    vout << "# Host GPU model #" << setw(1) << i+1 << "  : " << Host.GetGPUModels()[i] << endl;
+    vout << "# Host GPU model #" << setw(1) << i+1 << "   : " << Host.GetGPUModels()[i] << endl;
     }
     } else {
-    vout << "# Host SMP GPU model : " << Host.GetGPUModels()[0] << endl;
+    vout << "# Host SMP GPU model  : " << Host.GetGPUModels()[0] << endl;
     }
         }
-    CPrintEngine::PrintTokens(vout,"# Host arch tokens   : ",Host.GetArchTokens());
+    CPrintEngine::PrintTokens(vout,"# Host arch tokens    : ",Host.GetArchTokens());
     }
 
     if( (GetDocumentationURL() != NULL) ||

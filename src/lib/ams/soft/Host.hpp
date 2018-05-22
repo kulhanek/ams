@@ -114,6 +114,9 @@ public:
     /// return number of CPUs per node
     int GetNumOfHostCPUs(void);
 
+    /// return number of threads per node
+    int GetNumOfHostThreads(void);
+
     /// return number of GPUs per node
     int GetNumOfHostGPUs(void);
 
@@ -193,6 +196,7 @@ private:
 // cached items ----------------------------------------------------------------
     // header
     int                         NumOfHostCPUs;          // default max. number of CPUs per node
+    int                         NumOfHostThreads;
     CSmallString                CPUModelName;           // cpu model name
     CSmallString                CPURawModelName;        // cpu model name without mem
     int                         NumOfHostGPUs;          // default max. number of GPUs per node

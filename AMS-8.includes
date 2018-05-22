@@ -10,3 +10,5 @@ share/scripts
 src/bin/ams-repoindex-files
 .
 share/personal/actions
+src/lib/ams
+src/lib/ams/lscpu

@@ -86,8 +86,12 @@ src/bin/ams-user/UserCmd.hpp
 src/bin/ams-user/UserCmdOptions.cpp
 src/bin/ams-user/UserCmdOptions.hpp
 src/bin/CMakeLists.txt
+src/lib/ams/CMakeLists.txt
 src/lib/ams/cuda/Cuda.cpp
 src/lib/ams/cuda/Cuda.hpp
+src/lib/ams/lscpu/lscpu.c
+src/lib/ams/lscpu/lscpu.h
+src/lib/ams/lscpu/lscpu.hpp
 src/lib/ams/soft/Actions.cpp
 src/lib/ams/soft/Actions.hpp
 src/lib/ams/soft/AmsUUID.cpp

@@ -153,6 +153,7 @@ void CHost::ClearAll(void)
     //NGPUs = 0;
     //NNodes = 1;
     NumOfHostCPUs = 1;
+    NumOfHostThreads = 1;
     NumOfHostGPUs = 0;
     CPUModelName = "";
     GPUModelNames.clear();
@@ -244,6 +245,7 @@ void CHost::LoadCache(void)
     CXMLElement* p_hele = p_ele->GetFirstChildElement("header");
     if( p_hele ){
         p_hele->GetAttribute("nhcpu",NumOfHostCPUs);
+        p_hele->GetAttribute("nhthr",NumOfHostThreads);
         p_hele->GetAttribute("cpum",CPUModelName);
         p_hele->GetAttribute("cpur",CPURawModelName);
         p_hele->GetAttribute("nhgpu",NumOfHostGPUs);
@@ -326,6 +328,7 @@ void CHost::SaveCache(void)
     CXMLElement* p_hele = p_ele->CreateChildElement("header");
     // common
     p_hele->SetAttribute("nhcpu",NumOfHostCPUs);
+    p_hele->SetAttribute("nhthr",NumOfHostThreads);
     p_hele->SetAttribute("cpum",CPUModelName);
     p_hele->SetAttribute("cpur",CPURawModelName);
     p_hele->SetAttribute("nhgpu",NumOfHostGPUs);
@@ -596,7 +599,10 @@ void CHost::InitDefaultTokens(CXMLElement* p_ele)
 
     // max cpus per node
     p_ele->GetAttribute("ncpus",DefaultNumOfHostCPUs);
-    if( CacheLoaded == false ) NumOfHostCPUs = DefaultNumOfHostCPUs;
+    if( CacheLoaded == false ){
+        NumOfHostCPUs = DefaultNumOfHostCPUs;
+        NumOfHostThreads = DefaultNumOfHostCPUs;
+    }
 
     // copy tokens
     vector<string>::iterator  it = tokens.begin();
@@ -642,7 +648,10 @@ void CHost::InitHostsTokens(CXMLElement* p_ele)
     p_ele->GetAttribute("ecpus",cenable);
     if( cenable ) {
         p_ele->GetAttribute("ncpus",HostNumOfHostCPUs);
-        if( CacheLoaded == false ) NumOfHostCPUs = HostNumOfHostCPUs;
+        if( CacheLoaded == false ){
+            NumOfHostCPUs = HostNumOfHostCPUs;
+            NumOfHostThreads = HostNumOfHostCPUs;
+        }
     }
 
     // copy tokens
@@ -675,8 +684,12 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     CPUModelName =  join(words," ");
     CPURawModelName = CPUModelName;
 
-    int count_CPU = cpu_desc->ncores;
-    CPUInfoNumOfThreadsPerCore = cpu_desc->nthreads / cpu_desc->ncores;
+    CPUInfoNumOfHostCPUs = cpu_desc->ncores;
+    CPUInfoNumOfHostThreads = cpu_desc->nthreads;
+    CPUInfoNumOfThreadsPerCore = 1;
+    if( cpu_desc->ncores > 0 ){
+        CPUInfoNumOfThreadsPerCore = cpu_desc->nthreads / cpu_desc->ncores;
+    }
     char* flags = cpu_desc->flags;
     if( flags != NULL ){
         CPUInfoFlags.push_back(flags);
@@ -716,9 +729,8 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
     bool cenable = false;
     p_ele->GetAttribute("ecpus",cenable);
     if( cenable ) {
-        CPUInfoNumOfHostCPUs = count_CPU;
-        CPUInfoNumOfHostThreads = count_CPU * CPUInfoNumOfThreadsPerCore;
-        NumOfHostCPUs = count_CPU;
+        NumOfHostCPUs = CPUInfoNumOfHostCPUs;
+        NumOfHostThreads = CPUInfoNumOfHostThreads;
     }
 
     // filter CPU tokens
@@ -1197,6 +1209,14 @@ int CHost::GetNumOfHostCPUs(void)
 {
     return(NumOfHostCPUs);
 }
+
+//------------------------------------------------------------------------------
+
+int CHost::GetNumOfHostThreads(void)
+{
+    return(NumOfHostThreads);
+}
+
 
 //------------------------------------------------------------------------------
 
