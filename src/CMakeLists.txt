@@ -8,6 +8,7 @@ INCLUDE_DIRECTORIES(lib/ams/soft SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/torque SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/cuda SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/srv SYSTEM)
+INCLUDE_DIRECTORIES(lib/ams/lscpu SYSTEM)
 INCLUDE_DIRECTORIES(lib/torque SYSTEM)
 
 # include subdirectories -------------------------------------------------------

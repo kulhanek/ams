@@ -200,10 +200,10 @@ private:
     CSmallString                GPURawModelName;        // gpu model name without mem
 
     // cpuinfo
-    bool                        HTDetected;             // hyperthreading
-    bool                        HTEnabled;
-    std::vector<std::string>    CPUInfoTokens;          // CPU tokens from /proc/cpuinfo
+    std::vector<std::string>    CPUInfoTokens;          // data from lscpu
     int                         CPUInfoNumOfHostCPUs;
+    int                         CPUInfoNumOfHostThreads;
+    int                         CPUInfoNumOfThreadsPerCore;
     std::vector<std::string>    CPUInfoFlags;           // list of CPU flags
     float                       CPUSpec;
 

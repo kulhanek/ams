@@ -53,6 +53,7 @@
 #include <unistd.h>
 #include <PrintEngine.hpp>
 #include <sys/stat.h>
+#include <lscpu.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -179,9 +180,6 @@ void CHost::ClearAll(void)
     CacheLoaded = false;
     CacheTime = 0;
 
-    HTDetected = false;
-    HTEnabled = false;
-
     IsDesktop = false;
     DesktopCPUPenalty = 1;
 
@@ -265,12 +263,12 @@ void CHost::LoadCache(void)
 // cpuinfo -------------
     CXMLElement* p_cele = p_ele->GetFirstChildElement("cpuinfo");
     if( p_cele ){
-        p_cele->GetAttribute("htd",HTDetected);
-        p_cele->GetAttribute("hte",HTEnabled);
         string sbuf;
         p_cele->GetAttribute("tks",sbuf);
         if( ! sbuf.empty() ) split(CPUInfoTokens,sbuf,is_any_of("#"));
         p_cele->GetAttribute("ncpus",CPUInfoNumOfHostCPUs);
+        p_cele->GetAttribute("nthrs",CPUInfoNumOfHostThreads);
+        p_cele->GetAttribute("tpc",CPUInfoNumOfThreadsPerCore);
         string flags;
         p_cele->GetAttribute("fl",flags);
         split(CPUInfoFlags,flags,is_any_of(","));
@@ -341,10 +339,10 @@ void CHost::SaveCache(void)
 
 // cpuinfo -------------
     CXMLElement* p_cele = p_ele->CreateChildElement("cpuinfo");
-    p_cele->SetAttribute("htd",HTDetected);
-    p_cele->SetAttribute("hte",HTEnabled);
     p_cele->SetAttribute("tks",join(CPUInfoTokens,"#"));
     p_cele->SetAttribute("ncpus",CPUInfoNumOfHostCPUs);
+    p_cele->SetAttribute("nthrs",CPUInfoNumOfHostThreads);
+    p_cele->SetAttribute("tpc",CPUInfoNumOfThreadsPerCore);
     p_cele->SetAttribute("fl",join(CPUInfoFlags,","));
     p_cele->SetAttribute("sp",CPUSpec);
 
@@ -668,76 +666,18 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
         INVALID_ARGUMENT("p_ele is NULL")
     }
 
-    ifstream cpuinfo;
+    struct lscpu_desc* cpu_desc = lscpu_get(0);
+    if( cpu_desc == NULL ) return;
 
-    // open /proc/cpuinfo file
-    cpuinfo.open("/proc/cpuinfo");
-    if( ! cpuinfo ){
-        RUNTIME_ERROR("unable to open /proc/cpuinfo");
+    CPURawModelName = cpu_desc->modelname;
+    CPUModelName = cpu_desc->modelname;
+    int count_CPU = cpu_desc->ncores;
+    CPUInfoNumOfThreadsPerCore = cpu_desc->nthreads / cpu_desc->ncores;
+    char* flags = cpu_desc->flags;
+    if( flags != NULL ){
+        CPUInfoFlags.push_back(flags);
+        flags++;
     }
-
-    // parse CPU attributes
-    string line;
-    bool arch_found = false;
-
-    int count_CPU = 0;
-    HTDetected = false;
-    int phys_CPUs = 0;
-    int cpu_cores = 0;
-
-    list<int> physIds;
-    list<int> coreIds;
-
-    while( getline(cpuinfo,line) ){
-        vector<string>  key_and_value;
-        split(key_and_value,line,is_any_of(":"));
-        if( key_and_value.size() != 2 ) continue;
-
-        string key = key_and_value[0];
-        string values = key_and_value[1];
-
-        trim(key);
-        trim(values);
-
-        if( key == "model name" ){
-            vector<string> words;
-            split(words,values,is_any_of(" "),token_compress_on);
-            CPUModelName =  join(words," ");
-            CPURawModelName = CPUModelName;
-            count_CPU++;
-            continue;
-        }
-
-        if( key == "physical id" ){
-            vector<string> words;
-            split(words,values,is_any_of(" "),token_compress_on);
-            if( words.size() == 1 ){
-                int l_physCPU = atoi(words[0].c_str());
-                physIds.push_back(l_physCPU);
-            }
-            continue;
-        }
-
-        if( key == "core id" ){
-            vector<string> words;
-            split(words,values,is_any_of(" "),token_compress_on);
-            if( words.size() == 1 ){
-                int l_cpu_core = atoi(words[0].c_str());
-                coreIds.push_back(l_cpu_core);
-            }
-            continue;
-        }
-
-        if( (key == "flags") && (arch_found == false) ){
-            split(CPUInfoFlags,values,is_any_of(" "),token_compress_on);
-            arch_found = true;
-            continue;
-        }
-    }
-
-    // close file
-    cpuinfo.close();
-
 
     // get total mem
     double mem = 0;
@@ -768,41 +708,12 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
         CPUModelName << str.str();
     }
 
-    // on virtualized machines ids are not sequential numbers
-    physIds.sort();
-    physIds.unique();
-    coreIds.sort();
-    coreIds.unique();
-
-    phys_CPUs = physIds.size();
-    cpu_cores = coreIds.size();
-
-    // is HT supported and enabled?
-    if( (cpu_cores*phys_CPUs != 0) && (cpu_cores*phys_CPUs < count_CPU) ){
-        HTDetected = true;
-    }
-    HTEnabled = false;
-    p_ele->GetAttribute("ht",HTEnabled);
-    HTEnabled &= HTDetected;
-
-    // opteron hack
-    // CMP_Legacy – Register showing the CPU is not Hyper-Threading capable
-    // https://unix.stackexchange.com/questions/43539/what-do-the-flags-in-proc-cpuinfo-mean
-    // cmp_legacy: If yes HyperThreading not valid
-    if( find(CPUInfoFlags.begin(),CPUInfoFlags.end(),"cmp_legacy") != CPUInfoFlags.end() ){
-        HTDetected = false;
-        HTEnabled = false;
-    } else {
-        if( (HTEnabled == false) && (cpu_cores*phys_CPUs != 0) ){
-            count_CPU = cpu_cores*phys_CPUs;
-        }
-    }
-
     // max cpus per node
     bool cenable = false;
     p_ele->GetAttribute("ecpus",cenable);
     if( cenable ) {
         CPUInfoNumOfHostCPUs = count_CPU;
+        CPUInfoNumOfHostThreads = count_CPU * CPUInfoNumOfThreadsPerCore;
         NumOfHostCPUs = count_CPU;
     }
 
@@ -1431,20 +1342,12 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     } else {
     vout << "    Enabled       : " << WhatIsEnabled(p_ele) << endl;
     vout << "    Priority      : " << pri << endl;
-    vout << "    Num of CPUs   : " << CPUInfoNumOfHostCPUs << endl;
+    vout << "    Num of cores  : " << CPUInfoNumOfHostCPUs << endl;
+    vout << "    Num of threads: " << CPUInfoNumOfHostThreads << endl;
+    vout << "    Threads/Core  : " << CPUInfoNumOfThreadsPerCore << endl;
     vout << "    SMP CPU model : " << GetCPUModel() << endl;
     CPrintEngine::PrintTokens(vout,"    CPU flags     : ",GetSecTokens(CPUInfoFlags));
     vout << "    CPU spec      : " << fixed << setprecision(2) << CPUSpec << endl;
-    if( HTDetected ){
-    vout << "    HypThreading  : detected ";
-        if( HTEnabled ){
-            vout << "and enabled" << endl;
-        } else {
-            vout << "but disabled" << endl;
-        }
-    } else {
-    vout << "    HypThreading  : not found" << endl;
-    }
     CPrintEngine::PrintTokens(vout,"    CPU tokens    : ",GetSecTokens(CPUInfoTokens));
     }
         }
@@ -1634,6 +1537,7 @@ void CHost::PrintNodeInfo(CVerboseStr& vout)
     vout << "cpu_model " << CPURawModelName << endl;
     vout << "cpu_flag " << join(CPUInfoFlags,",") << endl;
     vout << "spec " << fixed << setprecision(2) << CPUSpec << endl;
+    bool HTDetected = CPUInfoNumOfThreadsPerCore > 1;
     vout << "hyperthreading " << HTDetected << endl;
     vout << "ngpus " << NumOfHostGPUs << endl;
     vout << "gpu_model " << GPURawModelName << endl;
