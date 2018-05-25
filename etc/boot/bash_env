@@ -10,8 +10,15 @@ if [ -z "$AMS_ROOT" ]; then return 0; fi
 # init AMS core
 . $AMS_ROOT/etc/boot/init.ams
 
+# protect from infinite loops, RT#250731
+if [ -n "$AMS_BASH_ENV_ACTIVE" ]; then return 0; fi
+AMS_BASH_ENV_ACTIVE=YES
+export AMS_BASH_ENV_ACTIVE
+
 # reactivate modules
 amsmodule --system reactivate 2> /dev/null
+
+unset AMS_BASH_ENV_ACTIVE
 
 return 0
 
