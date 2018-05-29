@@ -45,6 +45,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEVELOPMENT_ROOT}/projects/cmake-m
 FIND_PACKAGE(MyBoost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} SYSTEM)
 
+# HWLOC ------------------------------------------
+SET(HWLOC_ROOT ${DEVELOPMENT_ROOT}/thirdparty/hwloc/2.0.1)
+INCLUDE_DIRECTORIES(${HWLOC_ROOT}/include)
+LINK_DIRECTORIES(${HWLOC_ROOT}/lib)
+SET(HWLOC_LIB_NAME hwloc)
+
 # HIPOLY -----------------------------------------
 SET(HIPOLY_ROOT ${DEVELOPMENT_ROOT}/projects/hipoly/1.0)
 INCLUDE_DIRECTORIES(${HIPOLY_ROOT}/src/lib/hipoly SYSTEM)

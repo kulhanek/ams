@@ -257,6 +257,10 @@ private:
     /// get section tokens
     const CSmallString GetSecTokens(std::vector<std::string>& list);
     const CSmallString GetSecTokens(std::set<std::string>& list);
+
+    // cpuinfo
+    void GetCPUModelAndFlags(CSmallString& model,std::vector<std::string>& flags)
+;
 };
 
 // -----------------------------------------------------------------------------

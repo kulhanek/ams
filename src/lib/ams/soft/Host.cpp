@@ -53,7 +53,7 @@
 #include <unistd.h>
 #include <PrintEngine.hpp>
 #include <sys/stat.h>
-#include <lscpu.hpp>
+#include <hwloc.h>
 
 //------------------------------------------------------------------------------
 
@@ -672,44 +672,47 @@ void CHost::InitHostsTokens(CXMLElement* p_ele)
 void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
 {
     if( p_ele == NULL ){
-        INVALID_ARGUMENT("p_ele is NULL")
+        INVALID_ARGUMENT("p_ele is NULL");
     }
 
-    struct lscpu_desc* cpu_desc = lscpu_get(0);
-    if( cpu_desc == NULL ) return;
+    int              err;
+    hwloc_topology_t topology;
 
-    std::string values(cpu_desc->modelname);
-    vector<string> words;
-    split(words,values,is_any_of(" "),token_compress_on);
-    CPUModelName =  join(words," ");
+    err = hwloc_topology_init (&topology);
+    if( err ){
+        ES_ERROR("unable to init hwloc topology");
+        return;
+    }
+
+    err = hwloc_topology_load (topology);
+    if( err ){
+        ES_ERROR("unable to load hwloc topology");
+        return;
+    }
+
+    // CPU core data
+    CPUInfoNumOfHostCPUs = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
+    CPUInfoNumOfHostThreads = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
+    CPUInfoNumOfThreadsPerCore = 1;
+    if( CPUInfoNumOfHostCPUs > 0 ){
+        CPUInfoNumOfThreadsPerCore = CPUInfoNumOfHostThreads / CPUInfoNumOfHostCPUs;
+    }
+
+    // CPU MODEL
+    GetCPUModelAndFlags(CPUModelName,CPUInfoFlags);
     CPURawModelName = CPUModelName;
 
-    CPUInfoNumOfHostCPUs = cpu_desc->ncores;
-    CPUInfoNumOfHostThreads = cpu_desc->nthreads;
-    CPUInfoNumOfThreadsPerCore = 1;
-    if( cpu_desc->ncores > 0 ){
-        CPUInfoNumOfThreadsPerCore = cpu_desc->nthreads / cpu_desc->ncores;
-    }
-    char* flags = cpu_desc->flags;
-    if( flags != NULL ){
-        CPUInfoFlags.push_back(flags);
-        flags++;
+    // Machine Memory
+    hwloc_obj_t machine = hwloc_get_obj_by_type(topology, HWLOC_OBJ_MACHINE, 0);
+    double mem = 0;
+    if( machine ){
+        mem = machine->total_memory;
     }
 
     // get total mem
-    double mem = 0;
-    std::string token;
-    std::ifstream file("/proc/meminfo");
-    while(file >> token) {
-        if(token == "MemTotal:") {
-            file >> mem;
-            break;
-        }
-        // ignore rest of the line
-        file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
     if( mem > 0 ){
         stringstream str;
+        mem = mem / 1024 ; // bytes to KB
         mem = mem / 1024 ; // kbytes to MB
         if( mem < 1024 ){
             str << " [Total memory: " << fixed << setprecision(1) << mem << " MB" << "]";
@@ -777,6 +780,55 @@ void CHost::InitCPUInfoTokens(CXMLElement* p_ele)
         warning << "spec not found for '" << CPURawModelName << "'";
         ES_WARNING(warning);
     }
+}
+
+void CHost::GetCPUModelAndFlags(CSmallString& model,std::vector<std::string>& flags)
+{
+    ifstream cpuinfo;
+
+    // open /proc/cpuinfo file
+    cpuinfo.open("/proc/cpuinfo");
+    if( ! cpuinfo ){
+        RUNTIME_ERROR("unable to open /proc/cpuinfo");
+    }
+
+    // parse CPU attributes
+    string line;
+    bool mod_found = false;
+    bool flags_found = false;
+
+    while( getline(cpuinfo,line) ){
+
+        // all found
+        if( flags_found && mod_found ) break;
+
+        vector<string>  key_and_value;
+        split(key_and_value,line,is_any_of(":"));
+        if( key_and_value.size() != 2 ) continue;
+
+        string key = key_and_value[0];
+        string values = key_and_value[1];
+
+        trim(key);
+        trim(values);
+
+        if( (key == "model name") && (mod_found == false) ){
+            vector<string> words;
+            split(words,values,is_any_of(" "),token_compress_on);
+            model =  join(words," ");
+            mod_found = true;
+            continue;
+        }
+
+        if( (key == "flags") && (flags_found == false) ){
+            split(flags,values,is_any_of(" "),token_compress_on);
+            flags_found = true;
+            continue;
+        }
+    }
+
+    // close file
+    cpuinfo.close();
 }
 
 //------------------------------------------------------------------------------
