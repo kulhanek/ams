@@ -47,7 +47,9 @@ private:
     unsigned int                RelPartCompleted;   // what parts from build should be completed
     CSmallString                CommandLine;
     unsigned int                CGenPosition;
-    std::vector<CSmallString>   Words;              // command line splitted into words
+    std::vector<CSmallString>   Words;              // command line splitted into words, options are ignored
+    CSmallString                Command;
+    CSmallString                Action;
     unsigned int                CWord;              // word to be completed
     std::vector<CSmallString>   Suggestions;        // suggestions
     bool                        ModuleNameComp;     // module name completion mode
@@ -57,9 +59,6 @@ private:
 
     // return action name or empty string
     CSmallString GetAction(void);
-
-    // does command line contain any option?
-    bool AnyOption(void);
 
     // filter suggestions
     bool FilterSuggestions(void);
@@ -78,7 +77,7 @@ private:
     bool AddModuleSuggestions(void);
 
     // add build suggestions
-    bool AddRealizationSuggestions(void);
+    bool AddBuildSuggestions(void);
 
     // add category suggestions
     bool AddCategorySuggestions(void);
@@ -87,7 +86,7 @@ private:
     bool AddSyncSuggestions(void);
 
     // what part from build should be printed?
-    unsigned int WhatRealizationPart(void);
+    unsigned int WhatBuildPart(void);
 };
 
 //------------------------------------------------------------------------------

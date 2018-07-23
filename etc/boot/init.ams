@@ -39,8 +39,6 @@ export -f site
 export -f amssetenv
 
 # name completion --------------------------------------------------------------
-COMP_WORDBREAKS=" \"'@><=;|&("    # : removed from the list
-
 complete -o nospace -C _ams-cgen amsmodule
 complete -o nospace -C _ams-cgen site
 complete -o nospace -C _ams-cgen ams-cache

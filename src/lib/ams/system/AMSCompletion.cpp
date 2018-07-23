@@ -73,15 +73,29 @@ bool CAMSCompletion::InitCompletion(void)
     CWord = 0; // command cannot be completed by this program
     p_word = strtok_r(p_beg," ",&p_saveptr);
     while(p_word != NULL) {
-        Words.push_back(p_word);
-        unsigned int pos = p_word - p_beg;
-        if( (pos <= CGenPosition) &&
-                ((pos + strlen(p_word)) >= CGenPosition) ) CWord = Words.size() - 1;
+        if( (strlen(p_word) >= 1) && (p_word[0] == '-') ){
+            // option - ignore
+        } else {
+            Words.push_back(p_word);
+            unsigned int pos = p_word - p_beg;
+            if( (pos <= CGenPosition) &&
+                    ((pos + strlen(p_word)) >= CGenPosition) ) CWord = Words.size() - 1;
+        }
         p_word = strtok_r(NULL," ",&p_saveptr);
     }
     if( CWord == 0 ) CWord = Words.size();
 
     RelPartCompleted = 2; // only name and version is completed by default
+
+    // get command
+    if( Words.size() >= 1 ){
+        Command = Words[0];
+    }
+
+    // get action
+    if( Words.size() >= 2 ){
+        Action = Words[1];
+    }
 
     return(true);
 }
@@ -92,9 +106,6 @@ bool CAMSCompletion::InitCompletion(void)
 
 bool CAMSCompletion::GetSuggestions(void)
 {
-    // if any option then do not provide any suggestion
-    if( AnyOption() == true ) return(true);
-
     // get suggestions according to command ---------
     if( GetCommand() == "site" ) {
         // what part should be completed?
@@ -172,7 +183,7 @@ bool CAMSCompletion::GetSuggestions(void)
             return(true);
         }
         return(true);
-    }
+    }    
     // ----------------------------------------------
     else {
         // unsupported command return
@@ -186,27 +197,14 @@ bool CAMSCompletion::GetSuggestions(void)
 
 CSmallString CAMSCompletion::GetCommand(void)
 {
-    if( Words.size() >= 1 ) return(Words[0]);
-    return("");
+    return(Command);
 }
 
 //------------------------------------------------------------------------------
 
 CSmallString CAMSCompletion::GetAction(void)
 {
-    if( Words.size() >= 2 ) return(Words[1]);
-    return("");
-}
-
-//------------------------------------------------------------------------------
-
-bool CAMSCompletion::AnyOption(void)
-{
-    for(unsigned int i=0; i < Words.size(); i++) {
-        // all words are non-empty (due to usage of strtok)
-        if( Words[i][0] == '-' ) return(true);
-    }
-    return(false);
+    return(Action);
 }
 
 //------------------------------------------------------------------------------
@@ -250,13 +248,13 @@ bool CAMSCompletion::PrintSuggestions(void)
                 // only one suggestion - put extra space to move to next argument
                 if( Suggestions[i] != NULL) printf("%s \n",(const char*)Suggestions[i]);
             } else {
-                if( (WhatRealizationPart() + 1 == RelPartCompleted) ||
-                        (WhatRealizationPart() == 3) ) {
+                if( (WhatBuildPart() + 1 == RelPartCompleted) ||
+                        (WhatBuildPart() == 3) ) {
                     // end of suggestion
                     if( Suggestions[i] != NULL) printf("%s \n",(const char*)Suggestions[i]);
                 } else {
                     // continue with next build part
-                    if( Suggestions[i] != NULL) printf("%s:\n",(const char*)Suggestions[i]);
+                    if( Suggestions[i] != NULL) printf("%s\n",(const char*)Suggestions[i]);
                 }
             }
         } else {
@@ -318,7 +316,7 @@ bool CAMSCompletion::AddModuleSuggestions(void)
 
     CXMLIterator    I(p_mele);
 
-    int numparts = WhatRealizationPart();
+    int numparts = WhatBuildPart();
 
     while( (p_ele = I.GetNextChildElement("module")) != NULL ) {
         CSmallString name;
@@ -339,33 +337,36 @@ bool CAMSCompletion::AddModuleSuggestions(void)
             CSmallString suggestion;
 
             // how many items from name should be printed?
+            bool add = true;
             switch(numparts) {
+            case -1:
+                add = false;
+                break;
             case 0:
                 suggestion = name;
                 break;
             case 1:
-                suggestion = name + ":" + ver;
+                suggestion = ver;
                 break;
             case 2:
-                suggestion = name + ":" + ver + ":" + arch;
+                suggestion = arch;
                 break;
             case 3:
-                suggestion = name + ":" + ver + ":" + arch + ":" + mode;
+                suggestion = mode;
                 break;
             default:
                 break;
             }
 
             // is already in the list?
-            bool found = false;
             for(unsigned int i=0; i < Suggestions.size(); i++) {
                 if( Suggestions[i] == suggestion ) {
-                    found = true;
+                    add = false;
                     break;
                 }
             }
 
-            if( found == false ) Suggestions.push_back(suggestion);
+            if( add == true ) Suggestions.push_back(suggestion);
         }
 
     }
@@ -384,7 +385,7 @@ bool CAMSCompletion::AddSyncSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CAMSCompletion::AddRealizationSuggestions(void)
+bool CAMSCompletion::AddBuildSuggestions(void)
 {
     CXMLElement*     p_mele = Cache.GetRootElementOfCache();
     CXMLElement*     p_ele;
@@ -442,10 +443,10 @@ bool CAMSCompletion::AddCategorySuggestions(void)
 
 //------------------------------------------------------------------------------
 
-unsigned int CAMSCompletion::WhatRealizationPart(void)
+unsigned int CAMSCompletion::WhatBuildPart(void)
 {
-    // count number of semicolon in current builds
     unsigned int numsem = 0;
+
     if( CWord < Words.size() ) {
         for(unsigned int i=0; i < Words[CWord].GetLength(); i++) {
             if( Words[CWord][i] == ':' ) numsem++;

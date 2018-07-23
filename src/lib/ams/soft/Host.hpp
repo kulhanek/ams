@@ -213,7 +213,7 @@ private:
 
     // desktop
     bool                        IsDesktop;              // is the host a personal desktop?
-    int                         DesktopCPUPenalty;      // how many CPUs are not availbale for PBSPro node
+    int                         DesktopCPUPenalty;      // how many CPUs are not available for PBSPro node
 
     // cuda
     std::vector<std::string>    CUDATokens;
