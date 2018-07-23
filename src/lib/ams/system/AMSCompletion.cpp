@@ -228,6 +228,19 @@ bool CAMSCompletion::FilterSuggestions(void)
         }
     }
 
+    // keep only the last word after ":"
+    for(unsigned int i=0; i < Suggestions.size(); i++) {
+        CSmallString tmp = Suggestions[i];
+        char* p_saveptr = NULL;
+        char* p_word;
+
+        p_word = strtok_r(tmp.GetBuffer(),":",&p_saveptr);
+        while(p_word != NULL) {
+            Suggestions[i] = p_word;
+            p_word = strtok_r(NULL,":",&p_saveptr);
+        }
+    }
+
     return(true);
 }
 
