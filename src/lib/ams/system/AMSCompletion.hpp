@@ -76,9 +76,6 @@ private:
     // add module name suggestions
     bool AddModuleSuggestions(void);
 
-    // add sync suggestions
-    bool AddSyncSuggestions(void);
-
     // what part from build should be printed?
     unsigned int WhatBuildPart(void);
 };

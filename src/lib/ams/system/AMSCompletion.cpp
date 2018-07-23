@@ -386,15 +386,6 @@ bool CAMSCompletion::AddModuleSuggestions(void)
 
 //------------------------------------------------------------------------------
 
-bool CAMSCompletion::AddSyncSuggestions(void)
-{
-    Suggestions.push_back("all");
-    Suggestions.push_back("amscore");
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
 unsigned int CAMSCompletion::WhatBuildPart(void)
 {
     unsigned int numsem = 0;
