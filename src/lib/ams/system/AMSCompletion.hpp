@@ -76,12 +76,6 @@ private:
     // add module name suggestions
     bool AddModuleSuggestions(void);
 
-    // add build suggestions
-    bool AddBuildSuggestions(void);
-
-    // add category suggestions
-    bool AddCategorySuggestions(void);
-
     // add sync suggestions
     bool AddSyncSuggestions(void);
 

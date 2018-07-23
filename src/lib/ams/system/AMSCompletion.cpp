@@ -337,36 +337,33 @@ bool CAMSCompletion::AddModuleSuggestions(void)
             CSmallString suggestion;
 
             // how many items from name should be printed?
-            bool add = true;
             switch(numparts) {
-            case -1:
-                add = false;
-                break;
             case 0:
                 suggestion = name;
                 break;
             case 1:
-                suggestion = ver;
+                suggestion = name + ":" + ver;
                 break;
             case 2:
-                suggestion = arch;
+                suggestion = name + ":" + ver + ":" + arch;
                 break;
             case 3:
-                suggestion = mode;
+                suggestion = name + ":" + ver + ":" + arch + ":" + mode;
                 break;
             default:
                 break;
             }
 
             // is already in the list?
+            bool found = false;
             for(unsigned int i=0; i < Suggestions.size(); i++) {
                 if( Suggestions[i] == suggestion ) {
-                    add = false;
+                    found = true;
                     break;
                 }
             }
 
-            if( add == true ) Suggestions.push_back(suggestion);
+            if( found == false ) Suggestions.push_back(suggestion);
         }
 
     }
@@ -380,64 +377,6 @@ bool CAMSCompletion::AddSyncSuggestions(void)
 {
     Suggestions.push_back("all");
     Suggestions.push_back("amscore");
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CAMSCompletion::AddBuildSuggestions(void)
-{
-    CXMLElement*     p_mele = Cache.GetRootElementOfCache();
-    CXMLElement*     p_ele;
-    CXMLElement*     p_sele;
-
-    CXMLIterator    I(p_mele);
-
-    while( (p_ele = I.GetNextChildElement("module")) != NULL ) {
-        CSmallString name;
-        p_ele->GetAttribute("name",name);
-
-        CXMLElement*    p_rele = p_ele->GetFirstChildElement("builds");
-        CXMLIterator    J(p_rele);
-
-        while( (p_sele = J.GetNextChildElement("build")) != NULL ) {
-            CSmallString ver;
-            CSmallString arch;
-            CSmallString mode;
-            p_sele->GetAttribute("ver",ver);
-            p_sele->GetAttribute("arch",arch);
-            p_sele->GetAttribute("mode",mode);
-
-            CSmallString suggestion;
-            suggestion = name + ":" + ver + ":" + arch + ":" + mode;
-            Suggestions.push_back(suggestion);
-        }
-
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CAMSCompletion::AddCategorySuggestions(void)
-{
-    CXMLElement* p_iele = PrintEngine.GetRootElementOfConfig();
-
-    CXMLElement* p_ele = p_iele->GetChildElementByPath("categories");
-    if( p_ele == NULL ) {
-        return(true);
-    }
-
-    CXMLIterator    I(p_ele);
-    CXMLElement*     p_sele;
-
-    while( (p_sele = I.GetNextChildElement("category")) != NULL ) {
-        CSmallString    name;
-        p_sele->GetAttribute("name",name);
-        Suggestions.push_back(name);
-    }
-
     return(true);
 }
 
