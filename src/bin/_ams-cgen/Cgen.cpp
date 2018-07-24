@@ -59,22 +59,7 @@ int CCgen::Init(int argc, char* argv[])
 
     // attach verbose stream to terminal stream and set desired verbosity level
     vout.Attach(Console);
-    if( Options.GetOptVerbose() ) {
-        vout.Verbosity(CVerboseStr::high);
-    } else {
-        vout.Verbosity(CVerboseStr::low);
-    }
-
-    CSmallTimeAndDate dt;
-    dt.GetActualTimeAndDate();
-
-    vout << high;
-    vout << endl;
-    vout << "# ==============================================================================" << endl;
-    vout << "# _ams-cgen (AMS utility) started at " << dt.GetSDateAndTime() << endl;
-    vout << "# ==============================================================================" << endl;
-
-    vout << low;
+    vout.Verbosity(CVerboseStr::low);
 
     return(SO_CONTINUE);
 }
@@ -112,12 +97,7 @@ void CCgen::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    vout << high;
-    vout << "# ==============================================================================" << endl;
-    vout << "# _ams-cgen (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
-    vout << "# ==============================================================================" << endl;
-
-    if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
+    if( ErrorSystem.IsError() || ErrorSystem.IsAnyRecord() ){
         vout << low;
         ErrorSystem.PrintErrors(vout);
     }
