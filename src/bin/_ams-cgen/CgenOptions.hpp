@@ -56,40 +56,9 @@ class CCgenOptions : public CSimpleOptions {
 
  // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
-        // options ------------------------------
-        CSO_OPT(bool,Help)
-        CSO_OPT(bool,Version)
-        CSO_OPT(bool,Verbose)
     CSO_LIST_END
 
     CSO_MAP_BEGIN
- // description of options -----------------------------------------------------
-        CSO_MAP_OPT(bool,                           /* option type */
-                    Verbose,                        /* option name */
-                    false,                          /* default value */
-                    false,                          /* is option mandatory */
-                    'v',                           /* short option name */
-                    "verbose",                      /* long option name */
-                    NULL,                           /* parametr name */
-                    "increase output verbosity")   /* option description */
-        //----------------------------------------------------------------------
-        CSO_MAP_OPT(bool,                           /* option type */
-                    Version,                        /* option name */
-                    false,                          /* default value */
-                    false,                          /* is option mandatory */
-                    '\0',                           /* short option name */
-                    "version",                      /* long option name */
-                    NULL,                           /* parametr name */
-                    "output version information and exit")   /* option description */
-        //----------------------------------------------------------------------
-        CSO_MAP_OPT(bool,                           /* option type */
-                    Help,                        /* option name */
-                    false,                          /* default value */
-                    false,                          /* is option mandatory */
-                    'h',                           /* short option name */
-                    "help",                      /* long option name */
-                    NULL,                           /* parametr name */
-                    "display this help and exit")   /* option description */
     CSO_MAP_END
 
 // final operation with options ------------------------------------------------

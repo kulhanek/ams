@@ -43,23 +43,6 @@ int CCgenOptions::CheckOptions(void)
 
 int CCgenOptions::FinalizeOptions(void)
 {
-    bool ret_opt = false;
-
-    if( GetOptHelp() == true ){
-        PrintUsage();
-        ret_opt = true;
-    }
-
-    if( GetOptVersion() == true ){
-        PrintVersion();
-        ret_opt = true;
-    }
-
-    if( ret_opt == true ){
-        printf("\n");
-        return(SO_EXIT);
-    }
-
     return(SO_CONTINUE);
 }
 
