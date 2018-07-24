@@ -27,6 +27,7 @@
 #include <AMSGlobalConfig.hpp>
 #include <User.hpp>
 #include "Cgen.hpp"
+#include <SimpleOptions.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -51,12 +52,6 @@ CCgen::CCgen(void)
 
 int CCgen::Init(int argc, char* argv[])
 {
-    // encode program options, all check procedures are done inside of CABFIntOpts
-    int result = Options.ParseCmdLine(argc,argv);
-
-    // should we exit or was it error?
-    if( result != SO_CONTINUE ) return(result);
-
     // attach verbose stream to terminal stream and set desired verbosity level
     vout.Attach(Console);
     vout.Verbosity(CVerboseStr::low);

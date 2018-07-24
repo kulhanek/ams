@@ -9,8 +9,6 @@ share/sync/CMakeLists.txt
 share/CMakeLists.txt
 src/bin/_ams-cgen/Cgen.cpp
 src/bin/_ams-cgen/Cgen.hpp
-src/bin/_ams-cgen/CgenOptions.cpp
-src/bin/_ams-cgen/CgenOptions.hpp
 src/bin/_ams-cgen/CMakeLists.txt
 src/bin/_ams-module-cmd/CMakeLists.txt
 src/bin/_ams-module-cmd/ModuleCmd.cpp

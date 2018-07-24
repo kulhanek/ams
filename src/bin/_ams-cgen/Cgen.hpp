@@ -21,7 +21,6 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "CgenOptions.hpp"
 #include <VerboseStr.hpp>
 #include <TerminalStr.hpp>
 
@@ -44,7 +43,6 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    CCgenOptions    Options;
     CTerminalStr    Console;
     CVerboseStr     vout;
 };
