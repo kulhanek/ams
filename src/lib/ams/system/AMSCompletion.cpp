@@ -267,7 +267,7 @@ bool CAMSCompletion::PrintSuggestions(void)
                     if( Suggestions[i] != NULL) printf("%s \n",(const char*)Suggestions[i]);
                 } else {
                     // continue with next build part
-                    if( Suggestions[i] != NULL) printf("%s\n",(const char*)Suggestions[i]);
+                    if( Suggestions[i] != NULL) printf("%s:\n",(const char*)Suggestions[i]);
                 }
             }
         } else {
