@@ -38,6 +38,10 @@ export -f amsmodule
 export -f site
 export -f amssetenv
 
+# AMS/ABS completion -----------------------------------------------------------
+export AMS_WORDBREAKS="$COMP_WORDBREAKS"
+export AMS_BASHVERSION="${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"
+
 # name completion --------------------------------------------------------------
 complete -o nospace -C _ams-cgen amsmodule
 complete -o nospace -C _ams-cgen site
