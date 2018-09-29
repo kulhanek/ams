@@ -265,7 +265,7 @@ bool CAMSCompletion::FilterSuggestions(void)
         vector<string> items;
         split(items,tmp,is_any_of(":"));
         if( items.size() > 0 ){
-            Suggestions[i] = items[0];
+            Suggestions[i] = items[tems.size()-1];
         }
     }
 
