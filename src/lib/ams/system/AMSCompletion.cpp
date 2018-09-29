@@ -256,7 +256,7 @@ bool CAMSCompletion::FilterSuggestions(void)
     for(unsigned int i=0; i < Suggestions.size(); i++) {
         string tmp = Suggestions[i];
         vector<string> items;
-        split(Suggestions,tmp,is_any_of(":"));
+        split(items,tmp,is_any_of(":"));
         if( items.size() > 0 ){
             Suggestions[i] = items[0];
         }
