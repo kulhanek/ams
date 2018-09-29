@@ -35,6 +35,9 @@
 #include <PrintEngine.hpp>
 #include <string.h>
 #include <AMSGlobalConfig.hpp>
+#include <iostream>
+
+using namespace std;
 
 //------------------------------------------------------------------------------
 
@@ -100,12 +103,12 @@ bool CAMSCompletion::InitCompletion(void)
 
     if( debug ){
         cerr << "line:  " << CommandLine << endl;
-        cerr << "point: " << CGenPosition << end;
+        cerr << "point: " << CGenPosition << endl;
         cerr << "cmd:   " << Command << endl;
         cerr << "act:   " << Action << endl;
         cerr << "cword: " << CWord << endl;
         cerr << "words: " << endl;
-        for(int i=0; i < Words.size(); i++){
+        for(unsigned int i=0; i < Words.size(); i++){
             cerr << " " << Words[i] << endl;
         }
     }
