@@ -250,6 +250,9 @@ bool CAMSCompletion::FilterSuggestions(void)
     std::vector<std::string>::iterator ie = Suggestions.end();
     while( it != ie ){
         string sgt = *it;
+        if( Debug ){
+            cerr << "sgt: " << sgt << endl;
+        }
         if( fnmatch(filter,sgt.c_str(),0) != 0 ) {
             it = Suggestions.erase(it); // does not match - remove suggestion
         } else {
@@ -308,7 +311,7 @@ bool CAMSCompletion::PrintSuggestions(void)
 bool CAMSCompletion::AddSuggestions(const CSmallString& list)
 {
     string tmp = string(list);
-    split(Suggestions,tmp,is_any_of(" "));
+    split(Suggestions,tmp,is_any_of(" "),token_compress_on);
 
     if( Debug ){
         cerr << "suggestions: " << endl;
