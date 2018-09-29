@@ -215,6 +215,12 @@ rsync_softrepo()
     # get list of root app directories and their setup (permision and group)
         ssh -x $AMS_SRC_HOST "cd $AMS_SRC_SOFTREPO; echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do stat --format=\"%n %G %a\" \$A; cd \$A; done" > /tmp/perms.$$ 2>> $LOG_FILE
 
+    # overwrite groups
+    if [ -n "$AMS_TARGET_GROUP" ]; then
+        awk -v group=$AMS_TARGET_GROUP '{ printf("%s %s %s\n",$1,group,$3); }' <  /tmp/perms.$$ > /tmp/perms_.$$
+        mv /tmp/perms_.$$ /tmp/perms.$$
+    fi
+
     # create app root directory
         BACKUP_PWD=$PWD
         MY_GROUP=`id -g -n $AMS_DST_USER`

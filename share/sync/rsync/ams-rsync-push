@@ -273,6 +273,12 @@ rsync_softrepo()
         done > /tmp/perms.$$ 2>> $LOG_FILE
         cd $BACKUP_PWD
 
+        # overwrite groups
+        if [ -n "$AMS_TARGET_GROUP" ]; then
+            awk -v group=$AMS_TARGET_GROUP '{ printf("%s %s %s\n",$1,group,$3); }' <  /tmp/perms.$$ > /tmp/perms_.$$
+            mv /tmp/perms_.$$ /tmp/perms.$$
+        fi
+
     # create app root directory
         cat /tmp/perms.$$ | ssh -x $AMS_DST_HOST "cd $AMS_DST_SOFTREPO; while read NAME GROUP PERM; do mkdir -p \$NAME; chmod \$PERM \$NAME; chgrp \$GROUP \$NAME; cd \$NAME; done" >> $LOG_FILE 2>&1
         rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
@@ -338,6 +344,12 @@ rsync_build()
             cd $A
         done > /tmp/perms.$$ 2>> $LOG_FILE
         cd $BACKUP_PWD
+
+        # overwrite groups
+        if [ -n "$AMS_TARGET_GROUP" ]; then
+            awk -v group=$AMS_TARGET_GROUP '{ printf("%s %s %s\n",$1,group,$3); }' <  /tmp/perms.$$ > /tmp/perms_.$$
+            mv /tmp/perms_.$$ /tmp/perms.$$
+        fi
 
         # create app root directory
         cat /tmp/perms.$$ | ssh -x $AMS_DST_HOST "cd $AMS_DST_SOFTREPO; while read NAME GROUP PERM; do mkdir -p \$NAME; chmod \$PERM \$NAME; chgrp \$GROUP \$NAME; cd \$NAME; done" >> $LOG_FILE 2>&1

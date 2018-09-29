@@ -148,6 +148,11 @@ function read_profile_rsync()
     echo "  rsync options:          $AMS_RSYNC_OPTS"
     fi
 
+    export AMS_TARGET_GROUP="`grep TARGET_GROUP "$PROFILE" | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
+    if [ -n "$AMS_TARGET_GROUP" ]; then
+    echo "  target group:           $AMS_TARGET_GROUP"
+    fi
+
     export AMS_SYNC_SITES="`grep SITES "$PROFILE" | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
     echo "  Sync sites:             $AMS_SYNC_SITES"
     if [ -z "$AMS_SYNC_SITES" ]; then
