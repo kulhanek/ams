@@ -77,10 +77,12 @@ bool CAMSCompletion::InitCompletion(void)
     tmp = CommandLine;
     char* p_saveptr = NULL;
     char* p_beg = tmp.GetBuffer();
-    char* p_word;
+    char* p_word = NULL;
 
     CWord = 0; // command cannot be completed by this program
-    p_word = strtok_r(p_beg," ",&p_saveptr);
+    if( p_beg != NULL ){
+        p_word = strtok_r(p_beg," ",&p_saveptr);
+    }
     while(p_word != NULL) {
         if( (strlen(p_word) >= 1) && (p_word[0] == '-') ){
             // option - ignore
