@@ -241,6 +241,10 @@ bool CAMSCompletion::FilterSuggestions(void)
         filter = "*";
     }
 
+    if( Debug ){
+        cerr << "filter: " << filter << endl;
+    }
+
     // filter suggestions ---------------------------
     std::vector<std::string>::iterator it = Suggestions.begin();
     std::vector<std::string>::iterator ie = Suggestions.end();
