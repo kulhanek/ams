@@ -247,8 +247,7 @@ bool CAMSCompletion::FilterSuggestions(void)
 
     // filter suggestions ---------------------------
     std::vector<std::string>::iterator it = Suggestions.begin();
-    std::vector<std::string>::iterator ie = Suggestions.end();
-    while( it != ie ){
+    while( it != Suggestions.end() ){
         string sgt = *it;
         if( Debug ){
             cerr << "sgt: " << sgt << endl;
