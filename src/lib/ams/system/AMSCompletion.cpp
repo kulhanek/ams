@@ -63,6 +63,7 @@ bool CAMSCompletion::InitCompletion(void)
     CSmallString tmp;
     tmp = CShell::GetSystemVariable("COMP_POINT");
     CGenPosition = tmp.ToInt();
+    bool debug = CShell::GetSystemVariable("COMP_DEBUG") == "ON";
 
     // extract all words from command line ----------
     tmp = CommandLine;
@@ -95,6 +96,18 @@ bool CAMSCompletion::InitCompletion(void)
     // get action
     if( Words.size() >= 2 ){
         Action = Words[1];
+    }
+
+    if( debug ){
+        cerr << "line:  " << CommandLine << endl;
+        cerr << "point: " << CGenPosition << end;
+        cerr << "cmd:   " << Command << endl;
+        cerr << "act:   " << Action << endl;
+        cerr << "cword: " << CWord << endl;
+        cerr << "words: " << endl;
+        for(int i=0; i < Words.size(); i++){
+            cerr << " " << Words[i] << endl;
+        }
     }
 
     return(true);
