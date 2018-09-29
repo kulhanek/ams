@@ -51,7 +51,7 @@ private:
     CSmallString                Command;
     CSmallString                Action;
     unsigned int                CWord;              // word to be completed
-    std::vector<CSmallString>   Suggestions;        // suggestions
+    std::vector<std::string>    Suggestions;        // suggestions
     bool                        ModuleNameComp;     // module name completion mode
 
     // return command name or empty string

@@ -36,8 +36,12 @@
 #include <string.h>
 #include <AMSGlobalConfig.hpp>
 #include <iostream>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 using namespace std;
+using namespace boost;
+using namespace boost::algorithm;
 
 //------------------------------------------------------------------------------
 
@@ -237,23 +241,24 @@ bool CAMSCompletion::FilterSuggestions(void)
     }
 
     // filter suggestions ---------------------------
-    for(unsigned int i=0; i < Suggestions.size(); i++) {
-        if( fnmatch(filter,Suggestions[i],0) != 0 ) {
-            // does not match - remove suggestion
-            Suggestions[i] = NULL;
+    std::vector<std::string>::iterator it = Suggestions.begin();
+    std::vector<std::string>::iterator ie = Suggestions.end();
+    while( it != ie ){
+        string sgt = *it;
+        if( fnmatch(filter,sgt.c_str(),0) != 0 ) {
+            it = Suggestions.erase(it); // does not match - remove suggestion
+        } else {
+            it++;
         }
     }
 
     // keep only the last word after ":"
     for(unsigned int i=0; i < Suggestions.size(); i++) {
-        CSmallString tmp = Suggestions[i];
-        char* p_saveptr = NULL;
-        char* p_word;
-
-        p_word = strtok_r(tmp.GetBuffer(),":",&p_saveptr);
-        while(p_word != NULL) {
-            Suggestions[i] = p_word;
-            p_word = strtok_r(NULL,":",&p_saveptr);
+        string tmp = Suggestions[i];
+        vector<string> items;
+        split(Suggestions,tmp,is_any_of(":"));
+        if( items.size() > 0 ){
+            Suggestions[i] = items[0];
         }
     }
 
@@ -265,30 +270,27 @@ bool CAMSCompletion::FilterSuggestions(void)
 bool CAMSCompletion::PrintSuggestions(void)
 {
     // count number of suggestions
-    int scount = 0;
-    for(unsigned int i=0; i < Suggestions.size(); i++) {
-        if( Suggestions[i] != NULL) scount++;
-    }
+    int scount = Suggestions.size();
 
     // print suggestions
     for(unsigned int i=0; i < Suggestions.size(); i++) {
         if( scount == 1 ) {
             if( ModuleNameComp == false ) {
-                // only one suggestion - put extra space to move to next argument
-                if( Suggestions[i] != NULL) printf("%s \n",(const char*)Suggestions[i]);
+                // only one suggestion - put extra space to move to the next argument
+                printf("%s \n",Suggestions[i].c_str());
             } else {
                 if( (WhatBuildPart() + 1 == RelPartCompleted) ||
                         (WhatBuildPart() == 3) ) {
                     // end of suggestion
-                    if( Suggestions[i] != NULL) printf("%s \n",(const char*)Suggestions[i]);
+                    printf("%s \n",Suggestions[i].c_str());
                 } else {
                     // continue with next build part
-                    if( Suggestions[i] != NULL) printf("%s:\n",(const char*)Suggestions[i]);
+                    printf("%s:\n",Suggestions[i].c_str());
                 }
             }
         } else {
             // print only suggestion
-            if( Suggestions[i] != NULL) printf("%s\n",(const char*)Suggestions[i]);
+            printf("%s\n",Suggestions[i].c_str());
         }
     }
     return(true);
@@ -300,16 +302,8 @@ bool CAMSCompletion::PrintSuggestions(void)
 
 bool CAMSCompletion::AddSuggestions(const CSmallString& list)
 {
-    CSmallString tmp = list;
-    char* p_saveptr = NULL;
-    char* p_word;
-
-    p_word = strtok_r(tmp.GetBuffer()," ",&p_saveptr);
-    while(p_word != NULL) {
-        Suggestions.push_back(p_word);
-        p_word = strtok_r(NULL," ",&p_saveptr);
-    }
-
+    string tmp = string(list);
+    split(Suggestions,tmp,is_any_of(" "));
     return(true);
 }
 
@@ -328,7 +322,7 @@ bool CAMSCompletion::AddSiteSuggestions(void)
         if( site_id.LoadFromString(site_sid) == false ) continue;
         if( site.LoadConfig(site_sid) == false ) continue;
 
-        Suggestions.push_back(site.GetName());
+        Suggestions.push_back(string(site.GetName()));
     }
     dir_enum.EndFindFile();
 
@@ -386,13 +380,13 @@ bool CAMSCompletion::AddModuleSuggestions(void)
             // is already in the list?
             bool found = false;
             for(unsigned int i=0; i < Suggestions.size(); i++) {
-                if( Suggestions[i] == suggestion ) {
+                if( Suggestions[i] == string(suggestion) ) {
                     found = true;
                     break;
                 }
             }
 
-            if( found == false ) Suggestions.push_back(suggestion);
+            if( found == false ) Suggestions.push_back(string(suggestion));
         }
 
     }
