@@ -57,6 +57,7 @@ CAMSCompletion::CAMSCompletion(void)
     CGenPosition = 0;
     CWord = 0;
     ModuleNameComp = false;
+    Debug = false;
 }
 
 //==============================================================================
@@ -70,7 +71,7 @@ bool CAMSCompletion::InitCompletion(void)
     CSmallString tmp;
     tmp = CShell::GetSystemVariable("COMP_POINT");
     CGenPosition = tmp.ToInt();
-    bool debug = CShell::GetSystemVariable("COMP_DEBUG") == "ON";
+    Debug = CShell::GetSystemVariable("COMP_DEBUG") == "ON";
 
     // extract all words from command line ----------
     tmp = CommandLine;
@@ -105,7 +106,7 @@ bool CAMSCompletion::InitCompletion(void)
         Action = Words[1];
     }
 
-    if( debug ){
+    if( Debug ){
         cerr << "line:  " << CommandLine << endl;
         cerr << "point: " << CGenPosition << endl;
         cerr << "cmd:   " << Command << endl;
@@ -304,6 +305,14 @@ bool CAMSCompletion::AddSuggestions(const CSmallString& list)
 {
     string tmp = string(list);
     split(Suggestions,tmp,is_any_of(" "));
+
+    if( Debug ){
+        cerr << "suggestions: " << endl;
+        for(unsigned int i=0; i < Suggestions.size(); i++){
+            cerr << " " << Suggestions[i] << endl;
+        }
+    }
+
     return(true);
 }
 

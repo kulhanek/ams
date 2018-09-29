@@ -53,6 +53,7 @@ private:
     unsigned int                CWord;              // word to be completed
     std::vector<std::string>    Suggestions;        // suggestions
     bool                        ModuleNameComp;     // module name completion mode
+    bool                        Debug;
 
     // return command name or empty string
     CSmallString GetCommand(void);
