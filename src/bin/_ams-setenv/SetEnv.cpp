@@ -160,8 +160,6 @@ bool CSetEnv::Run(void)
 
     // generate environment
     ShellProcessor.SetVariable("AMS_NCPUS",Host.GetNCPUs());
-    ShellProcessor.SetVariable("OMP_NUM_THREADS",Host.GetNCPUs());
-    ShellProcessor.SetVariable("MKL_NUM_THREADS",Host.GetNCPUs());
     ShellProcessor.SetVariable("AMS_NGPUS",Host.GetNGPUs());
     ShellProcessor.SetVariable("AMS_NNODES",1);
     ShellProcessor.SetVariable("AMS_NODEFILE",nodefile);
