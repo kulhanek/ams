@@ -451,7 +451,7 @@ bool CCacheCmd::Run(void)
             if( Cache.RebuildCache(vout,false) == false) return(false);
             vout << endl;
 
-            Cache.GetDebDependencies(debdeps);
+            Cache.GetDebDependencies(Options.GetOptRelease(),debdeps);
             it++;
         }
 

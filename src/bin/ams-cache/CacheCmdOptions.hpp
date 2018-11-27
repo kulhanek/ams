@@ -78,6 +78,7 @@ public:
     // options ------------------------------
     CSO_OPT(CSmallString,Site)
     CSO_OPT(CSmallString,Sites)
+    CSO_OPT(CSmallString,Release)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -93,8 +94,7 @@ public:
                 "site",                      /* long option name */
                 "SITE",                           /* parametr name */
                 "manage cache for SITE (active site by default)")   /* option description */
-
-    // description of options -----------------------------------------------------
+    //----------------------------------------------------------------------
     CSO_MAP_OPT(CSmallString,                           /* option type */
                 Sites,                        /* option name */
                 "all",                          /* default value */
@@ -103,6 +103,15 @@ public:
                 "sites",                      /* long option name */
                 "SITES",                           /* parametr name */
                 "manage cache for SITES (all sites by default)")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(CSmallString,                           /* option type */
+                Release,                        /* option name */
+                NULL,                          /* default value */
+                false,                          /* is option mandatory */
+                0,                           /* short option name */
+                "release",                      /* long option name */
+                "VERSION",                           /* parametr name */
+                "OS version for debdepsall")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */

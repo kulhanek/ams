@@ -32,6 +32,7 @@
 #include <list>
 #include <set>
 #include <string>
+#include <map>
 
 //-----------------------------------------------------------------------------
 
@@ -169,7 +170,7 @@ public:
     void GetAllModuleVersions(CXMLElement* p_module, std::list<CSmallString>& vers);
 
     /// get deb pakackage dependencies
-    void GetDebDependencies(std::set<CSmallString>& debdeps);
+    void GetDebDependencies(const CSmallString& release,std::set<CSmallString>& debdeps);
 
     /// remove all builds with given architecture token
     void RemoveBuildsWithArchToken(const CSmallString& token);
@@ -189,7 +190,8 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    CXMLDocument    Cache;
+    CXMLDocument                        Cache;
+    std::map<CSmallString,CSmallString> DebAliases;
 
 // section of private methods --------------------------------------------------
     /// rebuild cache from information stored in directory
@@ -242,6 +244,9 @@ private:
 
     /// check syntax of variable element
     bool CheckModuleAliasSyntax(CVerboseStr& vout,CXMLElement* p_alias);
+
+    /// load deb aliases
+    void LoadDebReleaseFilters(const CSmallString& release);
 };
 
 //-----------------------------------------------------------------------------

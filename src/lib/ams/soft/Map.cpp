@@ -2552,7 +2552,7 @@ bool CMap::InjectRootDoc(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallStr
     // documentation ----------------------------------------
     CXMLElement* p_doc = p_docxml->GetChildElementByPath("module/doc");
     if( p_doc != NULL ) {
-        if( p_doc->DuplicateNode(p_mele) == false ) {
+        if( p_doc->DuplicateNode(p_mele) == NULL ) {
             CSmallString error;
             error << "unable to inject documentation file " << doc_name;
             ES_ERROR(error);
@@ -2564,7 +2564,7 @@ bool CMap::InjectRootDoc(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallStr
     // ACL ----------------------------------------
     CXMLElement* p_acl = p_docxml->GetChildElementByPath("module/acl");
     if( p_acl != NULL ) {
-        if( p_acl->DuplicateNode(p_mele) == false ) {
+        if( p_acl->DuplicateNode(p_mele) == NULL ) {
             CSmallString error;
             error << "unable to inject documentation file " << doc_name;
             ES_ERROR(error);
@@ -2576,7 +2576,7 @@ bool CMap::InjectRootDoc(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallStr
     // dependencies ----------------------------------------
     CXMLElement* p_deps = p_docxml->GetChildElementByPath("module/deps");
     if( p_deps != NULL ) {
-        if( p_deps->DuplicateNode(p_mele) == false ) {
+        if( p_deps->DuplicateNode(p_mele) == NULL ) {
             CSmallString error;
             error << "unable to inject documentation file " << doc_name;
             ES_ERROR(error);
@@ -2588,7 +2588,7 @@ bool CMap::InjectRootDoc(CXMLElement* p_sele,CXMLElement* p_mele,const CSmallStr
     // default version --------------------------------------
     CXMLElement* p_def = p_docxml->GetChildElementByPath("module/default");
     if( p_def != NULL ) {
-        if( p_def->DuplicateNode(p_mele) == false ) {
+        if( p_def->DuplicateNode(p_mele) == NULL ) {
             CSmallString error;
             error << "unable to inject default item from file " << doc_name;
             ES_ERROR(error);

@@ -327,7 +327,7 @@ bool CCache::SplitCache(CVerboseStr& vout)
             p_com->SetComment("Advanced Module System (AMS) module file");
         }
 
-        if( p_ele->DuplicateNode(&xml_doc) == false ) {
+        if( p_ele->DuplicateNode(&xml_doc) == NULL ) {
             ES_ERROR("unable to duplicate node");
             return(false);
         }
@@ -516,7 +516,7 @@ bool CCache::AddModule(CVerboseStr& vout,const CFileName& module_dir,const CFile
     }
 
     // include module to cache
-    if( p_mele->DuplicateNode(p_cele) == false ) {
+    if( p_mele->DuplicateNode(p_cele) == NULL ) {
         CSmallString error;
         error << "unable to add '" << full_name << "' module to the cache";
         ES_ERROR(error);
@@ -2199,8 +2199,56 @@ bool CCache::GetSortedModuleVersions(const CSmallString& mod_name,std::vector<st
 
 //------------------------------------------------------------------------------
 
-void CCache::GetDebDependencies(std::set<CSmallString>& debdeps)
+void CCache::LoadDebReleaseFilters(const CSmallString& release)
 {
+    DebAliases.clear();
+
+    CFileName    config_path;
+    config_path = AMSGlobalConfig.GetETCDIR() / "debaliases.xml";
+
+    if( ! CFileSystem::IsFile(config_path) ) return;
+
+    CXMLDocument deb_aliases;
+
+    CXMLParser xml_parser;
+    xml_parser.SetOutputXMLNode(&deb_aliases);
+
+    if( xml_parser.Parse(config_path) == false ) {
+        CSmallString error;
+        error << "unable to load " << config_path;
+        ES_ERROR(error);
+        return;
+    }
+
+    CXMLElement* p_root = deb_aliases.GetChildElementByPath("releases/release");
+    while( p_root != NULL ){
+        CSmallString name;
+        p_root->GetAttribute("name",name);
+        if( name == release ){
+            CXMLElement* p_alias = p_root->GetFirstChildElement("alias");
+            while( p_alias != NULL ){
+                CSmallString key;
+                CSmallString deb;
+                p_alias->GetAttribute("key",key);
+                p_alias->GetAttribute("deb",deb);
+                if( (key != NULL) && (deb != NULL) ){
+                    DebAliases[key] = deb;
+                }
+                p_alias = p_alias->GetNextSiblingElement("alias");
+            }
+        }
+        p_root = p_root->GetNextSiblingElement("release");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CCache::GetDebDependencies(const CSmallString& release,std::set<CSmallString>& debdeps)
+{
+    // load release filters
+    LoadDebReleaseFilters(release);
+
+    // list debs
     CXMLElement* p_sele = GetRootElementOfCache();
     if( p_sele == NULL ){
         RUNTIME_ERROR("unable to find cache element");
@@ -2225,7 +2273,14 @@ void CCache::GetDebDependencies(std::set<CSmallString>& debdeps)
                 CSmallString type;
                 p_lele->GetAttribute("name",dname);
                 p_lele->GetAttribute("type",type);
-                if( type == "deb" ) debdeps.insert(dname);
+                if( type == "deb" ){
+                    if( DebAliases.count(dname) > 0 ){
+                        CSmallString deb = DebAliases[dname];
+                        if( deb != NULL ) debdeps.insert(deb);
+                    } else {
+                        debdeps.insert(dname);
+                    }
+                }
             }
         }
 
@@ -2254,7 +2309,14 @@ void CCache::GetDebDependencies(std::set<CSmallString>& debdeps)
                     CSmallString type;
                     p_lele->GetAttribute("name",dname);
                     p_lele->GetAttribute("type",type);
-                    if( type == "deb" ) debdeps.insert(dname);
+                    if( type == "deb" ){
+                        if( DebAliases.count(dname) > 0 ){
+                            CSmallString deb = DebAliases[dname];
+                            if( deb != NULL ) debdeps.insert(deb);
+                        } else {
+                            debdeps.insert(dname);
+                        }
+                    }
                 }
             }
 
