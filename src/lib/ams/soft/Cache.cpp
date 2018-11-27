@@ -2206,7 +2206,7 @@ void CCache::LoadDebReleaseFilters(const CSmallString& release)
     CFileName    config_path;
     config_path = AMSGlobalConfig.GetETCDIR() / "debaliases.xml";
 
-    if( ! CFileSystem::IsFile(config_path) ) return;
+    if( ! CFileSystem::IsFile(config_path) ) return; // no aliases defined
 
     CXMLDocument deb_aliases;
 
@@ -2246,7 +2246,9 @@ void CCache::LoadDebReleaseFilters(const CSmallString& release)
 void CCache::GetDebDependencies(const CSmallString& release,std::set<CSmallString>& debdeps)
 {
     // load release filters
-    LoadDebReleaseFilters(release);
+    if( release != NULL ){
+        LoadDebReleaseFilters(release);
+    }
 
     // list debs
     CXMLElement* p_sele = GetRootElementOfCache();
