@@ -61,7 +61,7 @@ function exec_debdeps() {
     echo "# Installing system dependent packages:"
     echo "# ------------------------------------------------------------------------------"
     echo "# `lsb_release -d`"
-    RELEASE=`lsb_release -r`
+    RELEASE=`lsb_release -r | awk '{ print $2; }'`
     PKGS="`ams-cache --release "$RELEASE" debdepsall`"
     if [ $? -ne 0 ]; then
         exit 1
