@@ -707,13 +707,15 @@ bool CSite::DeactivateSite(void)
 
     std::list<CSmallString> modules;
 
-    char* p_str;
-    char* p_strtok = NULL;
+    if( tmp != NULL ){
+        char* p_str;
+        char* p_strtok = NULL;
 
-    p_str = strtok_r(tmp.GetBuffer(),"|",&p_strtok);
-    while( p_str != NULL ) {
-        modules.push_back(CSmallString(p_str));
-        p_str = strtok_r(NULL,"|",&p_strtok);
+        p_str = strtok_r(tmp.GetBuffer(),"|",&p_strtok);
+        while( p_str != NULL ) {
+            modules.push_back(CSmallString(p_str));
+            p_str = strtok_r(NULL,"|",&p_strtok);
+        }
     }
 
     modules.reverse();
