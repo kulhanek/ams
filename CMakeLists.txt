@@ -4,6 +4,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
+PROJECT(AMS)
 
 # ==============================================================================
 # conditional setup ------------------------------------------------------------
