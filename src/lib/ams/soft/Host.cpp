@@ -590,12 +590,91 @@ void CHost::InitDefaultTokens(CXMLElement* p_ele)
         INVALID_ARGUMENT("p_ele is NULL")
     }
 
-    // tokens
+    // default tokens
     string value;
     std::vector<string> tokens;
     if( p_ele->GetAttribute("tokens",value) ){
         split(tokens,value,is_any_of("#"));
     }
+
+    // hostnamectl parsing
+    CSmallString distro_name;
+    CSmallString distro_arch;
+
+    FILE* p_file = popen("/usr/bin/hostnamectl","r");
+    if( p_file != NULL ){
+        char buffer[1024];
+        memset(buffer,0,1024);
+        while( fgets(buffer,1023,p_file) ){
+
+            CXMLElement* p_fele = p_ele->GetFirstChildElement("distro");
+            while( p_fele != NULL ){
+                CSmallString name,token;
+
+                // load config
+                bool success = true;
+
+                success &= p_fele->GetAttribute("name",name);
+                success &= p_fele->GetAttribute("token",token);
+
+                // move to next record
+                p_fele = p_fele->GetNextSiblingElement("distro");
+
+                if( success == false ){
+                    ES_WARNING("undefined name and/or token attributes for distro element");
+                    continue;
+                }
+
+                // does host match Hostname
+                if( fnmatch(name,buffer,0) != 0 ){
+                    CSmallString warning;
+                    warning << "distro: hostnamectl '" << buffer << "' does not match distro name '" << name << "'";
+                    ES_WARNING(warning);
+                    continue;
+                } else {
+                    distro_name = token;
+                }
+            }
+            p_fele = p_ele->GetFirstChildElement("arch");
+            while( p_fele != NULL ){
+                CSmallString name,token;
+
+                // load config
+                bool success = true;
+
+                success &= p_fele->GetAttribute("name",name);
+                success &= p_fele->GetAttribute("token",token);
+
+                // move to next record
+                p_fele = p_fele->GetNextSiblingElement("arch");
+
+                if( success == false ){
+                    ES_WARNING("undefined name and/or token attributes for arch element");
+                    continue;
+                }
+
+                // does host match Hostname
+                if( fnmatch(name,buffer,0) != 0 ){
+                    CSmallString warning;
+                    warning << "arch: hostnamectl '" << buffer << "' does not match distro arch '" << name << "'";
+                    ES_WARNING(warning);
+                    continue;
+                } else {
+                    distro_arch = token;
+                }
+            }
+
+        }
+        pclose(p_file);
+    } else {
+        ES_WARNING("unable to run /usr/bin/hostnamectl");
+    }
+    if( (distro_name != NULL) || (distro_arch != NULL) ){
+        value = distro_arch + "-" + distro_name;
+            ES_WARNING(distro_arch);
+        tokens.push_back(value);
+    }
+
 
     // max cpus per node
     p_ele->GetAttribute("ncpus",DefaultNumOfHostCPUs);
@@ -1383,6 +1462,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
 
     int pri = 0;
     while( p_ele ){
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "default" ){
             pri++;
     vout << ">>> default ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1390,7 +1470,8 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Priority      : " << pri << endl;
     vout << "    Num of CPUs   : " << DefaultNumOfHostCPUs << endl;
     CPrintEngine::PrintTokens(vout,"    Default tokens: ",GetSecTokens(DefaultTokens));
-        }
+        }        
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "hosts" ){
             pri++;
     vout << ">>> hosts ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1399,6 +1480,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Num of CPUs   : " << HostNumOfHostCPUs << endl;
     CPrintEngine::PrintTokens(vout,"    Host tokens   : ",GetSecTokens(HostTokens));
         }
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "desktop" ){
             pri++;
     vout << ">>> desktop ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1409,6 +1491,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Status        : host is not a desktop" << endl;
     }
         }
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "cpuinfo" ){
             pri++;
     vout << ">>> cpuinfo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1427,6 +1510,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     CPrintEngine::PrintTokens(vout,"    CPU tokens    : ",GetSecTokens(CPUInfoTokens));
     }
         }
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "gpuinfo" ){
             pri++;
     vout << ">>> gpuinfo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1435,6 +1519,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     vout << "    Requested GPUs: " << NGPUs << endl;
     vout << "    Arch tokens   : " << GetSecTokens(GPUInfoTokens) << endl;
         }
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "cuda" ){
             pri++;
     vout << ">>> cuda ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -1463,6 +1548,7 @@ void CHost::PrintHostDetailedInfo(CVerboseStr& vout)
     CPrintEngine::PrintTokens(vout,"    CUDA tokens   : ",GetSecTokens(CUDATokens));
     }
         }
+// -----------------------------------------------------------------
         if( p_ele->GetName() == "net" ){
             pri++;
     vout << ">>> network ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
