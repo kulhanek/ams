@@ -601,80 +601,93 @@ void CHost::InitDefaultTokens(CXMLElement* p_ele)
     CSmallString distro_name;
     CSmallString distro_arch;
 
-    FILE* p_file = popen("/usr/bin/hostnamectl","r");
-    if( p_file != NULL ){
-        char buffer[1024];
-        memset(buffer,0,1024);
-        while( fgets(buffer,1023,p_file) ){
+    std::vector<string> files;
+    files.push_back("/etc/lsb-release");
+    files.push_back("/etc/os-release");
+    files.push_back("/etc/centos-release");
+    files.push_back("/etc/redhat-release");
+    files.push_back("/etc/redhat-release");
+    files.push_back("/proc/version");
 
-            CXMLElement* p_fele = p_ele->GetFirstChildElement("distro");
-            while( p_fele != NULL ){
-                CSmallString name,token;
+    vector<string>::iterator  fit = files.begin();
+    vector<string>::iterator  fie = files.end();
+    while( fit != fie ){
+        string fname = *fit;
+        fit++;
+        FILE* p_file = fopen(fname.c_str(),"r");
+        if( p_file != NULL ){
+            CSmallString buffer;
+            while( buffer.ReadLineFromFile(p_file,true,true) ){
 
-                // load config
-                bool success = true;
+                CXMLElement* p_fele = p_ele->GetFirstChildElement("distro");
+                while( p_fele != NULL ){
+                    CSmallString name,token;
 
-                success &= p_fele->GetAttribute("name",name);
-                success &= p_fele->GetAttribute("token",token);
+                    // load config
+                    bool success = true;
 
-                // move to next record
-                p_fele = p_fele->GetNextSiblingElement("distro");
+                    success &= p_fele->GetAttribute("name",name);
+                    success &= p_fele->GetAttribute("token",token);
 
-                if( success == false ){
-                    ES_WARNING("undefined name and/or token attributes for distro element");
-                    continue;
+                    // move to next record
+                    p_fele = p_fele->GetNextSiblingElement("distro");
+
+                    if( success == false ){
+                        ES_WARNING("undefined name and/or token attributes for distro element");
+                        continue;
+                    }
+
+                    // does host match Hostname
+                    if( fnmatch(name,buffer,0) != 0 ){
+                        CSmallString warning;
+                        warning << "distro: hostnamectl '" << buffer << "' does not match distro name '" << name << "'";
+                        ES_WARNING(warning);
+                        continue;
+                    } else {
+                        distro_name = token;
+                    }
+                }
+                p_fele = p_ele->GetFirstChildElement("arch");
+                while( p_fele != NULL ){
+                    CSmallString name,token;
+
+                    // load config
+                    bool success = true;
+
+                    success &= p_fele->GetAttribute("name",name);
+                    success &= p_fele->GetAttribute("token",token);
+
+                    // move to next record
+                    p_fele = p_fele->GetNextSiblingElement("arch");
+
+                    if( success == false ){
+                        ES_WARNING("undefined name and/or token attributes for arch element");
+                        continue;
+                    }
+
+                    // does host match Hostname
+                    if( fnmatch(name,buffer,0) != 0 ){
+                        CSmallString warning;
+                        warning << "arch: hostnamectl '" << buffer << "' does not match distro arch '" << name << "'";
+                        ES_WARNING(warning);
+                        continue;
+                    } else {
+                        distro_arch = token;
+                    }
                 }
 
-                // does host match Hostname
-                if( fnmatch(name,buffer,0) != 0 ){
-                    CSmallString warning;
-                    warning << "distro: hostnamectl '" << buffer << "' does not match distro name '" << name << "'";
-                    ES_WARNING(warning);
-                    continue;
-                } else {
-                    distro_name = token;
-                }
             }
-            p_fele = p_ele->GetFirstChildElement("arch");
-            while( p_fele != NULL ){
-                CSmallString name,token;
-
-                // load config
-                bool success = true;
-
-                success &= p_fele->GetAttribute("name",name);
-                success &= p_fele->GetAttribute("token",token);
-
-                // move to next record
-                p_fele = p_fele->GetNextSiblingElement("arch");
-
-                if( success == false ){
-                    ES_WARNING("undefined name and/or token attributes for arch element");
-                    continue;
-                }
-
-                // does host match Hostname
-                if( fnmatch(name,buffer,0) != 0 ){
-                    CSmallString warning;
-                    warning << "arch: hostnamectl '" << buffer << "' does not match distro arch '" << name << "'";
-                    ES_WARNING(warning);
-                    continue;
-                } else {
-                    distro_arch = token;
-                }
-            }
-
+            pclose(p_file);
+        } else {
+            CSmallString warning;
+            warning << "unable to open: '" << fname << "'";
+            ES_WARNING(warning);
         }
-        pclose(p_file);
-    } else {
-        ES_WARNING("unable to run /usr/bin/hostnamectl");
     }
-    if( (distro_name != NULL) || (distro_arch != NULL) ){
+    if( (distro_name != NULL) && (distro_arch != NULL) ){
         value = distro_arch + "-" + distro_name;
-            ES_WARNING(distro_arch);
         tokens.push_back(value);
     }
-
 
     // max cpus per node
     p_ele->GetAttribute("ncpus",DefaultNumOfHostCPUs);
