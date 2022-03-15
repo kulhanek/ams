@@ -54,6 +54,7 @@
 #include <PrintEngine.hpp>
 #include <sys/stat.h>
 #include <hwloc.h>
+#include <sys/utsname.h>
 
 //------------------------------------------------------------------------------
 
@@ -675,7 +676,6 @@ void CHost::InitDefaultTokens(CXMLElement* p_ele)
                         distro_arch = token;
                     }
                 }
-
             }
             pclose(p_file);
         } else {
@@ -684,6 +684,41 @@ void CHost::InitDefaultTokens(CXMLElement* p_ele)
             ES_WARNING(warning);
         }
     }
+
+    if( distro_arch == NULL ){
+        struct utsname una;
+        if( uname(&una) == 0 ){
+            CXMLElement* p_fele = p_ele->GetFirstChildElement("arch");
+            while( p_fele != NULL ){
+                CSmallString name,token;
+
+                // load config
+                bool success = true;
+
+                success &= p_fele->GetAttribute("name",name);
+                success &= p_fele->GetAttribute("token",token);
+
+                // move to next record
+                p_fele = p_fele->GetNextSiblingElement("arch");
+
+                if( success == false ){
+                    ES_WARNING("undefined name and/or token attributes for arch element");
+                    continue;
+                }
+
+                // does host match Hostname
+                if( fnmatch(name,una.machine,0) != 0 ){
+                    CSmallString warning;
+                    warning << "arch: uname '" << una.machine << "' does not match distro arch '" << name << "'";
+                    ES_WARNING(warning);
+                    continue;
+                } else {
+                    distro_arch = token;
+                }
+            }
+        }
+    }
+
     if( (distro_name != NULL) && (distro_arch != NULL) ){
         value = distro_arch + "-" + distro_name;
         tokens.push_back(value);
