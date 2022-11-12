@@ -1999,15 +1999,21 @@ bool CCache::DoesItNeedGPU(const CSmallString& name)
     CXMLIterator    I(p_list);
     CXMLElement*    p_sele;
 
+    bool gpu = false;
+    bool nogpu = true;
+
     while( (p_sele = I.GetNextChildElement("build")) != NULL ) {
         CSmallString larch;
         p_sele->GetAttribute("arch",larch);
         if( larch.FindSubString("gpu") >= 0 ){
-            return(true);
+            gpu = true;
+        } else {
+            nogpu = true;
         }
     }
 
-    return(false);
+    if( nogpu ) return(false);
+    return(gpu);
 }
 
 //------------------------------------------------------------------------------
