@@ -1,3 +1,0 @@
-export AMS_ROOT=/scratch/kulhanek/Development/linux/projects/ams/8.0
-export PATH=$AMS_ROOT/bin:$AMS_ROOT/sbin:$PATH
-. etc/boot/init.ams
