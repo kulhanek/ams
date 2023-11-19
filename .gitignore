@@ -1,0 +1,13 @@
+*.mod
+*.cmake
+CMakeCache.txt
+CMakeFiles
+DartConfiguration.tcl
+Makefile
+/bin
+/lib
+/include
+/test
+/etc
+AMS-8.creator.user
+/share/scripts/ams-personal
