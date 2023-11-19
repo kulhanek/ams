@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Run with 'activate' argument!"
+    exit
+fi
+
+GITREVS=`git rev-list --count HEAD`
+if [ $? -ne 0 ]; then exit 1; fi
+
+GITHASH=`git rev-parse --short HEAD`
+if [ $? -ne 0 ]; then exit 1; fi
+
+DATE=`date +"%Y-%m-%d %H:%M"`
+
+cat > src/lib/ams/AMSMainHeaderConfig.hpp << EOF
+#define AMS_CONFIG_VERSION  "8.x"
+#define AMS_VERSION         "8.${GITREVS}.${GITHASH}"
+#define AMS_BUILDTIME       "${DATE}"
+EOF
+if [ $? -ne 0 ]; then exit 1; fi
+
+echo ""
+echo "AMS Revision: 8.$GITREVS.$GITHASH ($DATE)"
+

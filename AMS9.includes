@@ -1,0 +1,12 @@
+src/lib/ams/host
+src/lib/ams/soft
+src/lib/ams/core
+src/bin/ams-user
+src/bin
+src/lib/ams/host/components
+src/lib/ams/utils
+src/lib/ams/modules
+src/lib/ams/site
+src/lib/ams/mods
+src/lib/ams/base
+src/lib/ams/user
