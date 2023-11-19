@@ -25,6 +25,7 @@
 #include <AMSMainHeader.hpp>
 #include <sys/types.h>
 #include <SmallString.hpp>
+#include <FileName.hpp>
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
 #include <list>
@@ -59,6 +60,9 @@ public:
     /// get all user groups separated by comma
     const CSmallString GetACLGroups(void);
 
+    /// get all posix groups separated by comma
+    const CSmallString GetPosixGroups(void);
+
     /// check group
     bool IsInACLGroup(const CSmallString& grpname);
 
@@ -80,6 +84,7 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
+    CFileName                   ConfigName;
     CXMLDocument                Config;                  // user configuration
     // user identification
     uid_t                       UID;
@@ -91,28 +96,29 @@ private:
     std::list<CSmallString>     PosixGroups;
 
     // access groups
-    std::list<CSmallString>     ACLDefaultGroups;
-    std::list<CSmallString>     ACLPosixGroups;
-    std::list<CSmallString>     ACLUserGroups;
-    std::list<CSmallString>     ACLAllGroups;          // only those groups in which the user belongs
+    std::list<CSmallString>     DefaultACLGroups;
+    std::list<CSmallString>     PosixACLGroups;
+    std::list<CSmallString>     AMSACLGroups;
+    std::list<CSmallString>     AllACLGroups;          // only those groups in which the user belongs
+
+
+    /// init user from the system
+    void InitPosixUser(void);
+
+    /// init user from user.xml file
+    void InitAMSUser(void);
 
     /// init default tokens
-    void InitACLDefaultGroups(CXMLElement* p_ele);
+    void InitDefaultACLGroups(CXMLElement* p_ele);
 
     /// init posix groups
-    void InitACLPosixGroups(CXMLElement* p_ele);
+    void InitPosixACLGroups(CXMLElement* p_ele);
 
     /// init user groups
-    void InitACLUsersGroups(CXMLElement* p_ele);
+    void InitAMSACLGroups(CXMLElement* p_ele);
 
-    /// init class by username
-    bool InitGlobalSetup(const CSmallString& name);
-
-    /// init class by userid
-    bool InitGlobalSetup(uid_t userid);
-
-    /// get group list
-    const CSmallString GetGroupList(std::list<CSmallString>& list);
+    /// get group list - comma separated
+    const CSmallString GetGroupList(std::list<CSmallString>& list,const CSmallString delim=",");
 };
 
 // -----------------------------------------------------------------------------

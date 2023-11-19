@@ -77,15 +77,8 @@ bool CUserCmd::Run(void)
 {   
     // init global setup
     AMSRegistry.LoadRegistry();
-    User.InitGlobalSetup();
-
-    if( AMSRegistry.GetActiveSiteID() != NULL ){
-        // initialize user -----------------------------
-        User.InitUserFile(AMSRegistry.GetActiveSiteID());
-        User.InitUser();
-    } else {
-        ES_WARNING("no site active");
-    }
+    User.InitUserConfig();
+    User.InitUser();
 
     if ( Options.GetOptUMask() ) {
         vout << User.GetRequestedUserUMask();

@@ -68,23 +68,24 @@ CUser::CUser(void)
 
 void CUser::InitUserConfig(void)
 {
-    CFileName    config_name = AMSRegistry.GetUsersConfigFile();
+    ConfigName = AMSRegistry.GetUsersConfigFile();
 
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&Config);
 
-    if( xml_parser.Parse(config_name) == false ) {
+    if( xml_parser.Parse(ConfigName) == false ) {
         CSmallString    error;
-        error << "unable to load users configuration file '" << config_name << "'";
+        error << "unable to load users configuration file '" << ConfigName << "'";
         RUNTIME_ERROR(error);
     }
 }
 
 //------------------------------------------------------------------------------
 
-bool CUser::InitUser(void)
+void CUser::InitUser(void)
 {
     InitPosixUser();
+    InitAMSUser();
 }
 
 //==============================================================================
@@ -161,38 +162,38 @@ void CUser::InitAMSUser(void)
 
     while( p_ele ){
         if( p_ele->GetName() == "default" ){
-            InitACLDefaultGroups(p_ele);
+            InitDefaultACLGroups(p_ele);
         }
         if( p_ele->GetName() == "posix" ){
-            InitACLPosixGroups(p_ele);
+            InitPosixACLGroups(p_ele);
         }
-        if( p_ele->GetName() == "user" ){
-            InitACLUserGroups(p_ele);
+        if( p_ele->GetName() == "ams" ){
+            InitAMSACLGroups(p_ele);
         }
         p_ele = p_ele->GetNextSiblingElement();
     }
 
 // merge all tokens
-    for(CSmallString group : ACLDefaultGroups){
-        ACLAllGroups.push_back(group);
+    for(CSmallString group : DefaultACLGroups){
+        AllACLGroups.push_back(group);
     }
-    for(CSmallString group : ACLPosixGroups){
-        ACLAllGroups.push_back(group);
+    for(CSmallString group : PosixACLGroups){
+        AllACLGroups.push_back(group);
     }
-    for(CSmallString group : ACLUserGroups){
-        ACLAllGroups.push_back(group);
+    for(CSmallString group : AMSACLGroups){
+        AllACLGroups.push_back(group);
     }
 
 // sort tokens
-    AllGroups.sort();
-    AllGroups.unique();
+    AllACLGroups.sort();
+    AllACLGroups.unique();
 }
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CUser::InitACLDefaultGroups(CXMLElement* p_ele)
+void CUser::InitDefaultACLGroups(CXMLElement* p_ele)
 {
     if( p_ele == NULL ){
         INVALID_ARGUMENT("p_ele is NULL");
@@ -201,13 +202,13 @@ void CUser::InitACLDefaultGroups(CXMLElement* p_ele)
 // tokens
     std::string value;
     if( p_ele->GetAttribute("groups",value) ){
-        split(ACLDefaultGroups,value,is_any_of(","));
+        split(DefaultACLGroups,value,is_any_of(","));
     }
 }
 
 //------------------------------------------------------------------------------
 
-void CUser::InitACLPosixGroups(CXMLElement* p_ele)
+void CUser::InitPosixACLGroups(CXMLElement* p_ele)
 {
     if( p_ele == NULL ){
         INVALID_ARGUMENT("p_ele is NULL");
@@ -224,9 +225,9 @@ void CUser::InitACLPosixGroups(CXMLElement* p_ele)
                 CSmallString alias;
                 p_fele->GetAttribute("alias",alias);
                 if( alias != NULL ){
-                    ACLPosixGroups.push_back(alias);
+                    PosixACLGroups.push_back(alias);
                 } else {
-                    ACLPosixGroups.push_back(pgrp);
+                    PosixACLGroups.push_back(pgrp);
                 }
             }
         }
@@ -236,7 +237,7 @@ void CUser::InitACLPosixGroups(CXMLElement* p_ele)
 
 //------------------------------------------------------------------------------
 
-void CUser::InitACLUsersGroups(CXMLElement* p_ele)
+void CUser::InitAMSACLGroups(CXMLElement* p_ele)
 {
     if( p_ele == NULL ){
         INVALID_ARGUMENT("p_ele is NULL");
@@ -253,7 +254,7 @@ void CUser::InitACLUsersGroups(CXMLElement* p_ele)
             CSmallString usrname;
             p_uele->GetAttribute("name",usrname);
             if( usrname == Name ){
-                ACLUserGroups.push_back(grpname);
+                AMSACLGroups.push_back(grpname);
                 break;
             }
             p_uele = p_uele->GetNextSiblingElement("user");
@@ -289,15 +290,22 @@ const CSmallString& CUser::GetEGroup(void) const
 
 const CSmallString CUser::GetACLGroups(void)
 {
-    return(GetGroupList(ACLAllGroups));
+    return(GetGroupList(AllACLGroups));
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CUser::GetPosixGroups(void)
+{
+    return(GetGroupList(PosixGroups));
 }
 
 //------------------------------------------------------------------------------
 
 bool CUser::IsInACLGroup(const CSmallString& grpname)
 {
-    std::list<CSmallString>::iterator   it = ACLAllGroups.begin();
-    std::list<CSmallString>::iterator   ie = ACLAllGroups.end();
+    std::list<CSmallString>::iterator   it = AllACLGroups.begin();
+    std::list<CSmallString>::iterator   ie = AllACLGroups.end();
     while(it != ie){
         if( grpname == (*it) )  return(true);
         it++;
@@ -310,8 +318,8 @@ bool CUser::IsInACLGroup(const CSmallString& grpname)
 
 bool CUser::IsInPosixGroup(const CSmallString& group)
 {
-    std::vector<CSmallString>::iterator   it = PosixGroups.begin();
-    std::vector<CSmallString>::iterator   ie = PosixGroups.end();
+    std::list<CSmallString>::iterator   it = PosixGroups.begin();
+    std::list<CSmallString>::iterator   ie = PosixGroups.end();
     while(it != ie){
         if( *it == group ) return(true);
         it++;
@@ -321,17 +329,18 @@ bool CUser::IsInPosixGroup(const CSmallString& group)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUser::GetGroupList(std::list<CSmallString>& list)
+const CSmallString CUser::GetGroupList(std::list<CSmallString>& list,const CSmallString delim)
 {
     CSmallString groups;
 
-    std::vector<CSmallString>::iterator   it = list.begin();
-    std::vector<CSmallString>::iterator   ie = list.end();
+    std::list<CSmallString>::iterator   it = list.begin();
+    std::list<CSmallString>::iterator   ie = list.end();
     while(it != ie){
-        if( it != list.begin() )  groups << ",";
+        if( it != list.begin() )  groups << delim;
         groups << (*it);
         it++;
-    }
+    }    
+
     return(groups);
 }
 
@@ -340,50 +349,32 @@ const CSmallString CUser::GetGroupList(std::list<CSmallString>& list)
 void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
 {
     vout << endl;
-    vout << "User name           : " << Name << " (uid: " << UID << ")" << endl;
-    vout << "Real group name     : " << RGroup << " (gid: " << RGID << ")" << endl;
-    vout << "Eff. group name     : " << EGroup << " (gid: " << EGID << ") [umask: " << CShell::GetUMask() << " " << CShell::GetUMaskPermissions() << "]" << endl;
-    vout << "Site ID             : " << SiteSID << endl;
-    if( SiteConfigInUse == true ){
-    vout << "Configuration realm : " << SiteConfigInUse << endl;
-    } else {
-    vout << "Configuration realm : default" << endl;
-    }
-    vout << "===================================================================" << endl;
+    vout << "# User name          : " << Name << " (uid: " << UID << ")" << endl;
+    vout << "# Real group name    : " << RGroup << " (gid: " << RGID << ")" << endl;
+    vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ") [umask: " << CShell::GetUMask() << " " << CShell::GetUMaskPermissions() << "]" << endl;
 
+    vout << "# ==============================================================================" << endl;
+    vout << "# Configuration      : " << ConfigName <<  endl;
     // parse config file -------------------------
-    CXMLElement* p_ele = Users.GetFirstChildElement("config");
+    CXMLElement* p_ele = Config.GetFirstChildElement("config");
     if( p_ele ){
         p_ele = p_ele->GetFirstChildElement();
     }
 
-    int pri = 0;
     while( p_ele ){
         if( p_ele->GetName() == "default" ){
-            pri++;
-    vout << ">>> default ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    vout << "    Priority    : " << pri << endl;
-    vout << "    Groups      : " << GetSecGroups(DefaultGroups) << endl;
+    CUtils::PrintTokens(vout,"# Deafult ACL groups : ",GetGroupList(DefaultACLGroups),80);
         }
         if( p_ele->GetName() == "posix" ){
-            pri++;
-    vout << ">>> posix ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    vout << "    Priority    : " << pri << endl;
-    vout << "    All groups  : " << GetSecGroups(AllPosixGroups) << endl;
-    vout << "    User groups : " << GetSecGroups(PosixGroups) << endl;
+    CUtils::PrintTokens(vout,"# Posix ACL groups   : ",GetGroupList(PosixACLGroups),80);
         }
-        if( p_ele->GetName() == "groups" ){
-            pri++;
-    vout << ">>> groups ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    vout << "    Priority    : " << pri << endl;
-    vout << "    All groups  : " << GetSecGroups(AllUserGroups) << endl;
-    vout << "    User groups : " << GetSecGroups(UserGroups) << endl;
+        if( p_ele->GetName() == "ams" ){
+    CUtils::PrintTokens(vout,"# AMS ACL groups     : ",GetGroupList(AMSACLGroups),80);
         }
         p_ele = p_ele->GetNextSiblingElement();
     }
-    vout << "===================================================================" << endl;
-    vout << ">>> final" << endl;
-    vout << "    ACL Groups  : " << GetGroups() << endl;
+    vout << "# ==============================================================================" << endl;
+    CUtils::PrintTokens(vout,"# Final ACL Groups   : ",GetGroupList(AllACLGroups),80);
 }
 
 //------------------------------------------------------------------------------
@@ -411,10 +402,8 @@ void CUser::PrintUserInfoForSite(CVerboseStr& vout)
 
     vout << "# User name  : " << GetName() << endl;
     vout << "# User group : " << GetEGroup() << " [umask: " << CShell::GetUMask() << " " << CShell::GetUMaskPermissions() << "]" << endl;
-    CUtils::PrintTokens(vout,"# ACL groups : ",GetGroups());
+    CUtils::PrintTokens(vout,"# ACL groups : ",GetACLGroups(),80);
 }
-
-
 
 //------------------------------------------------------------------------------
 
