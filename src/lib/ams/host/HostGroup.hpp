@@ -30,6 +30,7 @@
 #include <SmallString.hpp>
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
+#include <set>
 
 //------------------------------------------------------------------------------
 
@@ -72,6 +73,9 @@ public:
 
     /// get default site
     const CSmallString GetDefaultSite(void);
+
+    /// get list of allowed sites
+    void GetAllowedSites(std::set<CSmallString>& list);
 
     /// find host group namespace
     const CSmallString GetGroupNS(void);

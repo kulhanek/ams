@@ -10,3 +10,7 @@ src/lib/ams/site
 src/lib/ams/mods
 src/lib/ams/base
 src/lib/ams/user
+src/bin/_ams-site-cmd
+src/bin/ams-bundle
+src/bin/_ams-module-var
+src/bin/_ams-module-cmd

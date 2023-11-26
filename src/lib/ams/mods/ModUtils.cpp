@@ -24,22 +24,15 @@
 
 #include <ModUtils.hpp>
 #include <string.h>
-#include <Site.hpp>
-#include <DirectoryEnum.hpp>
-#include <FileName.hpp>
-#include <FileSystem.hpp>
-#include <AmsUUID.hpp>
-#include <errno.h>
-#include <ErrorSystem.hpp>
+#include <VerboseStr.hpp>
 #include <XMLIterator.hpp>
-#include <AMSRegistry.hpp>
 #include <iomanip>
 #include <list>
+
 #include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+//#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <XMLElement.hpp>
+//#include <boost/algorithm/string/join.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -51,7 +44,7 @@ using namespace boost::algorithm;
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CUtils::ParseModuleName(const CSmallString& module,
+bool CModUtils::ParseModuleName(const CSmallString& module,
         CSmallString& name,
         CSmallString& ver,
         CSmallString& arch,
@@ -71,7 +64,7 @@ bool CUtils::ParseModuleName(const CSmallString& module,
 
 //------------------------------------------------------------------------------
 
-bool CUtils::ParseModuleName(const CSmallString& module,
+bool CModUtils::ParseModuleName(const CSmallString& module,
         CSmallString& name,
         CSmallString& ver,
         CSmallString& arch)
@@ -89,7 +82,7 @@ bool CUtils::ParseModuleName(const CSmallString& module,
 
 //------------------------------------------------------------------------------
 
-bool CUtils::ParseModuleName(const CSmallString& module,
+bool CModUtils::ParseModuleName(const CSmallString& module,
         CSmallString& name,
         CSmallString& ver)
 {
@@ -105,7 +98,7 @@ bool CUtils::ParseModuleName(const CSmallString& module,
 
 //------------------------------------------------------------------------------
 
-bool CUtils::ParseModuleName(const CSmallString& module,
+bool CModUtils::ParseModuleName(const CSmallString& module,
         CSmallString& name)
 {
     CSmallString tmp(module);
@@ -121,7 +114,7 @@ bool CUtils::ParseModuleName(const CSmallString& module,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CSmallString CUtils::GetModuleName(const CSmallString& module)
+const CSmallString CModUtils::GetModuleName(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
@@ -132,7 +125,7 @@ const CSmallString CUtils::GetModuleName(const CSmallString& module)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUtils::GetModuleVer(const CSmallString& module)
+const CSmallString CModUtils::GetModuleVer(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
@@ -144,7 +137,7 @@ const CSmallString CUtils::GetModuleVer(const CSmallString& module)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUtils::GetModuleArch(const CSmallString& module)
+const CSmallString CModUtils::GetModuleArch(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
@@ -157,7 +150,7 @@ const CSmallString CUtils::GetModuleArch(const CSmallString& module)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUtils::GetModuleMode(const CSmallString& module)
+const CSmallString CModUtils::GetModuleMode(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
@@ -173,7 +166,7 @@ const CSmallString CUtils::GetModuleMode(const CSmallString& module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CUtils::PrintBuild(std::ostream& vout,CXMLElement* p_build)
+void CModUtils::PrintBuild(std::ostream& vout,CXMLElement* p_build)
 {
     // info out ----------------------------------------------------------------------------
     unsigned int col1 = 1;
@@ -181,7 +174,7 @@ void CUtils::PrintBuild(std::ostream& vout,CXMLElement* p_build)
     unsigned int col3 = 1;
     unsigned int col4 = 1;
 
-    CUtils::GetMaxSizesForBuild(p_build,col1,col2,col3,col4);
+    CModUtils::GetMaxSizesForBuild(p_build,col1,col2,col3,col4);
 
     if( col1 < 4 ) col1 = 4;
     if( col2 < 10 ) col2 = 10;
@@ -267,7 +260,7 @@ void CUtils::PrintBuild(std::ostream& vout,CXMLElement* p_build)
 
 //------------------------------------------------------------------------------
 
-void CUtils::GetMaxSizesForBuild(CXMLElement* p_ele,
+void CModUtils::GetMaxSizesForBuild(CXMLElement* p_ele,
         unsigned int& col1,unsigned int& col2,
         unsigned int& col3,unsigned int& col4)
 {
@@ -327,7 +320,7 @@ void CUtils::GetMaxSizesForBuild(CXMLElement* p_ele,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch)
+bool CModUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch)
 {
     int matches,maxmatches;
     return( AreSameTokens(user_arch,build_arch,matches,maxmatches) );
@@ -335,7 +328,7 @@ bool CUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& bui
 
 //------------------------------------------------------------------------------
 
-bool CUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch,int& matches,int& maxmatches)
+bool CModUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch,int& matches,int& maxmatches)
 {
     matches = 0;
     maxmatches = 0;
@@ -379,60 +372,6 @@ bool CUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& bui
     }
 
     return( matches == maxmatches );
-}
-
-//------------------------------------------------------------------------------
-
-void CUtils::PrintTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list,
-                         int ncolumns)
-{
-    string          svalue = string(res_list);
-    vector<string>  items;
-    if( ncolumns < 0 ) {
-        int nrow;
-        ncolumns = 80;
-        CTerminal::GetSize(nrow,ncolumns);
-    }
-
-    // split to items
-    split(items,svalue,is_any_of(","));
-
-    vector<string>::iterator it = items.begin();
-    vector<string>::iterator ie = items.end();
-
-    sout << title;
-
-    if(res_list == NULL ){
-        sout << "-none-" << endl;
-        return;
-    }
-
-    int len = title.GetLength();
-
-    while( it != ie ){
-        string sres = *it;
-        sout << sres;
-        len += sres.size();
-        len++;
-        it++;
-        if( it != ie ){
-            string sres = *it;
-            int tlen = len;
-            tlen += sres.size();
-            tlen++;
-            if( tlen > ncolumns ){
-                sout << "," << endl;
-                for(unsigned int i=0; i < title.GetLength(); i++){
-                    sout << " ";
-                }
-                len = title.GetLength();
-            } else {
-                sout << ", ";
-                len += 2;
-            }
-        }
-    }
-    sout << endl;
 }
 
 //==============================================================================

@@ -3,6 +3,7 @@
 // =============================================================================
 // AMS
 // -----------------------------------------------------------------------------
+//    Copyright (C) 2023      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //

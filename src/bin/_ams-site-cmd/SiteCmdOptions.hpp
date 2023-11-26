@@ -3,6 +3,7 @@
 // =============================================================================
 // AMS
 // -----------------------------------------------------------------------------
+//    Copyright (C) 2023      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
@@ -37,7 +38,8 @@ public:
     CSO_PROG_NAME_END
 
     CSO_PROG_DESC_BEGIN
-    "Activate particular site or print details about available or active sites."
+    "Activate a given site or print detailed information about the active or available sites. "
+    "A site usually encapsulates computational resources, typically a batch system(s)."
     CSO_PROG_DESC_END
 
     // program arguments short description
@@ -51,17 +53,15 @@ public:
     "   <b><cyan>action</cyan></b>      operation, which should be performed (avail by default)\n"
     "   <b><cyan>site</cyan></b>        site on which the action is performed\n"
     "\n"
-    "Supported actions:\n"
-    "   <green>activate</green>    activate site\n"
-    "   <green>avail</green>       list available sites\n"
-    "   <green>info</green>        info about site\n"
-    "   <green>disp</green>        deeper info about site\n"
-    "   <green>active</green>      the name of active site\n"
-    "   <green>isactive</green>    return zero if the site is active\n"
-    "   <green>isallowed</green>   return zero if the site can be activated on the host\n"
-    "   <green>id</green>          return site id\n"
-    "   <green>listamods</green>   list autoloaded modules\n"
-    "   <green>listavail</green>   list available sites (plain mode)\n"
+    "Supported actions (user):\n"
+    "   <green>activate site</green>    activate the site\n"
+    "   <green>[--all] avail</green>    list available sites\n"
+    "   <green>info [site]</green>      info about the active or requested site\n"
+    "   <green>disp [site]</green>      deeper info about the active or requested site\n"
+    "   <green>listamods [site]</green> list autoloaded modules for the active or requested site\n"
+    "\n"
+    "Supported actions (system):\n"
+    "   <green>init [site]</green>      init the site\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN
@@ -72,8 +72,6 @@ public:
     CSO_LIST_BEGIN
     // options ------------------------------
     CSO_OPT(bool,All)
-    CSO_OPT(CSmallString,Host)
-    CSO_OPT(CSmallString,User)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -98,24 +96,6 @@ public:
                 "all",                      /* long option name */
                 NULL,                           /* parametr name */
                 "print all sites with 'avail' action")   /* option description */
-    //----------------------------------------------------------------------
-    CSO_MAP_OPT(CSmallString,                           /* option type */
-                Host,                        /* option name */
-                "",                          /* default value */
-                false,                          /* is option mandatory */
-                '\0',                           /* short option name */
-                "host",                      /* long option name */
-                "HOSTNAME",                           /* parametr name */
-                "override the name of hostname taken from HOSTNANE system variable")   /* option description */
-    //----------------------------------------------------------------------
-    CSO_MAP_OPT(CSmallString,                           /* option type */
-                User,                        /* option name */
-                "",                          /* default value */
-                false,                          /* is option mandatory */
-                '\0',                           /* short option name */
-                "user",                      /* long option name */
-                "NAME",                           /* parametr name */
-                "override the name of current user")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Version,                        /* option name */

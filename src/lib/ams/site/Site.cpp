@@ -38,6 +38,7 @@
 #include <Host.hpp>
 #include <iomanip>
 #include <string.h>
+#include <SiteController.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -71,25 +72,21 @@ CSite::~CSite(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CSite::LoadConfig(const CSmallString& site_id)
+bool CSite::LoadConfig(const CSmallString& config_file)
 {
-    if( site_id == NULL ){
-        ES_WARNING("site_id is NULL");
+    if( config_file == NULL ){
+        ES_WARNING("config_file is NULL");
         return(false);
     }
 
-    CFileName    config_path;
-    Config.RemoveAllChildNodes();
-
-    config_path = AMSRegistry.GetETCDIR();
-    config_path = config_path / "sites" / site_id / "site.xml";
+    ConfigFile = config_file;
 
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&Config);
 
-    if( xml_parser.Parse(config_path) == false ) {
+    if( xml_parser.Parse(ConfigFile) == false ) {
         CSmallString error;
-        error << "unable to load site '" << site_id << "' config";
+        error << "unable to load site '" << ConfigFile << "' config";
         ES_ERROR(error);
         return(false);
     }
@@ -142,9 +139,7 @@ const CSmallString CSite::GetDocumentationURL(void)
     if( p_ele == NULL ) {
         return(name);
     }
-    if( p_ele->GetAttribute("url",name) ) {
-        return(name);
-    }
+    p_ele->GetAttribute("email",name);
     return(name);
 }
 
@@ -152,24 +147,21 @@ const CSmallString CSite::GetDocumentationURL(void)
 
 const CSmallString CSite::GetSupportEMail(void)
 {
-    CSmallString name;
+    CSmallString email;
     CXMLElement* p_ele = Config.GetChildElementByPath("site/description/support");
     if( p_ele == NULL ) {
-        return(name);
+        return(email);
     }
 
-    if( p_ele->GetAttribute("email",name) ) {
-        return(name);
-    }
-    return(name);
+    p_ele->GetAttribute("email",email);
+    return(email);
 }
 
 //------------------------------------------------------------------------------
 
 bool CSite::IsSiteActive(void)
 {
-    // FIXME
-   return(false);
+   return(SiteController.GetActiveSite() == GetName());
 }
 
 //------------------------------------------------------------------------------
@@ -187,17 +179,43 @@ bool CSite::IsSiteAdaptive(void)
 
 //------------------------------------------------------------------------------
 
-CXMLElement* CSite::GetSiteEnvoronment(void)
+bool CSite::IsPurgeModuleSet(void)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("site");
+    if( p_ele == NULL ) {
+        return(true);
+    }
+    bool purge_modules = false;
+    p_ele->GetAttribute("purge_modules",purge_modules);
+    return(purge_modules);
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CSite::GetSiteEnvironment(void)
 {
     return( Config.GetChildElementByPath("site/environment") );
 }
 
 //------------------------------------------------------------------------------
 
-void CSite::GetAutoloadedModules(std::list<CSmallString>& modules, const CSmallString& flavor)
+void CSite::GetAutoloadedModules(std::list<CSmallString>& modules)
 {
-    // FIXME
-   // return(Config.GetChildElementByPath("site/autoload"));
+    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+
+    CXMLElement* p_ele = Config.GetChildElementByPath("site/autoload");
+    if( p_ele ){
+        p_ele = p_ele->GetFirstChildElement("module");
+    }
+    while( p_ele ){
+        CSmallString mname,mflavor;
+        p_ele->GetAttribute("name",mname);
+        p_ele->GetAttribute("flavor",mflavor);
+        if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+            modules.push_back(mname);
+        }
+        p_ele = p_ele->GetNextSiblingElement("module");
+    }
 }
 
 //==============================================================================
@@ -214,28 +232,25 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
             status << " [adaptive]";
         }
     } else {
-        status =  "is not active";
+        status =  " (not active)";
     }
 
+    vout << endl;
+    vout << "# ~~~ <b>Site Info</b> ";
     CSmallString version;
     version << " [AMS " << LibBuildVersion_AMS_NoDate << "] ";
 
-    vout << endl;
-    vout << "# ";
-    for(unsigned int n=4; n < 80 - version.GetLength(); n++) vout << "~";
+    for(unsigned int n=18; n < 80 - version.GetLength(); n++) vout << "~";
     vout << version << "~~" << endl;
 
-    int  n1 = (80 - 8 - status.GetLength() - name.GetLength())/2;
-    vout << "# Site info ";
-    for(int i=12; i < n1; i++) vout << " ";
-    vout << "||| <b><green>" << name << "</green></b>" << status << " |||";
+    vout << "# Site name   : <b><green>" << name << "</green></b>" << status << endl;
+    vout << "# Site ID     : " << GetID() << endl;
 
     User.PrintUserInfoForSite(vout);
     Host.PrintHostInfoForSite(vout);
 
     if( (GetDocumentationURL() != NULL) || (GetSupportEMail() != NULL) ) {
-        vout << "#" << endl;
-        vout << "# ~~~ Site documentation and support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+        vout << "# ~~~ <b>Site documentation and support</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( GetDocumentationURL() != NULL ) {
             vout << "# Documentation  : " << GetDocumentationURL() << endl;
         }
@@ -253,8 +268,54 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
 void CSite::PrintFullSiteInfo(CVerboseStr& vout)
 {
     PrintShortSiteInfo(vout);
+
     vout << endl;
-    CShellProcessor::PrintBuild(vout,GetSiteEnvoronment());
+    vout << "# ~~~ <b>Site Attributes</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    vout << "# Site config   : " << ConfigFile << endl;
+    vout << "# Adaptive site : " << bool_to_str(IsSiteAdaptive()) << endl;
+    vout << "# Purge modules : " << bool_to_str(IsPurgeModuleSet()) <<  endl;
+    vout << "# Site flavor   : " << AMSRegistry.GetSiteFlavor() << endl;
+
+    vout << endl;
+    vout << "# ~~~ <b>Environment Variables</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    CShellProcessor::PrintBuild(vout,GetSiteEnvironment());
+
+    vout << endl;
+    vout << "# ~~~ <b>Autoloaded Modules</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    PrintAutoloadedModules(vout);
+}
+
+//------------------------------------------------------------------------------
+
+void CSite::PrintAutoloadedModules(CVerboseStr& vout)
+{
+    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+
+    vout << "# Action Module                                                       Flavor    " << endl;
+    vout << "# ------ ------------------------------------------------------------ ----------" << endl;
+    CXMLElement* p_ele = Config.GetChildElementByPath("site/autoload");
+    if( p_ele ){
+        p_ele = p_ele->GetFirstChildElement("module");
+    }
+    while( p_ele ){
+        CSmallString mname,mflavor;
+        p_ele->GetAttribute("name",mname);
+        p_ele->GetAttribute("flavor",mflavor);
+        if( mname != NULL ){
+            if( mflavor == NULL ){
+                vout << setw(8) << "regular";
+            } else if ( mflavor == flavor ){
+                vout << setw(8) << "flavor";
+            } else {
+                vout << setw(8) << "ignored";
+            }
+            vout << " " << setw(60) << mname;
+            vout << " " << setw(10) << mflavor;
+            vout << endl;
+        }
+
+        p_ele = p_ele->GetNextSiblingElement("module");
+    }
 }
 
 //==============================================================================

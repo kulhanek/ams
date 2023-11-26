@@ -49,26 +49,6 @@ public:
     static const CSmallString PrependValue(const CSmallString& value_list,
             const CSmallString& value,
             const CSmallString& delimiter);
-
-// umask methods ---------------------------------------------------------------
-
-    /// get user name
-    static const CSmallString GetUserName(void);
-
-    /// get umask
-    static const CSmallString GetUMask(void);
-
-    /// get umask permission bits
-    static const CSmallString GetUMaskPermissions(void);
-
-    /// get umask
-    static const CSmallString GetUMask(mode_t mumask);
-
-    /// get umask permission bits
-    static mode_t GetUMaskMode(const CSmallString& smask);
-
-    /// get umask permission bits
-    static const CSmallString GetUMaskPermissions(mode_t mumask);
 };
 
 //------------------------------------------------------------------------------

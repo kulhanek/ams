@@ -3,6 +3,7 @@
 // =============================================================================
 // AMS
 // -----------------------------------------------------------------------------
+//    Copyright (C) 2023      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
@@ -47,12 +48,13 @@ private:
     bool                ForcePrintErrors;
     int                 ExitCode;
 
-    // actions
+    // actions  
     int     ActivateSite(void);
-    int     DispSite(void);
+    void    AvailSites(void);
     int     InfoSite(void);
-    bool    IsActive(void);
-    bool    IsAllowed(void);
+    int     DispSite(void);
+    int     ListAMods(void);
+    int     InitSite(void);
 };
 
 // -----------------------------------------------------------------------------

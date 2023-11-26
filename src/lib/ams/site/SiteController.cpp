@@ -21,125 +21,129 @@
 //     Boston, MA  02110-1301  USA
 // =============================================================================
 
-#include <Utils.hpp>
-#include <string.h>
-#include <Site.hpp>
-#include <DirectoryEnum.hpp>
+#include <SiteController.hpp>
+#include <Shell.hpp>
 #include <FileName.hpp>
-#include <FileSystem.hpp>
-#include <AmsUUID.hpp>
-#include <errno.h>
-#include <ErrorSystem.hpp>
-#include <XMLIterator.hpp>
 #include <AMSRegistry.hpp>
-#include <iomanip>
+#include <Utils.hpp>
+#include <HostGroup.hpp>
 #include <list>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <XMLElement.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
-using namespace boost;
-using namespace boost::algorithm;
+
+//------------------------------------------------------------------------------
+
+CSiteController  SiteController;
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-ActiveSiteID       = CShell::GetSystemVariable("AMS_SITE");
-ActiveSiteName     = CUtils::GetSiteName(ActiveSiteID);
-
-const CSmallString& CAMSRegistry::GetActiveSiteID(void)
+CSiteController::CSiteController(void)
 {
-    return(ActiveSiteID);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CAMSRegistry::GetActiveSiteName(void)
+CSiteController::~CSiteController(void)
 {
-    return(ActiveSiteName);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CSiteController::InitSiteControllerConfig(void)
+{
+    ActiveSite = CShell::GetSystemVariable("AMS_SITE");
 }
 
 //------------------------------------------------------------------------------
 
-void CAMSRegistry::SetActiveSiteID(const CSmallString &site_id)
+const CFileName CSiteController::GetSiteConfig(const CSmallString& name)
 {
-    ActiveSiteID    = site_id;
-    ActiveSiteName  = CUtils::GetSiteName(ActiveSiteID);
+    CFileName search_path = AMSRegistry.GetSiteSearchPaths();
+    CFileName site_config;
+    CUtils::FindFile(search_path,name,".xml",site_config);
+    return(site_config);
 }
 
+//==============================================================================
 //------------------------------------------------------------------------------
+//==============================================================================
 
-void CAMSRegistry::SetActiveSiteID(const CAmsUUID& site_id)
+const CSmallString& CSiteController::GetActiveSite(void) const
 {
-    SetActiveSiteID(site_id.GetFullStringForm());
+    return(ActiveSite);
 }
 
-const CSmallString CSiteController::GetSiteID(const CSmallString& site_name)
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CSiteController::GetAvailableSites(std::list<CSmallString>& list)
 {
-    // go through the list of all available sites -------------
-    CDirectoryEnum dir_enum(AMSRegistry.GetETCDIR() / "sites");
+    CFileName search_path = AMSRegistry.GetSiteSearchPaths();
+    std::list<CFileName> all_site_files;
+    CUtils::FindAllFiles(search_path,"*.xml",all_site_files);
 
-    dir_enum.StartFindFile("*");
-    CFileName site_sid;
-    while( dir_enum.FindFile(site_sid) ) {
-        CAmsUUID    site_id;
-        CSite       site;
-        if( site_id.LoadFromString(site_sid) == false ) continue;
-        if( site.LoadConfig(site_sid) == false ) continue;
-
-        // site was found - return site id
-        if( site.GetName() == site_name ) return(site.GetID());
+    std::list<CFileName> all_sites;
+    for(CFileName site_file : all_site_files){
+        CFileName site_name = site_file.GetFileNameWithoutExt();
+        all_sites.push_back(site_name);
     }
-    dir_enum.EndFindFile();
+    all_sites.sort();
+    all_sites.unique();
 
-    // site was not found or it is not correctly configured
-    return("");
-}
+    std::set<CSmallString> allowed_sites;
+    HostGroup.GetAllowedSites(allowed_sites);
 
-//------------------------------------------------------------------------------
-
-const CSmallString CSiteController::GetSiteName(const CSmallString& site_sid)
-{
-    if( site_sid == NULL ) return("");
-    CSite   site;
-    if( site.LoadConfig(site_sid) == false ){
-        return("");
+    for(CFileName site : all_sites){
+        if( allowed_sites.count(site) == 0 ) continue;
+        if( GetActiveSite() == site ){
+            CSmallString act_site = "[" + site + "]";
+            list.push_back(act_site);
+        } else {
+            list.push_back(site);
+        }
     }
-    return(site.GetName());
 }
 
 //------------------------------------------------------------------------------
 
-bool CSiteController::IsSiteIDValid(const CSmallString& site_id)
+void CSiteController::GetAllSites(std::list<CSmallString>& list)
 {
-    CFileName config_path = AMSRegistry.GetETCDIR();
-    config_path = config_path / "sites" / site_id / "site.xml";
+    CFileName search_path = AMSRegistry.GetSiteSearchPaths();
+    std::list<CFileName> all_site_files;
+    CUtils::FindAllFiles(search_path,"*.xml",all_site_files);
 
-    if( CFileSystem::IsFile(config_path) == false ) return(false);
+    std::list<CFileName> all_sites;
+    for(CFileName site_file : all_site_files){
+        CFileName site_name = site_file.GetFileNameWithoutExt();
+        all_sites.push_back(site_name);
+    }
+    all_sites.sort();
+    all_sites.unique();
 
-    CSite   site;
-    return(site.LoadConfig(site_id));
+    std::set<CSmallString> allowed_sites;
+    HostGroup.GetAllowedSites(allowed_sites);
+
+    for(CFileName site : all_sites){
+        if( allowed_sites.count(site) == 0 ){
+            CSmallString other_site = "^" + site;
+            list.push_back(other_site);
+        } else {
+            if( GetActiveSite() == site ){
+                CSmallString act_site = "[" + site + "]";
+                list.push_back(act_site);
+            } else {
+                list.push_back(site);
+            }
+        }
+    }
 }
-
-
-//------------------------------------------------------------------------------
-
-bool CSite::IsActive(void)
-{
-    // get active site id
-    CSmallString active_site = AMSRegistry.GetActiveSiteID();
-
-    // compare with site id
-    return((active_site == GetID()) && (active_site.GetLength() > 0));
-}
-
-
 
 //==============================================================================
 //------------------------------------------------------------------------------

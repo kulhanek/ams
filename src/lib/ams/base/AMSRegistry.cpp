@@ -54,7 +54,10 @@ CAMSRegistry::CAMSRegistry(void)
 
 void CAMSRegistry::LoadRegistry(void)
 {
-
+    SiteFlavor = CShell::GetSystemVariable("AMS_FLAVOUR");
+    if( SiteFlavor == NULL ){
+        SiteFlavor = "regular";
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -164,7 +167,7 @@ const CFileName CAMSRegistry::GetHostGroup(void)
     if( CFileSystem::IsFile(host_group) ){
         return(host_group);
     }
-    CFileName paths  = GetDefaultHostGroupsPath();
+    CFileName paths  = GetHostGroupsSearchPaths();
     CFileName module = host_group;
     host_group = "host group '" + host_group + "' not found";
     CUtils::FindFile(paths,module,".xml",host_group);
@@ -173,16 +176,16 @@ const CFileName CAMSRegistry::GetHostGroup(void)
 
 //------------------------------------------------------------------------------
 
-const CFileName CAMSRegistry::GetDefaultHostGroupsPath(void)
+const CFileName CAMSRegistry::GetHostGroupsSearchPaths(void)
 {
     CFileName path = CShell::GetSystemVariable("AMS_HOST_GROUPS_PATH");
     if( path == NULL ){
         path = AMSRegistry.GetETCDIR() / "default" / "host-groups";
     } else {
         if( path[0] == ':' ){
-            path = AMSRegistry.GetETCDIR() / "default" / "host-groups" / path;
+            path = AMSRegistry.GetETCDIR() / "default" / "host-groups" + path;
         } else if ( path[path.GetLength()-1] == ':' ) {
-            path = path / AMSRegistry.GetETCDIR() / "default" / "host-groups";
+            path = path + AMSRegistry.GetETCDIR() / "default" / "host-groups";
         }
     }
     return(path);
@@ -190,16 +193,16 @@ const CFileName CAMSRegistry::GetDefaultHostGroupsPath(void)
 
 //------------------------------------------------------------------------------
 
-const CFileName CAMSRegistry::GetDefaultHostSubSystemsPath(void)
+const CFileName CAMSRegistry::GetHostSubSystemsSearchPaths(void)
 {
     CFileName path = CShell::GetSystemVariable("AMS_HOST_SUBSYSTEMS_PATH");
     if( path == NULL ){
         path = AMSRegistry.GetETCDIR() / "default" / "host-subsystems";
     } else {
         if( path[0] == ':' ){
-            path = AMSRegistry.GetETCDIR() / "default" / "host-subsystems" / path;
+            path = AMSRegistry.GetETCDIR() / "default" / "host-subsystems" + path;
         } else if ( path[path.GetLength()-1] == ':' ) {
-            path = path / AMSRegistry.GetETCDIR() / "default" / "host-subsystems";
+            path = path + AMSRegistry.GetETCDIR() / "default" / "host-subsystems";
         }
     }
     return(path);
@@ -213,6 +216,74 @@ const CFileName CAMSRegistry::GetUsersConfigFile(void)
 {
     CFileName path = AMSRegistry.GetETCDIR() / "default" / "users.xml";
     return(path);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+const CFileName CAMSRegistry::GetSiteSearchPaths(void)
+{
+    CFileName path = CShell::GetSystemVariable("AMS_SITE_PATH");
+    if( path == NULL ){
+        path = AMSRegistry.GetETCDIR() / "sites";
+    } else {
+        if( path[0] == ':' ){
+            path = AMSRegistry.GetETCDIR() / "sites" + path;
+        } else if ( path[path.GetLength()-1] == ':' ) {
+            path = path + AMSRegistry.GetETCDIR() / "sites";
+        }
+    }
+    return(path);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAMSRegistry::GetSiteFlavor(void) const
+{
+    return(SiteFlavor);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+const CFileName CAMSRegistry::GetPrintProfileSearchPaths(void)
+{
+    CFileName path = CShell::GetSystemVariable("AMS_PRINT_PROFILE_PATH");
+    if( path == NULL ){
+        path = AMSRegistry.GetETCDIR() / "print-profiles";
+    } else {
+        if( path[0] == ':' ){
+            path = AMSRegistry.GetETCDIR() / "print-profiles" + path;
+        } else if ( path[path.GetLength()-1] == ':' ) {
+            path = path + AMSRegistry.GetETCDIR() / "print-profiles";
+        }
+    }
+    return(path);
+}
+
+//------------------------------------------------------------------------------
+
+const CFileName CAMSRegistry::GetPrintProfileFile(void)
+{
+    CSmallString profile = "default";
+    // FIXME
+
+    CFileName path = GetPrintProfileSearchPaths();
+    CFileName config_file;
+    if( CUtils::FindFile(path,profile,".xml",config_file) ){
+        return(config_file);
+    }
+
+    // fallback to default profile
+    profile = "default";
+    path = AMSRegistry.GetETCDIR() / "default" / "print-profiles";
+    if( CUtils::FindFile(path,profile,".xml",config_file) ){
+        return(config_file);
+    }
+
+    RUNTIME_ERROR("no print profile found");
 }
 
 //==============================================================================

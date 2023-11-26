@@ -8,6 +8,7 @@ INCLUDE_DIRECTORIES(lib/ams/host SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/host/components SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/user SYSTEM)
 INCLUDE_DIRECTORIES(lib/ams/site SYSTEM)
+INCLUDE_DIRECTORIES(lib/ams/mods SYSTEM)
 
 # include sub-directories ------------------------------------------------------
 IF(AMS_CORE_ONLY)

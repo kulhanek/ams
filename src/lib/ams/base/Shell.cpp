@@ -23,10 +23,6 @@
 #include <Shell.hpp>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <pwd.h>
 #include <sstream>
 
 //==============================================================================
@@ -106,97 +102,6 @@ const CSmallString CShell::PrependValue(const CSmallString& value_list,
     }
 
     return(newlist);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-const CSmallString CShell::GetUserName(void)
-{
-    uid_t uid = geteuid();
-    struct passwd *pw = getpwuid(uid);
-    if( pw ) {
-        return(pw->pw_name);
-    }
-    return("");
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CShell::GetUMask(void)
-{
-   mode_t mumask = 0;
-   mumask = umask(mumask); // get umask - it destroys current setup
-   umask(mumask); // restore umask
-   return(CShell::GetUMask(mumask));
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CShell::GetUMaskPermissions(void)
-{
-    mode_t mumask = 0;
-    mumask = umask(mumask); // get umask - it destroys current setup
-    umask(mumask); // restore umask
-    return(CShell::GetUMaskPermissions(mumask));
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-const CSmallString CShell::GetUMask(mode_t mumask)
-{
-   std::stringstream str;
-   char c1 = (mumask & 0007) + '0';
-   char c2 = ((mumask & 0070) >> 3) + '0';
-   char c3 = ((mumask & 0700) >> 6) + '0';
-   str << c3 << c2 << c1;
-   return(str.str());
-}
-
-//------------------------------------------------------------------------------
-
-mode_t CShell::GetUMaskMode(const CSmallString& smask)
-{
-    if( smask.GetLength() < 3 ) return(0777);
-    mode_t mode = ((smask[0]-'0') << 6) | ((smask[1]-'0') << 3) | (smask[2]-'0');
-    return(mode);
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CShell::GetUMaskPermissions(mode_t mumask)
-{
-    std::stringstream str;
-    char c1 = (mumask & 0007);
-    char c2 = ((mumask & 0070) >> 3);
-    char c3 = ((mumask & 0700) >> 6);
-
-    str << "files: ";
-    if( (c3 & 04) == 0 ) str << "r"; else str << "-";
-    if( (c3 & 02) == 0 ) str << "w"; else str << "-";
-    str << "-";
-    if( (c2 & 04) == 0 ) str << "r"; else str << "-";
-    if( (c2 & 02) == 0 ) str << "w"; else str << "-";
-    str << "-";
-    if( (c1 & 04) == 0 ) str << "r"; else str << "-";
-    if( (c1 & 02) == 0 ) str << "w"; else str << "-";
-    str << "-";
-
-    str << " dirs: ";
-    if( (c3 & 04) == 0 ) str << "r"; else str << "-";
-    if( (c3 & 02) == 0 ) str << "w"; else str << "-";
-    if( (c3 & 01) == 0 ) str << "x"; else str << "-";
-    if( (c2 & 04) == 0 ) str << "r"; else str << "-";
-    if( (c2 & 02) == 0 ) str << "w"; else str << "-";
-    if( (c2 & 01) == 0 ) str << "x"; else str << "-";
-    if( (c1 & 04) == 0 ) str << "r"; else str << "-";
-    if( (c1 & 02) == 0 ) str << "w"; else str << "-";
-    if( (c1 & 01) == 0 ) str << "x"; else str << "-";
-
-    return(str.str());
 }
 
 //==============================================================================

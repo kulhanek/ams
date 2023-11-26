@@ -27,6 +27,7 @@
 #include <AMSMainHeader.hpp>
 #include <SmallString.hpp>
 #include <FileName.hpp>
+#include <list>
 
 //------------------------------------------------------------------------------
 
@@ -39,14 +40,23 @@ public:
 // some common print techniques
     /// print comma delimited tokens
     static void PrintTokens(std::ostream& sout, const CSmallString& title,
-                            const CSmallString& res_list, int ncolumns=-1);
+                            const CSmallString& res_list, int ncolumns=-1,char firstchar='#');
+
+    /// print comma delimited tokens
+    static void PrintTokens(std::ostream& sout, const CSmallString& title,
+                            std::list<CSmallString>& list, int ncolumns=-1,char firstchar='#');
 
     /// find file in paths
     static bool FindFile(const CFileName& search_paths, const CFileName& module,
                          const CFileName& ext, CFileName& output_file);
 
-    /// get group ID
-    static gid_t GetGroupID(const CSmallString& name,bool trynobody=true);
+    /// find all files in paths
+    static void FindAllFilesInPaths(const CFileName& search_paths, const CFileName& pattern,
+                         std::list<CFileName>& list);
+
+    /// find all files in given path
+    static void FindAllFiles(const CFileName& path, const CFileName& pattern,
+                         std::list<CFileName>& list);
 };
 
 //------------------------------------------------------------------------------

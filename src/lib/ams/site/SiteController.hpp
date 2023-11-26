@@ -24,32 +24,37 @@
 // =============================================================================
 
 #include <AMSMainHeader.hpp>
-#include <SmallString.hpp>
-#include <XMLElement.hpp>
+#include <FileName.hpp>
+#include <list>
 
 //------------------------------------------------------------------------------
 
 class AMS_PACKAGE CSiteController {
 public:
+// constructor and destructor --------------------------------------------------
+    CSiteController(void);
+    ~CSiteController(void);
+
+// setup methods ---------------------------------------------------------------
+    /// init site controller configuration
+    void InitSiteControllerConfig(void);
+
 // site methods ----------------------------------------------------------------
-    /// lookup for site id from site name
-    static const CSmallString GetSiteID(const CSmallString& site_name);
+    /// get active site
+    const CSmallString& GetActiveSite(void) const;
 
-    /// lookup for site name from site id
-    static const CSmallString GetSiteName(const CSmallString& site_id);
+    /// get site config
+    const CFileName GetSiteConfig(const CSmallString& name);
 
-    /// is site id valid
-    static bool IsSiteIDValid(const CSmallString& site_id);
+    /// list available sites
+    void GetAvailableSites(std::list<CSmallString>& list);
 
-    bool IsActive(void);
-
-    /// can be site activated on this host?
-    bool CanBeActivated(void);
+    /// list all sites
+    void GetAllSites(std::list<CSmallString>& list);
 
 // section of private data ----------------------------------------------------
 private:
-    CSmallString    ActiveSiteName;
-    CSmallString    ActiveSiteID;
+    CSmallString    ActiveSite;
 };
 
 //------------------------------------------------------------------------------

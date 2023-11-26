@@ -33,6 +33,7 @@
 #include <AMSRegistry.hpp>
 #include <FileSystem.hpp>
 #include <Utils.hpp>
+#include <UserUtils.hpp>
 #include <Shell.hpp>
 #include <iomanip>
 #include <boost/algorithm/string/split.hpp>
@@ -102,7 +103,7 @@ void CHost::InitHostSubSystems(const CFileName& host_subsystems)
     }
 
 // subsystems
-    CFileName   path = AMSRegistry.GetDefaultHostSubSystemsPath();
+    CFileName   path = AMSRegistry.GetHostSubSystemsSearchPaths();
     std::string modules = string(host_subsystems);
     std::vector<CFileName>  module_list;
     split(module_list,modules,is_any_of(","),boost::token_compress_on);
@@ -421,9 +422,9 @@ void CHost::PrintHostInfo(CVerboseStr& vout)
 void CHost::PrintHostInfoForSite(CVerboseStr& vout)
 {
     if( IsLoadedFromCache() ){
-    vout << "# ~~~ Host info ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [cached] ~~" << endl;
+    vout << "# ~~~ <b>Host info</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [cached] ~~" << endl;
     } else {
-    vout << "# ~~~ Host info ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    vout << "# ~~~ <b>Host info</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     }
     vout << "# Full host name      : " << GetHostName() << endl;
     vout << "# Num of host CPUs    : " << setw(4) << left << GetNumOfHostCPUs();
@@ -456,7 +457,7 @@ const CFileName CHost::GetDefaultHostCacheName(void)
         host_cache_dir = "/tmp";
     }
     CFileName host_cache;
-    host_cache = host_cache_dir / "ams_cache_r09." + CShell::GetUserName();
+    host_cache = host_cache_dir / "ams_cache_r09." + CUserUtils::GetUserName();
     return(host_cache);
 }
 

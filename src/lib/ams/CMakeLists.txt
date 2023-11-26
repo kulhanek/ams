@@ -6,13 +6,14 @@
 SET(AMS_SRC
         AMSMainHeader.cpp
 
-    # BASE
+    # BASE 
         base/AmsUUID.cpp
         base/Shell.cpp
         base/ShellProcessor.cpp
         base/Utils.cpp
         base/CudaRT.cpp
         base/AMSRegistry.cpp
+        base/PrintEngine.cpp
 
     # HOST
         host/HostGroup.cpp
@@ -28,10 +29,17 @@ SET(AMS_SRC
         host/components/HostCompat.cpp
 
     # USER
+        user/UserUtils.cpp
         user/User.cpp
 
     # SITE
+        site/SiteController.cpp
         site/Site.cpp
+
+    # MODULES
+        mods/ModUtils.cpp
+        mods/ModCache.cpp
+        mods/ModBundle.cpp
     )
 
 # create shared library --------------------------------------------------------

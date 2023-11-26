@@ -63,11 +63,14 @@ public:
     /// is site adaptive?
     bool IsSiteAdaptive(void);
 
-    /// get site environment block
-    CXMLElement* GetSiteEnvoronment(void);
+    /// purge module during site activation
+    bool IsPurgeModuleSet(void);
 
-    /// return short site description
-    void GetAutoloadedModules(std::list<CSmallString>& modules, const CSmallString& flavor);
+    /// get site environment block
+    CXMLElement* GetSiteEnvironment(void);
+
+    /// return short site description, these module are not exported
+    void GetAutoloadedModules(std::list<CSmallString>& modules);
 
 // print information about site -----------------------------------------------
     /// print short info about site
@@ -75,6 +78,9 @@ public:
 
     /// print full info about site
     void PrintFullSiteInfo(CVerboseStr& vout);
+
+    /// print list of autoloaded modules
+    void PrintAutoloadedModules(CVerboseStr& vout);
 
 // section of private data ----------------------------------------------------
 private:

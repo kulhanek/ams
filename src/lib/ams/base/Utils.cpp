@@ -40,8 +40,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <XMLElement.hpp>
-#include <sys/types.h>
-#include <grp.h>
+#include <fnmatch.h>
 
 //------------------------------------------------------------------------------
 
@@ -65,25 +64,33 @@ CSmallString CUtils::GenerateUUID(void)
 //==============================================================================
 
 void CUtils::PrintTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list,
-                         int ncolumns)
+                         int ncolumns,char firstchar)
 {
-    string          svalue = string(res_list);
-    vector<string>  items;
+    string                      svalue = string(res_list);
+    std::list<CSmallString>   list;
+
+    // split to items
+    split(list,svalue,is_any_of(","));
+
+    CUtils::PrintTokens(sout,title,list,ncolumns,firstchar);
+}
+
+//------------------------------------------------------------------------------
+
+void CUtils::PrintTokens(std::ostream& sout, const CSmallString& title,
+                        std::list<CSmallString>& list, int ncolumns,char firstchar)
+{
     if( ncolumns < 0 ) {
         int nrow;
         ncolumns = 80;
         CTerminal::GetSize(nrow,ncolumns);
     }
-
-    // split to items
-    split(items,svalue,is_any_of(","));
-
-    std::vector<string>::iterator it = items.begin();
-    std::vector<string>::iterator ie = items.end();
+    std::list<CSmallString>::iterator it = list.begin();
+    std::list<CSmallString>::iterator ie = list.end();
 
     sout << title;
 
-    if(res_list == NULL ){
+    if( list.empty() ){
         sout << "-none-" << endl;
         return;
     }
@@ -91,20 +98,27 @@ void CUtils::PrintTokens(std::ostream& sout,const CSmallString& title, const CSm
     int len = title.GetLength();
 
     while( it != ie ){
-        string sres = *it;
+        CSmallString sres = *it;
         sout << sres;
-        len += sres.size();
+        len += sres.GetLength();
         len++;
         it++;
         if( it != ie ){
-            string sres = *it;
+            CSmallString sres = *it;
             int tlen = len;
-            tlen += sres.size();
+            tlen += sres.GetLength();
             tlen++;
             if( tlen > ncolumns ){
                 sout << "," << endl;
-                for(unsigned int i=0; i < title.GetLength(); i++){
-                    sout << " ";
+                if( firstchar != 0 ){
+                      sout << firstchar;
+                      for(unsigned int i=1; i < title.GetLength(); i++){
+                          sout << " ";
+                      }
+                } else {
+                    for(unsigned int i=0; i < title.GetLength(); i++){
+                        sout << " ";
+                    }
                 }
                 len = title.GetLength();
             } else {
@@ -139,23 +153,47 @@ bool CUtils::FindFile(const CFileName& search_paths,const CFileName& module,cons
     return(false);
 }
 
-//==============================================================================
 //------------------------------------------------------------------------------
-//==============================================================================
 
-gid_t CUtils::GetGroupID(const CSmallString& name,bool trynobody)
+void CUtils::FindAllFilesInPaths(const CFileName& search_paths, const CFileName& pattern,
+                     std::list<CFileName>& list)
 {
-    struct group *p_grp = getgrnam(name);
-    if( p_grp == NULL ){
-        if( trynobody ){
-            CSmallString error;
-            error << "no gid for '" << name << "' - trying to use nogroup as bypass";
-            ES_ERROR(error);
-            p_grp = getgrnam("nogroup");
-        }
-        if( p_grp == NULL ) return(-1);
+    std::vector<CFileName> paths;
+    std::string            spaths = string(search_paths);
+    split(paths,spaths,is_any_of(":"),boost::token_compress_on);
+
+    for(CFileName path : paths){
+        FindAllFiles(path,pattern,list);
     }
-    return(p_grp->gr_gid);
+}
+
+//------------------------------------------------------------------------------
+
+void CUtils::FindAllFiles(const CFileName& path, const CFileName& pattern,
+                     std::list<CFileName>& list)
+{
+    CDirectoryEnum penum(path);
+
+    if( penum.StartFindFile("*") == false ) {
+        return;
+    }
+
+    CFileName file;
+    while( penum.FindFile(file) == true ) {
+        if( file == "." ) continue;
+        if( file == ".." ) continue;
+
+        CFileName full_name = path / file;
+        if( CFileSystem::IsDirectory(full_name) ){
+            FindAllFiles(full_name,pattern,list);
+        } else {
+            if( fnmatch(pattern,file,0) == 0 ){
+                list.push_back(full_name);
+            }
+        }
+    }
+
+    penum.EndFindFile();
 }
 
 //==============================================================================

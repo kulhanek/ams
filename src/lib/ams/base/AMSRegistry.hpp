@@ -67,19 +67,34 @@ public:
     const CFileName GetHostGroup(void);
 
     /// return column separated paths for host groups configurations
-    const CFileName GetDefaultHostGroupsPath(void);
+    const CFileName GetHostGroupsSearchPaths(void);
 
     /// return column separated paths for host submodule configurations
-    const CFileName GetDefaultHostSubSystemsPath(void);
+    const CFileName GetHostSubSystemsSearchPaths(void);
 
 // users configuration ---------------------------------------------------------
     /// return full file name to the users configurations
     const CFileName GetUsersConfigFile(void);
 
-// section of private data ----------------------------------------------------
+// site configuration ----------------------------------------------------------
+    /// return column separated paths for site configurations
+    const CFileName GetSiteSearchPaths(void);
+
+    /// get site flavor
+    const CSmallString GetSiteFlavor(void) const;
+
+// print engine setup ----------------------------------------------------------
+    /// return column separated paths for print profiles
+    const CFileName GetPrintProfileSearchPaths(void);
+
+    /// return full file name to the print profile
+    const CFileName GetPrintProfileFile(void);
+
+// section of private data -----------------------------------------------------
 private:
     CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT variable
     CXMLDocument    Config;             // global config data
+    CSmallString    SiteFlavor;
 
     /// get user global setup dir
     const CFileName GetUserGlobalConfigDir(void);

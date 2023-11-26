@@ -30,12 +30,14 @@
 #include <XMLParser.hpp>
 #include <FileSystem.hpp>
 #include <fnmatch.h>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
-//using namespace boost;
-//using namespace boost::algorithm;
+using namespace boost;
+using namespace boost::algorithm;
 
 //------------------------------------------------------------------------------
 
@@ -180,7 +182,7 @@ const CFileName CHostGroup::GetHostSubSystems(void)
 
 const CSmallString CHostGroup::GetDefaultSite(void)
 {
-    CXMLElement* p_ele = HostGroup.GetFirstChildElement("group/sites");
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/sites");
     if( p_ele == NULL ){
         CSmallString warning;
         warning << "no sites defined in the file '" << HostGroupFile << "'";
@@ -193,6 +195,26 @@ const CSmallString CHostGroup::GetDefaultSite(void)
         RUNTIME_ERROR(warning);
     }
     return(default_site);
+}
+
+//------------------------------------------------------------------------------
+
+void CHostGroup::GetAllowedSites(std::set<CSmallString>& list)
+{
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/sites");
+    if( p_ele == NULL ){
+        CSmallString warning;
+        warning << "no sites defined in the file '" << HostGroupFile << "'";
+        RUNTIME_ERROR(warning);
+    }
+    std::string allowed_sites;
+    if( p_ele->GetAttribute("allowed",allowed_sites) == false ){
+        // keep without warning
+        return;
+    }
+    split(list,allowed_sites,boost::is_any_of(","));
+
+    list.insert(GetDefaultSite());
 }
 
 //------------------------------------------------------------------------------

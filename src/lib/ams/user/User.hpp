@@ -101,7 +101,6 @@ private:
     std::list<CSmallString>     AMSACLGroups;
     std::list<CSmallString>     AllACLGroups;          // only those groups in which the user belongs
 
-
     /// init user from the system
     void InitPosixUser(void);
 

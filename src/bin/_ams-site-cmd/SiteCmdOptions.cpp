@@ -1,6 +1,7 @@
 // =============================================================================
 // AMS
 // -----------------------------------------------------------------------------
+//    Copyright (C) 2023      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
@@ -20,6 +21,7 @@
 // =============================================================================
 
 #include "SiteCmdOptions.hpp"
+#include <SiteController.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -68,22 +70,13 @@ int CSiteCmdOptions::CheckArguments(void)
 {
     if( GetNumberOfProgArgs() == 0 ) {
         Action = "avail";
+        Site = SiteController.GetActiveSite();
         return(SO_CONTINUE);
     }
 
     if( GetNumberOfProgArgs() == 1 ) {
         Action = GetProgArg(0);
-        if( GetProgArg(0) == "avail" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "listavail" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "info" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "active" ) return(SO_CONTINUE);
-
-        if( (GetProgArg(0) == "activate") ||
-                (GetProgArg(0) == "isactive") ||
-                (GetProgArg(0) == "isallowed") ||
-                (GetProgArg(0) == "id") ||
-                (GetProgArg(0) == "listamods") ) {
+        if( GetProgArg(0) == "activate" ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
                 fprintf(stderr,"%s: specified action '%s' requires the specification of site\n",
@@ -92,25 +85,12 @@ int CSiteCmdOptions::CheckArguments(void)
             }
             return(SO_OPTS_ERROR);
         }
-        if( IsVerbose() ) {
-            if( IsError == false ) fprintf(stderr,"\n");
-            fprintf(stderr,"%s: specified action '%s' is not supported\n",
-                    (const char*)GetProgramName(), (const char*)GetProgArg(0));
-            IsError = true;
-        }
-        return(SO_OPTS_ERROR);
+        Site = SiteController.GetActiveSite();
+        return(SO_CONTINUE);
     }
 
     if( GetNumberOfProgArgs() == 2 ) {
         Action = GetProgArg(0);
-        Site = GetProgArg(1);
-        if( GetProgArg(0) == "activate" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "info" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "isactive" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "isallowed" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "id" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "listamods" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "avail" ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
@@ -120,22 +100,8 @@ int CSiteCmdOptions::CheckArguments(void)
             }
             return(SO_OPTS_ERROR);
         }
-        if( GetProgArg(0) == "active" ) {
-            if( IsVerbose() ) {
-                if( IsError == false ) fprintf(stderr,"\n");
-                fprintf(stderr,"%s: action 'actname' cannot be specified with site name\n",
-                        (const char*)GetProgramName());
-                IsError = true;
-            }
-            return(SO_OPTS_ERROR);
-        }
-        if( IsVerbose() ) {
-            if( IsError == false ) fprintf(stderr,"\n");
-            fprintf(stderr,"%s: specified action '%s' is not supported\n",
-                    (const char*)GetProgramName(), (const char*)GetProgArg(0));
-            IsError = true;
-        }
-        return(SO_OPTS_ERROR);
+        Site = GetProgArg(1);
+        return(SO_CONTINUE);
     }
 
     if( IsVerbose() ) {

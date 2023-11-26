@@ -38,7 +38,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <Shell.hpp>
+#include <UserUtils.hpp>
 #include <Utils.hpp>
 
 //------------------------------------------------------------------------------
@@ -274,6 +274,13 @@ const CSmallString& CUser::GetName(void) const
 
 //------------------------------------------------------------------------------
 
+uid_t CUser::GetUserID(void) const
+{
+    return(UID);
+}
+
+//------------------------------------------------------------------------------
+
 const CSmallString& CUser::GetRGroup(void) const
 {
     return(RGroup);
@@ -351,7 +358,8 @@ void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
     vout << endl;
     vout << "# User name          : " << Name << " (uid: " << UID << ")" << endl;
     vout << "# Real group name    : " << RGroup << " (gid: " << RGID << ")" << endl;
-    vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ") [umask: " << CShell::GetUMask() << " " << CShell::GetUMaskPermissions() << "]" << endl;
+    // FIXME - cover situations with umask change via shellprocessor
+    vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ") [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
 
     vout << "# ==============================================================================" << endl;
     vout << "# Configuration      : " << ConfigName <<  endl;
@@ -395,13 +403,13 @@ void CUser::PrintUserInfo(CVerboseStr& vout)
 void CUser::PrintUserInfoForSite(CVerboseStr& vout)
 {
     // user and host info
-    vout << endl;
-    vout << "# ~~~ User identification";
+    vout << "# ~~~ <b>User identification</b>";
     for(int n=25; n < 80;n++) vout << "~";
     vout << endl;
 
-    vout << "# User name  : " << GetName() << endl;
-    vout << "# User group : " << GetEGroup() << " [umask: " << CShell::GetUMask() << " " << CShell::GetUMaskPermissions() << "]" << endl;
+    vout <<                  "# User name  : " << GetName() << endl;
+    // FIXME - cover situations with umask change via shellprocessor
+    vout <<                  "# User group : " << GetEGroup() << " [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
     CUtils::PrintTokens(vout,"# ACL groups : ",GetACLGroups(),80);
 }
 
@@ -409,14 +417,8 @@ void CUser::PrintUserInfoForSite(CVerboseStr& vout)
 
 const CSmallString CUser::GetRequestedUserUMask(void)
 {
+    // FIXME - AMSERegistry > users.xml > default_umask
     return( AMSRegistry.GetUserUMask() );
-}
-
-//------------------------------------------------------------------------------
-
-uid_t CUser::GetUserID(void) const
-{
-    return(UID);
 }
 
 //==============================================================================
