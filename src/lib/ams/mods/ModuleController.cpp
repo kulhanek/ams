@@ -21,24 +21,16 @@
 //     Boston, MA  02110-1301  USA
 // =============================================================================
 
-#include <Utils.hpp>
-#include <string.h>
-#include <Site.hpp>
-#include <DirectoryEnum.hpp>
-#include <FileName.hpp>
-#include <FileSystem.hpp>
-#include <AmsUUID.hpp>
-#include <errno.h>
-#include <ErrorSystem.hpp>
-#include <XMLIterator.hpp>
+#include <ModuleController.hpp>
 #include <AMSRegistry.hpp>
-#include <iomanip>
-#include <list>
+#include <Shell.hpp>
+#include <ErrorSystem.hpp>
+#include <ModUtils.hpp>
+#include <Utils.hpp>
+#include <PrintEngine.hpp>
+
 #include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <XMLElement.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -46,39 +38,107 @@ using namespace std;
 using namespace boost;
 using namespace boost::algorithm;
 
+//------------------------------------------------------------------------------
+
+CModuleController  ModuleController;
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-ActiveModules      = CShell::GetSystemVariable("AMS_ACTIVE_MODULES");
-ExportedModules    = CShell::GetSystemVariable("AMS_EXPORTED_MODULES");
-
-
-bool CAMSRegistry::IsModuleActive(const CSmallString& module)
+void CModuleController::InitModuleControllerConfig(void)
 {
-    char* p_lvar;
-    if( ActiveModules == NULL ) return(false);
+// these are host specific informations; they can be restored from AMS registry in jobs
+    BundleName  = AMSRegistry.GetBundleName();
+    BundlePath  = AMSRegistry.GetBundlePath();
 
-    CSmallString name,ver,arch,para;
+// these are runtime informations
+    std::string sActiveModules   = std::string(CShell::GetSystemVariable("AMS_ACTIVE_MODULES"));
+    if( ! sActiveModules.empty() ) split(ActiveModules,sActiveModules,is_any_of("|"),boost::token_compress_on);
 
-    CUtils::ParseModuleName(module,name,ver,arch,para);
+    std::string sExportedModules = std::string(CShell::GetSystemVariable("AMS_EXPORTED_MODULES"));
+    if( ! sExportedModules.empty() ) split(ExportedModules,sExportedModules,is_any_of("|"),boost::token_compress_on);
+}
 
-    CSmallString tmp(ActiveModules);
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
 
-    // generate list of active modules
-    std::vector<CSmallString> active_list;
+void CModuleController::LoadBundles(EModBundleCache type)
+{
+    std::list<CFileName>    names;
+    std::list<CFileName>    paths;
 
-    char* p_saveptr = NULL;
-    p_lvar = strtok_r(tmp.GetBuffer(),"|",&p_saveptr);
-    while( p_lvar != NULL ) {
-        active_list.push_back(p_lvar);
-        p_lvar = strtok_r(NULL,"|",&p_saveptr);
+    std::string sname(BundleName);
+    std::string spath(BundlePath);
+
+    split(names,sname,is_any_of(","));
+    split(paths,spath,is_any_of(":"));
+
+    for(CFileName name : names){
+        for(CFileName path : paths){
+            if( CModBundle::IsBundle(path,name) == false ) continue;
+            CModBundlePtr p_bundle(new CModBundle());
+            if( p_bundle->InitBundle(path/name) == false ){
+                // this is fishy - record
+                CSmallString warning;
+                warning << "unable to init bunde '" << path / name << "'";
+                ES_WARNING(warning);
+                continue;
+            }
+            if( p_bundle->LoadCache(type) == false ){
+                // this is fishy - record
+                CSmallString warning;
+                warning << "unable to load cache for bundle '" << path / name << "'";
+                ES_WARNING(warning);
+                continue;
+            }
+            Bundles.push_back(p_bundle);
+            break;
+        }
     }
+}
 
-    for(unsigned int i=0; i < active_list.size(); i++) {
-        CSmallString mactive = active_list[i];
+//------------------------------------------------------------------------------
+
+void CModuleController::PrintBundlesInfo(CVerboseStr& vout)
+{
+    vout << "# *** Bundle Setup *** " << endl;
+    vout << "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    CUtils::PrintTokens(vout,"# Bundle names : ",BundleName,",",80,'#');
+    CUtils::PrintTokens(vout,"# Bundle paths : ",BundlePath,":",80,'#');
+
+    vout << endl;
+    vout << ">>>>> Loaded Bundles" << endl;
+    for( CModBundlePtr p_bundle : Bundles ){
+        vout << endl;
+        p_bundle->PrintInfo(vout,true);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModuleController::MergeBundles(void)
+{
+    for( CModBundlePtr p_bundle : Bundles ){
+        CXMLElement* p_cache = p_bundle->GetCacheElement();
+        CXMLElement* p_config = p_bundle->GetBundleElement();
+        ModCache.MergeWithCache(p_cache,p_config);
+    }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModuleController::IsModuleActive(const CSmallString& module)
+{
+    CSmallString name,ver,arch,para;
+    CModUtils::ParseModuleName(module,name,ver,arch,para);
+
+    for(CSmallString mactive : ActiveModules){
         CSmallString lname,lver,larch,lpara;
-        CUtils::ParseModuleName(mactive,lname,lver,larch,lpara);
+        CModUtils::ParseModuleName(mactive,lname,lver,larch,lpara);
         if( lname == name ) {
             if( ver == NULL ) return(true);
             if( lver == ver ) {
@@ -98,33 +158,17 @@ bool CAMSRegistry::IsModuleActive(const CSmallString& module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CAMSRegistry::GetActiveModuleVersion(const CSmallString& module,
-        CSmallString& actver)
+bool CModuleController::GetActiveModuleVersion(const CSmallString& module,
+                                               CSmallString& actver)
 {
-    char* p_lvar;
     actver = NULL;
-    if( ActiveModules == NULL ) return(false);
 
     CSmallString name,ver,arch,para;
+    CModUtils::ParseModuleName(module,name,ver,arch,para);
 
-    CUtils::ParseModuleName(module,name,ver,arch,para);
-
-    CSmallString tmp(ActiveModules);
-
-    // generate list of active modules
-    std::vector<CSmallString> active_list;
-
-    char* p_saveptr = NULL;
-    p_lvar = strtok_r(tmp.GetBuffer(),"|",&p_saveptr);
-    while( p_lvar != NULL ) {
-        active_list.push_back(p_lvar);
-        p_lvar = strtok_r(NULL,"|",&p_saveptr);
-    }
-
-    for(unsigned int i=0; i < active_list.size(); i++) {
-        CSmallString mactive = active_list[i];
+    for(CSmallString mactive : ActiveModules){
         CSmallString lname,lver,larch,lpara;
-        CUtils::ParseModuleName(mactive,lname,lver,larch,lpara);
+        CModUtils::ParseModuleName(mactive,lname,lver,larch,lpara);
         if( lname == name ) {
             if( ver == NULL ) {
                 actver = lver;
@@ -154,87 +198,134 @@ bool CAMSRegistry::GetActiveModuleVersion(const CSmallString& module,
 
 //------------------------------------------------------------------------------
 
-const CSmallString& CAMSRegistry::GetActiveModules(void)
+const CSmallString CModuleController::GetActiveModules(void)
 {
-    return(ActiveModules);
+    // FIXME
+    return("");
+    //return(ActiveModules);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString& CAMSRegistry::GetExportedModules(void)
+const CSmallString CModuleController::GetExportedModules(void)
 {
-    return(ExportedModules);
+    // FIXME
+    return("");
+    //return(ExportedModules);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CAMSRegistry::GetActiveModuleSpecification(
-    const CSmallString& name)
+const CSmallString CModuleController::GetActiveModuleSpecification(const CSmallString& name)
 {
-    if( ActiveModules == NULL ) return("");
-
-    char* p_lvar;
-
-    CSmallString tmp(ActiveModules);
-
-    char* p_saveptr = NULL;
-    p_lvar = strtok_r(tmp.GetBuffer(),"|",&p_saveptr);
-    while( p_lvar != NULL ) {
-        if( CUtils::GetModuleName(p_lvar) == name ) {
-            return(p_lvar);
-        }
-        p_lvar = strtok_r(NULL,"|",&p_saveptr);
+    for(CSmallString mactive : ActiveModules){
+        if( CModUtils::GetModuleName(mactive) == name ) return(mactive);
     }
-
     return("");
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CAMSRegistry::GetExportedModuleSpecification(
-    const CSmallString& name)
+const CSmallString CModuleController::GetExportedModuleSpecification(const CSmallString& name)
 {
-    if( ExportedModules == NULL ) return("");
-
-    char* p_lvar;
-
-    CSmallString tmp(ExportedModules);
-
-    char* p_saveptr = NULL;
-    p_lvar = strtok_r(tmp.GetBuffer(),"|",&p_saveptr);
-    while( p_lvar != NULL ) {
-        if( CUtils::GetModuleName(p_lvar) == name ) {
-            return(p_lvar);
-        }
-        p_lvar = strtok_r(NULL,"|",&p_saveptr);
+    for(CSmallString mexported : ExportedModules){
+        if( CModUtils::GetModuleName(mexported) == name ) return(mexported);
     }
-
     return("");
 }
 
 //-----------------------------------------------------------------------------
 
-void CAMSRegistry::UpdateActiveModules(const CSmallString& module,
-        bool add_module)
+void CModuleController::UpdateActiveModules(const CSmallString& module,
+                                            bool add_module)
 {
-    ActiveModules = CShell::RemoveValue(ActiveModules,module,"|");
-    if( add_module) ActiveModules = CShell::AppendValue(ActiveModules,module,"|");
+    ActiveModules.remove(module);
+    if( add_module) ActiveModules.push_back(module);
 }
 
 //-----------------------------------------------------------------------------
 
-void CAMSRegistry::UpdateExportedModules(const CSmallString& module,
-        bool add_module)
+void CModuleController::UpdateExportedModules(const CSmallString& module,
+                                              bool add_module)
 {
-    ExportedModules = CShell::RemoveValue(ExportedModules,module,"|");
-    if( add_module) ExportedModules = CShell::AppendValue(ExportedModules,module,"|");
+    ExportedModules.remove(module);
+    if( add_module) ExportedModules.push_back(module);
 }
 
 //-----------------------------------------------------------------------------
 
-void CAMSRegistry::SetExportedModules(const CSmallString& modules)
+void CModuleController::SetExportedModules(const CSmallString& modules)
 {
-    ExportedModules = modules;
+    // FIXME
+   // ExportedModules = modules;
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CModuleController::PrintModActiveModules(CTerminal& terminal)
+{
+    PrintEngine.PrintHeader(terminal,"ACTIVE MODULES",EPEHS_SECTION);
+
+    int maxmodlen = 0;
+    for(CSmallString mactive : ActiveModules){
+        int len = mactive.GetLength();
+        if( len > maxmodlen ) maxmodlen = len;
+    }
+    // do not count exported modules - their names are always shorter
+    maxmodlen++;
+
+    terminal.Printf("\n");
+    if( ActiveModules.size() == 0 ){
+        std::list<CSmallString> none;
+        none.push_back("-none-");
+        PrintEngine.PrintItems(terminal,none,maxmodlen);
+    } else {
+        PrintEngine.PrintItems(terminal,ActiveModules,maxmodlen);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModuleController::PrintModExportedModules(CTerminal& terminal)
+{
+    PrintEngine.PrintHeader(terminal,"EXPORTED MODULES",EPEHS_SECTION);
+
+    int maxmodlen = 0;
+    for(CSmallString mactive : ActiveModules){
+        int len = mactive.GetLength();
+        if( len > maxmodlen ) maxmodlen = len;
+    }
+    // do not count exported modules - their names are always shorter
+    maxmodlen++;
+
+    terminal.Printf("\n");
+    if( ExportedModules.size() == 0 ){
+        std::list<CSmallString> none;
+        none.push_back("-none-");
+        PrintEngine.PrintItems(terminal,none,maxmodlen);
+    } else {
+        PrintEngine.PrintItems(terminal,ExportedModules,maxmodlen);
+    }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModuleController::ReactivateModules(CVerboseStr& out)
+{
+    // FIXME
+    return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModuleController::PurgeModules(CVerboseStr& out)
+{
+    // FIXME
+    return(false);
 }
 
 //==============================================================================

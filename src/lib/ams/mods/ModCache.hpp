@@ -28,6 +28,7 @@
 #include <XMLDocument.hpp>
 #include <FileName.hpp>
 #include <Terminal.hpp>
+#include <VerboseStr.hpp>
 #include <list>
 
 //------------------------------------------------------------------------------
@@ -51,12 +52,22 @@ public:
     /// clean build - remove comments and text nodes
     void CleanBuild(CXMLNode* p_bele);
 
+    // merge caches - p_origin is bundle config
+    void MergeWithCache(CXMLElement* p_bcele,CXMLElement* p_origin=NULL);
+
+    /// create empty cache and return pointer to <cache> element
+    CXMLElement* CreateEmptyCache(void);
+
 // information methods ---------------------------------------------------------
     /// get module element
     CXMLElement* GetModule(const CSmallString& name,bool create=false);
 
     /// create module element
     CXMLElement* CreateModule(const CSmallString& name);
+
+    /// return default setup for the module
+    bool GetModuleDefaults(CXMLElement* p_mele,
+                           CSmallString& ver, CSmallString& arch, CSmallString& mode);
 
     /// get module categories
     void GetCategories(std::list<CSmallString>& list);
@@ -70,8 +81,29 @@ public:
     /// get module versions - sorted by veridx
     void GetModuleVersionsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
 
+    /// get module builds
+    void GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
+
     /// print available modules
     void PrintAvail(CTerminal& terminal,bool includever=false,bool includesys=false);
+
+    /// print module versions
+    void PrintModuleVersions(CVerboseStr& out, const CSmallString& module);
+
+    /// print module builds
+    void PrintModuleBuilds(CVerboseStr& vout, const CSmallString& module);
+
+    /// print module origin
+    void PrintModuleOrigin(CVerboseStr& vout, const CSmallString& module);
+
+    /// get number of modules
+    int GetNumberOfModules(void);
+
+    /// get number of categories
+    int GetNumberOfCategories(void);
+
+    /// return cache element
+    CXMLElement* GetCacheElement(void);
 
 // section of protected data ---------------------------------------------------
 protected:

@@ -290,3 +290,21 @@ const CFileName CAMSRegistry::GetPrintProfileFile(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
+const CFileName CAMSRegistry::GetBundleName(void)
+{
+    CFileName name = CShell::GetSystemVariable("AMS_BUNDLE_NAME");
+    return(name);
+}
+
+//------------------------------------------------------------------------------
+
+const CFileName CAMSRegistry::GetBundlePath(void)
+{
+    CFileName path = CShell::GetSystemVariable("AMS_BUNDLE_PATH");
+    return(path);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+

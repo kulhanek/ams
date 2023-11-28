@@ -29,23 +29,19 @@
 #include <XMLPrinter.hpp>
 #include <XMLParser.hpp>
 #include <ErrorSystem.hpp>
-#include <XMLComment.hpp>
 #include <Utils.hpp>
 #include <ModUtils.hpp>
 #include <iomanip>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <PrintEngine.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
 using namespace boost;
 using namespace boost::algorithm;
-
-//------------------------------------------------------------------------------
-
-CModBundle ModBundle;
 
 //------------------------------------------------------------------------------
 
@@ -58,7 +54,7 @@ CModBundle ModBundle;
 
 CModBundle::CModBundle(void)
 {
-
+    CacheType = EMBC_NONE;
 }
 
 //==============================================================================
@@ -78,6 +74,14 @@ bool CModBundle::GetBundleRoot(const CFileName& path,CFileName& bundle_root)
         tested_path = tested_path.GetFileDirectory();
     }
     return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundle::IsBundle(const CFileName& path,const CFileName& name)
+{
+    CFileName tested_dir = path / name / _AMS_BUNDLE;
+    return(CFileSystem::IsDirectory(tested_dir));
 }
 
 //------------------------------------------------------------------------------
@@ -103,7 +107,7 @@ bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
         return(false);
     }
 
-    CFileName           config_path = bundle_path / _AMS_BUNDLE;
+    CFileName config_path = bundle_path / _AMS_BUNDLE;
 
     if( CFileSystem::CreateDir(config_path) == false ){
         CSmallString error;
@@ -112,7 +116,7 @@ bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
         return(false);
     }
 
-    CFileName blds      = config_path / _AMS_BLDS;
+    CFileName blds = config_path / _AMS_BLDS;
 
     if( CFileSystem::CreateDir(blds) == false ){
         CSmallString error;
@@ -121,7 +125,7 @@ bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
         return(false);
     }
 
-    CSmallString id   = CUtils::GenerateUUID();
+    CSmallString id = CUtils::GenerateUUID();
 
     CXMLElement* p_config = Config.CreateChildElement("bundle");
     p_config->SetAttribute("name",name);
@@ -141,6 +145,9 @@ bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
         return(false);
     }
 
+// inject path into config
+    p_config->SetAttribute("path",BundlePath);
+
     AuditAction("created");
 
     return(true);
@@ -150,7 +157,6 @@ bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
 
 bool CModBundle::InitBundle(const CFileName& bundle_path)
 {
-
     BundlePath = bundle_path.GetFileDirectory();
     BundleName = bundle_path.GetFileName();
 
@@ -164,6 +170,7 @@ bool CModBundle::InitBundle(const CFileName& bundle_path)
     CFileName config_path = bundle_path / _AMS_BUNDLE ;
     CFileName config_file = config_path / "config.xml";
 
+// load config
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&Config);
     if( xml_parser.Parse(config_file) == false ){
@@ -172,6 +179,10 @@ bool CModBundle::InitBundle(const CFileName& bundle_path)
         ES_ERROR(warning);
         return(false);
     }
+
+// inject path into config
+    CXMLElement* p_config = Config.GetChildElementByPath("bundle",true);
+    p_config->SetAttribute("path",BundlePath);
 
     return(true);
 }
@@ -243,7 +254,7 @@ const CSmallString CModBundle::GetMaintainerEMail(void)
 
 //------------------------------------------------------------------------------
 
-void CModBundle::PrintInfo(CVerboseStr& vout)
+void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
 {
     vout << "# Bundle" << endl;
     vout << "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -252,11 +263,31 @@ void CModBundle::PrintInfo(CVerboseStr& vout)
     vout << "# Bundle ID   : " << GetID() << endl;
     vout << "# Maintainer  : " << GetMaintainerName() << " (" << GetMaintainerEMail() << ")" << endl;
 
+    if( mods ){
+    switch(CacheType) {
+    case(EMBC_SMALL):
+    vout << "# Cache type  : small" << endl;
+        break;
+    case(EMBC_BIG):
+    vout << "# Cache type  : big" << endl;
+        break;
+    case(EMBC_NONE):
+    vout << "# Cache type  : not loaded" << endl;
+        break;
+    }
+    vout << "# Modules     : " << setw(3) << GetNumberOfModules() << endl;
+    vout << "# Categories  : " << setw(3) << GetNumberOfCategories() << endl;
+    }
+
+    if( stat ){
     vout << "#" << endl;
     vout << "# Statistics" << endl;
     vout << "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     vout << "# Number of doc files : " << setw(3) << DocFiles.size() << endl;
     vout << "# Number of bld files : " << setw(3) << BldFiles.size() << endl;
+    }
+
+    // FIXME - audit log
 }
 
 //==============================================================================
@@ -277,24 +308,8 @@ bool CModBundle::RebuildCache(CVerboseStr& vout)
     NumOfDocs = 0;
     NumOfBlds = 0;
 
-// create header elements
-    Cache.CreateChildDeclaration();
-    CXMLComment* p_comment;
-
-    p_comment = Cache.CreateChildComment();
-    CSmallTimeAndDate dt;
-    dt.GetActualTimeAndDate();
-    CSmallString title;
-    title << "Advanced Module System (AMS) cache built at " << dt.GetSDateAndTime();
-    p_comment->SetComment(title);
-
-    p_comment = Cache.CreateChildComment();
-    CSmallString warn;
-    warn << "please do not edit this file (it is created by ams-bundle command)";
-    p_comment->SetComment(warn);
-
-// create root element
-    CXMLElement* p_cele = Cache.CreateChildElement("cache");
+// create empty cache
+    CXMLElement* p_cele = CreateEmptyCache();
 
     vout << "# Documentation file                                         Module             " << endl;
     vout << "# ---------------------------------------------------------- -------------------" << endl;
@@ -360,14 +375,25 @@ bool CModBundle::RebuildCache(CVerboseStr& vout)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CModBundle::LoadCache(void)
+bool CModBundle::LoadCache(EModBundleCache type)
 {
     CFileName config_dir = BundlePath / BundleName / _AMS_BUNDLE;
 
+    CacheType = EMBC_NONE;
+
 // load the cache
-    if( LoadCacheFile(config_dir / "cache.xml" ) == false ){
-        ES_ERROR("unable to load small cache");
-        return(false);
+    if( type == EMBC_BIG ){
+        if( LoadCacheFile(config_dir / "cache_big.xml" ) == false ){
+            ES_ERROR("unable to load big cache");
+            return(false);
+        }
+        CacheType = EMBC_BIG;
+    } else if( type == EMBC_SMALL ) {
+        if( LoadCacheFile(config_dir / "cache.xml" ) == false ){
+            ES_ERROR("unable to load small cache");
+            return(false);
+        }
+        CacheType = EMBC_SMALL;
     }
 
     return(true);
@@ -566,6 +592,15 @@ bool CModBundle::AddBuild(CVerboseStr& vout,CXMLElement* p_cele, const CFileName
 
     NumOfBlds++;
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CModBundle::GetBundleElement(void)
+{
+    CXMLElement* p_ele = Config.GetFirstChildElement("bundle");
+    // this is optional
+    return(p_ele);
 }
 
 //==============================================================================

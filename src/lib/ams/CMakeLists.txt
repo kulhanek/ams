@@ -40,6 +40,7 @@ SET(AMS_SRC
         mods/ModUtils.cpp
         mods/ModCache.cpp
         mods/ModBundle.cpp
+        mods/ModuleController.cpp
     )
 
 # create shared library --------------------------------------------------------

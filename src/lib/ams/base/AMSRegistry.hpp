@@ -90,6 +90,13 @@ public:
     /// return full file name to the print profile
     const CFileName GetPrintProfileFile(void);
 
+// bundle configuration --------------------------------------------------------
+    /// comma separated bundle names
+    const CFileName GetBundleName(void);
+
+    /// column separated bundle search paths
+    const CFileName GetBundlePath(void);
+
 // section of private data -----------------------------------------------------
 private:
     CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT variable

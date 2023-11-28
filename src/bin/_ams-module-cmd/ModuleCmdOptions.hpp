@@ -61,9 +61,11 @@ public:
     "   <green>purge</green>           deactivate all active modules\n"
     "\n"
     "Informative actions:\n"
-    "   <green><b>avail</green>           list available modules</b>\n"
-    "   <green><b>versions</green>        show available versions of modules</b>\n"
-    "   <green><b>help</green>            show help for modules if present</b>\n"
+    "   <b><green>avail</green>           list available modules</b>\n"
+    "   <b><green>versions</green>        show available versions of modules</b>\n"
+    "   <b><green>help</green>            show help for modules if present</b>\n"
+    "   <b><green>origin</green>          show the source of the module</b>\n"
+    "   <b><green>bundles</green>         show information about active module bundles</b>\n"
     "   <green>exported</green>        list exported modules\n"
     "   <green>active</green>          list active modules\n"
     "   <green>list</green>            list exported and active modules\n"
@@ -72,7 +74,6 @@ public:
     "   <green>isactive</green>        return zero if all modules in the argument list are active\n"
     "   <green>getactmod</green>       return name:version if the module is active\n"
     "   <green>getactver</green>       return module version if the module is active\n"
-    "   <green>syshdr</green>          print header for system modules\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN
@@ -83,6 +84,7 @@ public:
     CSO_LIST_BEGIN
     // options ------------------------------
     CSO_OPT(CSmallString,Colors)
+    CSO_OPT(bool,IncludeVersions)
     CSO_OPT(bool,ReExported)
     CSO_OPT(bool,System)
     CSO_OPT(bool,Help)
@@ -100,6 +102,14 @@ public:
                 "colors",                      /* long option name */
                 "MODE",                           /* parametr name */
                 "control colored output, allowed values are: auto, always")   /* option description */
+    CSO_MAP_OPT(bool,                           /* option type */
+                IncludeVersions,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                'i',                           /* short option name */
+                "incvers",                      /* long option name */
+                NULL,                           /* parametr name */
+                "print with module versions")   /* option description */
     CSO_MAP_OPT(bool,                           /* option type */
                 ReExported,                        /* option name */
                 false,                          /* default value */

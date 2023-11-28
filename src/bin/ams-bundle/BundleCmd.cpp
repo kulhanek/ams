@@ -263,18 +263,17 @@ bool CBundleCmd::PrintAvailMods(void)
         return(false);
     }
 
-    if( bundle.LoadCache() == false ){
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
         CSmallString error;
         error << "unable to load bundle cache";
         ES_ERROR(error);
         return(false);
     }
 
-
     PrintEngine.InitPrintProfile();
 
     PrintEngine.PrintHeader(Console.GetTerminal(),"AVAILABLE MODULES (ams-bundle)",EPEHS_SECTION);
-    bundle.PrintAvail(Console.GetTerminal(),Options.GetOptInludeVersions(),true);
+    bundle.PrintAvail(Console.GetTerminal(),Options.GetOptIncludeVersions(),true);
 
     return(true);
 }

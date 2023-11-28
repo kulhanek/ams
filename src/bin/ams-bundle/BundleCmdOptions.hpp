@@ -61,7 +61,7 @@ public:
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
     // options ------------------------------
-    CSO_OPT(bool,InludeVersions)
+    CSO_OPT(bool,IncludeVersions)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -70,7 +70,7 @@ public:
     CSO_MAP_BEGIN
     // description of options -----------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
-                InludeVersions,                        /* option name */
+                IncludeVersions,                        /* option name */
                 false,                          /* default value */
                 false,                          /* is option mandatory */
                 'i',                           /* short option name */

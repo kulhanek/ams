@@ -40,11 +40,16 @@ public:
 // some common print techniques
     /// print comma delimited tokens
     static void PrintTokens(std::ostream& sout, const CSmallString& title,
-                            const CSmallString& res_list, int ncolumns=-1,char firstchar='#');
+                            const CSmallString& res_list, int ncolumns=-1, char firstchar='#');
+
+    /// print delimited tokens
+    static void PrintTokens(std::ostream& sout, const CSmallString& title,
+                            const CSmallString& res_list, const CSmallString& delimiters,
+                            int ncolumns=-1, char firstchar='#');
 
     /// print comma delimited tokens
     static void PrintTokens(std::ostream& sout, const CSmallString& title,
-                            std::list<CSmallString>& list, int ncolumns=-1,char firstchar='#');
+                            std::list<CSmallString>& list, int ncolumns=-1, char firstchar='#');
 
     /// find file in paths
     static bool FindFile(const CFileName& search_paths, const CFileName& module,

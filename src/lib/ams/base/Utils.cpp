@@ -63,14 +63,30 @@ CSmallString CUtils::GenerateUUID(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CUtils::PrintTokens(std::ostream& sout,const CSmallString& title, const CSmallString& res_list,
-                         int ncolumns,char firstchar)
+void CUtils::PrintTokens(std::ostream& sout, const CSmallString& title, const CSmallString& res_list,
+                         int ncolumns, char firstchar)
 {
     string                      svalue = string(res_list);
     std::list<CSmallString>   list;
 
     // split to items
-    split(list,svalue,is_any_of(","));
+    if( res_list != NULL ) split(list,svalue,is_any_of(","));
+
+    CUtils::PrintTokens(sout,title,list,ncolumns,firstchar);
+}
+
+//------------------------------------------------------------------------------
+
+void CUtils::PrintTokens(std::ostream& sout, const CSmallString& title,
+                        const CSmallString& res_list, const CSmallString& delimiters,
+                        int ncolumns, char firstchar)
+{
+    string                      svalue = string(res_list);
+    std::list<CSmallString>   list;
+
+    // split to items
+    std::string sdelims(delimiters);
+    if( res_list != NULL ) split(list,svalue,is_any_of(sdelims));
 
     CUtils::PrintTokens(sout,title,list,ncolumns,firstchar);
 }

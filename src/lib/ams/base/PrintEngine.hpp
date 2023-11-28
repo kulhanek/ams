@@ -56,6 +56,9 @@ public:
     /// print items
     void PrintItems(CTerminal& terminal,std::list<CSmallString>& list);
 
+    /// print items
+    void PrintItems(CTerminal& terminal,std::list<CSmallString>& list,int maxlen);
+
 // get setup -------------------------------------------------------------------
     bool AreColorsEnabled(void);
     char GetSiteSectionDelimiter(void);

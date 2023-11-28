@@ -28,6 +28,8 @@
 #include <boost/shared_ptr.hpp>
 #include <list>
 
+//------------------------------------------------------------------------------
+
 enum EHostCacheMode {
     EHC_IGNORED = 1,
     EHC_LOADED  = 2,

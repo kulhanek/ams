@@ -31,6 +31,11 @@
 #include <Host.hpp>
 #include <User.hpp>
 #include <Utils.hpp>
+#include <AMSRegistry.hpp>
+#include <SiteController.hpp>
+#include <ModuleController.hpp>
+#include <HostGroup.hpp>
+#include <ModUtils.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -89,31 +94,20 @@ int CModuleCmd::Init(int argc, char* argv[])
 
 bool CModuleCmd::Run(void)
 {
-//    // check if site is active
-//    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
-//        vout << low;
-//        vout << endl;
-//        vout << "<red>>>> ERROR:</red> No site is active!" << endl;
-//        return(false);
-//    }
+// init AMS registry
+    AMSRegistry.LoadRegistry();
 
-//    // initialze AMS cache
-//    if( Cache.LoadCache(Options.GetArgAction() == "help") == false) {
-//        ES_ERROR("unable to load AMS cache");
-//        return(false);
-//    }
+// init host group
+    HostGroup.InitHostsConfig();
+    HostGroup.InitHostGroup();
 
-//    // init global host and user data
-//    Host.InitGlobalSetup();
-//    User.InitGlobalSetup();
+// init host
+    Host.InitHostSubSystems(HostGroup.GetHostSubSystems());
+    Host.InitHost();
 
-//    // initialize hosts -----------------------------
-//    Host.InitHostFile();
-//    Host.InitHost();
-
-//    // initialize user ------------------------------
-//    User.InitUserFile(AMSGlobalConfig.GetActiveSiteID());
-//    User.InitUser();
+// init user
+    User.InitUserConfig();
+    User.InitUser();
 
 //    // set module flags
 //    if( Options.GetOptSystem() == true ) {
@@ -135,31 +129,17 @@ bool CModuleCmd::Run(void)
 //        return(false);
 //    }
 
+// init site controller
+    SiteController.InitSiteControllerConfig();
+
+// init module controller
+    ModuleController.InitModuleControllerConfig();
+
+
     // remove incompatible builds if the site is adaptive
 //    if( Site.IsSiteAdaptive() ){
 //        Site.RemoveIncompatibleBuilds();
 //    }
-
-    if( (Options.GetArgAction() == "disp") ||
-            (Options.GetArgAction() == "versions") ||
-            (Options.GetArgAction() == "builds") ||
-            (Options.GetArgAction() == "avail") ||
-            (Options.GetArgAction() == "avail_no_system") ||
-            (Options.GetArgAction() == "active") ||
-            (Options.GetArgAction() == "exported") ||
-            (Options.GetArgAction() == "list") ||
-            (Options.GetArgAction() == "syshdr") ) {
-
-        // initialze AMS print engine
-//        if( PrintEngine.LoadConfig() == false) {
-//            ES_ERROR("unable to load print engine config");
-//            return(false);
-//        }
-    //    PrintEngine.SetOutputStream(vout);
-
-        // load user config
-     //   AMSUserConfig.LoadUserConfig();
-    }
 
     // ----------------------------------------------
     if( (Options.GetArgAction() == "add") || (Options.GetArgAction() == "activate") ) {
@@ -215,10 +195,11 @@ bool CModuleCmd::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "versions" ) {
-        // module versions
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
             fprintf(stderr,"\n");
-     //       if( PrintEngine.PrintModModuleVersions(Options.GetProgArg(i)) == false ) return(false);
+            ModCache.PrintModuleVersions(vout,Options.GetProgArg(i));
         }
         return(true);
     }
@@ -235,10 +216,21 @@ bool CModuleCmd::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "builds" ) {
-        // module builds
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
             fprintf(stderr,"\n");
-    //        if( PrintEngine.PrintModModuleBuilds(Options.GetProgArg(i)) == false ) return(false);
+            ModCache.PrintModuleBuilds(vout,Options.GetProgArg(i));
+        }
+        return(true);
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "origin" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
+        for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
+            fprintf(stderr,"\n");
+            ModCache.PrintModuleOrigin(vout,Options.GetProgArg(i));
         }
         return(true);
     }
@@ -268,14 +260,14 @@ bool CModuleCmd::Run(void)
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
             CSmallString warning;
             warning << "module '" << Options.GetProgArg(i) << "' is ";
-//            if( AMSGlobalConfig.IsModuleActive(Options.GetProgArg(i)) == true ) {
-//                warning << "active";
-//                result &= true;
-//            } else {
-//                warning << "not active";
-//                result &= false;
-//                ExitCode = 1;
-//            }
+            if( ModuleController.IsModuleActive(Options.GetProgArg(i)) == true ) {
+                warning << "active";
+                result &= true;
+            } else {
+                warning << "not active";
+                result &= false;
+                ExitCode = 1;
+            }
             ES_WARNING(warning);
         }
         return(result);
@@ -283,59 +275,71 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "getactmod" ) {
         CSmallString actver;
+        if( ModuleController.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
+            CSmallString warning;
+            warning << "module '" << Options.GetProgArg(1) << "' is not active";
+            ES_WARNING(warning);
+            return(false);
+        }
         CSmallString name;
-    //    CUtils::ParseModuleName(Options.GetProgArg(1),name);
-//        if( AMSGlobalConfig.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
-//            CSmallString warning;
-//            warning << "module '" << Options.GetProgArg(1) << "' is no active";
-//            ES_WARNING(warning);
-//            return(false);
-//        }
+        CModUtils::ParseModuleName(Options.GetProgArg(1),name);
         vout << name << ":" << actver;
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "getactver" ) {
         CSmallString actver;
-//        if( AMSGlobalConfig.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
-//            CSmallString warning;
-//            warning << "module '" << Options.GetProgArg(1) << "' is no active";
-//            ES_WARNING(warning);
-//            return(false);
-//        }
+        if( ModuleController.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
+            CSmallString warning;
+            warning << "module '" << Options.GetProgArg(1) << "' is no active";
+            ES_WARNING(warning);
+            return(false);
+        }
         vout << actver;
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "avail_no_system" ) {
-        vout << endl;
-    //    PrintEngine.PrintModAvailableModules(Console.GetTerminal(),false);
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
+        PrintEngine.InitPrintProfile();
+        PrintEngine.PrintHeader(Console.GetTerminal(),"AVAILABLE MODULES (Infinity Software Base | amsmodule)",EPEHS_SECTION);
+        ModCache.PrintAvail(Console.GetTerminal(),Options.GetOptIncludeVersions(),false);
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "avail" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
+        PrintEngine.InitPrintProfile();
+        PrintEngine.PrintHeader(Console.GetTerminal(),"AVAILABLE MODULES (Infinity Software Base | amsmodule)",EPEHS_SECTION);
+        ModCache.PrintAvail(Console.GetTerminal(),Options.GetOptIncludeVersions(),true);
+        return(true);
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "bundles" ) {
+        ModuleController.LoadBundles(EMBC_BIG);
         vout << endl;
-   //     PrintEngine.PrintModAvailableModules(Console.GetTerminal(),true);
+        ModuleController.PrintBundlesInfo(vout);
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "active" ) {
-        vout << endl;
-    //    PrintEngine.PrintModActiveModules(Console.GetTerminal());
+        PrintEngine.InitPrintProfile();
+        ModuleController.PrintModActiveModules(Console.GetTerminal());
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "exported" ) {
-        vout << endl;
-    //    PrintEngine.PrintModExportedModules(Console.GetTerminal());
+        PrintEngine.InitPrintProfile();
+        ModuleController.PrintModExportedModules(Console.GetTerminal());
         return(true);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "list" ) {
-        vout << endl;
-    //    PrintEngine.PrintModExportedModules(Console.GetTerminal());
-        vout << endl;
-    //    PrintEngine.PrintModActiveModules(Console.GetTerminal());
+        PrintEngine.InitPrintProfile();
+        ModuleController.PrintModExportedModules(Console.GetTerminal());
+        ModuleController.PrintModActiveModules(Console.GetTerminal());
         return(true);
     }
     // ----------------------------------------------
@@ -354,18 +358,11 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "reactivate" ) {
         ForcePrintErrors = true;
-    //    Actions.ReactivateModules(vout);
-        return(true);
+        return(ModuleController.ReactivateModules(vout));
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "purge" ) {
-   //     return(Actions.PurgeModules(vout));
-    }
-    // ----------------------------------------------
-    else if( Options.GetArgAction() == "syshdr" ) {
-        vout << endl;
-   //     PrintEngine.PrintSYSAvailHeader(Console.GetTerminal());
-        return(true);
+        return(ModuleController.PurgeModules(vout));
     }
     // ----------------------------------------------
     else {

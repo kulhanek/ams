@@ -29,6 +29,15 @@
 #include <FileName.hpp>
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
+#include <boost/shared_ptr.hpp>
+
+//------------------------------------------------------------------------------
+
+enum EModBundleCache {
+    EMBC_NONE   = 0,
+    EMBC_SMALL  = 1,
+    EMBC_BIG    = 2,
+};
 
 //------------------------------------------------------------------------------
 
@@ -40,6 +49,9 @@ public:
 // bundle methods --------------------------------------------------------------
     /// get bundle root path
     static bool GetBundleRoot(const CFileName& path,CFileName& bundle_root);
+
+    /// is bundle?
+    static bool IsBundle(const CFileName& path,const CFileName& name);
 
     /// initialize bundle
     bool CreateBundle(const CFileName& path,const CFileName& name,
@@ -56,7 +68,7 @@ public:
     bool RebuildCache(CVerboseStr& vout);
 
     /// load cache
-    bool LoadCache(void);
+    bool LoadCache(EModBundleCache type);
 
     /// save small and big caches
     bool SaveCaches(void);
@@ -72,13 +84,17 @@ public:
     const CSmallString GetMaintainerEMail(void);
 
     /// print info about the bundle
-    void PrintInfo(CVerboseStr& vout);
+    void PrintInfo(CVerboseStr& vout,bool mods=false,bool stat=false,bool audit=false);
+
+    /// return bundle config element
+    CXMLElement* GetBundleElement(void);
 
 // section of private data -----------------------------------------------------
 private:
     CFileName       BundlePath;
     CFileName       BundleName;
     CXMLDocument    Config;
+    EModBundleCache CacheType;
 
     std::list<CFileName>    DocFiles;
     std::list<CFileName>    BldFiles;
@@ -101,9 +117,9 @@ private:
     bool AddBuild(CVerboseStr& vout,CXMLElement* p_cele, const CFileName& build_file);
 };
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-extern CModBundle   ModBundle;
+typedef boost::shared_ptr<CModBundle>   CModBundlePtr;
 
 //-----------------------------------------------------------------------------
 

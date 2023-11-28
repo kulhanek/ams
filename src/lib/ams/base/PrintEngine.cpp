@@ -120,6 +120,15 @@ void CPrintEngine::PrintItems(CTerminal& terminal,std::list<CSmallString>& list)
     terminal.SetDefault();
 }
 
+//------------------------------------------------------------------------------
+
+void CPrintEngine::PrintItems(CTerminal& terminal,std::list<CSmallString>& list,int maxlen)
+{
+    terminal.SetColors(GetModuleFgColor(),GetModuleBgColor());
+    terminal.PrintColumnSortedList(list,maxlen);
+    terminal.SetDefault();
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

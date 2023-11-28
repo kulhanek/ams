@@ -1,5 +1,5 @@
-#ifndef SiteControllerH
-#define SiteControllerH
+#ifndef ModuleControllerH
+#define ModuleControllerH
 // =============================================================================
 //  AMS - Advanced Module System
 // -----------------------------------------------------------------------------
@@ -24,52 +24,84 @@
 // =============================================================================
 
 #include <AMSMainHeader.hpp>
-#include <SmallString.hpp>
-#include <XMLElement.hpp>
+#include <FileName.hpp>
+#include <ModBundle.hpp>
+#include <list>
 
 //------------------------------------------------------------------------------
 
-class AMS_PACKAGE CSiteController {
+class AMS_PACKAGE CModuleController {
 public:
+// setup methods ---------------------------------------------------------------
+    /// init module controller configuration
+    void InitModuleControllerConfig(void);
 
-    // information about modules ---------------------------------------------------
-        /// check if module is active
-        bool IsModuleActive(const CSmallString& module);
+// bundles operation -----------------------------------------------------------
+    /// load bundles
+    void LoadBundles(EModBundleCache type);
 
-        /// get version of active module
-        bool GetActiveModuleVersion(const CSmallString& module,CSmallString& actver);
+    /// print info about loaded bundles
+    void PrintBundlesInfo(CVerboseStr& vout);
 
-        /// return complete specification of active modules
-        const CSmallString& GetActiveModules(void);
+    /// merge them into a single cache
+    void MergeBundles(void);
 
-        /// return export specification of exported modules
-        const CSmallString& GetExportedModules(void);
+// information about modules ---------------------------------------------------
+    /// check if module is active
+    bool IsModuleActive(const CSmallString& module);
 
-        /// return complete specification of active module
-        const CSmallString GetActiveModuleSpecification(const CSmallString& name);
+    /// get version of active module
+    bool GetActiveModuleVersion(const CSmallString& module,CSmallString& actver);
 
-        /// return export specification of active module
-        const CSmallString GetExportedModuleSpecification(const CSmallString& name);
+    /// return complete specification of active modules
+    const CSmallString GetActiveModules(void);
 
-    // update module info ---------------------------------------------------------
-        /// update list of active modules
-        void UpdateActiveModules(const CSmallString& module,bool add_module);
+    /// return export specification of exported modules
+    const CSmallString GetExportedModules(void);
 
-        /// update list of exported modules
-        void UpdateExportedModules(const CSmallString& module,bool add_module);
+    /// return complete specification of active module
+    const CSmallString GetActiveModuleSpecification(const CSmallString& name);
 
-        /// set list of exported modules
-        void SetExportedModules(const CSmallString& modules);
+    /// return export specification of active module
+    const CSmallString GetExportedModuleSpecification(const CSmallString& name);
 
-// section of private data ----------------------------------------------------
+// print lists -----------------------------------------------------------------
+    /// print active modules
+    void PrintModActiveModules(CTerminal& terminal);
+
+    /// print exported modules
+    void PrintModExportedModules(CTerminal& terminal);
+
+// update module info ----------------------------------------------------------
+    /// update list of active modules
+    void UpdateActiveModules(const CSmallString& module,bool add_module);
+
+    /// update list of exported modules
+    void UpdateExportedModules(const CSmallString& module,bool add_module);
+
+    /// set list of exported modules
+    void SetExportedModules(const CSmallString& modules);
+
+// execution methods -----------------------------------------------------------
+    /// reactivate modules
+    bool ReactivateModules(CVerboseStr& out);
+
+    /// reactivate modules
+    bool PurgeModules(CVerboseStr& out);
+
+// section of private data -----------------------------------------------------
 private:
-    CSmallString    ActiveModules;      // list of active modules
-    CSmallString    ExportedModules;    // list of exported modules
+    std::list<CSmallString>     ActiveModules;      // list of active modules
+    std::list<CSmallString>     ExportedModules;    // list of exported modules
+
+    CFileName                   BundleName;
+    CFileName                   BundlePath;
+    std::list<CModBundlePtr>    Bundles;
 };
 
 //------------------------------------------------------------------------------
 
-extern CSiteController  SiteController;
+extern CModuleController  ModuleController;
 
 //------------------------------------------------------------------------------
 

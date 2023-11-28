@@ -82,19 +82,20 @@ int CModuleCmdOptions::CheckArguments(void)
     if( GetNumberOfProgArgs() == 1 ) {
         Action = GetProgArg(0);
         if( GetProgArg(0) == "avail" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "bundles" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "active" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "exported" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "list" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "reactivate" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "autoload" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "purge" ) return(SO_CONTINUE);
-        if( GetProgArg(0) == "syshdr" ) return(SO_CONTINUE);
         if( (GetProgArg(0) == "add") ||
                 (GetProgArg(0) == "remove") ||
                 (GetProgArg(0) == "versions") ||
                 (GetProgArg(0) == "builds") ||
                 (GetProgArg(0) == "disp") ||
                 (GetProgArg(0) == "help") ||
+                (GetProgArg(0) == "origin") ||
                 (GetProgArg(0) == "isactive") ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
@@ -123,6 +124,7 @@ int CModuleCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "disp" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "isactive" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "help" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "origin" ) return(SO_CONTINUE);
         if( (GetProgArg(0) == "getactver") || (GetProgArg(0) == "getactmod") ) {
             if( GetNumberOfProgArgs() != 2 ) {
                 if( IsVerbose() ) {
@@ -136,6 +138,7 @@ int CModuleCmdOptions::CheckArguments(void)
             return(SO_CONTINUE);
         }
         if( (GetProgArg(0) == "avail") ||
+                (GetProgArg(0) == "bundles") ||
                 (GetProgArg(0) == "active") ||
                 (GetProgArg(0) == "exported") ||
                 (GetProgArg(0) == "list") ||
