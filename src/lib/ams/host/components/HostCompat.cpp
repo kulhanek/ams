@@ -102,7 +102,7 @@ void CHostSubSystemCompat::PrintSubSystemInfo(CVerboseStr& vout)
 {
     vout << ">>> compat ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     vout <<                  "    Configuration  : " << GetConfigFile() <<  endl;
-    CUtils::PrintTokens(vout,"    Compat tokens  : ",GetTokenList(ArchTokens), 80);
+    CUtils::PrintTokens(vout,"    Compat tokens  : ",GetTokenList(ArchTokens), 80, ' ');
 }
 
 //==============================================================================

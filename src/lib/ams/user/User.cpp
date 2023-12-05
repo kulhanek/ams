@@ -407,10 +407,10 @@ void CUser::PrintUserInfoForSite(CVerboseStr& vout)
     for(int n=25; n < 80;n++) vout << "~";
     vout << endl;
 
-    vout <<                  "# User name  : " << GetName() << endl;
+    vout <<                  "  User name  : " << GetName() << endl;
     // FIXME - cover situations with umask change via shellprocessor
-    vout <<                  "# User group : " << GetEGroup() << " [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
-    CUtils::PrintTokens(vout,"# ACL groups : ",GetACLGroups(),80);
+    vout <<                  "  User group : " << GetEGroup() << " [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
+    CUtils::PrintTokens(vout,"  ACL groups : ",GetACLGroups(),80);
 }
 
 //------------------------------------------------------------------------------

@@ -340,6 +340,8 @@ bool CModBundle::RebuildCache(CVerboseStr& vout)
     vout << "# ------------------------------------------------------------------------------" << endl;
     vout << "# Number of bld files    : " << setw(3) << NumOfBlds << endl;
 
+    RebuildModuleDefaultBuilds();
+
     Archs.sort();
     Archs.unique();
 
@@ -566,12 +568,14 @@ bool CModBundle::AddBuild(CVerboseStr& vout,CXMLElement* p_cele, const CFileName
         return(true);
     }
 
+    CXMLElement* p_builds = p_mele->GetChildElementByPath("builds",true);
+
 // clean the build
     p_bele->RemoveAttribute("name");
     CleanBuild(p_bele);
 
 // include module build to cache
-    if( p_bele->DuplicateNode(p_mele) == NULL ) {
+    if( p_bele->DuplicateNode(p_builds) == NULL ) {
         CSmallString error;
         error << "unable to add '" << build_file << "' module build to the cache";
         ES_ERROR(error);
@@ -592,6 +596,70 @@ bool CModBundle::AddBuild(CVerboseStr& vout,CXMLElement* p_cele, const CFileName
 
     NumOfBlds++;
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CModBundle::RebuildModuleDefaultBuilds(void)
+{
+    CXMLElement* p_cele = GetCacheElement();
+    if( p_cele == NULL ){
+       ES_ERROR("unable to open cache element");
+       return;
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ){
+        InitDefaultBuild(p_mele);
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModBundle::InitDefaultBuild(CXMLElement* p_mele)
+{
+    if( p_mele == NULL ){
+        ES_ERROR("p_mele is NULL");
+        return;
+    }
+
+    if( p_mele->GetFirstChildElement("default") != NULL ){
+        return; // we already have default build set in module file
+    }
+
+    CSmallString defver;
+    bool         first = true;
+    double       defverindx;
+
+    CXMLElement* p_bele = p_mele->GetChildElementByPath("builds/build");
+    while( p_bele != NULL ){
+        CSmallString    ver;
+        double          verindx;
+        bool            result = true;
+        result &= p_bele->GetAttribute("ver",ver);
+        result &= p_bele->GetAttribute("verindx",verindx);
+        if( result ){
+            if( first ){
+                defver = ver;
+                defverindx = verindx;
+                first = false;
+            }
+            if( verindx > defverindx ){
+                defver = ver;
+                defverindx = verindx;
+            }
+        }
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+
+    if( first == true ) return; // not found
+
+    CXMLElement* p_def = p_mele->CreateChildElement("default");
+
+    p_def->SetAttribute("ver",defver);
+    p_def->SetAttribute("arch","auto");
+    p_def->SetAttribute("mode","auto");
 }
 
 //------------------------------------------------------------------------------

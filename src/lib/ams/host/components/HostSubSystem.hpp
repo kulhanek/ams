@@ -38,6 +38,14 @@ enum EHostCacheMode {
 
 //------------------------------------------------------------------------------
 
+enum EPrintHostInfo {
+    EPHI_SITE   = 0,
+    EPHI_MODULE = 1,
+};
+
+
+//------------------------------------------------------------------------------
+
 class CHostSubSystem;
 typedef boost::shared_ptr<CHostSubSystem>   CHostSubSystemPtr;
 
@@ -71,8 +79,8 @@ public:
     /// print node resources (for PBSPro)
     virtual void PrintNodeResources(CVerboseStr& vout);
 
-    /// print host resources for site
-    virtual void PrintHostInfoForSite(CVerboseStr& vout);
+    /// print host resources for
+    virtual void PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode);
 
 // section of private data -----------------------------------------------------
 private:

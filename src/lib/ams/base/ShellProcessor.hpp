@@ -33,6 +33,11 @@ enum EScriptType {
     EST_CHILD
 };
 
+enum EModuleAction {
+    EMA_ADD_MODULE,
+    EMA_REMOVE_MODULE,
+};
+
 //-----------------------------------------------------------------------------
 
 class AMS_PACKAGE CShellProcessor {
@@ -59,8 +64,7 @@ public:
     bool PrepareModuleEnvironmentForDeps(CXMLElement* p_build);
     bool PrepareModuleEnvironmentForModActionI(CXMLElement* p_build);
     bool PrepareModuleEnvironmentForModActionII(CXMLElement* p_build);
-    bool PrepareModuleEnvironmentForLowPriority(CXMLElement* p_build,
-            bool add_module);
+    bool PrepareModuleEnvironmentForLowPriority(CXMLElement* p_build, EModuleAction action);
 
     /// prepend value to variable
     void PrependValueToVariable(const CSmallString& name,

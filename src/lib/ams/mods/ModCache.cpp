@@ -29,6 +29,7 @@
 #include <FileSystem.hpp>
 #include <XMLComment.hpp>
 #include <ModUtils.hpp>
+#include <User.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -190,6 +191,17 @@ void CModCache::CleanBuild(CXMLNode* p_bele)
 //------------------------------------------------------------------------------
 //==============================================================================
 
+CXMLElement* CModCache::GetCacheElement(void)
+{
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        RUNTIME_ERROR("unable to open cache element");
+    }
+    return(p_cele);
+}
+
+//------------------------------------------------------------------------------
+
 CXMLElement* CModCache::GetModule(const CSmallString& name,bool create)
 {
     CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
@@ -230,6 +242,40 @@ CXMLElement* CModCache::CreateModule(const CSmallString& name)
 
 //------------------------------------------------------------------------------
 
+CXMLElement* CModCache::GetBuild(CXMLElement* p_mele,
+                                const CSmallString& ver,
+                                const CSmallString& arch,
+                                const CSmallString& mode)
+{
+    if( p_mele == NULL ) return(NULL);
+
+    CXMLElement* p_bele = p_mele->GetChildElementByPath("builds/build");
+
+    while( p_bele != NULL ) {
+        CSmallString lver;
+        CSmallString larch;
+        CSmallString lmode;
+        p_bele->GetAttribute("ver",lver);
+        p_bele->GetAttribute("arch",larch);
+        p_bele->GetAttribute("mode",lmode);
+        if( (lver == ver) && (larch == arch) && (lmode == mode) ) return(p_bele);
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+
+    return(NULL);
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CModCache::GetModuleDoc(CXMLElement* p_module)
+{
+    if( p_module == NULL ) return(NULL);
+    CXMLElement* p_doc = p_module->GetChildElementByPath("doc");
+    return(p_doc);
+}
+
+//------------------------------------------------------------------------------
+
 bool CModCache::GetModuleDefaults(CXMLElement* p_mele,
                                   CSmallString& ver, CSmallString& arch, CSmallString& mode)
 {
@@ -251,11 +297,188 @@ bool CModCache::GetModuleDefaults(CXMLElement* p_mele,
 
 //------------------------------------------------------------------------------
 
+void CModCache::GetModuleVersions(CXMLElement* p_mele, std::list<CSmallString>& list)
+{
+    CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
+    while( p_bele != NULL ) {
+        CSmallString modver;
+        p_bele->GetAttribute("ver",modver);
+        if( modver != NULL ) list.push_back(modver);
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::GetModuleVersionsSorted(CXMLElement* p_mele, std::list<CSmallString>& list)
+{
+    CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
+
+    std::list<CPVerRecord>  pvlist;
+
+    while( p_bele != NULL ) {
+        CPVerRecord verrcd;
+        verrcd.verindx = 0.0;
+        p_bele->GetAttribute("ver",verrcd.ver);
+        p_bele->GetAttribute("verindx",verrcd.verindx);
+        if( verrcd.ver != NULL ){
+        pvlist.push_back(verrcd);
+        }
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+
+    pvlist.sort(sort_tokens);
+    pvlist.unique();
+
+    for(CPVerRecord pvrec : pvlist){
+        list.push_back(pvrec.ver);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list)
+{
+    CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
+
+    std::list<CPVerRecord>  pvlist;
+
+    while( p_bele != NULL ) {
+        CPVerRecord bldrcd;
+        bldrcd.verindx = 0.0;
+        p_bele->GetAttribute("ver",bldrcd.ver);
+        p_bele->GetAttribute("arch",bldrcd.arch);
+        p_bele->GetAttribute("mode",bldrcd.mode);
+        p_bele->GetAttribute("verindx",bldrcd.verindx);
+        if( (bldrcd.ver != NULL) || (bldrcd.arch != NULL) || (bldrcd.mode != NULL) ){
+        pvlist.push_back(bldrcd);
+        }
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+
+    pvlist.sort(sort_tokens);
+    pvlist.unique();
+
+    for(CPVerRecord pvrec : pvlist){
+        CSmallString build;
+        build << pvrec.ver << ":" << pvrec.arch << ":" << pvrec.mode;
+        list.push_back(build);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+bool CModCache::CanModuleBeExported(CXMLElement* p_mele)
+{
+    if( p_mele == NULL ) return(true);
+    bool export_flag = true;
+    p_mele->GetAttribute("export",export_flag);
+    return(export_flag);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModCache::CheckModuleVersion(CXMLElement* p_mele,const CSmallString& ver)
+{
+    if( p_mele == NULL ) return(false);
+
+    CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
+
+    while( p_build != NULL ) {
+        CSmallString lver;
+        p_build->GetAttribute("ver",lver);
+        if( lver == ver ) return(true);
+        p_build = p_build->GetNextSiblingElement("build");
+    }
+
+    return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModCache::IsPermissionGrantedForModule(CXMLElement* p_mele)
+{
+    if( p_mele == NULL ){
+        RUNTIME_ERROR("p_mele is NULL");
+    }
+
+    CXMLElement* p_acl = p_mele->GetFirstChildElement("acl");
+    if( p_acl == NULL ) return(true);
+
+    return(IsPermissionGranted(p_acl));
+}
+
+//------------------------------------------------------------------------------
+
+bool CModCache::IsPermissionGrantedForBuild(CXMLElement* p_build)
+{
+    if( p_build == NULL ){
+        RUNTIME_ERROR("p_build is NULL");
+    }
+
+    CXMLElement* p_acl = p_build->GetFirstChildElement("acl");
+    if( p_acl == NULL ) return(true);
+
+    return(IsPermissionGranted(p_acl));
+}
+
+
+//------------------------------------------------------------------------------
+
+bool CModCache::IsPermissionGranted(CXMLElement* p_acl)
+{
+    if( p_acl == NULL ){
+        RUNTIME_ERROR("p_acl is NULL");
+    }
+
+    CSmallString value = "allow";
+    p_acl->GetAttribute("default",value);
+
+    if( value == "allow" ){
+        CXMLElement* p_rule = p_acl->GetFirstChildElement();
+        while( p_rule != NULL ){
+            CSmallString group;
+            p_rule->GetAttribute("group",group);
+            if( p_rule->GetName() == "allow" ){
+                if( User.IsInACLGroup(group) == true ) return(true);
+            }
+            if( p_rule->GetName() == "deny" ){
+                if( User.IsInACLGroup(group) == true ) return(false);
+            }
+            p_rule = p_rule->GetNextSiblingElement();
+        }
+        return(true);
+    }
+
+    if( value == "deny" ){
+        CXMLElement* p_rule = p_acl->GetFirstChildElement();
+        while( p_rule != NULL ){
+            CSmallString group;
+            p_rule->GetAttribute("group",group);
+            if( p_rule->GetName() == "allow" ){
+                if( User.IsInACLGroup(group) == true ) return(true);
+            }
+            if( p_rule->GetName() == "deny" ){
+                if( User.IsInACLGroup(group) == true ) return(false);
+            }
+            p_rule = p_rule->GetNextSiblingElement();
+        }
+        return(false);
+    }
+
+    return(true);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
 void CModCache::GetCategories(std::list<CSmallString>& list)
 {
     CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
     if( p_cele == NULL ){
-        RUNTIME_ERROR("unable to open cache element");
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
     }
 
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
@@ -280,7 +503,8 @@ void CModCache::GetModules(const CSmallString& category, std::list<CSmallString>
 {
     CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
     if( p_cele == NULL ){
-        RUNTIME_ERROR("unable to open cache element");
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
     }
 
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
@@ -320,77 +544,6 @@ void CModCache::GetModules(const CSmallString& category, std::list<CSmallString>
         }
 
         p_mele = p_mele->GetNextSiblingElement("module");
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void CModCache::GetModuleVersions(CXMLElement* p_mele, std::list<CSmallString>& list)
-{
-    CXMLElement*  p_bele = p_mele->GetFirstChildElement("build");
-    while( p_bele != NULL ) {
-        CSmallString modver;
-        p_bele->GetAttribute("ver",modver);
-        if( modver != NULL ) list.push_back(modver);
-        p_bele = p_bele->GetNextSiblingElement("build");
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void CModCache::GetModuleVersionsSorted(CXMLElement* p_mele, std::list<CSmallString>& list)
-{
-    CXMLElement*  p_bele = p_mele->GetFirstChildElement("build");
-
-    std::list<CPVerRecord>  pvlist;
-
-    while( p_bele != NULL ) {
-        CPVerRecord verrcd;
-        verrcd.verindx = 0.0;
-        p_bele->GetAttribute("ver",verrcd.ver);
-        p_bele->GetAttribute("verindx",verrcd.verindx);
-        if( verrcd.ver != NULL ){
-        pvlist.push_back(verrcd);
-        }
-        p_bele = p_bele->GetNextSiblingElement("build");
-    }
-
-    pvlist.sort(sort_tokens);
-    pvlist.unique();
-
-    for(CPVerRecord pvrec : pvlist){
-        list.push_back(pvrec.ver);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list)
-{
-    CXMLElement*  p_bele = p_mele->GetFirstChildElement("build");
-
-    std::list<CPVerRecord>  pvlist;
-
-    while( p_bele != NULL ) {
-        CPVerRecord bldrcd;
-        bldrcd.verindx = 0.0;
-        p_bele->GetAttribute("ver",bldrcd.ver);
-        p_bele->GetAttribute("arch",bldrcd.arch);
-        p_bele->GetAttribute("mode",bldrcd.mode);
-        p_bele->GetAttribute("verindx",bldrcd.verindx);
-        if( (bldrcd.ver != NULL) || (bldrcd.arch != NULL) || (bldrcd.mode != NULL) ){
-        pvlist.push_back(bldrcd);
-        }
-        p_bele = p_bele->GetNextSiblingElement("build");
-    }
-
-    pvlist.sort(sort_tokens);
-    pvlist.unique();
-
-    for(CPVerRecord pvrec : pvlist){
-        CSmallString build;
-        build << pvrec.ver << ":" << pvrec.arch << ":" << pvrec.mode;
-        list.push_back(build);
     }
 }
 
@@ -549,17 +702,6 @@ int CModCache::GetNumberOfCategories(void)
     cats.sort();
     cats.unique();
     return(cats.size());
-}
-
-//------------------------------------------------------------------------------
-
-CXMLElement* CModCache::GetCacheElement(void)
-{
-    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
-    if( p_cele == NULL ){
-        RUNTIME_ERROR("unable to open cache element");
-    }
-    return(p_cele);
 }
 
 //------------------------------------------------------------------------------

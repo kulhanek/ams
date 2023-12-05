@@ -59,30 +59,59 @@ public:
     CXMLElement* CreateEmptyCache(void);
 
 // information methods ---------------------------------------------------------
+    /// return cache element
+    CXMLElement* GetCacheElement(void);
+
     /// get module element
     CXMLElement* GetModule(const CSmallString& name,bool create=false);
 
     /// create module element
     CXMLElement* CreateModule(const CSmallString& name);
 
+    /// return module build for specified module
+    static CXMLElement* GetBuild(CXMLElement* p_mele,
+                            const CSmallString& ver,
+                            const CSmallString& arch,
+                            const CSmallString& mode);
+
     /// return default setup for the module
-    bool GetModuleDefaults(CXMLElement* p_mele,
+    static bool GetModuleDefaults(CXMLElement* p_mele,
                            CSmallString& ver, CSmallString& arch, CSmallString& mode);
 
+    /// return module documentation
+    static CXMLElement* GetModuleDoc(CXMLElement* p_mele);
+
+    /// get module versions
+    static void GetModuleVersions(CXMLElement* p_mele, std::list<CSmallString>& list);
+
+    /// get module versions - sorted by veridx
+    static void GetModuleVersionsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
+
+    /// get module builds
+    static void GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
+
+    /// check if module can be exported - default true
+    static bool CanModuleBeExported(CXMLElement* p_mele);
+
+    /// check module version
+    static bool CheckModuleVersion(CXMLElement* p_mele,const CSmallString& ver);
+
+// permissions
+    /// test if permission is granted (only module)
+    static bool IsPermissionGrantedForModule(CXMLElement* p_mele);
+
+    /// test if permission is granted (only build)
+    static bool IsPermissionGrantedForBuild(CXMLElement* p_bele);
+
+    /// test if permission is granted (only acl)
+    static bool IsPermissionGranted(CXMLElement* p_acl);
+
+// information methods ---------------------------------------------------------
     /// get module categories
     void GetCategories(std::list<CSmallString>& list);
 
     /// get modules in the given categories
     void GetModules(const CSmallString& category, std::list<CSmallString>& list,bool includever=false);
-
-    /// get module versions
-    void GetModuleVersions(CXMLElement* p_mele, std::list<CSmallString>& list);
-
-    /// get module versions - sorted by veridx
-    void GetModuleVersionsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
-
-    /// get module builds
-    void GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
 
     /// print available modules
     void PrintAvail(CTerminal& terminal,bool includever=false,bool includesys=false);
@@ -101,9 +130,6 @@ public:
 
     /// get number of categories
     int GetNumberOfCategories(void);
-
-    /// return cache element
-    CXMLElement* GetCacheElement(void);
 
 // section of protected data ---------------------------------------------------
 protected:

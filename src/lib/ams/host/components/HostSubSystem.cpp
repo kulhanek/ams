@@ -189,7 +189,7 @@ void CHostSubSystem::PrintNodeResources(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-void CHostSubSystem::PrintHostInfoForSite(CVerboseStr& vout)
+void CHostSubSystem::PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode)
 {
 
 }

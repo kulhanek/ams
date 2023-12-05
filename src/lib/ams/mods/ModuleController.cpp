@@ -318,6 +318,34 @@ bool CModuleController::ReactivateModules(CVerboseStr& out)
 {
     // FIXME
     return(false);
+
+//    CSmallString active_modules;
+//    active_modules = AMSGlobalConfig.GetActiveModules();
+
+//    CSmallString exported_modules;
+//    exported_modules = AMSGlobalConfig.GetExportedModules();
+
+//    char* p_str;
+//    char* p_strtok = NULL;
+
+//    bool result = true;
+
+//    ModuleFlags |= MFB_REACTIVATED;
+
+//    p_str = strtok_r(active_modules.GetBuffer(),"|",&p_strtok);
+//    while( p_str != NULL ) {
+//        result &= AddModule(vout,p_str);
+//        p_str = strtok_r(NULL,"|",&p_strtok);
+//    }
+
+//    // keep only those modules that were exported previously
+//    AMSGlobalConfig.SetExportedModules(exported_modules);
+
+//    if( exported_modules != NULL ) {
+//        ShellProcessor.SetVariable("AMS_EXPORTED_MODULES",exported_modules);
+//    } else {
+//        ShellProcessor.UnsetVariable("AMS_EXPORTED_MODULES");
+//    }
 }
 
 //------------------------------------------------------------------------------
@@ -326,6 +354,34 @@ bool CModuleController::PurgeModules(CVerboseStr& out)
 {
     // FIXME
     return(false);
+
+//    CSmallString active_modules;
+//    active_modules = AMSGlobalConfig.GetActiveModules();
+
+//    std::list<CSmallString> modules;
+
+//    char* p_str;
+//    char* p_strtok = NULL;
+
+//    p_str = strtok_r(active_modules.GetBuffer(),"|",&p_strtok);
+//    while( p_str != NULL ) {
+//        modules.push_back(CSmallString(p_str));
+//        p_str = strtok_r(NULL,"|",&p_strtok);
+//    }
+
+//    modules.reverse();
+
+//    std::list<CSmallString>::iterator it = modules.begin();
+//    std::list<CSmallString>::iterator ie = modules.end();
+//    bool result = true;
+
+//    while( it != ie ){
+//        CSmallString module = *it;
+//        result &= RemoveModule(vout,module);
+//        it++;
+//    }
+
+//    return(result);
 }
 
 //==============================================================================

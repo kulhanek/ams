@@ -22,19 +22,16 @@
 // =============================================================================
 
 #include <string.h>
-#include <Actions.hpp>
-#include <Cache.hpp>
-#include <AMSGlobalConfig.hpp>
+#include <Module.hpp>
+#include <ModCache.hpp>
 #include <ShellProcessor.hpp>
-#include <XMLIterator.hpp>
 #include <ErrorSystem.hpp>
-#include <Utils.hpp>
-#include <Site.hpp>
-#include <XMLParser.hpp>
-#include <FileSystem.hpp>
-#include <fnmatch.h>
+#include <ModUtils.hpp>
+#include <ModuleController.hpp>
 #include <Shell.hpp>
 #include <Host.hpp>
+#include <HostGroup.hpp>
+#include <XMLPrinter.hpp>
 #include <iomanip>
 #include <map>
 #include <list>
@@ -51,13 +48,13 @@ using namespace boost::algorithm;
 
 //------------------------------------------------------------------------------
 
-CActions Actions;
+CModule Module;
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CActions::CActions(void)
+CModule::CModule(void)
 {
     GlobalPrintLevel = EAPL_FULL;
     Level = 0;
@@ -69,94 +66,40 @@ CActions::CActions(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CActions::SetFlags(int flags)
+void CModule::SetFlags(int flags)
 {
     ModuleFlags = flags;
 }
 
 //------------------------------------------------------------------------------
 
-int  CActions::GetFlags(void)
+int  CModule::GetFlags(void)
 {
     return(ModuleFlags);
 }
 
+//------------------------------------------------------------------------------
+
+void CModule::SetPrintLevel(EModulePrintLevel set)
+{
+    GlobalPrintLevel = set;
+}
+
+//-----------------------------------------------------------------------------
+
+void CModule::SetModuleExportFlag(bool set)
+{
+    ModuleExportFlag = set;
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CActions::ReactivateModules(std::ostream& vout)
+EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool fordep,bool do_not_export)
 {
-    CSmallString active_modules;
-    active_modules = AMSGlobalConfig.GetActiveModules();
-
-    CSmallString exported_modules;
-    exported_modules = AMSGlobalConfig.GetExportedModules();
-
-    char* p_str;
-    char* p_strtok = NULL;
-
-    bool result = true;
-
-    ModuleFlags |= MFB_REACTIVATED;
-
-    p_str = strtok_r(active_modules.GetBuffer(),"|",&p_strtok);
-    while( p_str != NULL ) {
-        result &= AddModule(vout,p_str);
-        p_str = strtok_r(NULL,"|",&p_strtok);
-    }
-
-    // keep only those modules that were exported previously
-    AMSGlobalConfig.SetExportedModules(exported_modules);
-
-    if( exported_modules != NULL ) {
-        ShellProcessor.SetVariable("AMS_EXPORTED_MODULES",exported_modules);
-    } else {
-        ShellProcessor.UnsetVariable("AMS_EXPORTED_MODULES");
-    }
-}
-
-//------------------------------------------------------------------------------
-
-bool CActions::PurgeModules(std::ostream& vout)
-{
-    CSmallString active_modules;
-    active_modules = AMSGlobalConfig.GetActiveModules();
-
-    std::list<CSmallString> modules;
-
-    char* p_str;
-    char* p_strtok = NULL;
-
-    p_str = strtok_r(active_modules.GetBuffer(),"|",&p_strtok);
-    while( p_str != NULL ) {
-        modules.push_back(CSmallString(p_str));
-        p_str = strtok_r(NULL,"|",&p_strtok);
-    }
-
-    modules.reverse();
-
-    std::list<CSmallString>::iterator it = modules.begin();
-    std::list<CSmallString>::iterator ie = modules.end();
-    bool result = true;
-
-    while( it != ie ){
-        CSmallString module = *it;
-        result &= RemoveModule(vout,module);
-        it++;
-    }
-
-    return(result);
-}
-
-//------------------------------------------------------------------------------
-
-EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool fordep,bool do_not_export)
-{
-    module.GetSubstitute('/',':');
-
     // determine print level -----------------------
-    EActionPrintLevel print_level =  GlobalPrintLevel;
+    EModulePrintLevel print_level =  GlobalPrintLevel;
     if( (Level > 0) && (GlobalPrintLevel != EAPL_NONE) ) print_level = EAPL_SHORT;
     Level++;
 
@@ -169,14 +112,14 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
     // parse module input --------------------------
     CSmallString name,ver,arch,mode;
 
-    if( (CUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
+    if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
         ES_ERROR("module name is empty string");
         Level--;
         return(EAE_MODULE_NOT_FOUND);
     }
 
     // get module specification --------------------
-    CXMLElement* p_module = Cache.GetModule(name);
+    CXMLElement* p_module = ModCache.GetModule(name);
 
     if( p_module == NULL ) {
         CSmallString error;
@@ -187,7 +130,7 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
     }
 
     // test permission - module level
-    if( Cache.IsPermissionGrantedForModule(p_module) == false ){
+    if( CModCache::IsPermissionGrantedForModule(p_module) == false ){
         CSmallString error;
         error << "module '" << name << "' is not allowed for the current user";
         ES_TRACE_ERROR(error);
@@ -208,7 +151,7 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
         return(EAE_BUILD_NOT_FOUND);
     }
 
-    CXMLElement* p_build = Cache.GetBuild(p_module,ver,arch,mode);
+    CXMLElement* p_build = ModCache.GetBuild(p_module,ver,arch,mode);
 
     if( p_build == NULL ) {
         CSmallString error;
@@ -220,28 +163,11 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
         return(EAE_BUILD_NOT_FOUND);
     }
 
-    // process exclude_node flag -------------------
-    CSmallString exclude_node;
-    p_build->GetAttribute("exclude_node",exclude_node);
-
-    CSmallString ams_node_type;
-    ams_node_type = CShell::GetSystemVariable("AMS_NODE_TYPE");
-
-    if( exclude_node != NULL ) {
-        if( fnmatch(exclude_node,ams_node_type,0) == 0 ) {
-            if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
-                vout << "  INFO: Module activation is excluded on this node." << endl;
-                vout << endl;
-            }
-            return(EAE_STATUS_OK);
-        }
-    }
-
     // unload module if it is already loaded -------
 
     bool reactivating = false;
 
-    if( AMSGlobalConfig.IsModuleActive(name) == true ) {
+    if( ModuleController.IsModuleActive(name) == true ) {
         if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
             vout << "  INFO:    Module is active, reactivating .. " << endl;
         }
@@ -280,7 +206,7 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
     complete_module = name + ":" + ver + ":" + arch + ":" + mode;
 
     CSmallString exported_module;
-    if( Cache.CanModuleBeExported(p_module) == true ) {
+    if( CModCache::CanModuleBeExported(p_module) == true ) {
         exported_module = name + ":" + ver;
     }
 
@@ -290,24 +216,9 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
 
     // print rest of module info -------------------
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
-        vout <<     "  Requested CPUs     : " << setw(3) << Host.GetNCPUs();
-        vout <<     "  Requested GPUs     : " << setw(3) << Host.GetNGPUs()<< endl;
-        vout <<     "  Num of host CPUs   : " << setw(3) << Host.GetNumOfHostCPUs();
-        vout <<     "  Num of host GPUs   : " << setw(3) << Host.GetNumOfHostGPUs() << endl;
-        vout <<     "  Requested nodes    : " << setw(3) << Host.GetNNodes() << endl;
-        vout <<     "  Host arch tokens   : " << Host.GetArchTokens() << endl;
-        vout <<     "  Host SMP CPU model : " << Host.GetCPUModel() << endl;
-        if( Host.GetNumOfHostGPUs() > 0 ){
-        if( Host.IsGPUModelSMP() == false ){
-        for(size_t i=0; i < Host.GetGPUModels().size(); i++){
-        vout <<     "  Host GPU model #" << setw(1) << i+1 << "  : " << Host.GetGPUModels()[i] << endl;
-        }
-        } else{
-        vout <<     "  Host SMP GPU model : " << Host.GetGPUModels()[0] << endl;
-        }
-        }
+        Host.PrintHostInfoForModule(vout);
         vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-        if( (Cache.CanModuleBeExported(p_module) == true) && (do_not_export == false) ) {
+        if( (CModCache::CanModuleBeExported(p_module) == true) && (do_not_export == false) ) {
             vout << "  Exported module    : " << exported_module << endl;
         } else {
             if( do_not_export ){
@@ -319,7 +230,7 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
         vout <<     "  Module build       : " << complete_module << endl;
     }
 
-    if( PrepareModuleEnvironment(p_build,complete_module,exported_module,true) == false ) {
+    if( PrepareModuleEnvironment(p_build,complete_module,exported_module,EMA_ADD_MODULE) == false ) {
         Level--;
         return(EAE_CONFIG_ERROR);
     }
@@ -348,12 +259,12 @@ EActionError CActions::AddModule(std::ostream& vout,CSmallString module,bool for
 //------------------------------------------------------------------------------
 //==============================================================================
 
-EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
+EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
 {
     module.GetSubstitute('/',':');
 
     // determine print level -----------------------
-    EActionPrintLevel print_level =  GlobalPrintLevel;
+    EModulePrintLevel print_level =  GlobalPrintLevel;
     if( (Level > 0) && (GlobalPrintLevel != EAPL_NONE) ) print_level = EAPL_SHORT;
     Level++;
 
@@ -366,14 +277,14 @@ EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
     // parse module input --------------------------
     CSmallString name,ver,arch,mode;
 
-    if( (CUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
+    if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
         ES_ERROR("module name is empty string");
         Level--;
         return(EAE_MODULE_NOT_FOUND);
     }
 
     // get module specification --------------------
-    CXMLElement* p_module = Cache.GetModule(name);
+    CXMLElement* p_module = ModCache.GetModule(name);
 
     if( p_module == NULL ) {
         CSmallString error;
@@ -383,7 +294,7 @@ EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
         return(EAE_MODULE_NOT_FOUND);
     }
 
-    if( AMSGlobalConfig.IsModuleActive(name) == false ) {
+    if( ModuleController.IsModuleActive(name) == false ) {
         CSmallString error;
         error << "unable to remove module '" << name << "' because it is not active";
         ES_ERROR(error);
@@ -392,10 +303,10 @@ EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
     }
 
     CSmallString   complete_module;
-    complete_module = AMSGlobalConfig.GetActiveModuleSpecification(name);
+    complete_module = ModuleController.GetActiveModuleSpecification(name);
 
     CSmallString exported_module;
-    exported_module = AMSGlobalConfig.GetExportedModuleSpecification(name);
+    exported_module = ModuleController.GetExportedModuleSpecification(name);
 
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
         vout << "  Module build : " << complete_module << endl;
@@ -405,13 +316,13 @@ EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
         vout << "           Unload module : " << complete_module << endl;
     }
 
-    if( CUtils::ParseModuleName(complete_module,name,ver,arch,mode) == false ) {
+    if( CModUtils::ParseModuleName(complete_module,name,ver,arch,mode) == false ) {
         ES_ERROR("unable to parse complete module specification");
         Level--;
         return(EAE_CONFIG_ERROR);
     }
 
-    CXMLElement* p_build = Cache.GetBuild(p_module,ver,arch,mode);
+    CXMLElement* p_build = ModCache.GetBuild(p_module,ver,arch,mode);
 
     if( p_build == NULL ) {
         ES_ERROR("unable to get module build");
@@ -419,7 +330,7 @@ EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
         return(EAE_BUILD_NOT_FOUND);
     }
 
-    if( PrepareModuleEnvironment(p_build,complete_module,exported_module,false) == false ) {
+    if( PrepareModuleEnvironment(p_build,complete_module,exported_module,EMA_REMOVE_MODULE) == false ) {
         Level--;
         return(EAE_CONFIG_ERROR);
     }
@@ -432,41 +343,16 @@ EActionError CActions::RemoveModule(std::ostream& vout,CSmallString module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CActions::SetActionPrintLevel(EActionPrintLevel set)
+bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container)
 {
-    GlobalPrintLevel = set;
-}
+    if( p_dep_container == NULL ) return(true);
 
-//-----------------------------------------------------------------------------
-
-void CActions::SetModuleExportFlag(bool set)
-{
-    ModuleExportFlag = set;
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-bool CActions::SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container)
-{
-    CXMLElement* p_ele = NULL;
-
-    if( p_dep_container != NULL ) {
-        p_ele = p_dep_container->GetFirstChildElement("deps");
-    }
-
-    if( p_ele == NULL ) {
-        return(true);        // no dependencies - skipping
-    }
-
-    CXMLIterator    I(p_ele);
-    CXMLElement*     p_sele;
+    CXMLElement* p_sele = p_dep_container->GetChildElementByPath("deps/dep");
 
     bool result = true;
     int count = 0;
 
-    while( (p_sele = I.GetNextChildElement()) != NULL ) {
+    while( p_sele != NULL ) {
         if( p_sele->GetName() == "dep" ) {
             CSmallString lname,ltype;
             p_sele->GetAttribute("name",lname);
@@ -476,11 +362,11 @@ bool CActions::SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container)
                 CSmallString lmodname;
                 CSmallString lmodver;
 
-                CUtils::ParseModuleName(lname,lmodname,lmodver);
+                CModUtils::ParseModuleName(lname,lmodname,lmodver);
                 // is module already added?
                 bool found = false;
-                for(unsigned int i=0; i<DepList.size(); i++) {
-                    if( DepList[i] == lmodname ) {
+                for(CSmallString dep_name : DepList){
+                    if( dep_name == lmodname ){
                         found = true;
                         break;
                     }
@@ -500,7 +386,7 @@ bool CActions::SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container)
                 }
 
             } else if( ltype == "rm" ) {
-                if( AMSGlobalConfig.IsModuleActive(lname) == true ) {
+                if( ModuleController.IsModuleActive(lname) == true ) {
                     if( GlobalPrintLevel != EAPL_NONE ) {
                         vout << "  WARNING: active module in conflict, unloading ... " << endl;
                     }
@@ -509,6 +395,7 @@ bool CActions::SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container)
             }
 
         }
+        p_sele = p_sele->GetNextSiblingElement("dep");
     }
 
     if( (Level == 1) && ( count > 0) ) {
@@ -522,25 +409,16 @@ bool CActions::SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_container)
+bool CModule::SolveModulePostDeps(CVerboseStr& vout,CXMLElement* p_dep_container)
 {
-    CXMLElement* p_ele = NULL;
+    if( p_dep_container == NULL ) return(true);
 
-    if( p_dep_container != NULL ) {
-        p_ele = p_dep_container->GetFirstChildElement("deps");
-    }
-
-    if( p_ele == NULL ) {
-        return(true);        // no dependencies - skipping
-    }
-
-    CXMLIterator    I(p_ele);
-    CXMLElement*     p_sele;
+    CXMLElement* p_sele = p_dep_container->GetChildElementByPath("deps/dep");
 
     bool result = true;
     int count = 0;
 
-    while( (p_sele = I.GetNextChildElement()) != NULL ) {
+    while( p_sele != NULL ) {
         if( p_sele->GetName() == "depend" ) {
             CSmallString lname, ltype;
             p_sele->GetAttribute("name",lname);
@@ -550,11 +428,11 @@ bool CActions::SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_contain
                 CSmallString lmodname;
                 CSmallString lmodver;
 
-                CUtils::ParseModuleName(lname,lmodname,lmodver);
+                CModUtils::ParseModuleName(lname,lmodname,lmodver);
                 // is module already added?
                 bool found = false;
-                for(unsigned int i=0; i<DepList.size(); i++) {
-                    if( DepList[i] == lmodname ) {
+                for(CSmallString dep_name : DepList){
+                    if( dep_name == lmodname ){
                         found = true;
                         break;
                     }
@@ -572,6 +450,7 @@ bool CActions::SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_contain
                 if( found == false) result &= AddModule(vout,lname,true) != EAE_STATUS_OK;
             }
         }
+        p_sele = p_sele->GetNextSiblingElement("dep");
     }
 
     if( (Level == 1) && ( count > 0) ) {
@@ -585,10 +464,10 @@ bool CActions::SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_contain
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::PrepareModuleEnvironment(CXMLElement* p_build,
-        const CSmallString& complete_module,
-        const CSmallString& exported_module,
-        bool add_module)
+bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
+                                        const CSmallString& complete_module,
+                                        const CSmallString& exported_module,
+                                        EModuleAction action)
 {
     // prepare module environment ------------------
     if( ShellProcessor.PrepareModuleEnvironmentForModActionI(p_build) == false ) {
@@ -598,7 +477,7 @@ bool CActions::PrepareModuleEnvironment(CXMLElement* p_build,
 
     // install hooks from module config ------------
 
-    if( add_module == true ) {
+    if( action == EMA_ADD_MODULE ) {
         // do postaction if necessary
         CSmallString args;
         args << "\""+complete_module+"\" " << ModuleFlags;
@@ -618,16 +497,18 @@ bool CActions::PrepareModuleEnvironment(CXMLElement* p_build,
             break;
         }
 
-        if( Site.ExecuteModaction("add",args) == false ) {
-            return(false);
-        }
+// FIXME
+//        if( Site.ExecuteModaction("add",args) == false ) {
+//            return(false);
+//        }
     } else {
-        if( Site.ExecuteModaction("remove","\""+complete_module+"\"") == false ) {
-            return(false);
-        }
+// FIXME
+//        if( Site.ExecuteModaction("remove","\""+complete_module+"\"") == false ) {
+//            return(false);
+//        }
     }
 
-    if( ShellProcessor.PrepareModuleEnvironmentForLowPriority(p_build,add_module) == false ) {
+    if( ShellProcessor.PrepareModuleEnvironmentForLowPriority(p_build,action) == false ) {
         return(false);
     }
 
@@ -637,22 +518,29 @@ bool CActions::PrepareModuleEnvironment(CXMLElement* p_build,
 
     // now update AMS_ACTIVE_MODULES and AMS_EXPORTED_MODULES variables
 
-    if( add_module == true ) {
+    switch(action){
+        case(EMA_ADD_MODULE):
         ShellProcessor.AppendValueToVariable("AMS_ACTIVE_MODULES",complete_module,"|");
-        AMSGlobalConfig.UpdateActiveModules(complete_module,true);
+        // FIXME
+        // AMSGlobalConfig.UpdateActiveModules(complete_module,true);
 
         if( (ModuleExportFlag == true) && (exported_module != NULL) ) {
             ShellProcessor.AppendValueToVariable("AMS_EXPORTED_MODULES",exported_module,"|");
-            AMSGlobalConfig.UpdateExportedModules(exported_module,true);
+            // FIXME
+            //  AMSGlobalConfig.UpdateExportedModules(exported_module,true);
         }
-    } else {
+        break;
+    case(EMA_REMOVE_MODULE):
         ShellProcessor.RemoveValueFromVariable("AMS_ACTIVE_MODULES",complete_module,"|");
-        AMSGlobalConfig.UpdateActiveModules(complete_module,false);
+        // FIXME
+        // AMSGlobalConfig.UpdateActiveModules(complete_module,false);
 
         if( exported_module != NULL ) {
             ShellProcessor.RemoveValueFromVariable("AMS_EXPORTED_MODULES",exported_module,"|");
-            AMSGlobalConfig.UpdateExportedModules(exported_module,false);
+            // FIXME
+            // AMSGlobalConfig.UpdateExportedModules(exported_module,false);
         }
+        break;
     }
 
     return(true);
@@ -662,51 +550,7 @@ bool CActions::PrepareModuleEnvironment(CXMLElement* p_build,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CSmallString CActions::RemoveModule(const CSmallString& module_list,const CSmallString& name)
-{
-    CSmallString     tmp(module_list);
-    CSmallString     newlist;
-    char*             p_lvar;
-
-    if( tmp == NULL ) return(newlist);
-
-    p_lvar = strtok(tmp.GetBuffer(),"|");
-    while( p_lvar != NULL ) {
-        if( (strlen(p_lvar) != 0) && (strstr(p_lvar,name) != p_lvar) ) {
-            if( newlist != NULL ) newlist += "|";
-            newlist += p_lvar;
-        }
-        p_lvar = strtok(NULL,"|");
-    }
-
-    return(newlist);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-const CSmallString CActions::AppendModule(const CSmallString& module_list,const CSmallString& module)
-{
-    CSmallString     newlist(module_list);
-
-    if( newlist != NULL ) {
-        if( module != NULL ) {
-            newlist += "|";
-            newlist += module;
-        }
-    } else {
-        newlist = module;
-    }
-
-    return(newlist);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
+bool CModule::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
                                 CSmallString& name,
                                 CSmallString& ver,
                                 CSmallString& arch,
@@ -717,7 +561,7 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
     CSmallString defarch;
     CSmallString defpar;
 
-    if( Cache.GetModuleDefaults(p_module,defver,defarch,defpar) == false ) {
+    if( CModCache::GetModuleDefaults(p_module,defver,defarch,defpar) == false ) {
         //    CSmallString error;
         //    error << "default setup for module '" << name << "' is not provided";
         //    ES_ERROR(error);
@@ -742,7 +586,7 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
         if( cache_type == "S" ) {
             vout << " INFO: Source        : system cache" << endl;
         }
-        if( Cache.CanModuleBeExported(p_module) == true ) {
+        if( CModCache::CanModuleBeExported(p_module) == true ) {
             vout << " INFO: Exportable    : yes" << endl;
         } else {
             vout << " INFO: Exportable    : no" << endl;
@@ -751,7 +595,7 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
     }
 
     // test permission - module level
-    if( Cache.IsPermissionGrantedForModule(p_module) == false ){
+    if( CModCache::IsPermissionGrantedForModule(p_module) == false ){
         CSmallString error;
         error << "module '" << name << "' is not allowed for the current user";
         ES_ERROR(error);
@@ -790,7 +634,7 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
             }
         }
         // user do not specify version or it wants default one
-        if( Cache.CheckModuleVersion(p_module,defver) == false ) {
+        if( CModCache::CheckModuleVersion(p_module,defver) == false ) {
             CSmallString error;
             error << "no build was found for default version '" << defver
                   << "' of module '" << name << "'";
@@ -801,7 +645,7 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
         ver = defver;
     } else {
         // use user specified version
-        if( Cache.CheckModuleVersion(p_module,ver) == false ) {
+        if( CModCache::CheckModuleVersion(p_module,ver) == false ) {
             CSmallString error;
             error << "no build was found for specified version '" << ver
                   << "' of module '" << name << "'";
@@ -853,7 +697,7 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
         }
     }
 
-    if( DetermineArchitecture(vout,p_module,ver,arch) == false ) {
+    if( DetermineArch(vout,p_module,ver,arch) == false ) {
         CSmallString error;
         error << "no build was found for module '" << name
               << "' with version '" << ver << "' and architecture '" << arch << "'";
@@ -919,336 +763,89 @@ bool CActions::CompleteModule(std::ostream& vout,CXMLElement* p_module,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CActions::DetermineArchitecture(std::ostream& vout,
+bool CModule::DetermineArch(CVerboseStr& vout,
                                         CXMLElement* p_module,
                                         const CSmallString& ver,
                                         CSmallString& arch)
 {
     CSmallString sys_arch = Host.GetArchTokens();
-    CSmallString user_arch = arch;
 
     if( (GlobalPrintLevel == EAPL_VERBOSE) && (arch == "auto" ) ) {
         vout << " INFO: Host architecture tokens : " << sys_arch << endl;
-        vout << " INFO: Requested architecture   : " << user_arch <<  endl;
+        vout << " INFO: Requested architecture   : " << arch <<  endl;
     }
 
     if( arch == "auto" ){
+        return(DetermineArchAuto(vout,p_module,ver,arch));
+    } else {
+        return(DetermineArchUser(vout,p_module,ver,arch));
+    }
+}
 
-        if( GlobalPrintLevel == EAPL_VERBOSE ) {
-            vout << " INFO:" << endl;
-            vout << " INFO: Testing architectures ..." << endl;
-        }
+//------------------------------------------------------------------------------
 
-        list<string> sys_tokens;
-        string       ssys_arch(sys_arch);
-        split(sys_tokens,ssys_arch,is_any_of(","));
+bool CModule::DetermineArchAuto(CVerboseStr& vout,
+                                        CXMLElement* p_module,
+                                        const CSmallString& ver,
+                                        CSmallString& arch)
+{
+    CSmallString sys_arch = Host.GetArchTokens();
 
-        int best_match = 0;
-        int best_score = -1;
-        CSmallString found_arch;
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO:" << endl;
+        vout << " INFO: Testing architectures ..." << endl;
+    }
 
-        // find the best architecture build
-        CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
-        while( p_build ){
-            CSmallString bver,bmode;
-            string barch;
-            p_build->GetAttribute("ver",bver);
-            p_build->GetAttribute("arch",barch);
-            p_build->GetAttribute("mode",bmode);
+    list<string> sys_tokens;
+    string       ssys_arch(sys_arch);
+    split(sys_tokens,ssys_arch,is_any_of(","));
 
-            if( ver == bver ){
-                // test permission - build level
-                if( Cache.IsPermissionGrantedForBuild(p_build) == false ){
-                    if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                        CSmallString bam;
-                        bam = CSmallString(barch) + ":" + bmode;
-                        vout << " INFO:   -> Build architecture " << setw(15) << left << barch << " from " << setw(25) << bam << " is not allowed for the current user." << endl;
-                    }
-                    p_build = p_build->GetNextSiblingElement("build");
-                    continue;
-                }
+    int best_match = 0;
+    int best_score = -1;
+    CSmallString found_arch;
 
-                list<string> build_tokens;
-                split(build_tokens,barch,is_any_of("#"));
-                build_tokens.sort();
-                build_tokens.unique();
+    // find the best architecture build
+    CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
+    while( p_build ){
+        CSmallString bver,bmode;
+        string barch;
+        p_build->GetAttribute("ver",bver);
+        p_build->GetAttribute("arch",barch);
+        p_build->GetAttribute("mode",bmode);
 
-                int matches = 0;
-                int failures = 0;
-                int score = 0;
-
-                list<string>::iterator bit = build_tokens.begin();
-                list<string>::iterator bet = build_tokens.end();
-
-                while( bit != bet ){
-
-                    bool found = false;
-                    list<string>::iterator sit = sys_tokens.begin();
-                    list<string>::iterator set = sys_tokens.end();
-
-                    while( sit != set ){
-                        if( (*bit) == (*sit) ){
-                            score += Host.GetArchTokenScore(*sit);
-                            found = true;
-                            break;
-                        }
-                        sit++;
-                    }
-                    if( found ){
-                        matches++;
-                    } else {
-                        failures++;
-                    }
-
-                    bit++;
-                }
+        if( ver == bver ){
+            // test permission - build level
+            if( CModCache::IsPermissionGrantedForBuild(p_build) == false ){
                 if( GlobalPrintLevel == EAPL_VERBOSE ) {
                     CSmallString bam;
                     bam = CSmallString(barch) + ":" + bmode;
-                    vout << " INFO:   -> Tested architecture " << setw(15) << left << barch << " from " << setw(25) << bam << " has " << setw(2) << matches << " matches, " << setw(2) << failures << " failures, and score " << score << endl;
-                }
-
-                if( failures == 0 ){
-                    if( (best_match <= matches) && (best_score < score) ){
-                        best_match = matches;
-                        best_score = score;
-                        found_arch = barch;
-                    }
-                }
-            }
-
-            p_build = p_build->GetNextSiblingElement("build");
-        }
-        if( GlobalPrintLevel == EAPL_VERBOSE ) {
-            vout << " INFO:   -> No more builds to test." << endl;
-        }
-        if( found_arch != NULL ){
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> The best build was found for '" << found_arch << "'." << endl;
-                vout << " INFO:" << endl;
-            }
-            arch = found_arch;
-            return(true);
-        } else {
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> No suitable build was found for system architecture." << endl;
-            }
-        }
-
-    } else {
-
-        CSmallString found_arch;
-
-        if( GlobalPrintLevel == EAPL_VERBOSE ) {
-            vout << " INFO:" << endl;
-            vout << " INFO: Testing architectures ..." << endl;
-        }
-
-        // find the exact architecture build
-        CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
-        while( p_build ){
-            CSmallString bver;
-            CSmallString barch;
-            CSmallString bmode;
-            p_build->GetAttribute("ver",bver);
-            p_build->GetAttribute("arch",barch);
-            p_build->GetAttribute("mode",bmode);
-            if( ver == bver ){
-
-                // test permission - build level
-                if( Cache.IsPermissionGrantedForBuild(p_build) == false ){
-                    if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                        CSmallString bam;
-                        bam = CSmallString(barch) + ":" + bmode;
-                        vout << " INFO:   -> Build architecture '" << barch << "' from '" << bam << "' is not allowed for the current user." << endl;
-                    }
-                    p_build = p_build->GetNextSiblingElement("build");
-                    continue;
-                }
-
-                int matches,maxmatches;
-                bool found = CUtils::AreSameTokens(user_arch,barch,matches,maxmatches);
-
-                if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                    if( found == false ){
-                        CSmallString bam;
-                        bam = CSmallString(barch) + ":" + bmode;
-                        vout << " INFO:   -> Build architecture '" << barch << "' from '" << bam << "' does not exactly match user request '" << user_arch << "' (" << matches << " matches out of " << maxmatches << ")." << endl;
-                    }
-                }
-
-                if( found == true ){
-                    found_arch = barch;
-                    break;
-                }
-            }
-
-            p_build = p_build->GetNextSiblingElement("build");
-        }
-        if( found_arch != NULL ){
-            arch = found_arch;
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> The best build was found for '" << arch << "'." << endl;
-                vout << " INFO:" << endl;
-            }
-            return(true);
-        } else {
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> No suitable build was found for system architecture." << endl;
-            }
-        }
-    }
-
-    return(false);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-bool CActions::DetermineMode(std::ostream& vout,CXMLElement* p_module,
-                                const CSmallString& ver,
-                                const CSmallString& arch,
-                                CSmallString& mode)
-{
-    CSmallString user_mode = mode;
-
-    if( mode == "auto" ){
-
-        // first determine allowed tokens and their score
-        std::list<std::string>      Modes;
-        std::map<std::string,int>   ModeScore;
-
-        CXMLElement* p_ele = Host.GetRootParallelModes();
-        CXMLElement* p_mele = p_ele->GetFirstChildElement();
-        while( p_mele != NULL ){
-            int ncgpu = 0; // current number of cpus/gpus
-            int mcgpu = 0; // max number of cpus/gpus per node
-            if( p_mele->GetName() == "cmode" ){
-                ncgpu = Host.GetNCPUs();
-                mcgpu = Host.GetNumOfHostCPUs();
-            } else if( p_mele->GetName() == "gmode" ) {
-                ncgpu = Host.GetNGPUs();
-                mcgpu = Host.GetNumOfHostGPUs();
-            } else {
-                ES_ERROR("unknown element in host modes");
-                return(false);
-            }
-            // add token name
-            std::string name;
-            p_mele->GetAttribute("name",name);
-
-            // and determine its score
-            int score = -1;
-            CXMLElement* p_sele = p_mele->GetFirstChildElement();
-            while( p_sele != NULL ){
-                int lscore = 0;
-                p_sele->GetAttribute("score",lscore);
-                if( p_sele->GetName() == "one" ){
-                    if( ncgpu == 1 ){
-                        score = lscore;
-                        break;
-                    }
-                }
-                if( p_sele->GetName() == "gto" ){
-                    if( ncgpu > 1 ){
-                        score = lscore;
-                        break;
-                    }
-                }
-                if( p_sele->GetName() == "lem" ){
-                    if( ncgpu <= mcgpu ){
-                        score = lscore;
-                        break;
-                    }
-                }
-                if( p_sele->GetName() == "gtm" ){
-                    if( ncgpu > mcgpu ){
-                        score = lscore;
-                        break;
-                    }
-                }
-                p_sele = p_sele->GetNextSiblingElement();
-            }
-            if( score >= 0 ){
-                Modes.push_back(name);
-                ModeScore[name] = score;
-            }
-            p_mele = p_mele->GetNextSiblingElement();
-        }
-
-        if( GlobalPrintLevel == EAPL_VERBOSE ) {
-            vout << " INFO: Host mode tokens with determined scores:" << endl;
-            std::list<std::string>::iterator mit = Modes.begin();
-            std::list<std::string>::iterator mie = Modes.end();
-
-            while( mit != mie ){
-                vout << " INFO:   -> " << left << setw(10) << *mit << right << setw(5) << ModeScore[*mit] << endl;
-                mit++;
-            }
-        }
-
-        if( GlobalPrintLevel == EAPL_VERBOSE ) {
-            vout << " INFO:" << endl;
-            vout << " INFO: Testing modes ..." << endl;
-        }
-
-        int best_match = 0;
-        int best_score = -1;
-        CSmallString found_mode;
-
-        // find the best architecture build
-        CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
-        while( p_build ){
-            CSmallString bver;
-            p_build->GetAttribute("ver",bver);
-            if( bver != ver ){
-                p_build = p_build->GetNextSiblingElement("build");
-                continue;
-            }
-
-            CSmallString barch;
-            p_build->GetAttribute("arch",barch);
-            if( CUtils::AreSameTokens(arch,barch) == false ){
-                p_build = p_build->GetNextSiblingElement("build");
-                continue;
-            }
-
-            string bmode;
-            p_build->GetAttribute("mode",bmode);
-
-            // test permission - build level
-            if( Cache.IsPermissionGrantedForBuild(p_build) == false ){
-                if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                    CSmallString bam;
-                    bam = barch + ":" + bmode;
-                    vout << " INFO:   -> Tested build " << setw(20) << bam << " is not allowed for the current user." << endl;
+                    vout << " INFO:   -> Build architecture " << setw(15) << left << barch << " from " << setw(25) << bam << " is not allowed for the current user." << endl;
                 }
                 p_build = p_build->GetNextSiblingElement("build");
                 continue;
             }
 
-            list<string> mode_tokens;
-            split(mode_tokens,bmode,is_any_of("#"));
-            mode_tokens.sort();
-            mode_tokens.unique();
+            list<string> build_tokens;
+            split(build_tokens,barch,is_any_of("#"));
+            build_tokens.sort();
+            build_tokens.unique();
 
             int matches = 0;
             int failures = 0;
             int score = 0;
 
-            list<string>::iterator bit = mode_tokens.begin();
-            list<string>::iterator bet = mode_tokens.end();
+            list<string>::iterator bit = build_tokens.begin();
+            list<string>::iterator bet = build_tokens.end();
 
             while( bit != bet ){
 
                 bool found = false;
-                list<string>::iterator sit = Modes.begin();
-                list<string>::iterator set = Modes.end();
+                list<string>::iterator sit = sys_tokens.begin();
+                list<string>::iterator set = sys_tokens.end();
 
                 while( sit != set ){
                     if( (*bit) == (*sit) ){
-                        score += ModeScore[*sit];
+                        score += HostGroup.GetArchTokenScore(*sit);
                         found = true;
                         break;
                     }
@@ -1262,102 +859,708 @@ bool CActions::DetermineMode(std::ostream& vout,CXMLElement* p_module,
 
                 bit++;
             }
-
             if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> Tested mode " << setw(20) << left << bmode << right << " has " << setw(2) << matches << " matches, " << setw(2) << failures << " failures, and score " << score << endl;
+                CSmallString bam;
+                bam = CSmallString(barch) + ":" + bmode;
+                vout << " INFO:   -> Tested architecture " << setw(15) << left << barch << " from " << setw(25) << bam << " has " << setw(2) << matches << " matches, " << setw(2) << failures << " failures, and score " << score << endl;
             }
 
             if( failures == 0 ){
                 if( (best_match <= matches) && (best_score < score) ){
                     best_match = matches;
                     best_score = score;
-                    found_mode = bmode;
+                    found_arch = barch;
                 }
             }
-
-            p_build = p_build->GetNextSiblingElement("build");
         }
+
+        p_build = p_build->GetNextSiblingElement("build");
+    }
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO:   -> No more builds to test." << endl;
+    }
+    if( found_arch != NULL ){
         if( GlobalPrintLevel == EAPL_VERBOSE ) {
-            vout << " INFO:   -> No more builds to test." << endl;
-        }
-        if( found_mode != NULL ){
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> The best build was found for mode '" << found_mode << "'." << endl;
-                vout << " INFO:" << endl;
-            }
-            mode = found_mode;
-            return(true);
-        } else {
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> No suitable build was found for system mode." << endl;
-            }
-        }
-
-    } else {
-
-        CSmallString found_mode;
-
-        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> The best build was found for '" << found_arch << "'." << endl;
             vout << " INFO:" << endl;
-            vout << " INFO: Testing modes ..." << endl;
         }
+        arch = found_arch;
+        return(true);
+    } else {
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> No suitable build was found for system architecture." << endl;
+        }
+    }
 
-        // find the exact architecture build
-        CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
-        while( p_build ){
-            CSmallString bver;
-            p_build->GetAttribute("ver",bver);
-            if( bver != ver ){
-                p_build = p_build->GetNextSiblingElement("build");
-                continue;
-            }
+    return(false);
+}
 
-            CSmallString barch;
-            p_build->GetAttribute("arch",barch);
-            if( CUtils::AreSameTokens(arch,barch) == false ){
-                p_build = p_build->GetNextSiblingElement("build");
-                continue;
-            }
+//------------------------------------------------------------------------------
 
-            CSmallString bmode;
-            p_build->GetAttribute("mode",bmode);
+bool CModule::DetermineArchUser(CVerboseStr& vout,
+                                        CXMLElement* p_module,
+                                        const CSmallString& ver,
+                                        CSmallString& arch)
+{
+    CSmallString user_arch = arch;
+
+    CSmallString found_arch;
+
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO:" << endl;
+        vout << " INFO: Testing architectures ..." << endl;
+    }
+
+    // find the exact architecture build
+    CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
+    while( p_build ){
+        CSmallString bver;
+        CSmallString barch;
+        CSmallString bmode;
+        p_build->GetAttribute("ver",bver);
+        p_build->GetAttribute("arch",barch);
+        p_build->GetAttribute("mode",bmode);
+        if( ver == bver ){
 
             // test permission - build level
-            if( Cache.IsPermissionGrantedForBuild(p_build) == false ){
+            if( CModCache::IsPermissionGrantedForBuild(p_build) == false ){
                 if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                    vout << " INFO:   -> Tested build '" << setw(20) << bmode << "' is not allowed for the current user." << endl;
+                    CSmallString bam;
+                    bam = CSmallString(barch) + ":" + bmode;
+                    vout << " INFO:   -> Build architecture '" << barch << "' from '" << bam << "' is not allowed for the current user." << endl;
                 }
                 p_build = p_build->GetNextSiblingElement("build");
                 continue;
             }
 
             int matches,maxmatches;
-            if( CUtils::AreSameTokens(mode,bmode,matches,maxmatches) ){
-                found_mode = bmode;
+            bool found = AreSameTokens(user_arch,barch,matches,maxmatches);
+
+            if( GlobalPrintLevel == EAPL_VERBOSE ) {
+                if( found == false ){
+                    CSmallString bam;
+                    bam = CSmallString(barch) + ":" + bmode;
+                    vout << " INFO:   -> Build architecture '" << barch << "' from '" << bam << "' does not exactly match user request '" << user_arch << "' (" << matches << " matches out of " << maxmatches << ")." << endl;
+                }
+            }
+
+            if( found == true ){
+                found_arch = barch;
                 break;
             }
-
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> Tested build '" << bmode << "' does not exactly match user request '" << user_mode << "' (" << matches << " matches out of " << maxmatches << ")." << endl;
-            }
-
-            p_build = p_build->GetNextSiblingElement("build");
         }
-        if( found_mode != NULL ){
-            mode = found_mode;
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> The best build was found for user mode '" << mode << "'." << endl;
-                vout << " INFO:" << endl;
-            }
-            return(true);
-        } else {
-            if( GlobalPrintLevel == EAPL_VERBOSE ) {
-                vout << " INFO:   -> No suitable build was found for user mode request." << endl;
-            }
+
+        p_build = p_build->GetNextSiblingElement("build");
+    }
+    if( found_arch != NULL ){
+        arch = found_arch;
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> The best build was found for '" << arch << "'." << endl;
+            vout << " INFO:" << endl;
+        }
+        return(true);
+    } else {
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> No suitable build was found for system architecture." << endl;
         }
     }
 
     return(false);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModule::DetermineMode(CVerboseStr& vout,CXMLElement* p_module,
+                                const CSmallString& ver,
+                                const CSmallString& arch,
+                                CSmallString& mode)
+{
+    if( mode == "auto" ){
+        return(DetermineModeAuto(vout,p_module,ver,arch,mode));
+    } else {
+        return(DetermineModeUser(vout,p_module,ver,arch,mode));
+    }
+}
+
+//------------------------------------------------------------------------------
+
+bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
+                                const CSmallString& ver,
+                                const CSmallString& arch,
+                                CSmallString& mode)
+{
+    // first determine allowed tokens and their score
+    std::list<std::string>      Modes;
+    std::map<std::string,int>   ModeScore;
+
+    CXMLElement* p_ele = HostGroup.GetParallelModes();
+    CXMLElement* p_mele = p_ele->GetFirstChildElement();
+    while( p_mele != NULL ){
+        int ncgpu = 0; // current number of cpus/gpus
+        int mcgpu = 0; // max number of cpus/gpus per node
+        if( p_mele->GetName() == "cmode" ){
+            ncgpu = Host.GetNCPUs();
+            mcgpu = Host.GetNumOfHostCPUs();
+        } else if( p_mele->GetName() == "gmode" ) {
+            ncgpu = Host.GetNGPUs();
+            mcgpu = Host.GetNumOfHostGPUs();
+        } else {
+            ES_ERROR("unknown element in host modes");
+            return(false);
+        }
+        // add token name
+        std::string name;
+        p_mele->GetAttribute("name",name);
+
+        // and determine its score
+        int score = -1;
+        CXMLElement* p_sele = p_mele->GetFirstChildElement();
+        while( p_sele != NULL ){
+            int lscore = 0;
+            p_sele->GetAttribute("score",lscore);
+            if( p_sele->GetName() == "one" ){
+                if( ncgpu == 1 ){
+                    score = lscore;
+                    break;
+                }
+            }
+            if( p_sele->GetName() == "gto" ){
+                if( ncgpu > 1 ){
+                    score = lscore;
+                    break;
+                }
+            }
+            if( p_sele->GetName() == "lem" ){
+                if( ncgpu <= mcgpu ){
+                    score = lscore;
+                    break;
+                }
+            }
+            if( p_sele->GetName() == "gtm" ){
+                if( ncgpu > mcgpu ){
+                    score = lscore;
+                    break;
+                }
+            }
+            p_sele = p_sele->GetNextSiblingElement();
+        }
+        if( score >= 0 ){
+            Modes.push_back(name);
+            ModeScore[name] = score;
+        }
+        p_mele = p_mele->GetNextSiblingElement();
+    }
+
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO: Host mode tokens with determined scores:" << endl;
+
+        for(std::string mode : Modes){
+            vout << " INFO:   -> " << left << setw(10) << mode << right << setw(5) << ModeScore[mode] << endl;
+        }
+    }
+
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO:" << endl;
+        vout << " INFO: Testing modes ..." << endl;
+    }
+
+    int best_match = 0;
+    int best_score = -1;
+    CSmallString found_mode;
+
+    // find the best architecture build
+    CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
+    while( p_build ){
+        CSmallString bver;
+        p_build->GetAttribute("ver",bver);
+        if( bver != ver ){
+            p_build = p_build->GetNextSiblingElement("build");
+            continue;
+        }
+
+        CSmallString barch;
+        p_build->GetAttribute("arch",barch);
+        if( AreSameTokens(arch,barch) == false ){
+            p_build = p_build->GetNextSiblingElement("build");
+            continue;
+        }
+
+        string bmode;
+        p_build->GetAttribute("mode",bmode);
+
+        // test permission - build level
+        if( CModCache::IsPermissionGrantedForBuild(p_build) == false ){
+            if( GlobalPrintLevel == EAPL_VERBOSE ) {
+                CSmallString bam;
+                bam = barch + ":" + bmode;
+                vout << " INFO:   -> Tested build " << setw(20) << bam << " is not allowed for the current user." << endl;
+            }
+            p_build = p_build->GetNextSiblingElement("build");
+            continue;
+        }
+
+        list<string> mode_tokens;
+        split(mode_tokens,bmode,is_any_of("#"));
+        mode_tokens.sort();
+        mode_tokens.unique();
+
+        int matches = 0;
+        int failures = 0;
+        int score = 0;
+
+        list<string>::iterator bit = mode_tokens.begin();
+        list<string>::iterator bet = mode_tokens.end();
+
+        while( bit != bet ){
+
+            bool found = false;
+            list<string>::iterator sit = Modes.begin();
+            list<string>::iterator set = Modes.end();
+
+            while( sit != set ){
+                if( (*bit) == (*sit) ){
+                    score += ModeScore[*sit];
+                    found = true;
+                    break;
+                }
+                sit++;
+            }
+            if( found ){
+                matches++;
+            } else {
+                failures++;
+            }
+
+            bit++;
+        }
+
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> Tested mode " << setw(20) << left << bmode << right << " has " << setw(2) << matches << " matches, " << setw(2) << failures << " failures, and score " << score << endl;
+        }
+
+        if( failures == 0 ){
+            if( (best_match <= matches) && (best_score < score) ){
+                best_match = matches;
+                best_score = score;
+                found_mode = bmode;
+            }
+        }
+
+        p_build = p_build->GetNextSiblingElement("build");
+    }
+
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO:   -> No more builds to test." << endl;
+    }
+    if( found_mode != NULL ){
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> The best build was found for mode '" << found_mode << "'." << endl;
+            vout << " INFO:" << endl;
+        }
+        mode = found_mode;
+        return(true);
+    } else {
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> No suitable build was found for system mode." << endl;
+        }
+    }
+
+    return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModule::DetermineModeUser(CVerboseStr& vout,CXMLElement* p_module,
+                                const CSmallString& ver,
+                                const CSmallString& arch,
+                                CSmallString& mode)
+{
+    CSmallString user_mode = mode;
+    CSmallString found_mode;
+
+    if( GlobalPrintLevel == EAPL_VERBOSE ) {
+        vout << " INFO:" << endl;
+        vout << " INFO: Testing modes ..." << endl;
+    }
+
+    // find the exact architecture build
+    CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
+    while( p_build ){
+        CSmallString bver;
+        p_build->GetAttribute("ver",bver);
+        if( bver != ver ){
+            p_build = p_build->GetNextSiblingElement("build");
+            continue;
+        }
+
+        CSmallString barch;
+        p_build->GetAttribute("arch",barch);
+        if( AreSameTokens(arch,barch) == false ){
+            p_build = p_build->GetNextSiblingElement("build");
+            continue;
+        }
+
+        CSmallString bmode;
+        p_build->GetAttribute("mode",bmode);
+
+        // test permission - build level
+        if( CModCache::IsPermissionGrantedForBuild(p_build) == false ){
+            if( GlobalPrintLevel == EAPL_VERBOSE ) {
+                vout << " INFO:   -> Tested build '" << setw(20) << bmode << "' is not allowed for the current user." << endl;
+            }
+            p_build = p_build->GetNextSiblingElement("build");
+            continue;
+        }
+
+        int matches,maxmatches;
+        if( AreSameTokens(mode,bmode,matches,maxmatches) ){
+            found_mode = bmode;
+            break;
+        }
+
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> Tested build '" << bmode << "' does not exactly match user request '" << user_mode << "' (" << matches << " matches out of " << maxmatches << ")." << endl;
+        }
+
+        p_build = p_build->GetNextSiblingElement("build");
+    }
+    if( found_mode != NULL ){
+        mode = found_mode;
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> The best build was found for user mode '" << mode << "'." << endl;
+            vout << " INFO:" << endl;
+        }
+        return(true);
+    } else {
+        if( GlobalPrintLevel == EAPL_VERBOSE ) {
+            vout << " INFO:   -> No suitable build was found for user mode request." << endl;
+        }
+    }
+
+    return(false);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+
+
+
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModule::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch)
+{
+    int matches,maxmatches;
+    return( AreSameTokens(user_arch,build_arch,matches,maxmatches) );
+}
+
+//------------------------------------------------------------------------------
+
+bool CModule::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch,int& matches,int& maxmatches)
+{
+    matches = 0;
+    maxmatches = 0;
+
+    string          suser_arch(user_arch);
+    list<string>    user_archs;
+
+    split(user_archs,suser_arch,is_any_of("#"));
+    user_archs.sort();
+    user_archs.unique();
+
+    string          sbuild_arch(build_arch);
+    list<string>    build_archs;
+
+    split(build_archs,sbuild_arch,is_any_of("#"));
+    build_archs.sort();
+    build_archs.unique();
+
+    if( build_archs.size() >= user_archs.size() ){
+        maxmatches = build_archs.size();
+    } else{
+        maxmatches = user_archs.size();
+    }
+
+    list<string>::iterator bit = build_archs.begin();
+    list<string>::iterator bet = build_archs.end();
+
+    while( bit != bet ){
+        list<string>::iterator uit = user_archs.begin();
+        list<string>::iterator uet = user_archs.end();
+
+        while( uit != uet ){
+            if( (*bit) == (*uit) ){
+                matches++;
+                break;
+            }
+            uit++;
+        }
+
+        bit++;
+    }
+
+    return( matches == maxmatches );
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModule::PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name)
+{
+    // determine print level -----------------------
+    SetPrintLevel(EAPL_VERBOSE);
+
+    // complete module specification ---------------
+    vout << "# Module specification: " << mod_name << " (disp action)" << endl;
+    vout << "# =============================================================" << endl;
+
+    // parse module input --------------------------
+    CSmallString name,ver,arch,mode;
+
+    if( (CModUtils::ParseModuleName(mod_name,name,ver,arch,mode) == false) || (name == NULL) ) {
+        ES_ERROR("module name is empty string");
+        return(false);
+    }
+
+    // get module specification --------------------
+    CXMLElement* p_module = ModCache.GetModule(name);
+
+    if( p_module == NULL ) {
+        CSmallString error;
+        error << "module '" << name << "' does not have any record in the AMS database";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    if( CompleteModule(vout,p_module,name,ver,arch,mode) == false ) {
+        return(false);
+    }
+
+    CXMLElement* p_build = ModCache.GetBuild(p_module,ver,arch,mode);
+
+    if( p_build == NULL ) {
+        CSmallString error;
+        error << "build '" <<
+              name << ":" << ver << ":" << arch << ":" << mode <<
+              "' does not have any record in the AMS database";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    // unload module if it is already loaded -------
+
+    vout << endl;
+
+    if( ModuleController.IsModuleActive(name) == true ) {
+        vout << " INFO:     Module is active, it will be reactivated if 'add' action is used .. " << endl;
+        vout << endl;
+    }
+
+    // now show module deps ---------------
+    CXMLElement* p_sele = p_module->GetChildElementByPath("deps/dep");
+
+    while( p_sele != NULL ) {
+        CSmallString lmodule,ltype;
+        p_sele->GetAttribute("name",lmodule);
+        p_sele->GetAttribute("type",ltype);
+        if( ltype == "pre" ){
+            vout << " INFO:    additional module is required, it will be pre-loaded if 'add' action is used ... " << endl;
+        }
+        if( ltype == "post" ){
+            vout << " INFO:    additional module is required, it will be post-loaded if 'add' action is used ... " << endl;
+        }
+        if( ltype == "rm" ){
+            vout << " WARNING: active module in conflict, it will be unloaded if 'add' action is used ... " << endl;
+        }
+        p_sele = p_sele->GetNextSiblingElement("dep");
+    }
+
+    Host.PrintHostInfoForModule(vout);
+
+    vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+
+    CSmallString exported_module;
+    if( ModCache.CanModuleBeExported(p_module) == true ) {
+        exported_module = name + ":" + ver;
+        vout << "  Exported module    : " << exported_module << endl;
+    } else {
+        vout << "  Exported module    : -none- (export is not enabled)" << endl;
+    }
+
+    CSmallString complete_module;
+    complete_module = name + ":" + ver + ":" + arch + ":" + mode;
+    vout <<     "  Module build       : " << complete_module << endl;
+    vout << "" << endl;
+
+    return(PrintBuildInfo(vout,complete_module));
+}
+
+//------------------------------------------------------------------------------
+
+bool CModule::PrintBuildInfo(CVerboseStr& vout,const CSmallString& mod_name)
+{
+    CSmallString name,ver,arch,mode;
+
+    // get module specification --------------------
+    if( (CModUtils::ParseModuleName(mod_name,name,ver,arch,mode) == false) || (name == NULL) ) {
+        ES_ERROR("module name is empty string");
+        return(false);
+    }
+
+    CXMLElement* p_module = ModCache.GetModule(name);
+
+    if( p_module == NULL ) {
+        CSmallString error;
+        error << "module '" << mod_name << "' was not found in AMS cache";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    // complete module specification ---------------
+    CXMLElement* p_build = ModCache.GetBuild(p_module,ver,arch,mode);
+
+    if( p_build == NULL ) {
+        CSmallString error;
+        error << "module build '" << mod_name << "' was not found in AMS cache";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    CShellProcessor::PrintBuild(vout,p_build);
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CModule::StartHelp(void)
+{
+    // remove previous contents
+    HTMLHelp.RemoveAllChildNodes();
+
+    // create header
+    HTMLHelp.CreateChildDeclaration();
+    HTMLHelp.CreateChildText("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">",true);
+
+    CXMLElement* p_html = HTMLHelp.CreateChildElement("html");
+    p_html->SetAttribute("xmlns","http://www.w3.org/1999/xhtml");
+    p_html->SetAttribute("xml:lang","en");
+    p_html->SetAttribute("lang","en");
+    p_html->SetAttribute("encoding","utf-8");
+
+    CXMLElement* p_head = p_html->CreateChildElement("head");
+        CXMLElement* p_title = p_head->CreateChildElement("title");
+            CSmallString title;
+            title << "Advanced Module System (" << LibBuildVersion_AMS_Web << ")";
+            p_title->CreateChildText(title);
+        CXMLElement* p_meta = p_head->CreateChildElement("meta");
+            p_meta->SetAttribute("http-equiv","Content-Type");
+            p_meta->SetAttribute("content","text/html; charset=utf-8");
+
+    p_html->CreateChildElement("body");
+}
+
+//------------------------------------------------------------------------------
+
+bool CModule::AddHelp(const CSmallString& mod_name)
+{
+    CSmallString name;
+    CSmallString vers;
+
+    CModUtils::ParseModuleName(mod_name,name,vers);
+
+    CXMLElement* p_module = ModCache.GetModule(name);
+    if( p_module == NULL ) return(false);
+
+    CSmallString dver, drch, dmode;
+    CModCache::GetModuleDefaults(p_module,dver,drch,dmode);
+
+    std::list<CSmallString> versions;
+    CModCache::GetModuleVersionsSorted(p_module,versions);
+
+    CXMLElement* p_mele = HTMLHelp.GetChildElementByPath("html/body");
+
+    // create title
+    CXMLElement* p_ele = p_mele->CreateChildElement("h1");
+    CSmallString title;
+    title << "Module: " << name;
+    if( vers != NULL ){
+        title << ":" << vers;
+    }
+    p_ele->CreateChildText(title);
+
+    if( (versions.size() > 0) && (vers == NULL) ){
+
+        // create list of versions
+
+        CSmallString svers = "Available versions: ";
+        bool first = true;
+        for( CSmallString version : versions ){
+            if( first == false ) svers << ", ";
+            bool defver = dver == version;
+            if( defver ) svers << "<b>";
+            svers << name << ":" << version;
+            if( defver ) svers << "</b>";
+            first =  false;
+        }
+
+        p_ele = p_mele->CreateChildElement("p");
+        p_ele->CreateChildText(svers);
+    }
+
+    CXMLElement* p_doc = CModCache::GetModuleDoc(p_module);
+    if(  p_doc != NULL  ){
+        // create title
+        p_ele = p_mele->CreateChildElement("h2");
+        p_ele->CreateChildText("Description");
+        // insert contents
+        PreprocessHelpHeaders(p_doc);
+        p_mele->CopyChildNodesFrom(p_doc);
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CModule::PreprocessHelpHeaders(CXMLElement* p_ele)
+{
+    if( p_ele == NULL ) return;
+    CSmallString name = p_ele->GetName();
+    if( (name == "h2") || (name == "h3") || (name == "h4") ||
+        (name == "h5") || (name == "h6") || (name == "h7") ){
+        p_ele->SetName("h2");
+    }
+
+    CXMLElement* p_chld = p_ele->GetFirstChildElement();
+    while( p_chld ){
+        PreprocessHelpHeaders(p_chld);
+        p_chld = p_chld->GetNextSiblingElement();
+    }
+}
+
+//------------------------------------------------------------------------------
+
+bool CModule::ShowHelp(void)
+{
+    CXMLPrinter pe;
+
+    pe.SetPrintedXMLNode(&HTMLHelp);
+    pe.SetPrintAsItIs(true);
+
+    return(pe.Print(stdout));
 }
 
 //==============================================================================

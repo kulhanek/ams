@@ -55,6 +55,9 @@ public:
     /// print host info for site
     void PrintHostInfoForSite(CVerboseStr& vout);
 
+    /// print host info for site
+    void PrintHostInfoForModule(CVerboseStr& vout);
+
     /// print node info
     void PrintNodeResources(CVerboseStr& vout);
 

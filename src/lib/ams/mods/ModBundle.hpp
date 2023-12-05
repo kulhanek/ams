@@ -115,6 +115,12 @@ private:
 
     /// add build
     bool AddBuild(CVerboseStr& vout,CXMLElement* p_cele, const CFileName& build_file);
+
+    /// rebuild default build for all modules
+    void RebuildModuleDefaultBuilds(void);
+
+    /// init default build element
+    void InitDefaultBuild(CXMLElement* p_mele);
 };
 
 //-----------------------------------------------------------------------------

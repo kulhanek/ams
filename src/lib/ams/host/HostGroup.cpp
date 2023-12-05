@@ -131,6 +131,37 @@ const CFileName CHostGroup::GetDefaultHostSubSystems(void)
     return(hostsubsystems);
 }
 
+//------------------------------------------------------------------------------
+
+CXMLElement* CHostGroup::GetParallelModes(void)
+{
+    CXMLElement* p_mele = HostsConfig.GetChildElementByPath("config/modes");
+    if( p_mele == NULL ){
+        RUNTIME_ERROR("unable to open hosts config/modes element");
+    }
+    return(p_mele);
+}
+
+//------------------------------------------------------------------------------
+
+int CHostGroup::GetArchTokenScore(const CSmallString& token)
+{
+    CXMLElement* p_tele = HostsConfig.GetChildElementByPath("config/tokens/token");
+
+    while( p_tele != NULL ){
+        CSmallString stname;
+        p_tele->GetAttribute("name",stname);
+        if( stname == token ){
+            int score = 0;
+            p_tele->GetAttribute("score",score);
+            return(score);
+        }
+        p_tele = p_tele->GetNextSiblingElement("token");
+    }
+
+    return(0);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -237,6 +268,13 @@ const CSmallString CHostGroup::GetRealm(void)
     CSmallString realm("NONE");
     p_grp->GetAttribute("realm",realm);
     return(realm);
+}
+
+//------------------------------------------------------------------------------
+
+void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules)
+{
+   // FIXME
 }
 
 //==============================================================================

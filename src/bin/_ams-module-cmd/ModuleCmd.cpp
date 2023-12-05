@@ -36,6 +36,7 @@
 #include <ModuleController.hpp>
 #include <HostGroup.hpp>
 #include <ModUtils.hpp>
+#include <Module.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -109,32 +110,24 @@ bool CModuleCmd::Run(void)
     User.InitUserConfig();
     User.InitUser();
 
-//    // set module flags
-//    if( Options.GetOptSystem() == true ) {
-//        Actions.SetFlags(MFB_SYSTEM);
-//    } else {
-//        Actions.SetFlags(MFB_USER);
-//    }
-//    if( CShell::GetSystemVariable("_INFINITY_JOB_") == "_INFINITY_JOB_" ) {
-//        Actions.SetFlags(Actions.GetFlags() | MFB_INFINITY);
-//    }
-//    if( Options.GetOptReExported() == true ) {
-//        Actions.SetFlags(Actions.GetFlags() | MFB_REEXPORTED);
-//    }
-
-    // extra initializations ------------------------
-    // initialize active site
-//    if( Site.LoadConfig() == false) {
-//        ES_ERROR("unable to load site config");
-//        return(false);
-//    }
+// set module flags
+    if( Options.GetOptSystem() == true ) {
+        Module.SetFlags(MFB_SYSTEM);
+    } else {
+        Module.SetFlags(MFB_USER);
+    }
+    if( CShell::GetSystemVariable("_INFINITY_JOB_") == "_INFINITY_JOB_" ) {
+        Module.SetFlags(Module.GetFlags() | MFB_INFINITY);
+    }
+    if( Options.GetOptReExported() == true ) {
+        Module.SetFlags(Module.GetFlags() | MFB_REEXPORTED);
+    }
 
 // init site controller
     SiteController.InitSiteControllerConfig();
 
 // init module controller
     ModuleController.InitModuleControllerConfig();
-
 
     // remove incompatible builds if the site is adaptive
 //    if( Site.IsSiteAdaptive() ){
@@ -143,6 +136,8 @@ bool CModuleCmd::Run(void)
 
     // ----------------------------------------------
     if( (Options.GetArgAction() == "add") || (Options.GetArgAction() == "activate") ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
         // add modules
         bool ok = true;
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
@@ -155,39 +150,41 @@ bool CModuleCmd::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "remove" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
         // remove modules
         bool ok = true;
-//        for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
-//            EActionError error = Actions.RemoveModule(vout,Options.GetProgArg(i));
+        for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
+            EModuleError error = Module.RemoveModule(vout,Options.GetProgArg(i));
 
-//            if( error > 0 ){
-//                CSmallString error;
-//                error << "unable to add module '" << Options.GetProgArg(i) << "'";
-//                ES_TRACE_ERROR(error);
-//                vout << low;
-//                vout << endl;
-//                vout << "<red>>>> ERROR:</red> Unable to remove module <b>" << Options.GetProgArg(i) << "</b>." << endl;
-//                ok = false;
-//            }
+            if( error > 0 ){
+                CSmallString error;
+                error << "unable to add module '" << Options.GetProgArg(i) << "'";
+                ES_TRACE_ERROR(error);
+                vout << low;
+                vout << endl;
+                vout << "<red>>>> ERROR:</red> Unable to remove module <b>" << Options.GetProgArg(i) << "</b>." << endl;
+                ok = false;
+            }
 
-//            switch(error){
-//                case EAE_STATUS_OK:
-//                    break;
-//                case EAE_MODULE_NOT_FOUND:
-//                    vout << "           The module was not found in the AMS database (mispelled name?)." << endl;
-//                    break;
-//                case EAE_NOT_ACTIVE:
-//                    vout << "           The module is not active." << endl;
-//                    break;
-//                case EAE_BUILD_NOT_FOUND:
-//                    vout << "           The module does not have suitable build for this host." << endl;
-//                    vout << "           Try <b>module disp " << Options.GetProgArg(i) << "</b> to get more information." << endl;
-//                    break;
-//                default:
-//                    ForcePrintErrors = true;
-//                    break;
-//            }
-//        }
+            switch(error){
+                case EAE_STATUS_OK:
+                    break;
+                case EAE_MODULE_NOT_FOUND:
+                    vout << "           The module was not found in the AMS database (mispelled name?)." << endl;
+                    break;
+                case EAE_NOT_ACTIVE:
+                    vout << "           The module is not active." << endl;
+                    break;
+                case EAE_BUILD_NOT_FOUND:
+                    vout << "           The module does not have suitable build for this host." << endl;
+                    vout << "           Try <b>module disp " << Options.GetProgArg(i) << "</b> to get more information." << endl;
+                    break;
+                default:
+                    ForcePrintErrors = true;
+                    break;
+            }
+        }
         if( ok == false ){
             ExitCode = 1;
         }
@@ -205,13 +202,14 @@ bool CModuleCmd::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "help" ) {
-        // module help
+        ModuleController.LoadBundles(EMBC_BIG);
+        ModuleController.MergeBundles();
         bool ok = true;
-//        PrintEngine.StartHelp();
-//        for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
-//            ok &= PrintEngine.AddHelp(Options.GetProgArg(i));
-//        }
-//        if( ok == true ) PrintEngine.ShowHelp();
+        Module.StartHelp();
+        for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
+            ok &= Module.AddHelp(Options.GetProgArg(i));
+        }
+        if( ok == true ) Module.ShowHelp();
         return(ok);
     }
     // ----------------------------------------------
@@ -236,17 +234,19 @@ bool CModuleCmd::Run(void)
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "disp" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
         // module info
         bool ok = true;
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
             fprintf(stderr,"\n");
-//            if( PrintEngine.PrintModModuleInfo(Options.GetProgArg(i)) == false ){
-//                vout << low;
-//                vout << endl;
-//                vout << "<red>>>> ERROR:</red> Unable to display information about module <b>" << Options.GetProgArg(i) << "</b>." << endl;
-//                ForcePrintErrors = true;
-//                ok = false;
-//            }
+            if( Module.PrintModuleInfo(vout,Options.GetProgArg(i)) == false ){
+                vout << low;
+                vout << endl;
+                vout << "<red>>>> ERROR:</red> Unable to display information about module <b>" << Options.GetProgArg(i) << "</b>." << endl;
+                ForcePrintErrors = true;
+                ok = false;
+            }
         }
         if( ok == false ){
             ExitCode = 1;
@@ -345,15 +345,27 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "autoload" ) {
         ForcePrintErrors = true;
-//        AMSUserConfig.LoadUserConfig();
-//        CXMLElement* p_mod_ele = AMSUserConfig.GetAutoloadedModules();
-//        Actions.SetFlags(Actions.GetFlags() ^ MFB_SYS_AUTOLOADED);
-//        Actions.SetFlags(Actions.GetFlags() | MFB_USER_AUTOLOADED);
-//        if( CSite::ActivateAutoloadedModules(p_mod_ele) == false ) {
-//            ES_WARNING("unable to load user auto-loaded modules");
-//            return(false);
-//        }
-        return(true);
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
+
+        Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
+
+        std::list<CSmallString> modules;
+        HostGroup.GetAutoLoadedModules(modules);
+
+        CSite site;
+        // FIXME - load site
+        site.GetAutoLoadedModules(modules);
+
+        // add modules
+        bool ok = true;
+        for(CSmallString module : modules) {
+            ok &= AddModule(module,true);
+        }
+        if( ok == false ){
+            ExitCode = 1;
+        }
+        return(ok);
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "reactivate" ) {
@@ -413,91 +425,86 @@ void CModuleCmd::Finalize(void)
 
 bool CModuleCmd::AddModule(const CSmallString& module,bool do_not_export)
 {
-//    CSmallString name;
-//    CSmallString ver;
+    CSmallString name;
+    CSmallString ver;
 
-//    CUtils::ParseModuleName(module,name,ver);
+    CModUtils::ParseModuleName(module,name,ver);
 
-//    EActionError error = EAE_MODULE_NOT_FOUND;
+    EModuleError error = EAE_MODULE_NOT_FOUND;
 
     bool ok = true;
 
-//    if( (ver == NULL) || (ver == "default") ){
-//        // first, try exactly what is required
-//        error = Actions.AddModule(vout,module,false,do_not_export);
+    if( (ver == NULL) || (ver == "default") ){
+        // first, try exactly what is required
+        error = Module.AddModule(vout,module,false,do_not_export);
 
-//        if( error == EAE_BUILD_NOT_FOUND ){
-//            // if not suitable build is found - try to downgrade version
-//            std::vector<std::string> versions;
-//            Cache.GetSortedModuleVersions(name,versions);
+        if( error == EAE_BUILD_NOT_FOUND ){
+            // if not suitable build is found - try to downgrade version
+            std::list<CSmallString> versions;
 
-//            CSmallString dver, drch, dmode;
-//            CXMLElement* p_ele = Cache.GetModule(name);
-//            if( p_ele ){
-//                Cache.GetModuleDefaults(p_ele,dver,drch,dmode);
-//            }
+            CSmallString dver, drch, dmode;
+            CXMLElement* p_ele = ModCache.GetModule(name);
+            if( p_ele ){
+                CModCache::GetModuleVersionsSorted(p_ele,versions);
+                CModCache::GetModuleDefaults(p_ele,dver,drch,dmode);
+            }
 
-//            std::vector<std::string>::iterator it = versions.begin();
-//            std::vector<std::string>::iterator ie = versions.end();
+            bool default_found = false;
+            CSmallString last_vers = dver;
 
-//            bool default_found = false;
-//            CSmallString last_vers = dver;
+            for(CSmallString version : versions){
 
-//            while( it != ie ){
-//                CSmallString version = CSmallString(*it);
+                if( default_found == true ){
+                    vout << "<blue><b>>>> WARNING:</b></blue> No suitable build found for <b>" << name << ":" << last_vers << "</b>";
+                    vout << ", downgrading to <b>" << name << ":" << version << "</b>" << endl;
+                    CSmallString moudle_name;
+                    last_vers = version;
+                    moudle_name << name << ":" << version;
+                    error = Module.AddModule(vout,moudle_name,false,do_not_export);
+                    if( error == EAE_STATUS_OK ) break;
+                    if( error != EAE_BUILD_NOT_FOUND ) break;
+                }
 
-//                if( default_found == true ){
-//                    vout << "<blue><b>>>> WARNING:</b></blue> No suitable build found for <b>" << name << ":" << last_vers << "</b>";
-//                    vout << ", downgrading to <b>" << name << ":" << version << "</b>" << endl;
-//                    CSmallString moudle_name;
-//                    last_vers = version;
-//                    moudle_name << name << ":" << version;
-//                    error = Actions.AddModule(vout,moudle_name,false,do_not_export);
-//                    if( error == EAE_STATUS_OK ) break;
-//                    if( error != EAE_BUILD_NOT_FOUND ) break;
-//                }
+                if( version == dver ) default_found = true;  // this must be here - we need to skip default version
+            }
+        }
 
-//                if( version == dver ) default_found = true;  // this must be here - we need to skip default version
-//                it++;
-//            }
-//        }
+    } else {
+        // add exactly what is required
+        error = Module.AddModule(vout,module,false,do_not_export);
+    }
 
-//    } else {
-//        // add exactly what is required
-//        error = Actions.AddModule(vout,module,false,do_not_export);
-//    }
+    if( error > 0 ){
+        CSmallString error;
+        error << "unable to add module '" << module << "'";
+        ES_TRACE_ERROR(error);
+        vout << low;
+        vout << endl;
+        vout << "<red>>>> ERROR:</red> Unable to add module <b>" << module << "</b>!" << endl;
+        ok = false;
+    }
 
-//    if( error > 0 ){
-//        CSmallString error;
-//        error << "unable to add module '" << module << "'";
-//        ES_TRACE_ERROR(error);
-//        vout << low;
-//        vout << endl;
-//        vout << "<red>>>> ERROR:</red> Unable to add module <b>" << module << "</b>!" << endl;
-//        ok = false;
-//    }
-
-//    switch(error){
-//        case EAE_STATUS_OK:
-//            break;
-//        case EAE_MODULE_NOT_FOUND:
-//            vout << "           The module was not found in the AMS database (mispelled name?)." << endl;
-//            break;
-//        case EAE_PERMISSION_DENIED:
-//            vout << "           The current user is not allowed to use this module (permission denied)." << endl;
-//            break;
-//        case EAE_BUILD_NOT_FOUND:
-//            vout << "           The module does not have suitable build for this host." << endl;
-//            vout << "           Try <b>module disp " << module << "</b> to get more information." << endl;
-//            break;
-//        case EAE_DEPENDENCY_ERROR:
-//            vout << "           Problems with module dependencies." << endl;
-//            ForcePrintErrors = true;
-//            break;
-//        default:
-//            ForcePrintErrors = true;
-//            break;
-//    }
+    switch(error){
+        case EAE_STATUS_OK:
+            break;
+        case EAE_MODULE_NOT_FOUND:
+            vout << "           The module was not found in the AMS database (mispelled name?)." << endl;
+            break;
+        case EAE_PERMISSION_DENIED:
+            vout << "           The current user is not allowed to use this module (permission denied)." << endl;
+            break;
+        case EAE_BUILD_NOT_FOUND:
+            vout << "           The module does not have suitable build for this host." << endl;
+            vout << "           Try <b>module disp " << module << "</b> to get more information." << endl;
+            break;
+        case EAE_DEPENDENCY_ERROR:
+            vout << "           Problems with module dependencies." << endl;
+            ForcePrintErrors = true;
+            break;
+        default:
+            ForcePrintErrors = true;
+            break;
+    }
 
     return(ok);
 }

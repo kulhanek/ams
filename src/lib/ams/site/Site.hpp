@@ -70,7 +70,7 @@ public:
     CXMLElement* GetSiteEnvironment(void);
 
     /// return short site description, these module are not exported
-    void GetAutoloadedModules(std::list<CSmallString>& modules);
+    void GetAutoLoadedModules(std::list<CSmallString>& modules);
 
 // print information about site -----------------------------------------------
     /// print short info about site
@@ -80,7 +80,7 @@ public:
     void PrintFullSiteInfo(CVerboseStr& vout);
 
     /// print list of autoloaded modules
-    void PrintAutoloadedModules(CVerboseStr& vout);
+    void PrintAutoLoadedModules(CVerboseStr& vout);
 
 // section of private data ----------------------------------------------------
 private:

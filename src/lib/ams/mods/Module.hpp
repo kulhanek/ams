@@ -1,8 +1,9 @@
-#ifndef ActionsH
-#define ActionsH
+#ifndef ModuleH
+#define ModuleH
 // =============================================================================
 //  AMS - Advanced Module System
 // -----------------------------------------------------------------------------
+//     Copyright (C) 2023 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //     Copyright (C) 2011 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //     Copyright (C) 2004,2005,2008,2010 Petr Kulhanek (kulhanek@chemi.muni.cz)
@@ -26,20 +27,42 @@
 #include <AMSMainHeader.hpp>
 #include <SmallString.hpp>
 #include <XMLElement.hpp>
-#include <XMLDocument.hpp>
-#include <vector>
 #include <VerboseStr.hpp>
+#include <ShellProcessor.hpp>
+#include <list>
+
+//------------------------------------------------------------------------------
+
+// module is actived by the site command
+#define MFB_SYSTEM          (1 << 0)
+
+// module is activated by an user
+#define MFB_USER            (1 << 1)
+
+// module is activated within infinity job
+#define MFB_INFINITY        (1 << 2)
+
+// module is reactivated
+#define MFB_REACTIVATED     (1 << 16)
+
+// module is reexported
+#define MFB_REEXPORTED      (1 << 17)
+
+// module was autoloaded
+#define MFB_AUTOLOADED      (1 << 18)
 
 //-----------------------------------------------------------------------------
 
-enum EActionPrintLevel {
+enum EModulePrintLevel {
     EAPL_NONE,
     EAPL_SHORT,
     EAPL_FULL,
     EAPL_VERBOSE
 };
 
-enum EActionError {
+//-----------------------------------------------------------------------------
+
+enum EModuleError {
     EAE_STATUS_OK = 0,
     EAE_CONFIG_ERROR,
     EAE_MODULE_NOT_FOUND,
@@ -51,36 +74,23 @@ enum EActionError {
 
 //-----------------------------------------------------------------------------
 
-class AMS_PACKAGE CActions {
+class AMS_PACKAGE CModule {
 public:
-    // constructor and destructors ------------------------------------------------
-    CActions(void);
+// constructor and destructors ------------------------------------------------
+    CModule(void);
 
-    // executive methods ----------------------------------------------------------
+// executive methods ----------------------------------------------------------
     /// add module - fordep is for depended modules
-    EActionError AddModule(std::ostream& vout,CSmallString module,bool fordep=false,bool do_not_export=false);
+    EModuleError AddModule(CVerboseStr& vout,CSmallString module,bool fordep=false,bool do_not_export=false);
 
     /// remove module
-    EActionError RemoveModule(std::ostream& vout,CSmallString module);
-
-    /// reactivate all active modules
-    void ReactivateModules(std::ostream& vout);
-
-    /// deactivate all active modules
-    bool PurgeModules(std::ostream& vout);
+    EModuleError RemoveModule(CVerboseStr& vout,CSmallString module);
 
     /// set print level
-    void SetActionPrintLevel(EActionPrintLevel set);
+    void SetPrintLevel(EModulePrintLevel set);
 
     /// set module export option
     void SetModuleExportFlag(bool set);
-
-    /// complete module build
-    bool CompleteModule(std::ostream& vout,CXMLElement* p_module,
-                                     CSmallString& name,
-                                     CSmallString& ver,
-                                     CSmallString& arch,
-                                     CSmallString& mode);
 
     /// set module flags
     void SetFlags(int flags);
@@ -88,71 +98,87 @@ public:
     /// set module flags
     int  GetFlags(void);
 
-    // section of private methods ------------------------------------------------
+// print methods ---------------------------------------------------------------
+
+    /// print informations about module activation
+    bool PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name);
+
+    /// print informations about module build
+    bool PrintBuildInfo(CVerboseStr& vout,const CSmallString& mod_name);
+
+    void StartHelp(void);
+    bool AddHelp(const CSmallString& mod_name);
+    bool ShowHelp(void);
+
+// section of private methods --------------------------------------------------
 private:
-    EActionPrintLevel           GlobalPrintLevel;
+    EModulePrintLevel           GlobalPrintLevel;
     int                         Level;
     bool                        ModuleExportFlag;
     int                         ModuleFlags;        // module flags used for statistics
-    std::vector<CSmallString>   DepList;            // dependency list - to avoid dependency cycles
+    std::list<CSmallString>     DepList;            // dependency list - to avoid dependency cycles
 
-    // actions related ------------------------------
+    CXMLDocument                HTMLHelp;
+
+    /// complete module build
+    bool CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
+                                     CSmallString& name,
+                                     CSmallString& ver,
+                                     CSmallString& arch,
+                                     CSmallString& mode);
+
+// actions related ------------------------------
     /// solve module deps
-    bool SolveModuleDeps(std::ostream& vout,CXMLElement* p_dep_container);
+    bool SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container);
 
     /// solve module desp  -  after module is activated
-    bool SolveModulePostDeps(std::ostream& vout,CXMLElement* p_dep_container);
+    bool SolveModulePostDeps(CVerboseStr& vout,CXMLElement* p_dep_container);
 
     /// determine acceptable architecture for module
-    bool DetermineArchitecture(std::ostream& vout,CXMLElement* p_module,
-                                            const CSmallString& ver,
-                                            CSmallString& arch);
+    bool DetermineArch(CVerboseStr& vout,CXMLElement* p_module,
+                            const CSmallString& ver, CSmallString& arch);
+
+    /// determine acceptable architecture for module
+    bool DetermineArchAuto(CVerboseStr& vout,CXMLElement* p_module,
+                            const CSmallString& ver, CSmallString& arch);
+
+    /// determine acceptable architecture for module
+    bool DetermineArchUser(CVerboseStr& vout,CXMLElement* p_module,
+                            const CSmallString& ver, CSmallString& arch);
 
     /// determine acceptable parallel mode for module
-    bool DetermineMode(std::ostream& vout,CXMLElement* p_module,
-                                          const CSmallString& ver,
-                                          const CSmallString& arch,
-                                          CSmallString& mode);
+    bool DetermineMode(CVerboseStr& vout,CXMLElement* p_module,
+                      const CSmallString& ver, const CSmallString& arch, CSmallString& mode);
+
+    /// determine acceptable parallel mode for module
+    bool DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
+                      const CSmallString& ver, const CSmallString& arch, CSmallString& mode);
+
+    /// determine acceptable parallel mode for module
+    bool DetermineModeUser(CVerboseStr& vout,CXMLElement* p_module,
+                      const CSmallString& ver, const CSmallString& arch, CSmallString& mode);
 
     /// update environment according to module specification
     bool PrepareModuleEnvironment(CXMLElement* p_build,
                                     const CSmallString& complete_module,
                                     const CSmallString& exported_module,
-                                    bool add_module);
+                                    EModuleAction action);
 
-    /// remove module with name from list of module specs seprated by '|'
-    const CSmallString RemoveModule(const CSmallString& module_list,
-                                    const CSmallString& name);
+// architectures
+    /// compare two architectures
+    static bool AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch);
 
-    /// append module spec to list of module specs seprated by '|'
-    const CSmallString AppendModule(const CSmallString& module_list,
-                                    const CSmallString& module);
+    /// compare two architectures
+    static bool AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch,
+                              int& matches,int& maxmatches);
 
-    bool TryOneParaProperty(std::ostream& vout,CXMLElement* p_module,
-                                        const CSmallString& name,
-                                        const CSmallString& ver,
-                                        const CSmallString& arch,
-                                        const CSmallString& mode);
-    bool TryLEParaProperty(std::ostream& vout,CXMLElement* p_module,
-                                        const CSmallString& name,
-                                        const CSmallString& ver,
-                                        const CSmallString& arch,
-                                        const CSmallString& mode);
-    bool TryGTParaProperty(std::ostream& vout,CXMLElement* p_module,
-                                        const CSmallString& name,
-                                        const CSmallString& ver,
-                                        const CSmallString& arch,
-                                        const CSmallString& mode);
-    bool TryAlwaysParaProperty(std::ostream& vout,CXMLElement* p_module,
-                                        const CSmallString& name,
-                                        const CSmallString& ver,
-                                        const CSmallString& arch,
-                                        const CSmallString& mode);
+    /// for module help
+    void PreprocessHelpHeaders(CXMLElement* p_ele);
 };
 
 //-----------------------------------------------------------------------------
 
-extern CActions Actions;
+extern CModule Module;
 
 //-----------------------------------------------------------------------------
 

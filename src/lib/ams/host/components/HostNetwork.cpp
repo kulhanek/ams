@@ -202,9 +202,9 @@ void CHostSubSystemNetwork::PrintSubSystemInfo(CVerboseStr& vout)
     vout << ">>> network ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     }
     vout <<                  "    Configuration  : " << GetConfigFile() <<  endl;
-    CUtils::PrintTokens(vout,"    Net devices    : ", GetTokenList(NetDevs), 80);
+    CUtils::PrintTokens(vout,"    Net devices    : ", GetTokenList(NetDevs), 80, ' ');
     vout <<                  "    Net filters    : " << NetFilters << endl;
-    CUtils::PrintTokens(vout,"    Net tokens     : ", GetTokenList(ArchTokens), 80);
+    CUtils::PrintTokens(vout,"    Net tokens     : ", GetTokenList(ArchTokens), 80, ' ');
 }
 
 //==============================================================================

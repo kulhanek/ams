@@ -282,9 +282,8 @@ bool CShellProcessor::PrepareModuleEnvironmentForModActionII(
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
-    CXMLElement* p_build,
-    bool add_module)
+bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(CXMLElement* p_build,
+                                                             EModuleAction action)
 {
     CSimpleList<CXMLElement> CommandList;
     CXMLElement* p_sele;
@@ -293,7 +292,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
     if( p_build != NULL ) p_setup = p_build->GetFirstChildElement("setup");
 
     // we need reverse order when unload !
-    if( add_module == true ) {
+    if( action == EMA_ADD_MODULE ) {
         CXMLIterator     I(p_setup);
         CXMLElement*     p_sele;
         while( (p_sele = I.GetNextChildElement()) != NULL ) {
@@ -327,7 +326,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
             p_sele->GetAttribute("operation",operation);
 
             if( operation == "append" ) {
-                if( add_module == true ) {
+                if( action == EMA_ADD_MODULE ) {
                     AppendValueToVariable(name,value,":");
                 } else {
                     RemoveValueFromVariable(name,value,":");
@@ -335,7 +334,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
             }
 
             if( operation == "prepend" ) {
-                if( add_module == true ) {
+                if( action == EMA_ADD_MODULE ) {
                     PrependValueToVariable(name,value,":");
                 } else {
                     RemoveValueFromVariable(name,value,":");
@@ -343,7 +342,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
             }
 
             if( operation == "set" ) {
-                if( add_module == true ) {
+                if( action == EMA_ADD_MODULE ) {
                     SetVariable(name,value);
                 } else {
                     UnsetVariable(name);
@@ -351,14 +350,14 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
             }
 
             if( operation == "keep" ) {
-                if( add_module == true ) {
+                if( action == EMA_ADD_MODULE ) {
                     SetVariable(name,value);
                 }
                 // keep does nothing for remove !
             }
 
             if( operation == "unset" ) {
-                if( add_module == true ) {
+                if( action == EMA_ADD_MODULE ) {
                     UnsetVariable(name);
                 }
             }
@@ -377,7 +376,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
                 mod_type = EST_INLINE;
             }
 
-            if( add_module == true ) {
+            if( action == EMA_ADD_MODULE ) {
                 RegisterScript(name,"add",mod_type);
             } else {
                 RegisterScript(name,"remove",mod_type);
@@ -391,7 +390,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForLowPriority(
             p_sele->GetAttribute("name",name);
             p_sele->GetAttribute("value",value);
 
-            if( add_module == true ) {
+            if( action == EMA_ADD_MODULE ) {
                 SetAlias(name,value);
             } else {
                 UnsetAlias(name);

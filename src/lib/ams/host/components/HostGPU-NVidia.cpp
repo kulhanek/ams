@@ -236,10 +236,10 @@ void CHostSubSystemGPUNVidia::PrintSubSystemInfo(CVerboseStr& vout)
     } else {
     vout <<                  "    SMP GPU model  : " << GPUModels.front() << endl;
     }
-    CUtils::PrintTokens(vout,"    Capabilities   : ",GetTokenList(CapaTokens),80);
+    CUtils::PrintTokens(vout,"    Capabilities   : ",GetTokenList(CapaTokens), 80, ' ');
     }
     }
-    CUtils::PrintTokens(vout,"    CUDA tokens    : ",GetTokenList(ArchTokens));
+    CUtils::PrintTokens(vout,"    CUDA tokens    : ",GetTokenList(ArchTokens), 80, ' ');
 }
 
 //------------------------------------------------------------------------------
@@ -254,19 +254,34 @@ void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-void CHostSubSystemGPUNVidia::PrintHostInfoForSite(CVerboseStr& vout)
+void CHostSubSystemGPUNVidia::PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode)
 {
-    if( NumOfHostGPUs > 0 ){
-    vout << "# Num of host GPUs    : " << NumOfHostGPUs << endl;
-    if( IsGPUModelSMP() == false ){
-    int i=1;
-    for(CSmallString model : GPUModels){
-    vout << "# Host GPU model #" << setw(1) << i << "   : " << model << endl;
-    i++;
+    if( mode == EPHI_SITE ) {
+        if( NumOfHostGPUs > 0 ){
+        vout << "  Num of host GPUs   : " << NumOfHostGPUs << endl;
+        if( IsGPUModelSMP() == false ){
+        int i=1;
+        for(CSmallString model : GPUModels){
+        vout << "  Host GPU model #" << setw(1) << i << "  : " << model << endl;
+        i++;
+        }
+        } else {
+        vout << "  Host SMP GPU model : " << GPUModels.front() << endl;
+        }
+        }
     }
-    } else {
-    vout << "# Host SMP GPU model  : " << GPUModels.front() << endl;
-    }
+    if( mode == EPHI_MODULE ) {
+        if( NumOfHostGPUs > 0 ){
+        if( IsGPUModelSMP() == false ){
+        int i=1;
+        for(CSmallString model : GPUModels){
+        vout << "  Host GPU model #" << setw(1) << i << "  : " << model << endl;
+        i++;
+        }
+        } else {
+        vout << "  Host SMP GPU model : " << GPUModels.front() << endl;
+        }
+        }
     }
 }
 

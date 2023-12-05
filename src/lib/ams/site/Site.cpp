@@ -199,7 +199,7 @@ CXMLElement* CSite::GetSiteEnvironment(void)
 
 //------------------------------------------------------------------------------
 
-void CSite::GetAutoloadedModules(std::list<CSmallString>& modules)
+void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules)
 {
     CSmallString flavor = AMSRegistry.GetSiteFlavor();
 
@@ -243,8 +243,8 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
     for(unsigned int n=18; n < 80 - version.GetLength(); n++) vout << "~";
     vout << version << "~~" << endl;
 
-    vout << "# Site name   : <b><green>" << name << "</green></b>" << status << endl;
-    vout << "# Site ID     : " << GetID() << endl;
+    vout << "  Site name  : <b><green>" << name << "</green></b>" << status << endl;
+    vout << "  Site ID    : " << GetID() << endl;
 
     User.PrintUserInfoForSite(vout);
     Host.PrintHostInfoForSite(vout);
@@ -252,10 +252,10 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
     if( (GetDocumentationURL() != NULL) || (GetSupportEMail() != NULL) ) {
         vout << "# ~~~ <b>Site documentation and support</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( GetDocumentationURL() != NULL ) {
-            vout << "# Documentation  : " << GetDocumentationURL() << endl;
+            vout << "  Documentation  : " << GetDocumentationURL() << endl;
         }
         if( GetSupportEMail() != NULL ) {
-            vout << "# Support e-mail : <b><green>" << GetSupportEMail() << "</green></b>" << endl;
+            vout << "  Support e-mail : <b><green>" << GetSupportEMail() << "</green></b>" << endl;
         }
     }
 
@@ -282,12 +282,12 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
 
     vout << endl;
     vout << "# ~~~ <b>Autoloaded Modules</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    PrintAutoloadedModules(vout);
+    PrintAutoLoadedModules(vout);
 }
 
 //------------------------------------------------------------------------------
 
-void CSite::PrintAutoloadedModules(CVerboseStr& vout)
+void CSite::PrintAutoLoadedModules(CVerboseStr& vout)
 {
     CSmallString flavor = AMSRegistry.GetSiteFlavor();
 

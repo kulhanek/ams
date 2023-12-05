@@ -89,7 +89,7 @@ void CHostSubSystemGPU::PrintSubSystemInfo(CVerboseStr& vout)
     vout << ">>> gpu ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     vout <<                  "    Configuration  : " << GetConfigFile() <<  endl;
     vout <<                  "    Available GPUs : " << NumOfAvailableGPUs << endl;
-    CUtils::PrintTokens(vout,"    Tokens         : ", GetTokenList(ArchTokens),80);
+    CUtils::PrintTokens(vout,"    Tokens         : ", GetTokenList(ArchTokens),80, ' ');
 }
 
 //==============================================================================

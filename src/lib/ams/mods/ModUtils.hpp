@@ -55,13 +55,6 @@ public:
     static bool ParseModuleName(const CSmallString& module,
             CSmallString& name);
 
-// architectures ---------------------------------------------------------------
-    /// compare two architectures
-    static bool AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch);
-
-    /// compare two architectures
-    static bool AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch,int& matches,int& maxmatches);
-
 // module name operation -------------------------------------------------------
     /// extract name part from full or incomplete module name
     static const CSmallString GetModuleName(const CSmallString& module);

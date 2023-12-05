@@ -52,6 +52,7 @@ bool CModUtils::ParseModuleName(const CSmallString& module,
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return(false);
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     name = strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -71,6 +72,7 @@ bool CModUtils::ParseModuleName(const CSmallString& module,
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return(false);
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     name = strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -88,6 +90,7 @@ bool CModUtils::ParseModuleName(const CSmallString& module,
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return(false);
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     name = strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -103,6 +106,7 @@ bool CModUtils::ParseModuleName(const CSmallString& module,
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return(false);
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     name = strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -118,6 +122,7 @@ const CSmallString CModUtils::GetModuleName(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     return(strtok_r(tmp.GetBuffer(),":",&p_saveptr));
@@ -129,6 +134,7 @@ const CSmallString CModUtils::GetModuleVer(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -141,6 +147,7 @@ const CSmallString CModUtils::GetModuleArch(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -154,6 +161,7 @@ const CSmallString CModUtils::GetModuleMode(const CSmallString& module)
 {
     CSmallString tmp(module);
     if( tmp == NULL ) return("");
+    tmp.GetSubstitute('/',':');
 
     char* p_saveptr = NULL;
     strtok_r(tmp.GetBuffer(),":",&p_saveptr);
@@ -320,59 +328,7 @@ void CModUtils::GetMaxSizesForBuild(CXMLElement* p_ele,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CModUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch)
-{
-    int matches,maxmatches;
-    return( AreSameTokens(user_arch,build_arch,matches,maxmatches) );
-}
 
-//------------------------------------------------------------------------------
-
-bool CModUtils::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch,int& matches,int& maxmatches)
-{
-    matches = 0;
-    maxmatches = 0;
-
-    string          suser_arch(user_arch);
-    list<string>    user_archs;
-
-    split(user_archs,suser_arch,is_any_of("#"));
-    user_archs.sort();
-    user_archs.unique();
-
-    string          sbuild_arch(build_arch);
-    list<string>    build_archs;
-
-    split(build_archs,sbuild_arch,is_any_of("#"));
-    build_archs.sort();
-    build_archs.unique();
-
-    if( build_archs.size() >= user_archs.size() ){
-        maxmatches = build_archs.size();
-    } else{
-        maxmatches = user_archs.size();
-    }
-
-    list<string>::iterator bit = build_archs.begin();
-    list<string>::iterator bet = build_archs.end();
-
-    while( bit != bet ){
-        list<string>::iterator uit = user_archs.begin();
-        list<string>::iterator uet = user_archs.end();
-
-        while( uit != uet ){
-            if( (*bit) == (*uit) ){
-                matches++;
-                break;
-            }
-            uit++;
-        }
-
-        bit++;
-    }
-
-    return( matches == maxmatches );
-}
 
 //==============================================================================
 //------------------------------------------------------------------------------

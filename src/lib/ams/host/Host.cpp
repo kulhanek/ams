@@ -426,15 +426,29 @@ void CHost::PrintHostInfoForSite(CVerboseStr& vout)
     } else {
     vout << "# ~~~ <b>Host info</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     }
-    vout << "# Full host name      : " << GetHostName() << endl;
-    vout << "# Num of host CPUs    : " << setw(4) << left << GetNumOfHostCPUs();
-    vout << " / Num of host threads : " << setw(4) << left << GetNumOfHostThreads() << endl;
+    vout << "  Full host name     : " << Host.GetHostName() << endl;
 
     for(CHostSubSystemPtr hs : HostSubSystems){
-        hs->PrintHostInfoForSite(vout);
+        hs->PrintHostInfoFor(vout,EPHI_SITE);
     }
 
-    CUtils::PrintTokens(vout,"# Host arch tokens    : ",GetArchTokens(),80);
+    CUtils::PrintTokens(vout,"  Host arch tokens   : ",GetArchTokens(), 80,' ');
+}
+
+//------------------------------------------------------------------------------
+
+void CHost::PrintHostInfoForModule(CVerboseStr& vout)
+{
+    vout <<                  "  Requested CPUs     : " << setw(3) << GetNCPUs();
+    vout <<                  "  Requested GPUs     : " << setw(3) << GetNGPUs()<< endl;
+    vout <<                  "  Num of host CPUs   : " << setw(3) << GetNumOfHostCPUs();
+    vout <<                  "  Num of host GPUs   : " << setw(3) << GetNumOfHostGPUs() << endl;
+    vout <<                  "  Requested nodes    : " << setw(3) << GetNNodes() << endl;
+    CUtils::PrintTokens(vout,"  Host arch tokens   : ",GetArchTokens(),80,' ');
+
+    for(CHostSubSystemPtr hs : HostSubSystems){
+        hs->PrintHostInfoFor(vout,EPHI_MODULE);
+    }
 }
 
 //------------------------------------------------------------------------------

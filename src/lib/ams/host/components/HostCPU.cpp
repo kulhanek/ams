@@ -281,8 +281,8 @@ void CHostSubSystemCPU::PrintSubSystemInfo(CVerboseStr& vout)
     }
     vout <<                  "    Threads/Core   : " << tpc << endl;
     vout <<                  "    SMP CPU model  : " << CPUModelName << endl;
-    CUtils::PrintTokens(vout,"    CPU flags      : ",GetTokenList(CPUFlags), 80);
-    CUtils::PrintTokens(vout,"    CPU tokens     : ",GetTokenList(ArchTokens), 80);
+    CUtils::PrintTokens(vout,"    CPU flags      : ",GetTokenList(CPUFlags), 80, ' ');
+    CUtils::PrintTokens(vout,"    CPU tokens     : ",GetTokenList(ArchTokens), 80, ' ');
 }
 
 //------------------------------------------------------------------------------
@@ -297,9 +297,16 @@ void CHostSubSystemCPU::PrintNodeResources(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-void CHostSubSystemCPU::PrintHostInfoForSite(CVerboseStr& vout)
+void CHostSubSystemCPU::PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode)
 {
-    vout << "# Host SMP CPU model  : " << CPUModelName << endl;
+    if( mode == EPHI_SITE ){
+        vout << "  Num of host CPUs   : " << setw(4) << left << Host.GetNumOfHostCPUs();
+        vout << " / Num of host threads : " << setw(4) << left << Host.GetNumOfHostThreads() << endl;
+        vout << "  Host SMP CPU model : " << CPUModelName << endl;
+    }
+    if( mode == EPHI_MODULE ){
+        vout << "  Host SMP CPU model : " << CPUModelName << endl;
+    }
 }
 
 //==============================================================================

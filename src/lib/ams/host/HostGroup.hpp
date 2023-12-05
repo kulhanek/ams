@@ -31,8 +31,7 @@
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
 #include <set>
-
-//------------------------------------------------------------------------------
+#include <list>
 
 //------------------------------------------------------------------------------
 
@@ -58,6 +57,12 @@ public:
     /// return comma separated names of host submodule configurations
     const CFileName GetDefaultHostSubSystems(void);
 
+    /// get root element with parallel modes
+    CXMLElement* GetParallelModes(void);
+
+    /// get arch token score
+    int GetArchTokenScore(const CSmallString& token);
+
 // information methods - active host group -------------------------------------
     /// get file name with the host group definition
     const CFileName GetHostGroupFile(void) const;
@@ -82,6 +87,9 @@ public:
 
     /// find host realm
     const CSmallString GetRealm(void);
+
+    /// get list of autoloaded modules
+    void GetAutoLoadedModules(std::list<CSmallString>& modules);
 
 // information methods for all host groups -------------------------------------
 

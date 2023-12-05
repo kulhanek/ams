@@ -233,13 +233,23 @@ void CHostSubSystemOS::PrintSubSystemInfo(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-void CHostSubSystemOS::PrintHostInfoForSite(CVerboseStr& vout)
+void CHostSubSystemOS::PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode)
 {
-    vout << "# Operating system    : " << Distribution << " | " << Kernel;
+    if( mode == EPHI_SITE ) {
+    vout << "  Operating system   : " << Distribution << " | " << Kernel;
     if( Virtualization != "-none-" ){
         vout << " (" << Virtualization << ")";
     }
     vout << endl;
+    }
+
+    if( mode == EPHI_MODULE ) {
+    vout << "  Operating system   : " << Distribution << " | " << Kernel;
+    if( Virtualization != "-none-" ){
+        vout << " (" << Virtualization << ")";
+    }
+    vout << endl;
+    }
 }
 
 //==============================================================================

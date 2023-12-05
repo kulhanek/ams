@@ -57,7 +57,7 @@ public:
     virtual void PrintSubSystemInfo(CVerboseStr& vout);
 
     /// print host resources for site
-    virtual void PrintHostInfoForSite(CVerboseStr& vout);
+    virtual void PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode);
 
 // section of private data -----------------------------------------------------
 private:
