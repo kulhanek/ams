@@ -34,6 +34,8 @@
 #include <ShellProcessor.hpp>
 #include <PrintEngine.hpp>
 #include <FileName.hpp>
+#include <Module.hpp>
+#include <ModuleController.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -58,6 +60,9 @@ int CSiteCmd::Init(int argc, char* argv[])
 {
     ForcePrintErrors = false;
     ExitCode = 0;
+
+// init site controller - MUST BE HERE to get active site name
+    SiteController.InitSiteControllerConfig();
 
     // encode program options, all check procedures are done inside of Options
     int result = Options.ParseCmdLine(argc,argv);
@@ -96,10 +101,10 @@ int CSiteCmd::Init(int argc, char* argv[])
 bool CSiteCmd::Run(void)
 {
     // set module flags
-//    Actions.SetFlags(MFB_SYSTEM);
-//    if( CShell::GetSystemVariable("_INFINITY_JOB_") == "_INFINITY_JOB_" ) {
-//        Actions.SetFlags(MFB_INFINITY);
-//    }
+    Module.SetFlags(MFB_SYSTEM);
+    if( CShell::GetSystemVariable("_INFINITY_JOB_") == "_INFINITY_JOB_" ) {
+        Module.SetFlags(MFB_INFINITY);
+    }
 
 // init AMS registry
     AMSRegistry.LoadRegistry();
@@ -116,10 +121,13 @@ bool CSiteCmd::Run(void)
     User.InitUserConfig();
     User.InitUser();
 
-// init site controller
-    SiteController.InitSiteControllerConfig();
+//// init site controller - MOVED TO Init()
+//    SiteController.InitSiteControllerConfig();
 
-    // ----------------------------------------------
+// init module controller
+    ModuleController.InitModuleControllerConfig();
+
+// ----------------------------------------------
     if( Options.GetArgAction() == "activate" ) {
         int error = ActivateSite();
 
@@ -146,7 +154,7 @@ bool CSiteCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "avail" ) {
         AvailSites();
         return(true);
@@ -183,7 +191,7 @@ bool CSiteCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "disp" ) {
 
         if( Options.GetArgSite() == NULL ){
@@ -215,7 +223,7 @@ bool CSiteCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "listamods" ) {
 
         if( Options.GetArgSite() == NULL ){
@@ -249,7 +257,7 @@ bool CSiteCmd::Run(void)
 
         return(true);
     }   
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "init" ) {
 
         int error = InitSite();
@@ -273,7 +281,7 @@ bool CSiteCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else {
         ES_ERROR("not implemented");
         ExitCode = 1;
@@ -323,77 +331,115 @@ void CSiteCmd::Finalize(void)
 
 int CSiteCmd::ActivateSite(void)
 {
-//    // special case from ams-autosite - ignore
-//    if( Options.GetArgSite() == "none" ) return(SITE_STATUS_OK);
+    // special case - ignore
+    if( (Options.GetArgSite() == "none") || (Options.GetArgSite() == NULL) ) return(SITE_STATUS_OK);
 
-//    // deactivate current site
-//    if( AMSGlobalConfig.GetActiveSiteID() != NULL ) {
+    ModuleController.LoadBundles(EMBC_SMALL);
+    ModuleController.MergeBundles();
 
-//        if( Site.LoadConfig() == false ) {
-//            CSmallString error;
-//            error << "unable to load site '" << AMSGlobalConfig.GetActiveSiteID() << "' config";
-//            ES_TRACE_ERROR(error);
-//            return(SITE_ERROR_CONFIG_PROBLEM);
-//        }
+    vout << high;
+    ModuleController.PrintBundlesInfo(vout);
 
-//        if( Site.DeactivateSite() == false ) {
-//            CSmallString error;
-//            error << "unable to deactivate site '" << AMSGlobalConfig.GetActiveSiteID() << "'";
-//            ES_TRACE_ERROR(error);
-//            return(SITE_ERROR_CONFIG_PROBLEM);
-//        }
-//    }
+    Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
 
-//    // activate site
-//    CSmallString site_sid;
-//    if( (Options.GetArgSite().GetLength() > 0) && (Options.GetArgSite()[0] == '{') ) {
-//        site_sid = Options.GetArgSite();
-//        // is sid valid?
-//        if( CUtils::IsSiteIDValid(site_sid) == false ){
-//            return(SITE_ERROR_SITE_NOT_FOUND);
-//        }
-//    } else {
-//        site_sid = CUtils::GetSiteID(Options.GetArgSite());
-//        if( site_sid == NULL ) {
-//            CSmallString error;
-//            error << "specified site '" << Options.GetArgSite() << "' was not found";
-//            ES_ERROR(error);
-//            return(SITE_ERROR_SITE_NOT_FOUND);
-//        }
-//    }
+    CFileName active_site = SiteController.GetActiveSite();
 
-//    if( Site.LoadConfig(site_sid) == false ) {
-//        CSmallString error;
-//        error << "unable to load site '" << Options.GetArgSite() << "' config";
-//        ES_TRACE_ERROR(error);
-//        return(SITE_ERROR_CONFIG_PROBLEM);
-//    }
+    // deactivate current site
+    if( active_site != NULL ) {
 
-//    if( Site.CanBeActivated() == false ) {
-//        return(SITE_ERROR_NOT_ALLOWED);
-//    }
+        bool result = true;
+        CFileName site_config = SiteController.GetSiteConfig(active_site);
+        if( site_config == NULL ){
+            CSmallString error;
+            error << "specified site '" << active_site << "' was not found (deactivate)";
+            ES_TRACE_ERROR(error);
+            // ignore error
+            result = false;
+        }
 
-//    // reinit user and host
-//    // CANNOT BE HERE - moved to Site.ActivateSite()
-////    // init global host and user data
-////    Host.ClearAll();
-////    Host.InitGlobalSetup();
+        CSite site;
 
-////    User.ClearAll();
-////    User.InitGlobalSetup();
+        if( result ){
+            if( site.LoadConfig(site_config) == false ){
+                CSmallString error;
+                error << "unable to load site configuration from '" << site_config << "' (deactivate)";
+                ES_TRACE_ERROR(error);
+                // ignore error
+                result = false;
+            }
+        }
 
-//    if( Site.ActivateSite() == false ) {
-//        CSmallString error;
-//        error << "unable to activate site '" << Options.GetArgSite() << "'";
-//        ES_TRACE_ERROR(error);
-//        return(SITE_ERROR_CONFIG_PROBLEM);
-//    }
+        if( result ){
+            // purge all modules
+            if( ModuleController.PurgeModules(vout) == false ){
+                CSmallString error;
+                error << "currnet active site '" << active_site << "' cannot be deactivated";
+                ES_TRACE_ERROR(error);
+                // ignore error
+                result = false;
+            }
+        }
 
-//    Site.PrintShortSiteInfo(vout);
+        if( result ){
+            // destroy environment
+            if( site.DeactivateSite() == false ){
+                CSmallString error;
+                error << "currnet active site '" << active_site << "' cannot be deactivated";
+                ES_TRACE_ERROR(error);
+                // ignore error
+                result = false;
+            }
+        }
+    }
 
-//    if( ErrorSystem.IsError() ){
-//        return(SITE_ERROR_CONFIG_PROBLEM);
-//    }
+    active_site = Options.GetArgSite();
+
+    CFileName site_config = SiteController.GetSiteConfig(active_site);
+    if( site_config == NULL ){
+        CSmallString error;
+        error << "specified site '" << active_site << "' was not found (activate)";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
+    CSite site;
+    if( site.LoadConfig(site_config) == false ){
+        CSmallString error;
+        error << "unable to load site configuration from '" << site_config << "' (activate)";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
+    if( HostGroup.IsSiteAllowed(site.GetName()) == false ) {
+        return(SITE_ERROR_NOT_ALLOWED);
+    }
+
+    vout << low;
+    site.PrintShortSiteInfo(vout);
+
+    if( site.ActivateSite() == false ){
+        CSmallString error;
+        error << "unable to activate site einvoronment '" << site.GetName() << "' (activate)";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
+    std::list<CSmallString> modules;
+    HostGroup.GetAutoLoadedModules(modules);
+    site.GetAutoLoadedModules(modules);
+    AMSRegistry.GetAutoLoadedModules(modules);
+
+    vout << high;
+    bool result = true;
+    for( CSmallString module : modules ){
+        // ignore errors from autoloaded modules
+        Module.AddModule(vout,module,false,true);
+    }
+
+    vout << low;
+    if( ErrorSystem.IsError() || (result == false) ){
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
 
     return(SITE_STATUS_OK);
 }
@@ -470,32 +516,31 @@ int CSiteCmd::DispSite(void)
 
 int CSiteCmd::ListAMods(void)
 {
-//    CSmallString site_sid;
+    CFileName site_config = SiteController.GetSiteConfig(Options.GetArgSite());
+    if( site_config == NULL ){
+        CSmallString error;
+        error << "specified site '" << Options.GetArgSite() << "' was not found";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_SITE_NOT_FOUND);
+    }
 
-//    if( Options.GetArgSite() != NULL ) {
-//        if( (Options.GetArgSite().GetLength() > 0) && (Options.GetArgSite()[0] == '{') ) {
-//            site_sid = Options.GetArgSite();
-//        } else {
-//            site_sid = CUtils::GetSiteID(Options.GetArgSite());
-//        }
-//    } else {
-//        site_sid = AMSGlobalConfig.GetActiveSiteID();
-//    }
+    CSite site;
+    if( site.LoadConfig(site_config) == false ){
+        CSmallString error;
+        error << "unable to load site configuration from '" << site_config << "'";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
 
-//    if( CUtils::IsSiteIDValid(site_sid) == false ) {
-//        CSmallString error;
-//        error << "specified site '" << Options.GetArgSite() << "' was not found";
-//        ES_TRACE_ERROR(error);
-//        return(false);
-//    }
+    std::list<CSmallString> modules;
+    site.GetAutoLoadedModules(modules);
 
-//    if( Site.LoadConfig(site_sid) == false ) {
-//        CSmallString error;
-//        error << "unable to load site '" << Options.GetArgSite() << "' config";
-//        ES_TRACE_ERROR(error);
-//        return(false);
-//    }
-//    Site.PrintAutoloadedModules(vout);
+    ModuleController.LoadBundles(EMBC_SMALL);
+    ModuleController.MergeBundles();
+    PrintEngine.InitPrintProfile();
+    PrintEngine.PrintHeader(Console.GetTerminal(),"AUTOLOADES MODULES (Infinity Software Base | amsmodule)",EPEHS_SECTION);
+    PrintEngine.PrintItems(Console.GetTerminal(),modules);
+
     return(SITE_STATUS_OK);
 }
 

@@ -43,6 +43,9 @@ public:
     /// get active site
     const CSmallString& GetActiveSite(void) const;
 
+    /// get active site
+    void SetActiveSite(const CSmallString& name);
+
     /// get site config
     const CFileName GetSiteConfig(const CSmallString& name);
 

@@ -169,8 +169,15 @@ bool CBundleCmd::InfoBundle(void)
     bundle.FindAllFragmentFiles();
     vout << "done" << endl;
 
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        return(false);
+    }
+
     vout << endl;
-    bundle.PrintInfo(vout);
+    bundle.PrintInfo(vout,true,true,true);
 
     return(true);
 }

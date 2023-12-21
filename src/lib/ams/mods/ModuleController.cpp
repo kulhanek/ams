@@ -28,8 +28,10 @@
 #include <ModUtils.hpp>
 #include <Utils.hpp>
 #include <PrintEngine.hpp>
+#include <Module.hpp>
 
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
 //------------------------------------------------------------------------------
@@ -103,6 +105,7 @@ void CModuleController::LoadBundles(EModBundleCache type)
 
 void CModuleController::PrintBundlesInfo(CVerboseStr& vout)
 {
+    vout << endl;
     vout << "# *** Bundle Setup *** " << endl;
     vout << "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     CUtils::PrintTokens(vout,"# Bundle names : ",BundleName,",",80,'#');
@@ -148,6 +151,24 @@ bool CModuleController::IsModuleActive(const CSmallString& module)
                     if( lpara == para ) return(true);
                 }
             }
+        }
+    }
+
+    return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModuleController::IsModuleExported(const CSmallString& module)
+{
+    CSmallString name,ver,arch,para;
+    CModUtils::ParseModuleName(module,name,ver,arch,para);
+
+    for(CSmallString mexported : ExportedModules){
+        CSmallString lname,lver,larch,lpara;
+        CModUtils::ParseModuleName(mexported,lname,lver,larch,lpara);
+        if( lname == name ) {
+            return(true);
         }
     }
 
@@ -200,18 +221,28 @@ bool CModuleController::GetActiveModuleVersion(const CSmallString& module,
 
 const CSmallString CModuleController::GetActiveModules(void)
 {
-    // FIXME
-    return("");
-    //return(ActiveModules);
+    CSmallString    amods;
+    bool            first = true;
+    for(CSmallString mod : ActiveModules){
+        if( ! first ) amods << "|";
+        amods << mod;
+        first = false;
+    }
+    return(amods);
 }
 
 //------------------------------------------------------------------------------
 
 const CSmallString CModuleController::GetExportedModules(void)
 {
-    // FIXME
-    return("");
-    //return(ExportedModules);
+    CSmallString    emods;
+    bool            first = true;
+    for(CSmallString mod : ExportedModules){
+        if( ! first ) emods << "|";
+        emods << mod;
+        first = false;
+    }
+    return(emods);
 }
 
 //------------------------------------------------------------------------------
@@ -250,14 +281,6 @@ void CModuleController::UpdateExportedModules(const CSmallString& module,
 {
     ExportedModules.remove(module);
     if( add_module) ExportedModules.push_back(module);
-}
-
-//-----------------------------------------------------------------------------
-
-void CModuleController::SetExportedModules(const CSmallString& modules)
-{
-    // FIXME
-   // ExportedModules = modules;
 }
 
 //==============================================================================
@@ -314,74 +337,34 @@ void CModuleController::PrintModExportedModules(CTerminal& terminal)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CModuleController::ReactivateModules(CVerboseStr& out)
+bool CModuleController::ReactivateModules(CVerboseStr& vout)
 {
-    // FIXME
-    return(false);
-
-//    CSmallString active_modules;
-//    active_modules = AMSGlobalConfig.GetActiveModules();
-
-//    CSmallString exported_modules;
-//    exported_modules = AMSGlobalConfig.GetExportedModules();
-
-//    char* p_str;
-//    char* p_strtok = NULL;
-
-//    bool result = true;
-
-//    ModuleFlags |= MFB_REACTIVATED;
-
-//    p_str = strtok_r(active_modules.GetBuffer(),"|",&p_strtok);
-//    while( p_str != NULL ) {
-//        result &= AddModule(vout,p_str);
-//        p_str = strtok_r(NULL,"|",&p_strtok);
-//    }
-
-//    // keep only those modules that were exported previously
-//    AMSGlobalConfig.SetExportedModules(exported_modules);
-
-//    if( exported_modules != NULL ) {
-//        ShellProcessor.SetVariable("AMS_EXPORTED_MODULES",exported_modules);
-//    } else {
-//        ShellProcessor.UnsetVariable("AMS_EXPORTED_MODULES");
-//    }
+    bool result = true;
+    for(CSmallString mod : ActiveModules){
+        bool exported = IsModuleExported(mod);
+        result &= Module.AddModule(vout,mod,false,!exported);
+    }
+    return(result);
 }
 
 //------------------------------------------------------------------------------
 
-bool CModuleController::PurgeModules(CVerboseStr& out)
+bool CModuleController::PurgeModules(CVerboseStr& vout)
 {
-    // FIXME
-    return(false);
+    std::list<CSmallString> modules = ActiveModules;
+    modules.reverse();
 
-//    CSmallString active_modules;
-//    active_modules = AMSGlobalConfig.GetActiveModules();
+    std::list<CSmallString>::iterator it = modules.begin();
+    std::list<CSmallString>::iterator ie = modules.end();
+    bool result = true;
 
-//    std::list<CSmallString> modules;
+    while( it != ie ){
+        CSmallString module = *it;
+        result &= Module.RemoveModule(vout,module);
+        it++;
+    }
 
-//    char* p_str;
-//    char* p_strtok = NULL;
-
-//    p_str = strtok_r(active_modules.GetBuffer(),"|",&p_strtok);
-//    while( p_str != NULL ) {
-//        modules.push_back(CSmallString(p_str));
-//        p_str = strtok_r(NULL,"|",&p_strtok);
-//    }
-
-//    modules.reverse();
-
-//    std::list<CSmallString>::iterator it = modules.begin();
-//    std::list<CSmallString>::iterator ie = modules.end();
-//    bool result = true;
-
-//    while( it != ie ){
-//        CSmallString module = *it;
-//        result &= RemoveModule(vout,module);
-//        it++;
-//    }
-
-//    return(result);
+    return(result);
 }
 
 //==============================================================================

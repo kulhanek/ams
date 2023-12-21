@@ -319,7 +319,6 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "bundles" ) {
         ModuleController.LoadBundles(EMBC_BIG);
-        vout << endl;
         ModuleController.PrintBundlesInfo(vout);
         return(true);
     }
@@ -353,9 +352,27 @@ bool CModuleCmd::Run(void)
         std::list<CSmallString> modules;
         HostGroup.GetAutoLoadedModules(modules);
 
-        CSite site;
-        // FIXME - load site
-        site.GetAutoLoadedModules(modules);
+        CFileName active_site = SiteController.GetActiveSite();
+
+        if( active_site != NULL ){
+            CFileName site_config = SiteController.GetSiteConfig(active_site);
+            if( site_config == NULL ){
+                CSmallString error;
+                error << "specified site '" << active_site << "' was not found";
+                ES_TRACE_ERROR(error);
+                return(false);
+            }
+
+            CSite site;
+            if( site.LoadConfig(site_config) == false ){
+                CSmallString error;
+                error << "unable to load site configuration from '" << site_config << "'";
+                ES_TRACE_ERROR(error);
+                return(false);
+            }
+
+            site.GetAutoLoadedModules(modules);
+        }
 
         // add modules
         bool ok = true;
@@ -370,6 +387,7 @@ bool CModuleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "reactivate" ) {
         ForcePrintErrors = true;
+        Module.SetFlags(Module.GetFlags() | MFB_REACTIVATED);
         return(ModuleController.ReactivateModules(vout));
     }
     // ----------------------------------------------

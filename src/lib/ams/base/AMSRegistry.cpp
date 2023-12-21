@@ -92,6 +92,13 @@ const CFileName CAMSRegistry::GetETCDIR(void)
 
 //------------------------------------------------------------------------------
 
+const CFileName CAMSRegistry::GetModActionPath(const CFileName& action_command)
+{
+    return( AMSRoot / "bin" / "actions" / action_command );
+}
+
+//------------------------------------------------------------------------------
+
 const CFileName CAMSRegistry::GetUserGlobalConfigDir(void)
 {
     CFileName user_config_dir;
@@ -144,6 +151,13 @@ void CAMSRegistry::SetUserUMask(const CSmallString& umask)
 {
     CXMLElement* p_ele = Config.GetChildElementByPath("user",true);
     p_ele->SetAttribute("umask",umask);
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+{
+    // FIXME
 }
 
 //==============================================================================

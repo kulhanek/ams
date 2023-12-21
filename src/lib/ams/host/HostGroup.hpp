@@ -79,6 +79,9 @@ public:
     /// get default site
     const CSmallString GetDefaultSite(void);
 
+    /// is site allowed?
+    bool IsSiteAllowed(const CSmallString& name);
+
     /// get list of allowed sites
     void GetAllowedSites(std::set<CSmallString>& list);
 
@@ -89,10 +92,12 @@ public:
     const CSmallString GetRealm(void);
 
     /// get list of autoloaded modules
-    void GetAutoLoadedModules(std::list<CSmallString>& modules);
+    void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+
+    /// get host group environment block
+    CXMLElement* GetHostGroupEnvironment(void);
 
 // information methods for all host groups -------------------------------------
-
     /// find host group namespace
     const CSmallString GetGroupNS(const CSmallString& hostname);
 

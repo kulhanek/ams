@@ -27,6 +27,7 @@
 #include <XMLDocument.hpp>
 #include <FileName.hpp>
 #include <AmsUUID.hpp>
+#include <list>
 
 //------------------------------------------------------------------------------
 
@@ -52,12 +53,18 @@ public:
     /// return infinity etc directory
     const CFileName GetETCDIR(void);
 
+    /// get full pathname to mod action command
+    const CFileName GetModActionPath(const CFileName& action_command);
+
 // user preferences ------------------------------------------------------------
     /// get user umask
     const CSmallString GetUserUMask(void);
 
     /// set user umask
     void SetUserUMask(const CSmallString& umask);
+
+    /// get list of autoloaded modules
+    void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
 
 // host configuration ----------------------------------------------------------
     /// return full file name to the hosts configurations

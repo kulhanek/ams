@@ -29,6 +29,7 @@
 #include <FileName.hpp>
 #include <VerboseStr.hpp>
 #include <XMLDocument.hpp>
+#include <Module.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
 
@@ -60,17 +61,11 @@ public:
     /// is site active?
     bool IsSiteActive(void);
 
-    /// is site adaptive?
-    bool IsSiteAdaptive(void);
-
-    /// purge module during site activation
-    bool IsPurgeModuleSet(void);
+    /// return short site description, these module are not exported
+    void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
 
     /// get site environment block
     CXMLElement* GetSiteEnvironment(void);
-
-    /// return short site description, these module are not exported
-    void GetAutoLoadedModules(std::list<CSmallString>& modules);
 
 // print information about site -----------------------------------------------
     /// print short info about site
@@ -82,10 +77,23 @@ public:
     /// print list of autoloaded modules
     void PrintAutoLoadedModules(CVerboseStr& vout);
 
-// section of private data ----------------------------------------------------
+// actions ---------------------------------------------------------------------
+    /// activate site - autoloaded modules must be handled later
+    bool ActivateSite(void);
+
+    /// deactivate site - autoloaded module must be handled sooner
+    bool DeactivateSite(void);
+
+    /// execute action hook
+    bool ExecuteModAction(const CSmallString& action, const CSmallString& args);
+
+// section of private data -----------------------------------------------------
 private:
     CFileName       ConfigFile;     // file name with the site configuration
     CXMLDocument    Config;         // site specific configuration
+
+    /// prepare site environment
+    bool PrepareSiteEnvironment(CXMLElement* p_build, EModuleAction action);
 };
 
 //------------------------------------------------------------------------------

@@ -250,6 +250,15 @@ void CHostGroup::GetAllowedSites(std::set<CSmallString>& list)
 
 //------------------------------------------------------------------------------
 
+bool CHostGroup::IsSiteAllowed(const CSmallString& name)
+{
+    std::set<CSmallString> allowed_sites;
+    GetAllowedSites(allowed_sites);
+    return( std::find(allowed_sites.begin(), allowed_sites.end(), name) != allowed_sites.end() );
+}
+
+//------------------------------------------------------------------------------
+
 const CSmallString CHostGroup::GetGroupNS(void)
 {
     CXMLElement* p_grp = HostGroup.GetFirstChildElement("group");
@@ -272,9 +281,38 @@ const CSmallString CHostGroup::GetRealm(void)
 
 //------------------------------------------------------------------------------
 
-void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules)
+void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+{
+    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/autoload");
+    if( p_ele ){
+        p_ele = p_ele->GetFirstChildElement("module");
+    }
+    while( p_ele ){
+        CSmallString mname,mflavor;
+        p_ele->GetAttribute("name",mname);
+        p_ele->GetAttribute("flavor",mflavor);
+        if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+            if( withorigin ){
+                mname << "[hostgroup:" << GetHostGroupName();
+                if( mflavor != NULL ) mname << "@" << mflavor;
+                mname << "]";
+                modules.push_back(mname);
+            } else {
+                modules.push_back(mname);
+            }
+        }
+        p_ele = p_ele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
 {
    // FIXME
+    return(NULL);
 }
 
 //==============================================================================

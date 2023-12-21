@@ -50,6 +50,9 @@ public:
     /// check if module is active
     bool IsModuleActive(const CSmallString& module);
 
+    /// check if module is exported
+    bool IsModuleExported(const CSmallString& module);
+
     /// get version of active module
     bool GetActiveModuleVersion(const CSmallString& module,CSmallString& actver);
 
@@ -79,15 +82,12 @@ public:
     /// update list of exported modules
     void UpdateExportedModules(const CSmallString& module,bool add_module);
 
-    /// set list of exported modules
-    void SetExportedModules(const CSmallString& modules);
-
 // execution methods -----------------------------------------------------------
     /// reactivate modules
-    bool ReactivateModules(CVerboseStr& out);
+    bool ReactivateModules(CVerboseStr& vout);
 
     /// reactivate modules
-    bool PurgeModules(CVerboseStr& out);
+    bool PurgeModules(CVerboseStr& vout);
 
 // section of private data -----------------------------------------------------
 private:

@@ -36,8 +36,8 @@
 #include <Utils.hpp>
 #include <User.hpp>
 #include <Host.hpp>
+#include <HostGroup.hpp>
 #include <iomanip>
-#include <string.h>
 #include <SiteController.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -166,32 +166,6 @@ bool CSite::IsSiteActive(void)
 
 //------------------------------------------------------------------------------
 
-bool CSite::IsSiteAdaptive(void)
-{
-    CXMLElement* p_ele = Config.GetChildElementByPath("site");
-    if( p_ele == NULL ) {
-        return(true);
-    }
-    bool adaptive = false;
-    p_ele->GetAttribute("adaptive",adaptive);
-    return(adaptive);
-}
-
-//------------------------------------------------------------------------------
-
-bool CSite::IsPurgeModuleSet(void)
-{
-    CXMLElement* p_ele = Config.GetChildElementByPath("site");
-    if( p_ele == NULL ) {
-        return(true);
-    }
-    bool purge_modules = false;
-    p_ele->GetAttribute("purge_modules",purge_modules);
-    return(purge_modules);
-}
-
-//------------------------------------------------------------------------------
-
 CXMLElement* CSite::GetSiteEnvironment(void)
 {
     return( Config.GetChildElementByPath("site/environment") );
@@ -199,7 +173,7 @@ CXMLElement* CSite::GetSiteEnvironment(void)
 
 //------------------------------------------------------------------------------
 
-void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules)
+void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
     CSmallString flavor = AMSRegistry.GetSiteFlavor();
 
@@ -212,7 +186,14 @@ void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules)
         p_ele->GetAttribute("name",mname);
         p_ele->GetAttribute("flavor",mflavor);
         if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
-            modules.push_back(mname);
+            if( withorigin ){
+                mname << "[site:" << GetName();
+                if( mflavor != NULL ) mname << "@" << mflavor;
+                mname << "]";
+                modules.push_back(mname);
+            } else {
+                modules.push_back(mname);
+            }
         }
         p_ele = p_ele->GetNextSiblingElement("module");
     }
@@ -227,11 +208,7 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
     CSmallString name = GetName();
     CSmallString status;
 
-    if( IsSiteActive() ) {
-        if( IsSiteAdaptive() ) {
-            status << " [adaptive]";
-        }
-    } else {
+    if( ! IsSiteActive() ) {
         status =  " (not active)";
     }
 
@@ -272,8 +249,6 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
     vout << endl;
     vout << "# ~~~ <b>Site Attributes</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     vout << "# Site config   : " << ConfigFile << endl;
-    vout << "# Adaptive site : " << bool_to_str(IsSiteAdaptive()) << endl;
-    vout << "# Purge modules : " << bool_to_str(IsPurgeModuleSet()) <<  endl;
     vout << "# Site flavor   : " << AMSRegistry.GetSiteFlavor() << endl;
 
     vout << endl;
@@ -316,6 +291,155 @@ void CSite::PrintAutoLoadedModules(CVerboseStr& vout)
 
         p_ele = p_ele->GetNextSiblingElement("module");
     }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CSite::ActivateSite(void)
+{
+    if( HostGroup.IsSiteAllowed(GetName()) == false ) {
+        CSmallString error;
+        error << "site (" << GetName()
+              << ") is not allowed to be activated on this host group ("
+              << HostGroup.GetHostGroupName() << ")";
+        ES_TRACE_ERROR(error);
+        return(false);
+    }
+
+    // set active site ------------------------------
+    ShellProcessor.SetVariable("AMS_SITE",GetName());
+
+    if( GetSupportEMail() != NULL ) {
+        ShellProcessor.SetVariable("AMS_SITE_SUPPORT",GetSupportEMail());
+    }
+
+    // install hooks from site config ---------------
+    ExecuteModAction("activate",GetName());
+
+    // boot host environments -----------------------
+    CXMLElement* p_env_ele = HostGroup.GetHostGroupEnvironment();
+    PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);
+
+    // boot site environments -----------------------
+    p_env_ele = GetSiteEnvironment();
+    PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);
+
+    // setup host resources -------------------------
+    ShellProcessor.SetVariable("AMS_NHOSTCPUS",Host.GetNumOfHostCPUs());
+    ShellProcessor.SetVariable("AMS_NHOSTGPUS",Host.GetNumOfHostGPUs());
+    ShellProcessor.SetVariable("AMS_GROUPNS",HostGroup.GetGroupNS());
+
+    // reininitialization ---------------------------
+
+    // initial setup - destroy info about ABS collections
+    ShellProcessor.UnsetVariable("INF_COLLECTION_NAME");
+    ShellProcessor.UnsetVariable("INF_COLLECTION_PATH");
+    ShellProcessor.UnsetVariable("INF_COLLECTION_ID");
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CSite::DeactivateSite(void)
+{
+    if( IsSiteActive() == false ) {
+        ES_ERROR("only active site can be deactivated");
+        return(false);
+    }
+
+    // unload site environment ----------------------
+    CXMLElement* p_env_ele = GetSiteEnvironment();
+    PrepareSiteEnvironment(p_env_ele,EMA_REMOVE_MODULE);
+
+    // boot site environments -----------------------
+    p_env_ele = HostGroup.GetHostGroupEnvironment();
+    PrepareSiteEnvironment(p_env_ele,EMA_REMOVE_MODULE);
+
+    SiteController.SetActiveSite("");
+    ShellProcessor.UnsetVariable("AMS_SITE");
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CSite::PrepareSiteEnvironment(CXMLElement* p_build, EModuleAction action)
+{
+    if( p_build == NULL ) return(true); // nothing to do
+
+    // beginning
+    if( ShellProcessor.PrepareModuleEnvironmentForModActionI(p_build) == false ) {
+        ES_ERROR("unable to build new environment I");
+        return(false);
+    }
+    // main
+    if( ShellProcessor.PrepareModuleEnvironmentForLowPriority(p_build,action) == false ) {
+        ES_ERROR("unable to build new environment LP");
+        return(false);
+    }
+    // finalization
+    if( ShellProcessor.PrepareModuleEnvironmentForModActionII(p_build) == false ) {
+        ES_ERROR("unable to build new environment II");
+        return(false);
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CSite::ExecuteModAction(const CSmallString& action,
+                             const CSmallString& args)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("site/actions/action");
+    if( p_ele == NULL ) {
+        // no actions -> return
+        ES_WARNING("no actions are define");
+        return(true);
+    }
+
+    while( p_ele != NULL ) {
+        CXMLElement* p_cele = p_ele;
+        p_ele = p_ele->GetNextSiblingElement("action");
+
+        CSmallString laction;
+        if( p_cele->GetAttribute("name",laction) == false ) continue;
+        if( laction != action ) continue;
+
+        // action found - get the remaining specification
+        CSmallString lcommand,ltype,largs;
+        if( p_cele->GetAttribute("command",lcommand) == false ) {
+            CSmallString error;
+            error << "action '" << action << "' found but command is not provided";
+            ES_ERROR(error);
+            return(false);
+        }
+        p_cele->GetAttribute("type",ltype);
+        p_cele->GetAttribute("args",largs);
+
+        // complete entire command
+        CFileName full_command;
+        full_command = AMSRegistry.GetModActionPath(lcommand);
+
+        CFileName full_arguments;
+        full_arguments = largs + " " + args;
+
+        if( ltype == "inline" ) {
+            ShellProcessor.RegisterScript(full_command,full_arguments,EST_INLINE);
+        } else if( ltype == "child" ) {
+            ShellProcessor.RegisterScript(full_command,full_arguments,EST_CHILD);
+        } else {
+            CSmallString error;
+            error << "unsupported script type '" << ltype << "'";
+            ES_ERROR(error);
+            return(false);
+        }
+    }
+
+    return(true);
 }
 
 //==============================================================================
