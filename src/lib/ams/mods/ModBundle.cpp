@@ -36,6 +36,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <PrintEngine.hpp>
+#include <FSIndex.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -54,7 +55,13 @@ using namespace boost::algorithm;
 
 CModBundle::CModBundle(void)
 {
-    CacheType = EMBC_NONE;
+    CacheType               = EMBC_NONE;
+    PersonalBundle          = false;
+
+    NumOfAllBuilds          = 0;
+    NumOfUniqueBuilds       = 0;
+    NumOfNonSoftRepoBuilds  = 0;
+    NumOfSharedBuilds       = 0;
 }
 
 //==============================================================================
@@ -280,7 +287,7 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
     }
 
     if( stat ){
-    vout << "#" << endl;
+    vout << endl;
     vout << "# Statistics" << endl;
     vout << "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     vout << "# Number of doc files : " << setw(3) << DocFiles.size() << endl;
@@ -385,13 +392,13 @@ bool CModBundle::LoadCache(EModBundleCache type)
 
 // load the cache
     if( type == EMBC_BIG ){
-        if( LoadCacheFile(config_dir / "cache_big.xml" ) == false ){
+        if( LoadCacheFile(config_dir / "cache_big.xml") == false ){
             ES_ERROR("unable to load big cache");
             return(false);
         }
         CacheType = EMBC_BIG;
     } else if( type == EMBC_SMALL ) {
-        if( LoadCacheFile(config_dir / "cache.xml" ) == false ){
+        if( LoadCacheFile(config_dir / "cache.xml") == false ){
             ES_ERROR("unable to load small cache");
             return(false);
         }
@@ -678,6 +685,168 @@ CXMLElement* CModBundle::GetBundleElement(void)
 void CModBundle::AuditAction(const CSmallString& message)
 {
 
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
+{
+    // create list of builds
+    vout << endl;
+    vout << "# Assembling list of builds ..." << endl;
+
+    NumOfAllBuilds          = 0;
+    NumOfUniqueBuilds       = 0;
+    NumOfNonSoftRepoBuilds  = 0;
+    NumOfSharedBuilds       = 0;
+
+    UniqueBuilds.clear();
+    UniqueBuildPaths.clear();
+    BuildPaths.clear();
+    BuildIndexes.clear();
+
+    CXMLElement* p_mele = Cache.GetChildElementByPath("cache/module");
+
+    while( p_mele != NULL ) {
+        CSmallString name;
+        p_mele->GetAttribute("name",name);
+        CXMLElement* p_sele = p_mele->GetChildElementByPath("builds/build");
+
+        while( p_sele != NULL ) {
+
+            NumOfAllBuilds++;
+
+            CSmallString ver,arch,mode;
+            p_sele->GetAttribute("ver",ver);
+            p_sele->GetAttribute("arch",arch);
+            p_sele->GetAttribute("mode",mode);
+
+            // register build
+            CSmallString build_id;
+            build_id << name << ":" << ver << ":" << arch << ":" << mode;
+
+            if( UniqueBuilds.count(build_id) == 1 ) continue;
+            UniqueBuilds.insert(build_id);
+            NumOfUniqueBuilds++;
+
+            CFileName package_dir;
+            package_dir = CModCache::GetVariableValue(p_sele,"AMS_PACKAGE_DIR");
+            if( package_dir == NULL ){
+                NumOfNonSoftRepoBuilds++;
+                continue;
+            }
+
+            CFileName path;
+            if( package_dir[0] == '/' ){
+                path = package_dir;
+            } else {
+                path = BundlePath / package_dir;
+            }
+
+            if( ! PersonalBundle ){
+                // ignore this test for personal site as the build might not be synchronized yet
+                if( CFileSystem::IsDirectory(path) == false ){
+                    CSmallString error;
+                    error << build_id << " -> AMS_PACKAGE_DIR: " << package_dir << " does not exist!";
+                    ES_ERROR(error);
+                    return(false);
+                }
+            }
+
+            // register build
+            if( UniqueBuildPaths.count(path) == 1 ){
+                // already registered
+                NumOfSharedBuilds++;
+                continue;
+            }
+            UniqueBuildPaths.insert(path);
+
+            // register build for index
+            BuildPaths[build_id] = package_dir;
+
+            p_sele = p_sele->GetNextSiblingElement("build");
+        }
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+
+    vout << "  > Number of module builds                              = " << NumOfAllBuilds << endl;
+    vout << "  > Number of unique builds                              = " << NumOfUniqueBuilds << endl;
+    vout << "  > Number of builds (no AMS_PACKAGE_DIR)                = " << NumOfNonSoftRepoBuilds << endl;
+    vout << "  > Number of shared builds (the same AMS_PACKAGE_DIR)   = " << NumOfSharedBuilds << endl;
+    vout << "  > Number of builds for index (AMS_PACKAGE_DIR and dir) = " << BuildPaths.size() << endl;
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CModBundle::CalculateIndex(CVerboseStr& vout)
+{
+    // calculate index
+    vout << endl;
+    vout << "# Calculating index ..." << endl;
+
+    map<CSmallString,CFileName>::iterator it = BuildPaths.begin();
+    map<CSmallString,CFileName>::iterator ie = BuildPaths.end();
+
+    CFSIndex index;
+    index.RootDir = BundlePath;
+    index.PersonalBundle = PersonalBundle;
+
+    while( it != ie ){
+        CSmallString    build_id    = it->first;
+        CFileName       build_path  = it->second;
+        string sha1 = index.CalculateBuildHash(build_path);
+        BuildIndexes[build_id] = sha1;
+        vout << sha1 << " " << build_id << endl;
+        it++;
+    }
+
+    vout << endl;
+    vout << "# Statistics ..." << endl;
+    vout << "  > Number of stat objects  = " << index.NumOfStats << endl;
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundle::SaveIndex(void)
+{
+    CFileName index_name;
+    index_name = BundlePath / _AMS_BUNDLE / "index.new";
+
+    ofstream ofs(index_name);
+    if( ! ofs ){
+        ES_ERROR("Unable to open the index file for writing!");
+        return(false);
+    }
+
+    map<CSmallString,CFileName>::iterator it = BuildPaths.begin();
+    map<CSmallString,CFileName>::iterator ie = BuildPaths.end();
+
+    while( it != ie ){
+        CSmallString build_id = it->first;
+        string sha1 = BuildIndexes[build_id];
+        ofs << "* " << sha1 << " " << build_id << " " << it->second << endl;
+        it++;
+    }
+
+    if( ! ofs ){
+        ES_ERROR("The index was not saved due to error!");
+        return(false);
+    }
+
+    ofs.close();
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundle::CommitIndex(void)
+{
+    return(true);
 }
 
 //==============================================================================

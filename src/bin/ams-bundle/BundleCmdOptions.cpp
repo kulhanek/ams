@@ -106,7 +106,12 @@ int CBundleCmdOptions::CheckArguments(void)
             }
             return(SO_OPTS_ERROR);
         }
-        return(SO_CONTINUE);
+        if( Action == "index" ) return(SO_CONTINUE);
+    }
+
+    if( GetNumberOfProgArgs() == 4 ) {
+        Action = GetProgArg(0);
+        if( Action == "create" ) return(SO_CONTINUE);
     }
 
     if( IsVerbose() ) {

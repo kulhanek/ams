@@ -14,6 +14,8 @@ SET(AMS_SRC
         base/CudaRT.cpp
         base/AMSRegistry.cpp
         base/PrintEngine.cpp
+        base/sha1.cpp
+        base/FSIndex.cpp
 
     # HOST
         host/HostGroup.cpp

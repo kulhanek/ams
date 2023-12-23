@@ -96,6 +96,9 @@ public:
     /// check module version
     static bool CheckModuleVersion(CXMLElement* p_mele,const CSmallString& ver);
 
+    /// return value of build variable
+    static const CSmallString GetVariableValue(CXMLElement* p_rele, const CSmallString& name);
+
 // permissions
     /// test if permission is granted (only module)
     static bool IsPermissionGrantedForModule(CXMLElement* p_mele);

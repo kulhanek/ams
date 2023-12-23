@@ -484,7 +484,7 @@ void CModCache::GetCategories(std::list<CSmallString>& list)
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
     while( p_mele != NULL ) {
 
-        CXMLElement*  p_dele = p_mele->GetFirstChildElement("category");
+        CXMLElement*  p_dele = p_mele->GetChildElementByPath("categories/category");
         // support multiple categories
         while( p_dele != NULL ) {
             CSmallString cname;
@@ -510,15 +510,21 @@ void CModCache::GetModules(const CSmallString& category, std::list<CSmallString>
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
     while( p_mele != NULL ) {
         bool include = false;
+        bool hascat  = false;
 
-        CXMLElement*  p_dele = p_mele->GetFirstChildElement("category");
-        if( p_dele != NULL ){
+        CXMLElement*  p_dele = p_mele->GetChildElementByPath("categories/category");
+        while( p_dele != NULL ){
             CSmallString cname;
             p_dele->GetAttribute("name",cname);
+            hascat = true;
             if( category == cname ) {
                 include = true;
+                break;
             }
-        } else {
+            p_dele = p_dele->GetNextSiblingElement("category");
+        }
+
+        if( hascat == false ){
             if( category == "sys" ){
                 include = true;
             }
@@ -760,6 +766,30 @@ CXMLElement* CModCache::CreateEmptyCache(void)
 // create root element
     CXMLElement* p_cele = Cache.CreateChildElement("cache");
     return(p_cele);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+const CSmallString CModCache::GetVariableValue(CXMLElement* p_rele,
+                                               const CSmallString& name)
+{
+    if( p_rele == NULL ) return("");
+
+    CXMLElement* p_sele = p_rele->GetChildElementByPath("setup/variable");
+
+    while( p_sele != NULL ) {
+
+        CSmallString lname;
+        CSmallString lvalue;
+        p_sele->GetAttribute("name",lname);
+        p_sele->GetAttribute("value",lvalue);
+        if( lname == name ) return(lvalue);
+
+        p_sele = p_sele->GetNextSiblingElement("variable");
+    }
+    return("");
 }
 
 //==============================================================================

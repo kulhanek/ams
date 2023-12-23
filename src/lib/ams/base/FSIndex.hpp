@@ -1,11 +1,9 @@
-#ifndef BundleCmdH
-#define BundleCmdH
+#ifndef FSIndexH
+#define FSIndexH
 // =============================================================================
-// AMS
+// AMS - Advanced Module System
 // -----------------------------------------------------------------------------
-//    Copyright (C) 2023      Petr Kulhanek, kulhanek@chemi.muni.cz
-//    Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
-//    Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
+//    Copyright (C) 2016,2017      Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -22,36 +20,27 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "BundleCmdOptions.hpp"
-#include <TerminalStr.hpp>
-#include <VerboseStr.hpp>
+#include <AMSMainHeader.hpp>
+#include <FileName.hpp>
+
+class SHA1;
 
 // -----------------------------------------------------------------------------
 
-class CBundleCmd {
+class AMS_PACKAGE CFSIndex {
 public:
-// main methods ----------------------------------------------------------------
-    /// init options
-    int Init(int argc,char* argv[]);
 
-    /// main part of program
-    bool Run(void);
+    CFSIndex(void);
 
-    /// finalize program
-    void Finalize(void);
+// main methods ----------------------------------------------------------------    
+    std::string CalculateBuildHash(const CFileName& build_path);
+    void HashDir(const CFileName& full_path,SHA1& sha1);
+    void HashNode(const CFileName& name,struct stat& my_stat,bool build_node,SHA1& sha1);
 
-// section of private data -----------------------------------------------------
-private:
-    CBundleCmdOptions   Options;
-    CTerminalStr        Console;
-    CVerboseStr         vout;
-    bool                ForcePrintErrors;
-
-    bool InfoBundle(void);
-    bool CreateBundle(void);
-    bool RebuildBundle(void);
-    bool PrintAvailMods(void);
-    bool BundleIndex(void);
+public:
+    CFileName   RootDir;
+    bool        PersonalBundle;
+    int         NumOfStats;
 };
 
 // -----------------------------------------------------------------------------

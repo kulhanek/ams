@@ -30,6 +30,8 @@
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <set>
+#include <map>
 
 //------------------------------------------------------------------------------
 
@@ -89,12 +91,26 @@ public:
     /// return bundle config element
     CXMLElement* GetBundleElement(void);
 
+// bundle index operation ------------------------------------------------------
+    /// get list of build for index
+    bool ListBuildsForIndex(CVerboseStr& vout);
+
+    /// calculate new index
+    void CalculateIndex(CVerboseStr& vout);
+
+    /// save index
+    bool SaveIndex(void);
+
+    /// commit index
+    bool CommitIndex(void);
+
 // section of private data -----------------------------------------------------
 private:
     CFileName       BundlePath;
     CFileName       BundleName;
     CXMLDocument    Config;
     EModBundleCache CacheType;
+    bool            PersonalBundle;
 
     std::list<CFileName>    DocFiles;
     std::list<CFileName>    BldFiles;
@@ -106,6 +122,16 @@ private:
     std::list<CSmallString>     NoDocMods;
     int                         NumOfDocs;      // number of doc files
     int                         NumOfBlds;      // number of bld files
+
+    // index
+    int                                 NumOfAllBuilds;
+    int                                 NumOfUniqueBuilds;
+    int                                 NumOfNonSoftRepoBuilds;
+    int                                 NumOfSharedBuilds;
+    std::set<CSmallString>              UniqueBuilds;
+    std::set<CFileName>                 UniqueBuildPaths;
+    std::map<CSmallString,CFileName>    BuildPaths;
+    std::map<CSmallString,std::string>  BuildIndexes;
 
     /// record audit message
     void AuditAction(const CSmallString& message);

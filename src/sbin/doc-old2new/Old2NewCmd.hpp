@@ -1,5 +1,5 @@
-#ifndef BundleCmdH
-#define BundleCmdH
+#ifndef Old2NewCmdH
+#define Old2NewCmdH
 // =============================================================================
 // AMS
 // -----------------------------------------------------------------------------
@@ -22,13 +22,13 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "BundleCmdOptions.hpp"
+#include "Old2NewCmdOptions.hpp"
 #include <TerminalStr.hpp>
 #include <VerboseStr.hpp>
 
 // -----------------------------------------------------------------------------
 
-class CBundleCmd {
+class COld2NewCmd {
 public:
 // main methods ----------------------------------------------------------------
     /// init options
@@ -42,16 +42,9 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    CBundleCmdOptions   Options;
+    COld2NewCmdOptions   Options;
     CTerminalStr        Console;
     CVerboseStr         vout;
-    bool                ForcePrintErrors;
-
-    bool InfoBundle(void);
-    bool CreateBundle(void);
-    bool RebuildBundle(void);
-    bool PrintAvailMods(void);
-    bool BundleIndex(void);
 };
 
 // -----------------------------------------------------------------------------

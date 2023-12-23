@@ -1,3 +1,13 @@
+src/lib/ams/base/FSIndex.cpp
+src/lib/ams/base/FSIndex.hpp
+src/lib/ams/base/sha1.cpp
+src/lib/ams/base/sha1.hpp
+src/sbin/CMakeLists.txt
+src/sbin/doc-old2new/Old2NewCmdOptions.hpp
+src/sbin/doc-old2new/Old2NewCmdOptions.cpp
+src/sbin/doc-old2new/Old2NewCmd.hpp
+src/sbin/doc-old2new/Old2NewCmd.cpp
+src/sbin/doc-old2new/CMakeLists.txt
 src/bin/CMakeLists.txt
 src/bin/_ams-module-cmd/CMakeLists.txt
 src/bin/_ams-module-cmd/ModuleCmd.cpp

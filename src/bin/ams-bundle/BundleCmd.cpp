@@ -45,6 +45,8 @@ MAIN_ENTRY(CBundleCmd)
 
 int CBundleCmd::Init(int argc, char* argv[])
 {
+    ForcePrintErrors = false;
+
     // encode program options, all check procedures are done inside of Options
     int result = Options.ParseCmdLine(argc,argv);
 
@@ -113,6 +115,10 @@ bool CBundleCmd::Run(void)
         return( PrintAvailMods() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "index" ) {
+        return( BundleIndex() );
+    }
+    // ----------------------------------------------
     else {
         CSmallString error;
         error << "not implemented action '" << Options.GetArgAction() << "'";
@@ -129,15 +135,19 @@ void CBundleCmd::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
+    vout << endl;
+
     vout << high;
     vout << "# ==============================================================================" << endl;
     vout << "# ams-bundle (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
-    vout << low;
     if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
+        if( ForcePrintErrors ) vout << low;
         ErrorSystem.PrintErrors(vout);
+        if( ForcePrintErrors ) vout << endl;
     }
+
     vout << endl;
 }
 
@@ -151,8 +161,9 @@ bool CBundleCmd::InfoBundle(void)
     CFileSystem::GetCurrentDir(cwd);
     if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
         CSmallString error;
-        error << "no bundle found from the path starting at: '" << cwd << "'";
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -161,6 +172,7 @@ bool CBundleCmd::InfoBundle(void)
         CSmallString error;
         error << "unable to load bundle configuration '" << bundle_root << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -169,15 +181,17 @@ bool CBundleCmd::InfoBundle(void)
     bundle.FindAllFragmentFiles();
     vout << "done" << endl;
 
+    bool modstat = true;
+
     if( bundle.LoadCache(EMBC_SMALL) == false ){
         CSmallString error;
         error << "unable to load bundle cache";
-        ES_ERROR(error);
-        return(false);
+        ES_TRACE_ERROR(error);
+        modstat = false;
     }
 
     vout << endl;
-    bundle.PrintInfo(vout,true,true,true);
+    bundle.PrintInfo(vout,modstat,true,true);
 
     return(true);
 }
@@ -193,6 +207,7 @@ bool CBundleCmd::CreateBundle(void)
         CSmallString error;
         error << "the current directory is the part of the existing AMS bundle";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -200,6 +215,7 @@ bool CBundleCmd::CreateBundle(void)
         CSmallString error;
         error << "incorrect number of arguments";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -208,6 +224,7 @@ bool CBundleCmd::CreateBundle(void)
         CSmallString error;
         error << "unable to create bundle '" << cwd / Options.GetProgArg(1) << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -222,8 +239,9 @@ bool CBundleCmd::RebuildBundle(void)
     CFileSystem::GetCurrentDir(cwd);
     if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
         CSmallString error;
-        error << "no bundle found from the path starting at: '" << cwd << "'";
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -232,6 +250,7 @@ bool CBundleCmd::RebuildBundle(void)
         CSmallString error;
         error << "unable to load bundle configuration '" << bundle_root << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -257,8 +276,9 @@ bool CBundleCmd::PrintAvailMods(void)
     CFileSystem::GetCurrentDir(cwd);
     if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
         CSmallString error;
-        error << "no bundle found from the path starting at: '" << cwd << "'";
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -267,6 +287,7 @@ bool CBundleCmd::PrintAvailMods(void)
         CSmallString error;
         error << "unable to load bundle configuration '" << bundle_root << "'";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -274,6 +295,7 @@ bool CBundleCmd::PrintAvailMods(void)
         CSmallString error;
         error << "unable to load bundle cache";
         ES_ERROR(error);
+        ForcePrintErrors = true;
         return(false);
     }
 
@@ -281,6 +303,59 @@ bool CBundleCmd::PrintAvailMods(void)
 
     PrintEngine.PrintHeader(Console.GetTerminal(),"AVAILABLE MODULES (ams-bundle)",EPEHS_SECTION);
     bundle.PrintAvail(Console.GetTerminal(),Options.GetOptIncludeVersions(),true);
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::BundleIndex(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( Options.GetProgArg(1) == "new" ){
+        if( bundle.ListBuildsForIndex(vout) == false ){
+            CSmallString error;
+            error << "unable to list build for index";
+            ES_ERROR(error);
+            ForcePrintErrors = true;
+            return(false);
+        }
+        bundle.CalculateIndex(vout);
+        if( bundle.SaveIndex()  == false ){
+            CSmallString error;
+            error << "unable to save new index";
+            ES_ERROR(error);
+            ForcePrintErrors = true;
+            return(false);
+        }
+        return(true);
+    }
 
     return(true);
 }
