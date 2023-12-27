@@ -548,9 +548,6 @@ int CSiteCmd::ListAMods(void)
 
 int CSiteCmd::InitSite(void)
 {
-    // special case - ignore
-    if( (Options.GetArgSite() == "none") || (Options.GetArgSite() == NULL) ) return(SITE_STATUS_OK);
-
     ModuleController.LoadBundles(EMBC_SMALL);
     ModuleController.MergeBundles();
 
