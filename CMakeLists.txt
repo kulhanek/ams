@@ -2,7 +2,7 @@
 # AMS CMake File
 # ==============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10 FATAL_ERROR)
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(AMS)
 
@@ -41,11 +41,11 @@ ENDIF(NOT DEVELOPMENT_ROOT)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEVELOPMENT_ROOT}/projects/cmake-modules/1.0/share/modules")
 
 # boost =======================
-FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(MyBoost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} SYSTEM)
 
 # HWLOC ------------------------------------------
-SET(HWLOC_ROOT ${DEVELOPMENT_ROOT}/thirdparty/hwloc/2.0.1)
+SET(HWLOC_ROOT ${DEVELOPMENT_ROOT}/thirdparty/hwloc/2.4.1)
 INCLUDE_DIRECTORIES(${HWLOC_ROOT}/include)
 LINK_DIRECTORIES(${HWLOC_ROOT}/lib)
 SET(HWLOC_LIB_NAME hwloc)
