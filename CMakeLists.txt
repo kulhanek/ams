@@ -125,8 +125,8 @@ ENDIF(NOT DEFINED COMPOSITE_PROJECT)
 # ==============================================================================
 
 IF(NOT DEFINED COMPOSITE_PROJECT)
-    SET(CMAKE_CXX_FLAGS_RELEASE "-O2")
-    SET(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Werror -pedantic-errors -Wundef -Wno-long-long")
+    SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -std=c++11")
+    SET(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++11 -Wall -Werror -pedantic-errors -Wundef -Wno-long-long")
 
     #SET(CMAKE_BUILD_TYPE Release)
     SET(CMAKE_BUILD_TYPE Debug)
