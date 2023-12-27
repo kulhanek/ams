@@ -84,9 +84,6 @@ public:
     /// deactivate site - autoloaded module must be handled sooner
     bool DeactivateSite(void);
 
-    /// execute action hook
-    bool ExecuteModAction(const CSmallString& action, const CSmallString& args);
-
 // section of private data -----------------------------------------------------
 private:
     CFileName       ConfigFile;     // file name with the site configuration

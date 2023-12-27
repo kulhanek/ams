@@ -106,7 +106,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
         vout << endl;
         vout << "# Module specification: " << module << " (add action)" << endl;
-        vout << "# =============================================================" << endl;
+        vout << "# ==============================================================================" << endl;
     }
 
     // parse module input --------------------------
@@ -217,7 +217,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     // print rest of module info -------------------
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
         Host.PrintHostInfoForModule(vout);
-        vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+        vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( (CModCache::CanModuleBeExported(p_module) == true) && (do_not_export == false) ) {
             vout << "  Exported module    : " << exported_module << endl;
         } else {
@@ -271,7 +271,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
         vout << endl;
         vout << "# Module name: " << module << " (remove action)" << endl;
-        vout << "# =============================================================" << endl;
+        vout << "# ==============================================================================" << endl;
     }
 
     // parse module input --------------------------
@@ -497,15 +497,13 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
             break;
         }
 
-// FIXME
-//        if( Site.ExecuteModaction("add",args) == false ) {
-//            return(false);
-//        }
+        if( HostGroup.ExecuteModAction("add",args) == false ) {
+            return(false);
+        }
     } else {
-// FIXME
-//        if( Site.ExecuteModaction("remove","\""+complete_module+"\"") == false ) {
-//            return(false);
-//        }
+        if( HostGroup.ExecuteModAction("remove","\""+complete_module+"\"") == false ) {
+            return(false);
+        }
     }
 
     if( ShellProcessor.PrepareModuleEnvironmentForLowPriority(p_build,action) == false ) {
@@ -521,24 +519,20 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
     switch(action){
         case(EMA_ADD_MODULE):
         ShellProcessor.AppendValueToVariable("AMS_ACTIVE_MODULES",complete_module,"|");
-        // FIXME
-        // AMSGlobalConfig.UpdateActiveModules(complete_module,true);
+        ModuleController.UpdateActiveModules(complete_module,EMA_ADD_MODULE);
 
         if( (ModuleExportFlag == true) && (exported_module != NULL) ) {
             ShellProcessor.AppendValueToVariable("AMS_EXPORTED_MODULES",exported_module,"|");
-            // FIXME
-            //  AMSGlobalConfig.UpdateExportedModules(exported_module,true);
+            ModuleController.UpdateExportedModules(exported_module,EMA_ADD_MODULE);
         }
         break;
     case(EMA_REMOVE_MODULE):
         ShellProcessor.RemoveValueFromVariable("AMS_ACTIVE_MODULES",complete_module,"|");
-        // FIXME
-        // AMSGlobalConfig.UpdateActiveModules(complete_module,false);
+        ModuleController.UpdateActiveModules(complete_module,EMA_REMOVE_MODULE);
 
         if( exported_module != NULL ) {
             ShellProcessor.RemoveValueFromVariable("AMS_EXPORTED_MODULES",exported_module,"|");
-            // FIXME
-            // AMSGlobalConfig.UpdateExportedModules(exported_module,false);
+            ModuleController.UpdateExportedModules(exported_module,EMA_REMOVE_MODULE);
         }
         break;
     }
@@ -1246,20 +1240,6 @@ bool CModule::DetermineModeUser(CVerboseStr& vout,CXMLElement* p_module,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-
-
-
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
 bool CModule::AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch)
 {
     int matches,maxmatches;
@@ -1325,7 +1305,7 @@ bool CModule::PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name)
 
     // complete module specification ---------------
     vout << "# Module specification: " << mod_name << " (disp action)" << endl;
-    vout << "# =============================================================" << endl;
+    vout << "# ==============================================================================" << endl;
 
     // parse module input --------------------------
     CSmallString name,ver,arch,mode;
@@ -1390,7 +1370,7 @@ bool CModule::PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name)
 
     Host.PrintHostInfoForModule(vout);
 
-    vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
     CSmallString exported_module;
     if( ModCache.CanModuleBeExported(p_module) == true ) {

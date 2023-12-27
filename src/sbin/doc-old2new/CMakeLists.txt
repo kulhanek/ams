@@ -17,6 +17,6 @@ TARGET_LINK_LIBRARIES(doc-old2new ${AMS_LIBS})
 INSTALL(TARGETS
             doc-old2new
         DESTINATION
-            bin
+            sbin
         )
 

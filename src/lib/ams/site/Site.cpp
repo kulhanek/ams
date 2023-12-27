@@ -316,7 +316,7 @@ bool CSite::ActivateSite(void)
     }
 
     // install hooks from site config ---------------
-    ExecuteModAction("activate",GetName());
+    HostGroup.ExecuteModAction("activate",GetName());
 
     // boot host environments -----------------------
     CXMLElement* p_env_ele = HostGroup.GetHostGroupEnvironment();
@@ -384,59 +384,6 @@ bool CSite::PrepareSiteEnvironment(CXMLElement* p_build, EModuleAction action)
     if( ShellProcessor.PrepareModuleEnvironmentForModActionII(p_build) == false ) {
         ES_ERROR("unable to build new environment II");
         return(false);
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CSite::ExecuteModAction(const CSmallString& action,
-                             const CSmallString& args)
-{
-    CXMLElement* p_ele = Config.GetChildElementByPath("site/actions/action");
-    if( p_ele == NULL ) {
-        // no actions -> return
-        ES_WARNING("no actions are define");
-        return(true);
-    }
-
-    while( p_ele != NULL ) {
-        CXMLElement* p_cele = p_ele;
-        p_ele = p_ele->GetNextSiblingElement("action");
-
-        CSmallString laction;
-        if( p_cele->GetAttribute("name",laction) == false ) continue;
-        if( laction != action ) continue;
-
-        // action found - get the remaining specification
-        CSmallString lcommand,ltype,largs;
-        if( p_cele->GetAttribute("command",lcommand) == false ) {
-            CSmallString error;
-            error << "action '" << action << "' found but command is not provided";
-            ES_ERROR(error);
-            return(false);
-        }
-        p_cele->GetAttribute("type",ltype);
-        p_cele->GetAttribute("args",largs);
-
-        // complete entire command
-        CFileName full_command;
-        full_command = AMSRegistry.GetModActionPath(lcommand);
-
-        CFileName full_arguments;
-        full_arguments = largs + " " + args;
-
-        if( ltype == "inline" ) {
-            ShellProcessor.RegisterScript(full_command,full_arguments,EST_INLINE);
-        } else if( ltype == "child" ) {
-            ShellProcessor.RegisterScript(full_command,full_arguments,EST_CHILD);
-        } else {
-            CSmallString error;
-            error << "unsupported script type '" << ltype << "'";
-            ES_ERROR(error);
-            return(false);
-        }
     }
 
     return(true);

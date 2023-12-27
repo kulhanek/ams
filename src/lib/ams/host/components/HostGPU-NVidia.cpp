@@ -159,6 +159,7 @@ void CHostSubSystemGPUNVidia::Apply(void)
     for(CSmallString token : ArchTokens){
         Host.AddArchToken(token);
     }
+    Host.SetNumOfHostGPUs(NumOfHostGPUs);
 }
 
 //------------------------------------------------------------------------------
@@ -248,7 +249,7 @@ void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
 {
     vout << "gpu_model " << GPURawModelName << endl;
 
-    // FIXME - may here we want also compatible cuda capabilities?
+    // FIXME - maybe here we want also compatible cuda capabilities?
     vout << "gpu_cap " << GetTokenList(CapaTokens,",") << endl;
 }
 

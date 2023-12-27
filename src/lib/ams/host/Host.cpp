@@ -274,6 +274,15 @@ void CHost::InitHost(bool nocache)
     }
 }
 
+//------------------------------------------------------------------------------
+
+void CHost::InitHost(int ncpus, int ngpus)
+{
+    NumOfCPUs = ncpus;
+    NumOfGPUs = ngpus;
+    InitHost(true);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -466,11 +475,13 @@ void CHost::PrintNodeResources(CVerboseStr& vout)
 
 const CFileName CHost::GetDefaultHostCacheName(void)
 {
+    CFileName host_cache = CShell::GetSystemVariable("AMS_HOST_CACHE");
+    if( host_cache ) return(host_cache);
+
     CFileName host_cache_dir = CShell::GetSystemVariable("AMS_HOST_CACHE_DIR");
     if( host_cache_dir == NULL ){
         host_cache_dir = "/tmp";
     }
-    CFileName host_cache;
     host_cache = host_cache_dir / "ams_cache_r09." + CUserUtils::GetUserName();
     return(host_cache);
 }

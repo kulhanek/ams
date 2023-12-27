@@ -12,7 +12,7 @@ ADD_SUBDIRECTORY(ams-user)
 ADD_SUBDIRECTORY(_ams-module-var)
 ADD_SUBDIRECTORY(_ams-site-cmd)
 ADD_SUBDIRECTORY(_ams-module-cmd)
-#ADD_SUBDIRECTORY(_ams-setenv)
+ADD_SUBDIRECTORY(_ams-setenv)
 
 # administrative commands ------------------------
 ADD_SUBDIRECTORY(ams-bundle)

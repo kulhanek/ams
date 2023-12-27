@@ -29,6 +29,7 @@
 #include <ErrorSystem.hpp>
 #include <XMLParser.hpp>
 #include <FileSystem.hpp>
+#include <ShellProcessor.hpp>
 #include <fnmatch.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -311,8 +312,7 @@ void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules,bool with
 
 CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
 {
-   // FIXME
-    return(NULL);
+    return(HostGroup.GetChildElementByPath("group/environment"));
 }
 
 //==============================================================================
@@ -358,6 +358,68 @@ CXMLElement* CHostGroup::FindGroup(const CSmallString& hostname)
     }
 
     return(p_gele);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString& args)
+{
+    // try first the host group specific setup
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/actions");
+    if( p_ele == NULL ){
+        // then try the global setup
+        p_ele = HostsConfig.GetChildElementByPath("config/actions");
+    }
+
+    if( p_ele == NULL ) {
+        // no actions -> return
+        ES_WARNING("no actions are define");
+        return(true);
+    }
+
+    p_ele = p_ele->GetFirstChildElement("action");
+
+    while( p_ele != NULL ) {
+        CXMLElement* p_cele = p_ele;
+        p_ele = p_ele->GetNextSiblingElement("action");
+
+        CSmallString laction;
+        if( p_cele->GetAttribute("name",laction) == false ) continue;
+        if( laction != action ) continue;
+
+        // action found - get the remaining specification
+        CSmallString lcommand,ltype,largs;
+        if( p_cele->GetAttribute("command",lcommand) == false ) {
+            CSmallString error;
+            error << "action '" << action << "' found but command is not provided";
+            ES_ERROR(error);
+            return(false);
+        }
+        p_cele->GetAttribute("type",ltype);
+        p_cele->GetAttribute("args",largs);
+
+        // complete entire comand
+        CFileName full_command;
+        full_command = AMSRegistry.GetModActionPath(lcommand);
+
+        CFileName full_arguments;
+        full_arguments = largs + " " + args;
+
+        if( ltype == "inline" ) {
+            ShellProcessor.RegisterScript(full_command,full_arguments,EST_INLINE);
+        } else if( ltype == "child" ) {
+            ShellProcessor.RegisterScript(full_command,full_arguments,EST_CHILD);
+        } else {
+            CSmallString error;
+            error << "unsupported script type '" << ltype << "'";
+            ES_ERROR(error);
+            return(false);
+        }
+    }
+
+    return(true);
 }
 
 //==============================================================================

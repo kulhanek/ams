@@ -45,6 +45,9 @@ public:
     /// init current host
     void InitHost(bool nocache=false);
 
+    /// init current host, nocache
+    void InitHost(int ncpus, int ngpus);
+
 // information methods ---------------------------------------------------------
     /// get host name
     const CSmallString GetHostName(void);

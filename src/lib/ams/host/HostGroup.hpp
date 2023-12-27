@@ -47,7 +47,7 @@ public:
     /// init host group
     void InitHostGroup(void);
 
-    /// init all host group
+    /// init all host groups
     void InitAllHostGroups(void);
 
 // information methods - global configuration ----------------------------------
@@ -96,6 +96,9 @@ public:
 
     /// get host group environment block
     CXMLElement* GetHostGroupEnvironment(void);
+
+    /// execute action hook
+    bool ExecuteModAction(const CSmallString& action, const CSmallString& args);
 
 // information methods for all host groups -------------------------------------
     /// find host group namespace

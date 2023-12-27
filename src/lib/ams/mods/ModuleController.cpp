@@ -268,19 +268,19 @@ const CSmallString CModuleController::GetExportedModuleSpecification(const CSmal
 //-----------------------------------------------------------------------------
 
 void CModuleController::UpdateActiveModules(const CSmallString& module,
-                                            bool add_module)
+                                            EModuleAction action)
 {
     ActiveModules.remove(module);
-    if( add_module) ActiveModules.push_back(module);
+    if( action == EMA_ADD_MODULE ) ActiveModules.push_back(module);
 }
 
 //-----------------------------------------------------------------------------
 
 void CModuleController::UpdateExportedModules(const CSmallString& module,
-                                              bool add_module)
+                                              EModuleAction action)
 {
     ExportedModules.remove(module);
-    if( add_module) ExportedModules.push_back(module);
+    if( action == EMA_ADD_MODULE ) ExportedModules.push_back(module);
 }
 
 //==============================================================================

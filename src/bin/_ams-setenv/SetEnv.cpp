@@ -24,12 +24,14 @@
 #include <ostream>
 #include <SmallTimeAndDate.hpp>
 #include <ShellProcessor.hpp>
-#include <AMSGlobalConfig.hpp>
+#include <AMSRegistry.hpp>
+#include <HostGroup.hpp>
 #include <Host.hpp>
 #include <iomanip>
 #include <User.hpp>
 #include <sys/types.h>
 #include <unistd.h>
+#include <UserUtils.hpp>
 
 using namespace std;
 
@@ -79,22 +81,23 @@ int CSetEnv::Init(int argc, char* argv[])
 
 bool CSetEnv::Run(void)
 {
-    // check if site is active
-    if( AMSGlobalConfig.GetActiveSiteID() == NULL ) {
-        vout << low;
-        vout << endl;
-        vout << "<red>>>> ERROR:</red> No site is active!" << endl;
-        return(false);
-    }
+// get process parent ID as unique identifier
+    pid_t  pid = getppid();
 
-    // init global host and user data
-    Host.InitGlobalSetup();
-    User.InitGlobalSetup();
+// generate unique host cache name
+    CSmallString cachename = "/tmp/ams_cache_r09." + CUserUtils::GetUserName() + ".";
+    cachename << pid;
+    CShell::SetSystemVariable("AMS_HOST_CACHE",cachename);
 
-    // initialize hosts -----------------------------
-    Host.InitHostFile();
+// init AMS registry
+    AMSRegistry.LoadRegistry();
 
-    // determine number of host CPUs and GPUs
+// init host group
+    HostGroup.InitHostsConfig();
+    HostGroup.InitHostGroup();
+
+// init host
+    Host.InitHostSubSystems(HostGroup.GetHostSubSystems());
     Host.InitHost(Options.GetOptNCPUs(),Options.GetOptNGPUs());
 
     if( Options.GetOptNCPUs() > Host.GetNumOfHostCPUs() ){
@@ -113,26 +116,11 @@ bool CSetEnv::Run(void)
     // print info
     vout << low;
     vout <<     endl;
-    vout <<     ">>> Host info and requested resources" << endl;
-    vout <<     "  Requested CPUs     : " << setw(3) << Host.GetNCPUs();
-    vout <<     "  Requested GPUs     : " << setw(3) << Host.GetNGPUs()<< endl;
-    vout <<     "  Num of host CPUs   : " << setw(3) << Host.GetNumOfHostCPUs();
-    vout <<     "  Num of host GPUs   : " << setw(3) << Host.GetNumOfHostGPUs() << endl;
-    vout <<     "  Requested nodes    : " << setw(3) << Host.GetNNodes() << endl;
-    vout <<     "  Host arch tokens   : " << Host.GetArchTokens() << endl;
-    vout <<     "  Host SMP CPU model : " << Host.GetCPUModel() << endl;
-    if( Host.GetNumOfHostGPUs() > 0 ){
-    if( Host.IsGPUModelSMP() == false ){
-    for(size_t i=0; i < Host.GetGPUModels().size(); i++){
-    vout <<     "  Host GPU model #" << setw(1) << i+1 << "  : " << Host.GetGPUModels()[i] << endl;
-    }
-    } else{
-    vout <<     "  Host SMP GPU model : " << Host.GetGPUModels()[0] << endl;
-    }
-    }
+    vout <<     "# Host info and requested resources" << endl;
+    vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    Host.PrintHostInfoForModule(vout);
 
     // generate node file and gpunode files
-    pid_t  pid = getpid();
     CSmallString nodefile = "/tmp/nodefile.";
     nodefile << pid;
     CSmallString gpufile  = "/tmp/gpufile.";
@@ -159,12 +147,7 @@ bool CSetEnv::Run(void)
     nfstr.close();
 
     // generate environment
-    ShellProcessor.SetVariable("AMS_NCPUS",Host.GetNCPUs());
-    ShellProcessor.SetVariable("AMS_NGPUS",Host.GetNGPUs());
-    ShellProcessor.SetVariable("AMS_NNODES",1);
-    ShellProcessor.SetVariable("AMS_NODEFILE",nodefile);
-    ShellProcessor.SetVariable("AMS_GPUFILE",gpufile);
-
+    ShellProcessor.SetVariable("AMS_HOST_CACHE",cachename);
     ShellProcessor.SetVariable("INF_NCPUS",Host.GetNCPUs());
     ShellProcessor.SetVariable("INF_NGPUS",Host.GetNGPUs());
     ShellProcessor.SetVariable("INF_NNODES",1);

@@ -1,3 +1,8 @@
+src/bin/_ams-setenv/CMakeLists.txt
+src/bin/_ams-setenv/SetEnv.cpp
+src/bin/_ams-setenv/SetEnv.hpp
+src/bin/_ams-setenv/SetEnvOptions.cpp
+src/bin/_ams-setenv/SetEnvOptions.hpp
 src/lib/ams/base/FSIndex.cpp
 src/lib/ams/base/FSIndex.hpp
 src/lib/ams/base/sha1.cpp

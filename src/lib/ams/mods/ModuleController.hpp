@@ -26,6 +26,7 @@
 #include <AMSMainHeader.hpp>
 #include <FileName.hpp>
 #include <ModBundle.hpp>
+#include <ShellProcessor.hpp>
 #include <list>
 
 //------------------------------------------------------------------------------
@@ -77,10 +78,10 @@ public:
 
 // update module info ----------------------------------------------------------
     /// update list of active modules
-    void UpdateActiveModules(const CSmallString& module,bool add_module);
+    void UpdateActiveModules(const CSmallString& module,EModuleAction action);
 
     /// update list of exported modules
-    void UpdateExportedModules(const CSmallString& module,bool add_module);
+    void UpdateExportedModules(const CSmallString& module,EModuleAction action);
 
 // execution methods -----------------------------------------------------------
     /// reactivate modules
