@@ -548,7 +548,116 @@ int CSiteCmd::ListAMods(void)
 
 int CSiteCmd::InitSite(void)
 {
-    // FIXME
+    // special case - ignore
+    if( (Options.GetArgSite() == "none") || (Options.GetArgSite() == NULL) ) return(SITE_STATUS_OK);
+
+    ModuleController.LoadBundles(EMBC_SMALL);
+    ModuleController.MergeBundles();
+
+    vout << high;
+    ModuleController.PrintBundlesInfo(vout);
+
+    Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
+
+    CFileName active_site = SiteController.GetActiveSite();
+
+    // deactivate current site
+    if( active_site != NULL ) {
+
+        bool result = true;
+        CFileName site_config = SiteController.GetSiteConfig(active_site);
+        if( site_config == NULL ){
+            CSmallString error;
+            error << "specified site '" << active_site << "' was not found (deactivate)";
+            ES_TRACE_ERROR(error);
+            // ignore error
+            result = false;
+        }
+
+        CSite site;
+
+        if( result ){
+            if( site.LoadConfig(site_config) == false ){
+                CSmallString error;
+                error << "unable to load site configuration from '" << site_config << "' (deactivate)";
+                ES_TRACE_ERROR(error);
+                // ignore error
+                result = false;
+            }
+        }
+
+        if( result ){
+            // purge all modules
+            if( ModuleController.PurgeModules(vout) == false ){
+                CSmallString error;
+                error << "currnet active site '" << active_site << "' cannot be deactivated";
+                ES_TRACE_ERROR(error);
+                // ignore error
+                result = false;
+            }
+        }
+
+        if( result ){
+            // destroy environment
+            if( site.DeactivateSite() == false ){
+                CSmallString error;
+                error << "currnet active site '" << active_site << "' cannot be deactivated";
+                ES_TRACE_ERROR(error);
+                // ignore error
+                result = false;
+            }
+        }
+    }
+
+    active_site = HostGroup.GetDefaultSite();
+
+    CFileName site_config = SiteController.GetSiteConfig(active_site);
+    if( site_config == NULL ){
+        CSmallString error;
+        error << "specified site '" << active_site << "' was not found (activate)";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
+    CSite site;
+    if( site.LoadConfig(site_config) == false ){
+        CSmallString error;
+        error << "unable to load site configuration from '" << site_config << "' (activate)";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
+    if( HostGroup.IsSiteAllowed(site.GetName()) == false ) {
+        return(SITE_ERROR_NOT_ALLOWED);
+    }
+
+    vout << low;
+    site.PrintShortSiteInfo(vout);
+
+    if( site.ActivateSite() == false ){
+        CSmallString error;
+        error << "unable to activate site einvoronment '" << site.GetName() << "' (activate)";
+        ES_TRACE_ERROR(error);
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
+    std::list<CSmallString> modules;
+    HostGroup.GetAutoLoadedModules(modules);
+    site.GetAutoLoadedModules(modules);
+    AMSRegistry.GetAutoLoadedModules(modules);
+
+    vout << high;
+    bool result = true;
+    for( CSmallString module : modules ){
+        // ignore errors from autoloaded modules
+        Module.AddModule(vout,module,false,true);
+    }
+
+    vout << low;
+    if( ErrorSystem.IsError() || (result == false) ){
+        return(SITE_ERROR_CONFIG_PROBLEM);
+    }
+
     return(SITE_STATUS_OK);
 }
 

@@ -39,44 +39,17 @@ if [ -d "$AMS_ROOT/etc/boot/profile.d" ]; then
     unset AMS_STARTUP_SCRIPT
 fi
 
-#-------------------------------------------------------------------------------
-# activate default site
-#-------------------------------------------------------------------------------
-
-REACTIVATE=1
-
-# use either user or system defaults ...
-if [ -z "$DEFAULT_SITE_NAME" ]; then
-    SITE_NAME=`ams-autosite`
-else
-    SITE_NAME=$DEFAULT_SITE_NAME
-fi
-
-# use AMS_SITE if it is set
-if [ -n "$AMS_SITE" ]; then
-    SITE_NAME=$AMS_SITE
-fi
-
-# only if login shell or AMS_XSTARTUP and not PBS environment
-# in AMS_SSH_STARTUP it is activated explicitly
-if (shopt login_shell 2> /dev/null > /dev/null  || [ -n "$AMS_XSTARTUP" ]) && \
-   [ -z "$PBS_JOBID" ]; then
-    unset AMS_XSTARTUP
-    site activate $SITE_NAME
-    REACTIVATE=0
-fi
-
-if [ "$REACTIVATE" -eq 1 ] && site isactive "$SITE_NAME" &> /dev/null; then
-    amsmodule --system reactivate 2> /dev/null
-fi
-
-unset REACTIVATE SITE_NAME MODULE_PATH
-
 # non-interactive setup --------------------------------------------------------
 
 if [ -n "$AMS_ROOT" ]; then
     export BASH_ENV="$AMS_ROOT/etc/boot/bash_env"
 fi
+
+#-------------------------------------------------------------------------------
+# activate default site
+#-------------------------------------------------------------------------------
+
+site init
 
 #-------------------------------------------------------------------------------
 
