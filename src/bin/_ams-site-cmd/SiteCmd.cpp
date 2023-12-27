@@ -304,7 +304,7 @@ void CSiteCmd::Finalize(void)
 
     if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
         if( ForcePrintErrors ) vout << low;
-        ErrorSystem.PrintErrors(vout);
+        ErrorSystem.PrintErrors(stderr);
         if( ForcePrintErrors ) vout << endl;
     }
 
