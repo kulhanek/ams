@@ -1,0 +1,26 @@
+#!/bin/bash
+# ==============================================================================
+# Infinity
+# (c) 2017, Petr Kulhanek, kulhanek@chemi.muni.cz
+# ==============================================================================
+
+# do we have AMS_ROOT?
+if [ -z "$AMS_ROOT" ]; then return 0; fi
+
+# init AMS core
+. $AMS_ROOT/etc/boot/init.ams
+
+# protect from an infinite loop, RT#250731
+if [ -n "$AMS_BASH_ENV_ACTIVE" ]; then return 0; fi
+AMS_BASH_ENV_ACTIVE=YES
+export AMS_BASH_ENV_ACTIVE
+
+# reactivate modules
+amsmodule --system reactivate 2> /dev/null
+
+unset AMS_BASH_ENV_ACTIVE
+
+return 0
+
+
+
