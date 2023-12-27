@@ -220,7 +220,8 @@ bool CBundleCmd::CreateBundle(void)
     }
 
     CModBundle bundle;
-    if( bundle.CreateBundle(cwd,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetProgArg(3)) == false ){
+    if( bundle.CreateBundle(cwd,Options.GetProgArg(1),Options.GetProgArg(2),Options.GetProgArg(3),
+                            Options.GetOptForce()) == false ){
         CSmallString error;
         error << "unable to create bundle '" << cwd / Options.GetProgArg(1) << "'";
         ES_ERROR(error);

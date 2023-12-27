@@ -57,7 +57,7 @@ public:
 
     /// initialize bundle
     bool CreateBundle(const CFileName& path,const CFileName& name,
-                      const CSmallString& maintainer,const CSmallString& contact);
+                      const CSmallString& maintainer,const CSmallString& contact,bool froce);
 
     /// initialize bundle
     bool InitBundle(const CFileName& bundle_path);

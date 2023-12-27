@@ -375,7 +375,7 @@ bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString
 
     if( p_ele == NULL ) {
         // no actions -> return
-        ES_WARNING("no actions are define");
+        ES_WARNING("no actions are defined");
         return(true);
     }
 

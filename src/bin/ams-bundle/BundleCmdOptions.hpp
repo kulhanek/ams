@@ -61,6 +61,7 @@ public:
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
     // options ------------------------------
+    CSO_OPT(bool,Force)
     CSO_OPT(bool,IncludeVersions)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
@@ -69,6 +70,15 @@ public:
 
     CSO_MAP_BEGIN
     // description of options -----------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                Force,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                'f',                           /* short option name */
+                "force",                      /* long option name */
+                NULL,                           /* parametr name */
+                "create the bundle even if the root directory already exists")   /* option description */
+    //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 IncludeVersions,                        /* option name */
                 false,                          /* default value */

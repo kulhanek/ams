@@ -94,27 +94,44 @@ bool CModBundle::IsBundle(const CFileName& path,const CFileName& name)
 //------------------------------------------------------------------------------
 
 bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
-                              const CSmallString& maintainer,const CSmallString& contact)
+                              const CSmallString& maintainer,const CSmallString& contact,bool force)
 {
     BundlePath          = path;
     BundleName          = name;
     CFileName           bundle_path = BundlePath / BundleName;
 
-    if( CFileSystem::IsDirectory(bundle_path) == true ){
-        CSmallString error;
-        error << "unable to create the bundle, the bundle directory '" << bundle_path << " already exists'";
-        ES_ERROR(error);
-        return(false);
-    }
-
-    if( CFileSystem::CreateDir(bundle_path) == false ){
-        CSmallString error;
-        error << "unable to create the bundle directory '" << bundle_path << "'";
-        ES_ERROR(error);
-        return(false);
+    if( force == false ){
+        if( CFileSystem::IsDirectory(bundle_path) == true ){
+            CSmallString error;
+            error << "unable to create the bundle, the bundle directory '" << bundle_path << "' already exists";
+            ES_ERROR(error);
+            return(false);
+        }
+        if( CFileSystem::CreateDir(bundle_path) == false ){
+            CSmallString error;
+            error << "unable to create the bundle directory '" << bundle_path << "'";
+            ES_ERROR(error);
+            return(false);
+        }
+    } else {
+        if( CFileSystem::IsDirectory(bundle_path) == false ){
+            if( CFileSystem::CreateDir(bundle_path) == false ){
+                CSmallString error;
+                error << "unable to create the bundle directory '" << bundle_path << "'";
+                ES_ERROR(error);
+                return(false);
+            }
+        }
     }
 
     CFileName config_path = bundle_path / _AMS_BUNDLE;
+
+    if( CFileSystem::IsDirectory(config_path) == true ){
+        CSmallString error;
+        error << "unable to create the bundle, the bundle config directory '" << config_path << "' already exists";
+        ES_ERROR(error);
+        return(false);
+    }
 
     if( CFileSystem::CreateDir(config_path) == false ){
         CSmallString error;
@@ -124,6 +141,13 @@ bool CModBundle::CreateBundle(const CFileName& path,const CFileName& name,
     }
 
     CFileName blds = config_path / _AMS_BLDS;
+
+    if( CFileSystem::IsDirectory(blds) == true ){
+        CSmallString error;
+        error << "unable to create the bundle, the bundle bld directory '" << blds << "' already exists";
+        ES_ERROR(error);
+        return(false);
+    }
 
     if( CFileSystem::CreateDir(blds) == false ){
         CSmallString error;

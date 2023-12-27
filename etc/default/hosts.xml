@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- AMS hosts config -->
 <!-- change the key to invalidate all host caches -->
-<config key="0f5e5ca6-8a06-4292-b334-17b8fb038c7e">
+<config key="0f5e5ca6-8a06-4292-b334-17b8fb038c7e" hostsubsystems="default,os,cpu,gpu-nvidia,gpu,desktop,network,compat">
     <modes>
         <!-- allowed modes, properties are 
             one - 1CPU or 1GPU
