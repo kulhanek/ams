@@ -70,6 +70,13 @@ void CUser::InitUserConfig(void)
 {
     ConfigName = AMSRegistry.GetUsersConfigFile();
 
+    if( CFileSystem::IsFile(ConfigName) == false ){
+        CSmallString    warning;
+        warning << "no users configuration file '" << ConfigName << "'";
+        ES_WARNING(warning);
+        return;
+    }
+
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&Config);
 
