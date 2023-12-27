@@ -736,9 +736,11 @@ bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
     while( p_mele != NULL ) {
         CSmallString name;
         p_mele->GetAttribute("name",name);
-        CXMLElement* p_sele = p_mele->GetChildElementByPath("builds/build");
+        CXMLElement* p_bele = p_mele->GetChildElementByPath("builds/build");
 
-        while( p_sele != NULL ) {
+        while( p_bele != NULL ) {
+            CXMLElement* p_sele = p_bele;
+            p_bele = p_bele->GetNextSiblingElement("build");
 
             NumOfAllBuilds++;
 
@@ -789,8 +791,6 @@ bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
 
             // register build for index
             BuildPaths[build_id] = package_dir;
-
-            p_sele = p_sele->GetNextSiblingElement("build");
         }
         p_mele = p_mele->GetNextSiblingElement("module");
     }
