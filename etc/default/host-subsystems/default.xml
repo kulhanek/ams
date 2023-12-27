@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host subsystem configuration -->
+<default tokens="x86_64" ncpus="1" ngpus="0"/>
+

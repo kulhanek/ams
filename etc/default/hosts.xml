@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS hosts config -->
+<!-- change the key to invalidate all host caches -->
+<config key="0f5e5ca6-8a06-4292-b334-17b8fb038c7e">
+    <modes>
+        <!-- allowed modes, properties are 
+            one - 1CPU or 1GPU
+            lem - less than or equal to max(cpus)/(gpus)pernode, higher than one
+            gtm - greater than max(cpus)/(gpus)pernode
+            gto - greater than one
+        -->
+        <cmode name="para">
+           <one score="0"/>
+           <lem score="50"/>
+           <gtm score="100"/>
+        </cmode>
+        <cmode name="node">
+           <one score="0"/>
+           <lem score="100"/>
+           <gtm score="0"/>
+        </cmode>
+        <cmode name="single">
+           <one score="100"/>
+           <lem score="0"/>
+           <gtm score="0"/>
+        </cmode>
+        <gmode name="sgpu">
+           <one score="100"/>
+           <gto score="0"/>
+        </gmode>
+        <gmode name="mgpu">
+           <one score="0"/>
+           <gto score="100"/>
+        </gmode>
+    </modes>
+    <!-- tokens priorities -->
+    <tokens>
+        <token name="noarch"        score="0"/>
+        <token name="i386"          score="5"/>
+        <token name="i686"          score="10"/>
+        <token name="x86_64"        score="20"/>
+        <token name="cuda"          score="30"/>
+        <token name="ib"            score="10"/>
+        <token name="avx"           score="50"/>
+        <token name="avx2"          score="60"/>
+        <token name="sse4"          score="35"/>
+        <token name="sse4_1"        score="37"/>
+        <token name="sse4_2"        score="40"/>
+        <token name="m64-centos7"   score="50"/>
+        <token name="m64-deb9"      score="55"/>
+        <token name="m64-ub18"      score="60"/>
+        <token name="m64-deb10"     score="65"/>
+        <token name="m64-ub20"      score="70"/>
+        <token name="m64-deb11"     score="75"/>
+        <token name="m64-ub22"      score="80"/>
+    </tokens>
+</config>

@@ -50,7 +50,7 @@ public:
     const CFileName GetSiteConfig(const CSmallString& name);
 
     /// list available sites
-    void GetAvailableSites(std::list<CSmallString>& list);
+    void GetAvailableSites(std::list<CSmallString>& list,bool plain=false);
 
     /// list all sites
     void GetAllSites(std::list<CSmallString>& list);

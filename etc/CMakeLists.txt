@@ -1,9 +1,6 @@
 # ==============================================================================
-# AMS CMake File
+# Advanced Module System (AMS) CMake File
 # ==============================================================================
 
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/sbin)
-
-# helper commands -------------------------------
-ADD_SUBDIRECTORY(doc-old2new)
-
+ADD_SUBDIRECTORY(boot)
+ADD_SUBDIRECTORY(lynx)

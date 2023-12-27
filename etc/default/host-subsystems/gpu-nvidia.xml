@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host subsystem configuration -->
+<gpu-nvidia capatokens="true">
+    <dev name="/dev/nvidia0" lib="/software/ncbr/softrepo/core/cudart/8.0.44/x86_64/single/libcudart.so" tokens="cuda"/>
+</gpu-nvidia>
+

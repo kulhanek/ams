@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host subsystem configuration -->
+<compat>
+    <!-- 64 bit amd64 compatible -->
+    <arch name="x86_64">
+        <nextmatch name="i686"/>
+        <nextmatch name="i386"/>
+        <nextmatch name="noarch"/>
+    </arch>
+    <arch name="m64-deb9">
+        <nextmatch name="m64-centos7"/>
+    </arch>
+    <arch name="m64-ub18">
+        <nextmatch name="m64-deb9"/>
+        <nextmatch name="m64-centos7"/>
+    </arch>
+    <arch name="m64-deb10">
+        <nextmatch name="m64-ub18"/>
+        <nextmatch name="m64-deb9"/>
+        <nextmatch name="m64-centos7"/>
+    </arch>
+    <arch name="m64-ub20">
+        <nextmatch name="m64-deb10"/>
+        <nextmatch name="m64-ub18"/>
+        <nextmatch name="m64-deb9"/>
+        <nextmatch name="m64-centos7"/>
+    </arch>
+    <arch name="m64-deb11">
+        <nextmatch name="m64-ub20"/>
+        <nextmatch name="m64-deb10"/>
+        <nextmatch name="m64-ub18"/>
+        <nextmatch name="m64-deb9"/>
+        <nextmatch name="m64-centos7"/>
+    </arch>
+    <arch name="m64-ub22">
+        <nextmatch name="m64-deb11"/>
+        <nextmatch name="m64-ub20"/>
+        <nextmatch name="m64-deb10"/>
+        <nextmatch name="m64-ub18"/>
+        <nextmatch name="m64-deb9"/>
+        <nextmatch name="m64-centos7"/>
+    </arch>
+</compat>

@@ -116,6 +116,9 @@ public:
     /// get modules in the given categories
     void GetModules(const CSmallString& category, std::list<CSmallString>& list,bool includever=false);
 
+    /// get list of builds for cgen
+    void GetBuildsForCGen(std::list<CSmallString>& list,int numparts);
+
     /// print available modules
     void PrintAvail(CTerminal& terminal,bool includever=false,bool includesys=false);
 

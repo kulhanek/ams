@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Advanced Module System (AMS) print config -->
+<print>
+   <config  UseColors="true"
+            SiteSectionDelimiter=">"
+            SectionDelimiter=" " 
+            CategoryDelimiter="-"
+            SiteSectionBgColor="4"
+            SiteSectionFgColor="7" 
+            SectionBgColor="1"
+            SectionFgColor="3" 
+            CategoryBgColor="-1"
+            CategoryFgColor="2" 
+            ModuleBgColor="-1"
+            ModuleFgColor="-1"
+    />
+</print>

@@ -6,8 +6,12 @@ DartConfiguration.tcl
 Makefile
 /bin
 /lib
+/sbin
 /include
 /test
-/etc
+/etc/sites
+/etc/host-groups
+/etc/users.xml
+/etc/boot/profile.d
 AMS-8.creator.user
 /share/scripts/ams-personal

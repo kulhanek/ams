@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host subsystem configuration -->
+<network>
+    <iface filter="ib*" tokens="ib" />
+</network>
+

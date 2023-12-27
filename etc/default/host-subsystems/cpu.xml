@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host subsystem configuration -->
+<cpu tokens="true" ht="true">
+    <filter value="avx"/>
+    <filter value="avx2"/>
+    <filter value="sse4"/>
+    <filter value="sse4_1"/>
+    <filter value="sse4_2"/>
+</cpu>

@@ -555,6 +555,82 @@ void CModCache::GetModules(const CSmallString& category, std::list<CSmallString>
 
 //------------------------------------------------------------------------------
 
+void CModCache::GetBuildsForCGen(std::list<CSmallString>& list,int numparts)
+{
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ) {
+
+        CSmallString name;
+        p_mele->GetAttribute("name",name);
+
+        CSmallString suggestion;
+
+        switch(numparts) {
+        case 0:
+            suggestion = name;
+            break;
+        case 1:
+            suggestion = name + ":" + "default";
+            break;
+        case 2:
+            suggestion = name + ":" + "default" + ":" + "auto";
+            break;
+        case 3:
+            suggestion = name + ":" + "default" + ":" + "auto" + ":" + "auto";
+            break;
+        default:
+            break;
+        }
+
+        list.push_back(suggestion);
+
+        CXMLElement*  p_dele = p_mele->GetChildElementByPath("builds/build");
+        while( p_dele != NULL ) {
+
+            CSmallString ver;
+            CSmallString arch;
+            CSmallString mode;
+            p_dele->GetAttribute("ver",ver);
+            p_dele->GetAttribute("arch",arch);
+            p_dele->GetAttribute("mode",mode);
+
+            CSmallString suggestion;
+
+            // how many items from name should be printed?
+            switch(numparts) {
+            case 0:
+                suggestion = name;
+                break;
+            case 1:
+                suggestion = name + ":" + ver;
+                break;
+            case 2:
+                suggestion = name + ":" + ver + ":" + arch;
+                break;
+            case 3:
+                suggestion = name + ":" + ver + ":" + arch + ":" + mode;
+                break;
+            default:
+                break;
+            }
+
+            list.push_back(suggestion);
+
+            p_dele = p_dele->GetNextSiblingElement("build");
+        }
+
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void CModCache::PrintAvail(CTerminal& terminal,bool includever,bool includesys)
 {
 // get categories

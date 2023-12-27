@@ -90,7 +90,7 @@ void CSiteController::SetActiveSite(const CSmallString& name)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CSiteController::GetAvailableSites(std::list<CSmallString>& list)
+void CSiteController::GetAvailableSites(std::list<CSmallString>& list,bool plain)
 {
     CFileName search_path = AMSRegistry.GetSiteSearchPaths();
     std::list<CFileName> all_site_files;
@@ -109,11 +109,15 @@ void CSiteController::GetAvailableSites(std::list<CSmallString>& list)
 
     for(CFileName site : all_sites){
         if( allowed_sites.count(site) == 0 ) continue;
-        if( GetActiveSite() == site ){
-            CSmallString act_site = "[" + site + "]";
-            list.push_back(act_site);
-        } else {
+        if( plain == true ){
             list.push_back(site);
+        } else {
+            if( GetActiveSite() == site ){
+                CSmallString act_site = "[" + site + "]";
+                list.push_back(act_site);
+            } else {
+                list.push_back(site);
+            }
         }
     }
 }

@@ -194,12 +194,12 @@ const CFileName CAMSRegistry::GetHostGroupsSearchPaths(void)
 {
     CFileName path = CShell::GetSystemVariable("AMS_HOST_GROUPS_PATH");
     if( path == NULL ){
-        path = AMSRegistry.GetETCDIR() / "default" / "host-groups";
+        path = AMSRegistry.GetETCDIR() / "host-groups";
     } else {
         if( path[0] == ':' ){
-            path = AMSRegistry.GetETCDIR() / "default" / "host-groups" + path;
+            path = AMSRegistry.GetETCDIR() / "host-groups" + path;
         } else if ( path[path.GetLength()-1] == ':' ) {
-            path = path + AMSRegistry.GetETCDIR() / "default" / "host-groups";
+            path = path + AMSRegistry.GetETCDIR() / "host-groups";
         }
     }
     return(path);
@@ -228,7 +228,7 @@ const CFileName CAMSRegistry::GetHostSubSystemsSearchPaths(void)
 
 const CFileName CAMSRegistry::GetUsersConfigFile(void)
 {
-    CFileName path = AMSRegistry.GetETCDIR() / "default" / "users.xml";
+    CFileName path = AMSRegistry.GetETCDIR() / "users.xml";
     return(path);
 }
 

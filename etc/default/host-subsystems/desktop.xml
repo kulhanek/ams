@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host subsystem configuration -->
+<desktop penalty="1">
+    <host filter="*.ncbr.muni.cz" 
+          cmd="/bin/sh -c 'dpkg -l 2> /dev/null | grep ubuntu-desktop 2> /dev/null > /dev/null'"/> 
+</desktop>
+

@@ -129,12 +129,7 @@ bool CModuleCmd::Run(void)
 // init module controller
     ModuleController.InitModuleControllerConfig();
 
-    // remove incompatible builds if the site is adaptive
-//    if( Site.IsSiteAdaptive() ){
-//        Site.RemoveIncompatibleBuilds();
-//    }
-
-    // ----------------------------------------------
+// ----------------------------------------------
     if( (Options.GetArgAction() == "add") || (Options.GetArgAction() == "activate") ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -148,7 +143,7 @@ bool CModuleCmd::Run(void)
         }
         return(ok);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "remove" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -190,7 +185,7 @@ bool CModuleCmd::Run(void)
         }
         return(ok);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "versions" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -200,7 +195,7 @@ bool CModuleCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "help" ) {
         ModuleController.LoadBundles(EMBC_BIG);
         ModuleController.MergeBundles();
@@ -212,7 +207,7 @@ bool CModuleCmd::Run(void)
         if( ok == true ) Module.ShowHelp();
         return(ok);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "builds" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -222,7 +217,7 @@ bool CModuleCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "origin" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -232,7 +227,7 @@ bool CModuleCmd::Run(void)
         }
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "disp" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -253,7 +248,7 @@ bool CModuleCmd::Run(void)
         }
         return(ok);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "isactive" ) {
         ForcePrintErrors = true;
         bool result = true;
@@ -272,7 +267,7 @@ bool CModuleCmd::Run(void)
         }
         return(result);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "getactmod" ) {
         CSmallString actver;
         if( ModuleController.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
@@ -286,7 +281,7 @@ bool CModuleCmd::Run(void)
         vout << name << ":" << actver;
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "getactver" ) {
         CSmallString actver;
         if( ModuleController.GetActiveModuleVersion(Options.GetProgArg(1),actver) == false ) {
@@ -298,7 +293,7 @@ bool CModuleCmd::Run(void)
         vout << actver;
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "avail_no_system" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -307,7 +302,7 @@ bool CModuleCmd::Run(void)
         ModCache.PrintAvail(Console.GetTerminal(),Options.GetOptIncludeVersions(),false);
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "avail" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
@@ -316,32 +311,32 @@ bool CModuleCmd::Run(void)
         ModCache.PrintAvail(Console.GetTerminal(),Options.GetOptIncludeVersions(),true);
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "bundles" ) {
         ModuleController.LoadBundles(EMBC_BIG);
         ModuleController.PrintBundlesInfo(vout);
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "active" ) {
         PrintEngine.InitPrintProfile();
         ModuleController.PrintModActiveModules(Console.GetTerminal());
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "exported" ) {
         PrintEngine.InitPrintProfile();
         ModuleController.PrintModExportedModules(Console.GetTerminal());
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "list" ) {
         PrintEngine.InitPrintProfile();
         ModuleController.PrintModExportedModules(Console.GetTerminal());
         ModuleController.PrintModActiveModules(Console.GetTerminal());
         return(true);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "autoload" ) {
         ForcePrintErrors = true;
         ModuleController.LoadBundles(EMBC_SMALL);
@@ -384,17 +379,17 @@ bool CModuleCmd::Run(void)
         }
         return(ok);
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "reactivate" ) {
         ForcePrintErrors = true;
         Module.SetFlags(Module.GetFlags() | MFB_REACTIVATED);
         return(ModuleController.ReactivateModules(vout));
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else if( Options.GetArgAction() == "purge" ) {
         return(ModuleController.PurgeModules(vout));
     }
-    // ----------------------------------------------
+// ----------------------------------------------
     else {
         ES_ERROR("not implemented");
         return(false);

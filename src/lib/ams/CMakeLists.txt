@@ -37,6 +37,7 @@ SET(AMS_SRC
     # SITE
         site/SiteController.cpp
         site/Site.cpp
+        site/AMSCompletion.cpp
 
     # MODULES
         mods/ModUtils.cpp
@@ -44,6 +45,7 @@ SET(AMS_SRC
         mods/ModBundle.cpp
         mods/ModuleController.cpp
         mods/Module.cpp
+        mods/SoftStat.cpp
     )
 
 # create shared library --------------------------------------------------------

@@ -17,3 +17,9 @@ src/bin/_ams-module-cmd
 src/sbin/doc-old2new
 src/sbin
 src/bin/_ams-setenv
+etc/boot
+etc
+etc/lynx
+src/bin/_ams-cgen
+src/bin/actions
+src/bin/actions/module-add-stat
