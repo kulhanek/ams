@@ -838,11 +838,13 @@ void CModBundle::CalculateIndex(CVerboseStr& vout)
 bool CModBundle::SaveIndex(void)
 {
     CFileName index_name;
-    index_name = BundlePath / _AMS_BUNDLE / "index.new";
+    index_name = BundlePath / BundleName / _AMS_BUNDLE / "index.new";
 
     ofstream ofs(index_name);
     if( ! ofs ){
-        ES_ERROR("Unable to open the index file for writing!");
+        CSmallString error;
+        error << "unable to open the index file '" << index_name << "' for writing!";
+        ES_ERROR(error);
         return(false);
     }
 
