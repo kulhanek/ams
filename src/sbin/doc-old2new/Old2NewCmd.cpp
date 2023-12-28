@@ -76,6 +76,8 @@ int COld2NewCmd::Init(int argc, char* argv[])
 
 bool COld2NewCmd::Run(void)
 {   
+    vout << low;
+
     CXMLDocument    cat;
     CXMLDocument    doc;
 
@@ -123,8 +125,21 @@ bool COld2NewCmd::Run(void)
             p_cmele->GetAttribute("name",cmname);
             if( cmname == mname ){
                 CXMLElement* p_ele = doc.GetChildElementByPath("module/categories",true);
-                CXMLElement* p_nc = p_ele->CreateChildElement("category");
-                p_nc->SetAttribute("name",cname);
+                CXMLElement* p_nc = p_ele->GetFirstChildElement("category");
+                bool found = false;
+                while( p_nc != NULL ){
+                    CSmallString mcname;
+                    p_nc->GetAttribute("name",mcname);
+                    if( mcname == cname ) found = true;
+                    p_nc = p_nc->GetNextSiblingElement("category");
+                }
+                if( ! found ){
+                    p_nc = p_ele->CreateChildElement("category");
+                    p_nc->SetAttribute("name",cname);
+                    vout << "> category '" << cname << "' added" << endl;
+                } else {
+                    vout << "> category '" << cname << "' already assigned" << endl;
+                }
             }
             p_cmele = p_cmele->GetNextSiblingElement("module");
         }
