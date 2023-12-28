@@ -39,15 +39,16 @@ if [ -d "$AMS_ROOT/etc/boot/profile.d" ]; then
     unset AMS_STARTUP_SCRIPT
 fi
 
-# non-interactive setup --------------------------------------------------------
-
-if [ -n "$AMS_ROOT" ]; then
-    export BASH_ENV="$AMS_ROOT/etc/boot/bash_env"
-fi
-
 #-------------------------------------------------------------------------------
-# activate default site
+# activate default/current site
 #-------------------------------------------------------------------------------
+
+# this does all magic such as
+# ** initialize default site
+# ** re-initialize current site
+# ** set umask
+# ** restore current directory from ssh
+# ** restore modules from ssh
 
 site init
 

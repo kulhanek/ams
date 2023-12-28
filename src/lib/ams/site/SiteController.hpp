@@ -55,6 +55,21 @@ public:
     /// list all sites
     void GetAllSites(std::list<CSmallString>& list);
 
+    /// get site name from ssh wrapper
+    static const CSmallString  GetSSHSite(void);
+
+    /// is TTY available for stdin?
+    static bool  HasTTY(void);
+
+    /// is a batch job?
+    static bool  IsBatchJob(void);
+
+    /// was site info already printed?
+    static bool IsSiteInfoPrinted(void);
+
+    /// set taht site infor was already shown to users
+    static void SetSiteInfoPrinted(void);
+
 // section of private data ----------------------------------------------------
 private:
     CSmallString    ActiveSite;

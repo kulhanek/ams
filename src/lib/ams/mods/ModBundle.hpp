@@ -43,6 +43,28 @@ enum EModBundleCache {
 
 //------------------------------------------------------------------------------
 
+class AMS_PACKAGE CModBundleIndex {
+public:
+    /// load index
+    bool LoadIndex(const CFileName& index_name);
+
+    /// save index
+    bool SaveIndex(const CFileName& index_name);
+
+    /// diff two indexes
+    void Diff(CModBundleIndex& old_index, CVerboseStr& vout, bool skip_removed, bool skip_added);
+
+    /// clear index
+    void Clear(void);
+
+// section of public data ------------------------------------------------------
+public:
+    std::map<CSmallString,CFileName>    Paths;
+    std::map<CSmallString,std::string>  Hashes;
+};
+
+//------------------------------------------------------------------------------
+
 class AMS_PACKAGE CModBundle : public CModCache {
 public:
 // constructor and destructors -------------------------------------------------
@@ -93,16 +115,22 @@ public:
 
 // bundle index operation ------------------------------------------------------
     /// get list of build for index
-    bool ListBuildsForIndex(CVerboseStr& vout);
+    bool ListBuildsForIndex(CVerboseStr& vout,bool personal);
 
     /// calculate new index
-    void CalculateIndex(CVerboseStr& vout);
+    void CalculateNewIndex(CVerboseStr& vout);
 
     /// save index
-    bool SaveIndex(void);
+    bool SaveNewIndex(void);
 
     /// commit index
-    bool CommitIndex(void);
+    bool CommitNewIndex(void);
+
+    /// load new and old indexes
+    bool LoadIndexes(void);
+
+    /// diff two indexes
+    void DiffIndexes(CVerboseStr& vout, bool skip_removed, bool skip_added);
 
 // section of private data -----------------------------------------------------
 private:
@@ -110,7 +138,6 @@ private:
     CFileName       BundleName;
     CXMLDocument    Config;
     EModBundleCache CacheType;
-    bool            PersonalBundle;
 
     std::list<CFileName>    DocFiles;
     std::list<CFileName>    BldFiles;
@@ -123,15 +150,16 @@ private:
     int                         NumOfDocs;      // number of doc files
     int                         NumOfBlds;      // number of bld files
 
-    // index
+    // indexes
+    bool                                PersonalBundle;
     int                                 NumOfAllBuilds;
     int                                 NumOfUniqueBuilds;
     int                                 NumOfNonSoftRepoBuilds;
     int                                 NumOfSharedBuilds;
     std::set<CSmallString>              UniqueBuilds;
     std::set<CFileName>                 UniqueBuildPaths;
-    std::map<CSmallString,CFileName>    BuildPaths;
-    std::map<CSmallString,std::string>  BuildIndexes;
+    CModBundleIndex                     NewBundleIndex;
+    CModBundleIndex                     OldBundleIndex;
 
     /// record audit message
     void AuditAction(const CSmallString& message);

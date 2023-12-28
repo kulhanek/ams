@@ -135,7 +135,7 @@ void CBundleCmd::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    vout << endl;
+    if( ! ForcePrintErrors ) vout << endl;
 
     vout << high;
     vout << "# ==============================================================================" << endl;
@@ -146,9 +146,9 @@ void CBundleCmd::Finalize(void)
         if( ForcePrintErrors ) vout << low;
         ErrorSystem.PrintErrors(vout);
         if( ForcePrintErrors ) vout << endl;
+    } else {
+        vout << endl;
     }
-
-    vout << endl;
 }
 
 //==============================================================================
@@ -340,15 +340,15 @@ bool CBundleCmd::BundleIndex(void)
     }
 
     if( Options.GetProgArg(1) == "new" ){
-        if( bundle.ListBuildsForIndex(vout) == false ){
+        if( bundle.ListBuildsForIndex(vout,Options.GetOptPersonal()) == false ){
             CSmallString error;
             error << "unable to list build for index";
             ES_ERROR(error);
             ForcePrintErrors = true;
             return(false);
         }
-        bundle.CalculateIndex(vout);
-        if( bundle.SaveIndex()  == false ){
+        bundle.CalculateNewIndex(vout);
+        if( bundle.SaveNewIndex()  == false ){
             CSmallString error;
             error << "unable to save new index";
             ES_ERROR(error);
@@ -356,8 +356,30 @@ bool CBundleCmd::BundleIndex(void)
             return(false);
         }
         return(true);
+    } else if( Options.GetProgArg(1) == "diff" ){
+        if( bundle.LoadIndexes()  == false ){
+            CSmallString error;
+            error << "unable to load new and old indexes";
+            ES_ERROR(error);
+            ForcePrintErrors = true;
+            return(false);
+        }
+        bundle.DiffIndexes(vout,Options.GetOptSkipRemovedEntries(),Options.GetOptSkipAddedEntries());
+    } else if( Options.GetProgArg(1) == "commit" ){
+        if( bundle.CommitNewIndex()  == false ){
+            CSmallString error;
+            error << "unable to commit new index";
+            ES_ERROR(error);
+            ForcePrintErrors = true;
+            return(false);
+        }
+    } else {
+        CSmallString error;
+        error << "unsupported index operation '" << Options.GetProgArg(1) << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
     }
-
     return(true);
 }
 

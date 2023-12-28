@@ -28,6 +28,8 @@
 #include <Utils.hpp>
 #include <HostGroup.hpp>
 #include <list>
+#include <unistd.h>
+#include <ShellProcessor.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -154,6 +156,52 @@ void CSiteController::GetAllSites(std::list<CSmallString>& list)
             }
         }
     }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+const CSmallString  CSiteController::GetSSHSite(void)
+{
+    CSmallString ssh_site;
+    ssh_site = CShell::GetSystemVariable("AMS_SSH_SITE");
+    return(ssh_site);
+}
+
+//------------------------------------------------------------------------------
+
+bool CSiteController::HasTTY(void)
+{
+    int file_id = fileno(stdin);
+    if( isatty(file_id) != 0 ) return(true);
+    return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CSiteController::IsBatchJob(void)
+{
+    CSmallString pbs_jobid;
+    pbs_jobid = CShell::GetSystemVariable("PBS_JOBID");
+    return( pbs_jobid != NULL );
+}
+
+//------------------------------------------------------------------------------
+
+bool CSiteController::IsSiteInfoPrinted(void)
+{
+    CSmallString site_info_printed;
+    site_info_printed = CShell::GetSystemVariable("AMS_SITE_INFO_PRINTED");
+    return( site_info_printed == "y" );
+}
+
+//------------------------------------------------------------------------------
+
+void CSiteController::SetSiteInfoPrinted(void)
+{
+    CShell::SetSystemVariable("AMS_SITE_INFO_PRINTED","y");
+    ShellProcessor.SetVariable("AMS_SITE_INFO_PRINTED","y");
 }
 
 //==============================================================================

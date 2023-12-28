@@ -311,7 +311,7 @@ void CSiteCmd::Finalize(void)
     if( (Options.GetArgAction() == "activate") ||
         (Options.GetArgAction() == "avail") ||
         (Options.GetArgAction() == "disp") ||
-        (Options.GetArgAction() == "info")) {
+        (Options.GetArgAction() == "info") ) {
         vout << low;
         if( ! ForcePrintErrors ) vout << endl;
     }
@@ -414,15 +414,15 @@ int CSiteCmd::ActivateSite(void)
         return(SITE_ERROR_NOT_ALLOWED);
     }
 
-    vout << low;
-    site.PrintShortSiteInfo(vout);
-
     if( site.ActivateSite() == false ){
         CSmallString error;
-        error << "unable to activate site einvoronment '" << site.GetName() << "' (activate)";
+        error << "unable to activate site environment '" << site.GetName() << "' (activate)";
         ES_TRACE_ERROR(error);
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
+
+    vout << low;
+    site.PrintShortSiteInfo(vout);
 
     std::list<CSmallString> modules;
     HostGroup.GetAutoLoadedModules(modules);
@@ -546,112 +546,143 @@ int CSiteCmd::ListAMods(void)
 
 //------------------------------------------------------------------------------
 
+const CSmallString none_if_empty(const CSmallString str)
+{
+    if( str == NULL ){
+        return("-none-");
+    } else {
+        return(str);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 int CSiteCmd::InitSite(void)
 {
+// general info about setup
+    vout << high;
+    vout << endl;
+    vout << "# Active site   : " << none_if_empty(SiteController.GetActiveSite()) << endl;
+    vout << "# SSH site      : " << none_if_empty(SiteController.GetSSHSite()) << endl;
+    vout << "# Default site  : " << none_if_empty(HostGroup.GetDefaultSite()) << endl;
+    vout << "# Is Batch Job  : " << bool_to_str(SiteController.IsBatchJob()) << endl;
+    vout << "# Has TTY       : " << bool_to_str(SiteController.HasTTY()) << endl;
+
+    if( SiteController.IsBatchJob() && (SiteController.GetActiveSite() == NULL) ){
+        vout << endl;
+        vout << ">>> INFO: this is is a batch job which is not initialized yet" << endl;
+        return(SITE_STATUS_OK);
+    }
+
+// initialize module subsystems
+    vout << high;
     ModuleController.LoadBundles(EMBC_SMALL);
     ModuleController.MergeBundles();
-
-    vout << high;
     ModuleController.PrintBundlesInfo(vout);
 
-    Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
+    CSite   site;
+    bool    reactivate = false;
 
-    CFileName active_site = SiteController.GetActiveSite();
+// activate site if not active
+    CSmallString site_name = SiteController.GetActiveSite();
+    if( site_name == NULL ){
+        vout << endl;
+        site_name = SiteController.GetSSHSite();
+        if(  site_name != NULL ){
+            if( ! HostGroup.IsSiteAllowed(site_name) ){
+                site_name = HostGroup.GetDefaultSite();
+                vout << ">>> the SSH site is not alloved on this host group, switching to the default site" << endl;
+            } else {
+                vout << ">>> the SSH site is accepted: " << site_name << endl;
+            }
+        } else {
+            site_name = HostGroup.GetDefaultSite();
+            vout << ">>> the default site is accepted: " << site_name << endl;
+        }
+        if( site_name == NULL ){
+            CSmallString error;
+            error << "no site can be activated";
+            ES_TRACE_ERROR(error);
+            return(SITE_ERROR_CONFIG_PROBLEM);
+        }
 
-    // deactivate current site
-    if( active_site != NULL ) {
-
-        bool result = true;
-        CFileName site_config = SiteController.GetSiteConfig(active_site);
+        CFileName site_config = SiteController.GetSiteConfig(site_name);
         if( site_config == NULL ){
             CSmallString error;
-            error << "specified site '" << active_site << "' was not found (deactivate)";
+            error << "specified site '" << site_name << "' was not found (init)";
             ES_TRACE_ERROR(error);
-            // ignore error
-            result = false;
+            return(SITE_ERROR_CONFIG_PROBLEM);
         }
 
-        CSite site;
-
-        if( result ){
-            if( site.LoadConfig(site_config) == false ){
-                CSmallString error;
-                error << "unable to load site configuration from '" << site_config << "' (deactivate)";
-                ES_TRACE_ERROR(error);
-                // ignore error
-                result = false;
-            }
+        if( site.LoadConfig(site_config) == false ){
+            CSmallString error;
+            error << "unable to load site configuration from '" << site_config << "' (init)";
+            ES_TRACE_ERROR(error);
+            return(SITE_ERROR_CONFIG_PROBLEM);
         }
 
-        if( result ){
-            // purge all modules
-            if( ModuleController.PurgeModules(vout) == false ){
-                CSmallString error;
-                error << "currnet active site '" << active_site << "' cannot be deactivated";
-                ES_TRACE_ERROR(error);
-                // ignore error
-                result = false;
-            }
+        if( HostGroup.IsSiteAllowed(site.GetName()) == false ) {
+            return(SITE_ERROR_NOT_ALLOWED);
         }
 
-        if( result ){
-            // destroy environment
-            if( site.DeactivateSite() == false ){
-                CSmallString error;
-                error << "currnet active site '" << active_site << "' cannot be deactivated";
-                ES_TRACE_ERROR(error);
-                // ignore error
-                result = false;
-            }
+        if( site.ActivateSite() == false ){
+            CSmallString error;
+            error << "unable to activate site environment '" << site.GetName() << "' (init)";
+            ES_TRACE_ERROR(error);
+            return(SITE_ERROR_CONFIG_PROBLEM);
         }
+    } else {
+        vout << endl;
+        vout << ">>> the site is already activated: " << site_name << endl;
+
+        CFileName site_config = SiteController.GetSiteConfig(site_name);
+        if( site_config == NULL ){
+            CSmallString error;
+            error << "specified site '" << site_name << "' was not found (init)";
+            ES_TRACE_ERROR(error);
+            return(SITE_ERROR_CONFIG_PROBLEM);
+        }
+
+        if( site.LoadConfig(site_config) == false ){
+            CSmallString error;
+            error << "unable to load site configuration from '" << site_config << "' (init)";
+            ES_TRACE_ERROR(error);
+            return(SITE_ERROR_CONFIG_PROBLEM);
+        }
+
+        // we will reactivate all active modules as the site is already activated
+        reactivate = true;
     }
 
-    active_site = HostGroup.GetDefaultSite();
-
-    CFileName site_config = SiteController.GetSiteConfig(active_site);
-    if( site_config == NULL ){
-        CSmallString error;
-        error << "specified site '" << active_site << "' was not found (activate)";
-        ES_TRACE_ERROR(error);
-        return(SITE_ERROR_CONFIG_PROBLEM);
+// print site info if TTY is available
+    if( SiteController.HasTTY() && ( ! SiteController.IsSiteInfoPrinted() ) ) {
+        vout << low;
+        site.PrintShortSiteInfo(vout);
+        vout << endl;
+        SiteController.SetSiteInfoPrinted();
     }
 
-    CSite site;
-    if( site.LoadConfig(site_config) == false ){
-        CSmallString error;
-        error << "unable to load site configuration from '" << site_config << "' (activate)";
-        ES_TRACE_ERROR(error);
-        return(SITE_ERROR_CONFIG_PROBLEM);
-    }
-
-    if( HostGroup.IsSiteAllowed(site.GetName()) == false ) {
-        return(SITE_ERROR_NOT_ALLOWED);
-    }
-
-    vout << low;
-    site.PrintShortSiteInfo(vout);
-
-    if( site.ActivateSite() == false ){
-        CSmallString error;
-        error << "unable to activate site einvoronment '" << site.GetName() << "' (activate)";
-        ES_TRACE_ERROR(error);
-        return(SITE_ERROR_CONFIG_PROBLEM);
-    }
-
-    std::list<CSmallString> modules;
-    HostGroup.GetAutoLoadedModules(modules);
-    site.GetAutoLoadedModules(modules);
-    AMSRegistry.GetAutoLoadedModules(modules);
-
+// reactivate/autoload modules
     vout << high;
-    bool result = true;
-    for( CSmallString module : modules ){
-        // ignore errors from autoloaded modules
-        Module.AddModule(vout,module,false,true);
+    if( reactivate ) {
+        // site is already active - reactivate modules
+        Module.SetFlags(Module.GetFlags() | MFB_REACTIVATED);
+        return(ModuleController.ReactivateModules(vout));
+    } else {
+        // load autoloaded modules
+        Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
+        std::list<CSmallString> modules;
+        HostGroup.GetAutoLoadedModules(modules);
+        site.GetAutoLoadedModules(modules);
+        AMSRegistry.GetAutoLoadedModules(modules);
+        for( CSmallString module : modules ){
+            // ignore errors from autoloaded modules
+            Module.AddModule(vout,module,false,true);
+        }
     }
 
     vout << low;
-    if( ErrorSystem.IsError() || (result == false) ){
+    if( ErrorSystem.IsError() ){
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
 

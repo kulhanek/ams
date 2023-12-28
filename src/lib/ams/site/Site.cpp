@@ -310,6 +310,7 @@ bool CSite::ActivateSite(void)
 
     // set active site ------------------------------
     ShellProcessor.SetVariable("AMS_SITE",GetName());
+    SiteController.SetActiveSite(GetName());
 
     if( GetSupportEMail() != NULL ) {
         ShellProcessor.SetVariable("AMS_SITE_SUPPORT",GetSupportEMail());

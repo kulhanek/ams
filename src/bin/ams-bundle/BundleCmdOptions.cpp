@@ -74,6 +74,11 @@ int CBundleCmdOptions::CheckArguments(void)
 
     if( GetNumberOfProgArgs() == 1 ) {
         Action = GetProgArg(0);
+
+        if( (Action == "info") || (Action == "avail") || (Action == "rebuild") ) {
+            return(SO_CONTINUE);
+        }
+
         if( Action == "create" ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
@@ -92,7 +97,13 @@ int CBundleCmdOptions::CheckArguments(void)
             }
             return(SO_OPTS_ERROR);
         }
-        return(SO_CONTINUE);
+        if( IsVerbose() ) {
+            if( IsError == false ) fprintf(stderr,"\n");
+            fprintf(stderr,"%s: specified action '%s' is not supported\n",
+                    (const char*)GetProgramName(), (const char*)GetProgArg(0));
+            IsError = true;
+        }
+        return(SO_OPTS_ERROR);
     }
 
     if( GetNumberOfProgArgs() == 2 ) {

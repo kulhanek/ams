@@ -37,6 +37,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <PrintEngine.hpp>
 #include <FSIndex.hpp>
+#include <UserUtils.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -319,6 +320,38 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
     }
 
     // FIXME - audit log
+    if( audit ){
+    vout << endl;
+    vout << "# Audit log (last 10 records)" << endl;
+    vout << "# Date           User             Message" << endl;
+    vout << "# ~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+
+    CXMLElement* p_aele  = Config.GetChildElementByPath("bundle/audit/entry");
+    int count = 0;
+    while( p_aele != NULL ){
+        count++;
+        p_aele = p_aele->GetNextSiblingElement("entry");
+    }
+    int skip = count - 10;
+    p_aele  = Config.GetChildElementByPath("bundle/audit/entry");
+    while( p_aele != NULL ){
+        CSmallString        message, user;
+        CSmallTimeAndDate   dt;
+
+        p_aele->GetAttribute("message",message);
+        p_aele->GetAttribute("user",user);
+        p_aele->GetAttribute("time",dt);
+
+        p_aele = p_aele->GetNextSiblingElement("entry");
+        if( skip > 0 ){
+            skip--;
+        } else {
+            vout << setw(16) << dt.GetSDateAndTime() << " ";
+            vout << setw(16) << user << " ";
+            vout << message << endl;
+        }
+    }
+    }
 }
 
 //==============================================================================
@@ -708,14 +741,33 @@ CXMLElement* CModBundle::GetBundleElement(void)
 
 void CModBundle::AuditAction(const CSmallString& message)
 {
+    CXMLElement* p_ele  = Config.GetChildElementByPath("bundle/audit",true);
+    CXMLElement* p_aele = p_ele->CreateChildElement("entry");
 
+    CSmallTimeAndDate dt;
+    dt.GetActualTimeAndDate();
+
+    p_aele->SetAttribute("message",message);
+    p_aele->SetAttribute("user",CUserUtils::GetUserName());
+    p_aele->SetAttribute("time",dt);
+
+    CFileName config_file = BundlePath / BundleName / _AMS_BUNDLE / "config.xml";
+
+// save config
+    CXMLPrinter xml_printer;
+    xml_printer.SetPrintedXMLNode(&Config);
+    if( xml_printer.Print(config_file) == false ){
+        CSmallString warning;
+        warning << "unable to save bundle config '" << config_file << "'";
+        ES_ERROR(warning);
+    }
 }
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
+bool CModBundle::ListBuildsForIndex(CVerboseStr& vout,bool personal)
 {
     // create list of builds
     vout << endl;
@@ -728,8 +780,9 @@ bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
 
     UniqueBuilds.clear();
     UniqueBuildPaths.clear();
-    BuildPaths.clear();
-    BuildIndexes.clear();
+    NewBundleIndex.Clear();
+
+    PersonalBundle = personal;
 
     CXMLElement* p_mele = Cache.GetChildElementByPath("cache/module");
 
@@ -790,7 +843,7 @@ bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
             UniqueBuildPaths.insert(path);
 
             // register build for index
-            BuildPaths[build_id] = package_dir;
+            NewBundleIndex.Paths[build_id] = package_dir;
         }
         p_mele = p_mele->GetNextSiblingElement("module");
     }
@@ -799,21 +852,21 @@ bool CModBundle::ListBuildsForIndex(CVerboseStr& vout)
     vout << "  > Number of unique builds                              = " << NumOfUniqueBuilds << endl;
     vout << "  > Number of builds (no AMS_PACKAGE_DIR)                = " << NumOfNonSoftRepoBuilds << endl;
     vout << "  > Number of shared builds (the same AMS_PACKAGE_DIR)   = " << NumOfSharedBuilds << endl;
-    vout << "  > Number of builds for index (AMS_PACKAGE_DIR and dir) = " << BuildPaths.size() << endl;
+    vout << "  > Number of builds for index (AMS_PACKAGE_DIR and dir) = " << NewBundleIndex.Paths.size() << endl;
 
     return(true);
 }
 
 //------------------------------------------------------------------------------
 
-void CModBundle::CalculateIndex(CVerboseStr& vout)
+void CModBundle::CalculateNewIndex(CVerboseStr& vout)
 {
     // calculate index
     vout << endl;
     vout << "# Calculating index ..." << endl;
 
-    map<CSmallString,CFileName>::iterator it = BuildPaths.begin();
-    map<CSmallString,CFileName>::iterator ie = BuildPaths.end();
+    map<CSmallString,CFileName>::iterator it = NewBundleIndex.Paths.begin();
+    map<CSmallString,CFileName>::iterator ie = NewBundleIndex.Paths.end();
 
     CFSIndex index;
     index.RootDir = BundlePath;
@@ -823,7 +876,7 @@ void CModBundle::CalculateIndex(CVerboseStr& vout)
         CSmallString    build_id    = it->first;
         CFileName       build_path  = it->second;
         string sha1 = index.CalculateBuildHash(build_path);
-        BuildIndexes[build_id] = sha1;
+        NewBundleIndex.Hashes[build_id] = sha1;
         vout << sha1 << " " << build_id << endl;
         it++;
     }
@@ -835,11 +888,111 @@ void CModBundle::CalculateIndex(CVerboseStr& vout)
 
 //------------------------------------------------------------------------------
 
-bool CModBundle::SaveIndex(void)
+bool CModBundle::SaveNewIndex(void)
 {
     CFileName index_name;
     index_name = BundlePath / BundleName / _AMS_BUNDLE / "index.new";
 
+    return(NewBundleIndex.SaveIndex(index_name));
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundle::CommitNewIndex(void)
+{
+    CFileName new_index_name;
+    new_index_name = BundlePath / BundleName / _AMS_BUNDLE / "index.new";
+
+    CFileName old_index_name;
+    old_index_name = BundlePath / BundleName / _AMS_BUNDLE / "index.old";
+
+    if( CFileSystem::CopyFile(new_index_name,old_index_name,true) == false ){
+        CSmallString error;
+        error << "unable to copy the new index '" << new_index_name;
+        error << "' over old index '" << old_index_name << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    AuditAction("index commited");
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundle::LoadIndexes(void)
+{
+    CFileName new_index_name;
+    new_index_name = BundlePath / BundleName / _AMS_BUNDLE / "index.new";
+
+    bool result = true;
+    if( CFileSystem::IsFile(new_index_name) ){
+        result &= NewBundleIndex.LoadIndex(new_index_name);
+    }
+
+    CFileName old_index_name;
+    old_index_name = BundlePath / BundleName / _AMS_BUNDLE / "index.old";
+    if( CFileSystem::IsFile(old_index_name) ){
+        result &= OldBundleIndex.LoadIndex(old_index_name);
+    }
+
+    return(result);
+}
+
+//------------------------------------------------------------------------------
+
+void CModBundle::DiffIndexes(CVerboseStr& vout, bool skip_removed, bool skip_added)
+{
+    NewBundleIndex.Diff(OldBundleIndex,vout,skip_removed,skip_added);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+bool CModBundleIndex::LoadIndex(const CFileName& index_name)
+{
+    ifstream ifs(index_name);
+    if( ! ifs ){
+        CSmallString error;
+        error << "Unable to open the index file '" << index_name << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    string  line;
+    int     lino = 0;
+    while( getline(ifs,line) ){
+        lino++;
+        string flag,sha1,build,path;
+        stringstream str(line);
+        str >> flag >> sha1 >> build >> path;
+        if( ! str ){
+            CSmallString error;
+            error << "Corrupted index file '" << index_name << "' at line " << lino;
+            ES_ERROR(error);
+            return(false);
+        }
+
+        if( Hashes.count(build) == 1 ){
+            CSmallString error;
+            error << "SHA1 collision in index file '" << index_name << "' at line " << lino;
+            ES_ERROR(error);
+            return(false);
+        }
+        // flag is ignored, set only sha1,build,path
+        Hashes[build] = sha1;
+        Paths[build] = path;
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundleIndex::SaveIndex(const CFileName& index_name)
+{
     ofstream ofs(index_name);
     if( ! ofs ){
         CSmallString error;
@@ -848,12 +1001,12 @@ bool CModBundle::SaveIndex(void)
         return(false);
     }
 
-    map<CSmallString,CFileName>::iterator it = BuildPaths.begin();
-    map<CSmallString,CFileName>::iterator ie = BuildPaths.end();
+    map<CSmallString,CFileName>::iterator it = Paths.begin();
+    map<CSmallString,CFileName>::iterator ie = Paths.end();
 
     while( it != ie ){
         CSmallString build_id = it->first;
-        string sha1 = BuildIndexes[build_id];
+        string sha1 = Hashes[build_id];
         ofs << "* " << sha1 << " " << build_id << " " << it->second << endl;
         it++;
     }
@@ -864,15 +1017,61 @@ bool CModBundle::SaveIndex(void)
     }
 
     ofs.close();
-
     return(true);
 }
 
 //------------------------------------------------------------------------------
 
-bool CModBundle::CommitIndex(void)
+void CModBundleIndex::Diff(CModBundleIndex& old_index, CVerboseStr& vout, bool skip_removed, bool skip_added)
 {
-    return(true);
+    vout << endl;
+    vout << "# Diffing two indexes ..." << endl;
+
+    vout << low;
+
+    map<CSmallString,string>::iterator it;
+    map<CSmallString,string>::iterator ie;
+
+    if( skip_removed == false ){
+
+        // determine removed entries (-)
+        it = old_index.Hashes.begin();
+        ie = old_index.Hashes.end();
+
+        while( it != ie ){
+            CSmallString build = it->first;
+            if( Hashes.count(build) == 0 ){
+                vout << "- " << old_index.Hashes[build] << " " << build << " " << old_index.Paths[build] <<  endl;
+            }
+            it++;
+        }
+    }
+
+    // determine new entries (+) or modified (M)
+    it = Hashes.begin();
+    ie = Hashes.end();
+
+    while( it != ie ){
+        CSmallString build = it->first;
+        if( old_index.Hashes.count(build) == 0 ){
+            if( skip_added == false ){
+                vout << "+ " << Hashes[build] << " " << build << " " << Paths[build] <<  endl;
+            }
+        } else {
+            if( Hashes[build] != old_index.Hashes[build] ){
+                vout << "M " << Hashes[build] << " " << build << " " << Paths[build] <<  endl;
+            }
+        }
+        it++;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModBundleIndex::Clear(void)
+{
+    Paths.clear();
+    Hashes.clear();
 }
 
 //==============================================================================
