@@ -56,7 +56,7 @@ public:
     const CSmallString GetDocumentationURL(void);
 
     /// return support contact email
-    const CSmallString GetSupportEMail(void);
+    const CSmallString GetSupportEMail(bool incname);
 
     /// is site active?
     bool IsSiteActive(void);

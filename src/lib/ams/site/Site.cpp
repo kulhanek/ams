@@ -139,21 +139,25 @@ const CSmallString CSite::GetDocumentationURL(void)
     if( p_ele == NULL ) {
         return(name);
     }
-    p_ele->GetAttribute("email",name);
+    p_ele->GetAttribute("url",name);
     return(name);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CSite::GetSupportEMail(void)
+const CSmallString CSite::GetSupportEMail(bool incname)
 {
-    CSmallString email;
+    CSmallString email,name;
     CXMLElement* p_ele = Config.GetChildElementByPath("site/description/support");
     if( p_ele == NULL ) {
         return(email);
     }
 
     p_ele->GetAttribute("email",email);
+    p_ele->GetAttribute("name",name);
+    if( (name != NULL) && incname ){
+        email << " (" << name << ")";
+    }
     return(email);
 }
 
@@ -226,13 +230,13 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
     User.PrintUserInfoForSite(vout);
     Host.PrintHostInfoForSite(vout);
 
-    if( (GetDocumentationURL() != NULL) || (GetSupportEMail() != NULL) ) {
+    if( (GetDocumentationURL() != NULL) || (GetSupportEMail(true) != NULL) ) {
         vout << "# ~~~ <b>Site documentation and support</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( GetDocumentationURL() != NULL ) {
             vout << "  Documentation  : " << GetDocumentationURL() << endl;
         }
-        if( GetSupportEMail() != NULL ) {
-            vout << "  Support e-mail : <b><green>" << GetSupportEMail() << "</green></b>" << endl;
+        if( GetSupportEMail(true) != NULL ) {
+            vout << "  Support e-mail : <b><green>" << GetSupportEMail(true) << "</green></b>" << endl;
         }
     }
 
@@ -312,8 +316,8 @@ bool CSite::ActivateSite(void)
     ShellProcessor.SetVariable("AMS_SITE",GetName());
     SiteController.SetActiveSite(GetName());
 
-    if( GetSupportEMail() != NULL ) {
-        ShellProcessor.SetVariable("AMS_SITE_SUPPORT",GetSupportEMail());
+    if( GetSupportEMail(false) != NULL ) {
+        ShellProcessor.SetVariable("AMS_SITE_SUPPORT",GetSupportEMail(false));
     }
 
     // install hooks from site config ---------------
