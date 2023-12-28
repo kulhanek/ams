@@ -115,6 +115,8 @@ bool COld2NewCmd::Run(void)
     CSmallString mname;
     p_mele->GetAttribute("name",mname);
 
+    vout << "> module '" << mname << endl;
+
     CXMLElement* p_cele = cat.GetChildElementByPath("print/categories/category");
     while( p_cele != NULL ){
         CSmallString cname;
@@ -136,9 +138,9 @@ bool COld2NewCmd::Run(void)
                 if( ! found ){
                     p_nc = p_ele->CreateChildElement("category");
                     p_nc->SetAttribute("name",cname);
-                    vout << "> category '" << cname << "' added" << endl;
+                    vout << "  category '" << cname << "' added" << endl;
                 } else {
-                    vout << "> category '" << cname << "' already assigned" << endl;
+                    vout << "  category '" << cname << "' already assigned" << endl;
                 }
             }
             p_cmele = p_cmele->GetNextSiblingElement("module");
