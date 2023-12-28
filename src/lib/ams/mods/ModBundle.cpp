@@ -239,9 +239,11 @@ void CModBundle::FindAllFragmentFiles(void)
 
     BldFiles.clear();
     CUtils::FindAllFiles(blds,"*.bld",BldFiles);
+    BldFiles.sort();
 
     DocFiles.clear();
     CUtils::FindAllFiles(blds,"*.doc",DocFiles);
+    DocFiles.sort();
 }
 
 //==============================================================================
