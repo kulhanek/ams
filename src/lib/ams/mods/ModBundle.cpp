@@ -323,8 +323,8 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
     if( audit ){
     vout << endl;
     vout << "# Audit log (last 10 records)" << endl;
-    vout << "# Date           User             Message" << endl;
-    vout << "# ~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    vout << "# Date               User             Message" << endl;
+    vout << "# ~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
     CXMLElement* p_aele  = Config.GetChildElementByPath("bundle/audit/entry");
     int count = 0;
@@ -346,8 +346,8 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
         if( skip > 0 ){
             skip--;
         } else {
-            vout << setw(16) << dt.GetSDateAndTime() << " ";
-            vout << setw(16) << user << " ";
+            vout << setw(20) << left << dt.GetSDateAndTime() << " ";
+            vout << setw(16) << left << user << " ";
             vout << message << endl;
         }
     }
@@ -433,6 +433,8 @@ bool CModBundle::RebuildCache(CVerboseStr& vout)
     }
     CUtils::PrintTokens(vout,"# Architecture tokens    : ",Archs,80,'#');
     CUtils::PrintTokens(vout,"# Execution mode tokens  : ",Modes,80,'#');
+
+    AuditAction("cache rebuilded");
 
     return(true);
 }
