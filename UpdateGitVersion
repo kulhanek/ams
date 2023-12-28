@@ -14,12 +14,12 @@ if [ $? -ne 0 ]; then exit 1; fi
 DATE=`date +"%Y-%m-%d %H:%M"`
 
 cat > src/lib/ams/AMSMainHeaderConfig.hpp << EOF
-#define AMS_CONFIG_VERSION  "8.x"
-#define AMS_VERSION         "8.${GITREVS}.${GITHASH}"
+#define AMS_CONFIG_VERSION  "9.x"
+#define AMS_VERSION         "9.${GITREVS}.${GITHASH}"
 #define AMS_BUILDTIME       "${DATE}"
 EOF
 if [ $? -ne 0 ]; then exit 1; fi
 
 echo ""
-echo "AMS Revision: 8.$GITREVS.$GITHASH ($DATE)"
+echo "AMS Revision: 9.$GITREVS.$GITHASH ($DATE)"
 
