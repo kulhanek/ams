@@ -164,6 +164,12 @@ private:
                                     const CSmallString& exported_module,
                                     EModuleAction action);
 
+    /// return the name of bundle maintainer
+    const CSmallString GetMaintainerName(CXMLElement* p_module);
+
+    /// return support contact email
+    const CSmallString GetMaintainerEMail(CXMLElement* p_module);
+
 // architectures
     /// compare two architectures
     static bool AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch);

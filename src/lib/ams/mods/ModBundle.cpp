@@ -199,8 +199,7 @@ bool CModBundle::InitBundle(const CFileName& bundle_path)
         return(false);
     }
 
-    CFileName config_path = bundle_path / _AMS_BUNDLE ;
-    CFileName config_file = config_path / "config.xml";
+    CFileName config_file = BundlePath / BundleName / _AMS_BUNDLE / "config.xml";
 
 // load config
     CXMLParser xml_parser;
@@ -215,6 +214,17 @@ bool CModBundle::InitBundle(const CFileName& bundle_path)
 // inject path into config
     CXMLElement* p_config = Config.GetChildElementByPath("bundle",true);
     p_config->SetAttribute("path",BundlePath);
+
+// load audit
+    CFileName audit_file = BundlePath / BundleName / _AMS_BUNDLE / "audit.xml";
+
+    CXMLParser audit_xml_parser;
+    audit_xml_parser.SetOutputXMLNode(&AuditLog);
+    if( audit_xml_parser.Parse(audit_file) == false ){
+        CSmallString warning;
+        warning << "unable to load bundle audit log '" << audit_file << "'";
+        ES_ERROR(warning);
+    }
 
     return(true);
 }
@@ -326,14 +336,14 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
     vout << "# Date               User             Message" << endl;
     vout << "# ~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
-    CXMLElement* p_aele  = Config.GetChildElementByPath("bundle/audit/entry");
+    CXMLElement* p_aele  = AuditLog.GetChildElementByPath("audit/entry");
     int count = 0;
     while( p_aele != NULL ){
         count++;
         p_aele = p_aele->GetNextSiblingElement("entry");
     }
     int skip = count - 10;
-    p_aele  = Config.GetChildElementByPath("bundle/audit/entry");
+    p_aele  = AuditLog.GetChildElementByPath("audit/entry");
     while( p_aele != NULL ){
         CSmallString        message, user;
         CSmallTimeAndDate   dt;
@@ -743,7 +753,7 @@ CXMLElement* CModBundle::GetBundleElement(void)
 
 void CModBundle::AuditAction(const CSmallString& message)
 {
-    CXMLElement* p_ele  = Config.GetChildElementByPath("bundle/audit",true);
+    CXMLElement* p_ele  = AuditLog.GetChildElementByPath("audit",true);
     CXMLElement* p_aele = p_ele->CreateChildElement("entry");
 
     CSmallTimeAndDate dt;
@@ -753,14 +763,14 @@ void CModBundle::AuditAction(const CSmallString& message)
     p_aele->SetAttribute("user",CUserUtils::GetUserName());
     p_aele->SetAttribute("time",dt);
 
-    CFileName config_file = BundlePath / BundleName / _AMS_BUNDLE / "config.xml";
+    CFileName audit_file = BundlePath / BundleName / _AMS_BUNDLE / "audit.xml";
 
 // save config
     CXMLPrinter xml_printer;
-    xml_printer.SetPrintedXMLNode(&Config);
-    if( xml_printer.Print(config_file) == false ){
+    xml_printer.SetPrintedXMLNode(&AuditLog);
+    if( xml_printer.Print(audit_file) == false ){
         CSmallString warning;
-        warning << "unable to save bundle config '" << config_file << "'";
+        warning << "unable to save bundle config '" << audit_file << "'";
         ES_ERROR(warning);
     }
 }

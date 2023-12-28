@@ -137,6 +137,7 @@ private:
     CFileName       BundlePath;
     CFileName       BundleName;
     CXMLDocument    Config;
+    CXMLDocument    AuditLog;
     EModBundleCache CacheType;
 
     std::list<CFileName>    DocFiles;
