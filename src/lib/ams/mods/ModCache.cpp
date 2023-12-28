@@ -555,6 +555,43 @@ void CModCache::GetModules(const CSmallString& category, std::list<CSmallString>
 
 //------------------------------------------------------------------------------
 
+int CModCache::GetModulePrintSize(bool includever)
+{
+    size_t len = 0;
+
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return(len);
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ) {
+        CSmallString modname;
+        p_mele->GetAttribute("name",modname);
+        if( modname != NULL ){
+            if( includever ) {
+                std::list<CSmallString> vers;
+                // sorting does not have an effect as the whole list is sorted later
+                GetModuleVersions(p_mele,vers);
+                for(CSmallString modver : vers){
+                    CSmallString module;
+                    module << modname << ":" << modver;
+                    if( module.GetLength() > len ) len = module.GetLength();
+                }
+            } else {
+                if( modname.GetLength() > len ) len = modname.GetLength();
+            }
+        }
+
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+    len++;
+    return(len);
+}
+
+//------------------------------------------------------------------------------
+
 void CModCache::GetBuildsForCGen(std::list<CSmallString>& list,int numparts)
 {
     CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
@@ -639,6 +676,8 @@ void CModCache::PrintAvail(CTerminal& terminal,bool includever,bool includesys)
     cats.sort();
     cats.unique();
 
+    int len = GetModulePrintSize(includever);
+
 // print modules
     for(CSmallString cat : cats){
         std::list<CSmallString> mods;
@@ -647,7 +686,7 @@ void CModCache::PrintAvail(CTerminal& terminal,bool includever,bool includesys)
         mods.unique();
         if( mods.empty() ) continue;
         PrintEngine.PrintHeader(terminal,cat,EPEHS_CATEGORY);
-        PrintEngine.PrintItems(terminal,mods);
+        PrintEngine.PrintItems(terminal,mods,len);
     }
 
     if( includesys ){
@@ -657,7 +696,7 @@ void CModCache::PrintAvail(CTerminal& terminal,bool includever,bool includesys)
         mods.unique();
         if( ! mods.empty() ){
             PrintEngine.PrintHeader(terminal,"System & Uncategorized Modules",EPEHS_CATEGORY);
-            PrintEngine.PrintItems(terminal,mods);
+            PrintEngine.PrintItems(terminal,mods,len);
         }
     }
 }

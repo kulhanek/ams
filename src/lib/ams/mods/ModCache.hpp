@@ -137,6 +137,9 @@ public:
     /// get number of categories
     int GetNumberOfCategories(void);
 
+    /// get column size for all modules
+    int GetModulePrintSize(bool includever);
+
 // section of protected data ---------------------------------------------------
 protected:
     CXMLDocument    Cache;
