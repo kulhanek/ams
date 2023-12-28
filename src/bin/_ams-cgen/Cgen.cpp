@@ -23,6 +23,7 @@
 #include <SmallTimeAndDate.hpp>
 #include <AMSCompletion.hpp>
 #include <SimpleOptions.hpp>
+#include <Shell.hpp>
 #include "Cgen.hpp"
 
 //------------------------------------------------------------------------------
@@ -72,14 +73,11 @@ bool CCgen::Run(void)
 
 void CCgen::Finalize(void)
 {
-    CSmallTimeAndDate dt;
-    dt.GetActualTimeAndDate();
-
-    if( ErrorSystem.IsError() || ErrorSystem.IsAnyRecord() ){
-        vout << low;
-        ErrorSystem.PrintErrors(vout);
+    if( CShell::GetSystemVariable("COMP_DEBUG") == "ON" ) {
+        if( ErrorSystem.IsError() || ErrorSystem.IsAnyRecord() ){
+            ErrorSystem.PrintErrors(stderr);
+        }
     }
-
     vout << endl;
 }
 
