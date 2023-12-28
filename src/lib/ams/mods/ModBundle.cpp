@@ -898,6 +898,8 @@ void CModBundle::CalculateNewIndex(CVerboseStr& vout)
     vout << endl;
     vout << "# Statistics ..." << endl;
     vout << "  > Number of stat objects  = " << index.NumOfStats << endl;
+
+    AuditAction("new index");
 }
 
 //------------------------------------------------------------------------------
