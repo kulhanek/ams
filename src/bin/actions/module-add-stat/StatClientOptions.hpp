@@ -93,7 +93,7 @@ public:
     // description of options -----------------------------------------------------
     CSO_MAP_OPT(int,                            /* option type */
                 Port,                           /* option name */
-                32597,                          /* default value */
+                32598,                          /* default value */
                 false,                          /* is option mandatory */
                 'p',                           /* short option name */
                 "port",                      /* long option name */

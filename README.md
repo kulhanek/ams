@@ -2,7 +2,7 @@
 Advanced Module System (AMS) is part of the Infinity framework together with Advanced Batch System (ABS). AMS is responsible for management of software builds (single, parallel, architecture optimized) into software modules.
 
 ## Documentation ##
-The AMS reference documentation is available in [Wiki](https://github.com/kulhanek/ams/wiki).
+The AMS reference documentation is available at [https://infinity.ncbr.muni.cz](https://infinity.ncbr.muni.cz/).
 
 ## Installation ##
 Helper scripts for installation can be found in the [ams-build](https://github.com/kulhanek/ams-build) repository.

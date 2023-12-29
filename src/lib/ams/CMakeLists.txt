@@ -16,6 +16,7 @@ SET(AMS_SRC
         base/PrintEngine.cpp
         base/sha1.cpp
         base/FSIndex.cpp
+        base/ServerWatcher.cpp
 
     # HOST
         host/HostGroup.cpp

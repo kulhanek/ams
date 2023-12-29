@@ -331,7 +331,6 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
     vout << "# Number of bld files : " << setw(3) << BldFiles.size() << endl;
     }
 
-    // FIXME - audit log
     if( audit ){
     vout << endl;
     vout << "# Audit log (last 10 records)" << endl;
