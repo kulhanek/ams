@@ -1,0 +1,49 @@
+<!-- site configuration file -->
+<site name="sokar" id="{SOKAR:9848596a-17d1-47e2-9fce-b666fc0e5a36}">
+    <!-- detailed site description -->
+    <description>
+	<group>Clusters</group>
+        <organization url="http://lcc.ncbr.muni.cz">Laboratory of Computational Chemistry, Masaryk University</organization>
+        <documentation url="https://lcc.ncbr.muni.cz/whitezone/development/infinity/">Infinity software and job management system</documentation>
+        <support email="support@lcc.ncbr.muni.cz">issue tracking system</support>
+        <mailinglist email="infinity@lcc.ncbr.muni.cz">you must be subscribed</mailinglist>
+        <text>The sokar site manages software and computational resources available on the SOKAR cluster.</text>
+    </description>
+
+    <!-- this site is allowed from followig computers -->
+    <computers>
+	<computer name="sokar*" priority="100"/>
+	<computer name="kraken*" priority="100"/>
+        <!-- build machines -->
+        <computer name="virtsrv1.ncbr.muni.cz"/>
+        <computer name="*.vbox.inet"/>
+    </computers>
+
+    <!-- basic environment update with site activation -->
+    <environment>
+	<setup>
+    	    <variable name="SOFTREPO" value="/software/ncbr/softrepo" operation="set"/>
+    	    <variable name="OMP_NUM_THREADS" value="${OMP_NUM_THREADS:-1}" operation="set"/>
+    	    <variable name="MKL_NUM_THREADS" value="${MKL_NUM_THREADS:-1}" operation="set"/>
+    	    <variable name="MPIEXEC_SPEC" value="--bind-to-core --report-bindings" operation="set"/>
+	</setup>
+    </environment>
+
+    <!-- autoloaded modules -->
+    <autoload>
+	<module name="torque" 	      export="false"/>
+	<module name="abs" 	      export="false"/>
+	<module name="mc"             export="false"/>
+        <module name="infinity-env"   export="false"/>
+        <module name="meta-storages"  export="false"/>
+        <module name="metamodule"     export="false"/>
+        <module name="module-ams"     export="false"/>
+        <module name="ssh-ams"        export="false"/>
+        <module name="opengl-mux"     export="false"/>
+    </autoload>
+
+    <!-- additional tasks associated with module actions -->
+    <actions>
+        <action name="add" command="module-add-stat" args="virtsrv1.ncbr.muni.cz" type="child" />
+    </actions>
+</site>

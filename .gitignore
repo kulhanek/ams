@@ -9,9 +9,6 @@ Makefile
 /sbin
 /include
 /test
-/etc/sites
-/etc/host-groups
-/etc/users.xml
-/etc/boot/profile.d
+/etc
 AMS-8.creator.user
 /share/scripts/ams-personal

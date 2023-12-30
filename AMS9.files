@@ -6,6 +6,9 @@ etc/boot/init.ams
 etc/lynx/CMakeLists.txt
 etc/lynx/lynx.cfg
 etc/lynx/lynx.lss
+share/CMakeLists.txt
+share/lynx/CMakeLists.txt
+share/lynx/lynx.lss
 src/bin/_ams-cgen/CMakeLists.txt
 src/bin/_ams-cgen/Cgen.cpp
 src/bin/_ams-cgen/Cgen.hpp
@@ -22,6 +25,8 @@ src/bin/actions/module-add-stat/StatClientOptions.cpp
 src/bin/actions/module-add-stat/StatClientOptions.hpp
 src/lib/ams/base/FSIndex.cpp
 src/lib/ams/base/FSIndex.hpp
+src/lib/ams/base/ServerWatcher.cpp
+src/lib/ams/base/ServerWatcher.hpp
 src/lib/ams/base/sha1.cpp
 src/lib/ams/base/sha1.hpp
 src/lib/ams/mods/SoftStat.cpp

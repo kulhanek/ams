@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS host group config -->
+<!-- WOLF cluster -->
+<group name="WOLF cluster" groupns="ncbr" realm="NCBR"
+       surrogates="wolf.ncbr.muni.cz"
+       hostsubsystems="default,os,cpu,gpu-nvidia,gpu,desktop,network,compat">
+    <sites default="wolf" allowed="metavo,lcc,ivavik"/>
+</group>

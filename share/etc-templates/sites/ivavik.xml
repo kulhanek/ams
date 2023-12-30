@@ -1,0 +1,63 @@
+<!-- site configuration file -->
+<site name="ivavik" id="{IVAVIK:e265d40f-16e9-4d55-8042-33e9efb49f98}">
+    <!-- detailed site description -->
+    <description>
+	<group>Clusters</group>
+        <organization url="http://lcc.ncbr.muni.cz">Masaryk University</organization>
+        <documentation url="https://lcc.ncbr.muni.cz/whitezone/development/infinity/">Infinity software and job management system</documentation>
+        <support email="support@lcc.ncbr.muni.cz">issue tracking system</support>
+        <mailinglist email="infinity@lcc.ncbr.muni.cz">you must be subscribed</mailinglist>
+        <text>Nodes: ailar, alaska, atlin, flaps, inuvik, ivavik, jasper, klaune, noatak, oposum, teslin, yoho, yukon, banf, kobuk, nahani, vuntut, itsi, peyto</text>
+    </description>
+
+    <!-- this site is allowed from followig computers -->
+    <computers>
+	    <computer name="ivavik.ncbr.muni.cz" priority="150"/>
+	    <computer name="atlin.ncbr.muni.cz" priority="150"/>
+	    <computer name="noatak.ncbr.muni.cz" priority="150"/>
+	    <computer name="ailar.ncbr.muni.cz" priority="150"/>
+	    <computer name="kluane.ncbr.muni.cz" priority="150"/>
+	    <computer name="alaska.ncbr.muni.cz" priority="150"/>
+	    <computer name="flaps.ncbr.muni.cz" priority="150"/>
+	    <computer name="teslin.ncbr.muni.cz" priority="150"/>
+	    <computer name="inuvik.ncbr.muni.cz" priority="150"/>
+        <computer name="yukon.ncbr.muni.cz" priority="150"/>
+        <computer name="yoho.ncbr.muni.cz" priority="150"/>
+        <computer name="jasper.ncbr.muni.cz" priority="150"/>
+        <computer name="oposum.ncbr.muni.cz" priority="150"/>
+        <computer name="banf.ncbr.muni.cz" priority="150"/>
+        <computer name="kobuk.ncbr.muni.cz" priority="150"/>
+        <computer name="vuntut.ncbr.muni.cz" priority="150"/>
+        <computer name="nahani.ncbr.muni.cz" priority="150"/>
+        <computer name="itsi.ncbr.muni.cz" priority="150"/>
+        <computer name="peyto.ncbr.muni.cz" priority="150"/>
+        <!-- build machines -->
+        <computer name="virtsrv1.ncbr.muni.cz"/>
+    </computers>
+
+    <!-- basic environment update with site activation -->
+    <environment>
+	<setup>
+    	    <variable name="SOFTREPO" value="/software/ncbr/softrepo" operation="set"/>
+    	    <variable name="OMP_NUM_THREADS" value="${OMP_NUM_THREADS:-1}" operation="set"/>
+    	    <variable name="MKL_NUM_THREADS" value="${MKL_NUM_THREADS:-1}" operation="set"/>
+	</setup>
+    </environment>
+
+    <!-- autoloaded modules -->
+    <autoload>
+        <module name="abs"            export="false"/>
+        <module name="mc"             export="false"/>
+        <module name="infinity-env"   export="false"/>
+        <module name="meta-storages"  export="false"/>
+        <module name="metamodule"     export="false"/>
+        <module name="module-ams"     export="false"/>
+        <module name="ssh-ams"        export="false"/>
+        <module name="opengl-mux"     export="false"/>
+    </autoload>                                 
+
+    <!-- additional tasks associated with module actions -->
+    <actions>
+        <action name="add" command="module-add-stat" args="virtsrv1.ncbr.muni.cz" type="child" />
+    </actions>
+</site>

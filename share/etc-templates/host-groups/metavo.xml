@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AMS hosts config -->
+<!-- change the key to invalidate all host caches -->
+<config key="b4d77af2-b710-4a95-9e7f-ea4f15b21b76">
+<!-- host2site mappings and specific host setup -->
+    <groups>
+    <!-- personal site -->
+        <!-- this configuration is loaded if the AMS_PERSONAL environment variable is set to "ON" -->
+        <group name="personal computer" groupns="personal" realm="PERSONAL">
+            <!-- allowed sites --> 
+            <sites primary="personal" transferable="" others="wolf,metavo,robox,robox-pro,sokar,ivavik,pip,metacentrum,cerit-sc,elixir-cz,einfra"/>
+            <!-- hosts in the group -->
+            <hosts>
+                <host name="personal"/>  <!-- the "personal" word is mandatory here, do not use real computer name -->
+                <host name="localhost"/> <!-- required by ABS for personal site -->
+            </hosts>
+        </group>
+    <!-- KDC -->
+        <group name="KDC" groupns="ncbr" realm="NCBR">
+            <sites primary="metavo" transferable="" others=""/>
+            <hosts>
+                <host name="kdc.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- LCC ADM -->
+        <group name="LCCADM" groupns="ncbr" realm="NCBR">
+            <sites primary="softbld" transferable="" others=""/>
+            <hosts>
+                <host name="virtsrv1.ncbr.muni.cz"/>
+                <host name="virtsrv2.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- CMNG -->
+        <group name="CMNG" groupns="ncbr" realm="NCBR">
+            <sites primary="cmng" transferable="" others="wolf,metavo,robox,robox-pro,sokar,ivavik,pip,metacentrum,cerit-sc,elixir-cz,einfra"/>
+            <hosts>
+                <host name="cmng-a4.ncbr.muni.cz"/>
+                <host name="cmng-a35.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- WOLF OLD -->
+        <group name="WOLF OLD" groupns="ldap" realm="LDAP">
+            <sites primary="wolf-old" transferable="" others=""/>
+            <hosts>
+                <host name="wolf-old.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- WOLF cluster -->
+        <group name="WOLF cluster" groupns="ncbr" realm="NCBR"
+               surrogates="wolf.ncbr.muni.cz">
+            <sites primary="wolf" transferable="wolf" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,pip"/>
+            <hosts>
+                <host name="wolf.ncbr.muni.cz"/>
+                <host name="wolf??.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- PIP -->
+        <group name="PIP SGI UV" groupns="ncbr" realm="NCBR"
+               surrogates="pip.ncbr.muni.cz">
+            <sites primary="pip" transferable="pip" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,wolf"/>
+            <hosts>
+                <host name="pip.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- IVAVIK cluster -->
+        <group name="IVAVIK cluster" groupns="ncbr" realm="NCBR"
+               surrogates="ivavik.ncbr.muni.cz,jasper.ncbr.muni.cz">
+            <sites primary="ivavik" transferable="ivavik" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,wolf,pip"/>
+            <hosts>
+                <host name="ivavik.ncbr.muni.cz"/>
+                <host name="atlin.ncbr.muni.cz"/>
+                <host name="noatak.ncbr.muni.cz"/>
+                <host name="ailar.ncbr.muni.cz"/>
+                <host name="kluane.ncbr.muni.cz"/>
+                <host name="alaska.ncbr.muni.cz"/>
+                <host name="flaps.ncbr.muni.cz"/>
+                <host name="teslin.ncbr.muni.cz"/>
+                <host name="inuvik.ncbr.muni.cz"/>
+                <host name="yukon.ncbr.muni.cz"/>
+                <host name="yoho.ncbr.muni.cz"/>
+                <host name="jasper.ncbr.muni.cz"/>
+                <host name="oposum.ncbr.muni.cz"/>
+                <host name="banf.ncbr.muni.cz"/>
+                <host name="kobuk.ncbr.muni.cz"/>
+                <host name="vuntut.ncbr.muni.cz"/>
+                <host name="nahani.ncbr.muni.cz"/>
+                <host name="itsi.ncbr.muni.cz"/>
+                <host name="peyto.ncbr.muni.cz"/>
+                <host name="denali.ncbr.muni.cz"/>
+                <host name="entiako.ncbr.muni.cz"/>
+                <host name="togiak.ncbr.muni.cz"/>
+                <host name="katmai.ncbr.muni.cz"/>
+                <host name="alagnak.ncbr.muni.cz"/>
+                <host name="tikchik.ncbr.muni.cz"/>
+                <host name="aulavik.ncbr.muni.cz"/>
+                <host name="fundy.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- ROBOX cluster -->
+        <group name="ROBOX-PRO cluster" groupns="uvt" realm="UVT"
+               surrogates="robox.ceitec.muni.cz">
+            <sites primary="robox-pro" transferable="robox-pro" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,wolf,pip"/>
+            <hosts>
+                <host name="robox-pro.ceitec.muni.cz"/>
+                <host name="robox.ceitec.muni.cz"/>
+                <host name="robox1.ceitec.muni.cz"/>
+                <host name="robox2.ceitec.muni.cz"/>
+                <host name="robox3.ceitec.muni.cz"/>
+                <host name="robox4.ceitec.muni.cz"/>
+                <host name="ada.ceitec.muni.cz"/>
+                <host name="nela.ceitec.muni.cz"/>
+                <host name="kira.ceitec.muni.cz"/>
+                <host name="bara.ceitec.muni.cz"/>
+                <host name="lop.ceitec.muni.cz"/>
+                <host name="canis.ceitec.muni.cz"/>
+                <host name="hat.ceitec.muni.cz"/>
+                <host name="lara.ceitec.muni.cz"/>
+                <host name="vera.ceitec.muni.cz"/>
+                <host name="dara.ceitec.muni.cz"/>
+                <host name="lucy.ceitec.muni.cz"/>
+                <host name="tera.ceitec.muni.cz"/>
+                <host name="mika.ceitec.muni.cz"/>
+                <host name="nera.ceitec.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- ROBOX cluster -->
+        <group name="ROBOX cluster" groupns="ncbr" realm="NCBR"
+               surrogates="robox.ncbr.muni.cz">
+            <sites primary="robox" transferable="robox" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,wolf,pip"/>
+            <hosts>
+                <host name="robox.ncbr.muni.cz"/>
+                <host name="robox1.ncbr.muni.cz"/>
+                <host name="robox2.ncbr.muni.cz"/>
+                <host name="robox3.ncbr.muni.cz"/>
+                <host name="robox4.ncbr.muni.cz"/>
+                <host name="ada.ncbr.muni.cz"/>
+                <host name="nela.ncbr.muni.cz"/>
+                <host name="kira.ncbr.muni.cz"/>
+                <host name="bara.ncbr.muni.cz"/>
+                <host name="lop.ncbr.muni.cz"/>
+                <host name="canis.ncbr.muni.cz"/>
+                <host name="hat.ncbr.muni.cz"/>
+                <host name="lara.ncbr.muni.cz"/>
+                <host name="vera.ncbr.muni.cz"/>
+                <host name="dara.ncbr.muni.cz"/>
+                <host name="lucy.ncbr.muni.cz"/>
+                <host name="tera.ncbr.muni.cz"/>
+                <host name="mika.ncbr.muni.cz"/>
+                <host name="nera.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- LCC cluster -->
+        <group name="LCC cluster" groupns="ncbr" realm="NCBR"
+               surrogates="lcc.ncbr.muni.cz">
+            <sites primary="lcc" transferable="lcc" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,pip,wolf"/>
+            <hosts>
+                <host name="lcc.ncbr.muni.cz"/>
+                <host name="fes.ncbr.muni.cz"/>
+                <host name="batman.ncbr.muni.cz"/>
+                <host name="sabre.ncbr.muni.cz"/>
+                <host name="totnan.ncbr.muni.cz"/>
+                <host name="fridge.ncbr.muni.cz"/>
+                <host name="tuktuk.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+
+    <!-- SOKAR cluster -->
+        <group name="SOKAR cluster" groupns="ncbr" realm="NCBR"
+               surrogates="sokar.ncbr.muni.cz">
+            <sites primary="sokar" transferable="sokar" others="metacentrum,cerit-sc,elixir-cz,metavo,robox,robox-pro,sokar,ivavik,einfra,wolf,pip"/>
+            <hosts>
+                <host name="sokar*.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- CESNET storages - these nodes must be higher than the rest of MetaCentrum and CERIT-SC nodes-->
+        <group name="CESNET storages" groupns="einfra" realm="EINFRA">
+            <sites primary="metavo" transferable="metavo,metacentrum,cerit-sc,elixir-cz" others=""/>
+            <hosts>
+                <host name="storage-brno4-cerit-hsm.metacentrum.cz"/>
+                <host name="nfs1-hsm.cerit-sc.cz"/>
+            <!-- -->
+                <host name="storage-brno5-archive.metacentrum.cz"/>
+                <host name="nfs.du3.cesnet.cz"/>
+            <!-- -->
+                <host name="storage-brno10-ceitec-hsm.metacentrum.cz"/>
+                <host name="nfs.hsm1.ceitec.muni.cz"/>
+            <!-- -->
+                <host name="storage-jihlava2-archive.metacentrum.cz"/>
+                <host name="nfs.du2.cesnet.cz"/>
+            <!-- -->
+                <host name="storage-plzen2-archive.metacentrum.cz"/>
+                <host name="nfs.du1.cesnet.cz"/>
+            </hosts>
+        </group>
+    <!-- CERIT-SC CentOS -->
+        <group name="CERIT-SC CentOS manchines" groupns="ics" realm="META"
+               surrogates="onyx.ncbr.muni.cz,perian.ncbr.muni.cz,skirit.ics.muni.cz,minos.zcu.cz">
+            <sites primary="metavo" transferable="metavo,metacentrum,cerit-sc,elixir-cz" others="einfra"/>
+            <hosts>
+                <host name="zuphux.cerit-sc.cz"/>
+                <host name="ungu1.cerit-sc.cz"/>
+                <host name="urga1.cerit-sc.cz"/>
+                <host name="phi*.cerit-sc.cz"/>
+            </hosts>
+            <autoload>
+                <module name="openssl:1.0"   export="false"/>
+                <module name="libstdc:4.9.2" export="false"/>
+            </autoload>
+        </group>
+    <!-- MetaCentrum front-ends -->
+        <group name="MetaCentrum &amp; CERIT-SC front-ends" groupns="ics" realm="META">
+            <sites primary="metavo" transferable="metavo,metacentrum,cerit-sc,elixir-cz" others="einfra"/>
+            <hosts>
+                <host name="skirit.ics.muni.cz"/>
+                <host name="alfrid.meta.zcu.cz"/>
+                <host name="tarkil.grid.cesnet.cz"/>
+                <host name="nympha.zcu.cz"/>
+                <host name="minos.zcu.cz"/>
+                <host name="perian.ncbr.muni.cz"/>
+                <host name="onyx.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- MetaCentrum and CERIT-SC nodes -->
+        <group name="MetaCentrum &amp; CERIT-SC nodes" groupns="ics" realm="META"
+               surrogates="onyx.ncbr.muni.cz,perian.ncbr.muni.cz,skirit.ics.muni.cz,minos.zcu.cz">
+            <sites primary="metavo" transferable="metavo,metacentrum,cerit-sc,elixir-cz" others="einfra"/>
+            <hosts>
+                <host name="*.metacentrum.cz"/>
+                <host name="*.cesnet.cz"/>
+                <host name="*.zcu.cz"/>
+                <host name="*.fzu.cz"/>
+                <host name="*.cerit-sc.cz"/>
+                <host name="*.ics.muni.cz"/>
+                <host name="*.elixir-czech.cz"/>
+                <host name="*.tul.cz"/>
+                <host name="*.upol.cz"/>
+                <host name="lex*.ncbr.muni.cz"/>
+                <host name="zubat*.ncbr.muni.cz"/>
+                <host name="krux*.ncbr.muni.cz"/>
+                <host name="perian*.ncbr.muni.cz"/>
+                <host name="*.cas.cz"/>
+            </hosts>
+        </group>
+    <!-- SOFTBLD cluster -->
+        <group name="SOFTBLD cluster" groupns="ncbr" realm="NCBR">
+            <sites primary="softbld" transferable="softbld" others="wolf,metacentrum,cerit-sc,pip,ivavik,softbld,metavo,robox,robox-pro,sokar,einfra,lcc,cmng,cemcof,elixir-cz"/>
+            <hosts>
+                <host name="softrepo.ncbr.muni.cz"/>
+                <host name="infinity.ncbr.muni.cz"/>
+                <host name="devel.ncbr.muni.cz"/>
+                <host name="deb8.ncbr.muni.cz"/>
+                <host name="deb9.ncbr.muni.cz"/>
+                <host name="ub16.ncbr.muni.cz"/>
+                <host name="ub18.ncbr.muni.cz"/>
+            </hosts>
+        </group>
+    <!-- personal computers -->
+        <group name="PERSONAL PC" groupns="ncbr" realm="NCBR">
+            <sites primary="metavo" transferable="" others="einfra,wolf,metacentrum,cerit-sc,elixir-cz"/>
+            <hosts>
+                <host name="reblova-pc.ceitec.muni.cz"/>
+            </hosts>
+        </group>
+    </groups>
+<!-- default architecture setup -->
+    <archs>
+        <!-- host setup -->
+        <default tokens="x86_64" ecpus="true" ncpus="1"/>
+        <desktop penalty="1">
+            <host filter="*.ncbr.muni.cz" cmd="/bin/sh -c 'dpkg -l 2> /dev/null | grep ubuntu-desktop 2> /dev/null > /dev/null'"/> 
+        </desktop>
+        <cpuinfo tokens="true" ecpus="true" ht="false">
+            <filter value="avx"/>
+            <filter value="avx2"/>
+            <filter value="sse4"/>
+            <filter value="sse4_1"/>
+            <filter value="sse4_2"/>
+        </cpuinfo>
+        <gpuinfo tokens="gpu" />
+        <cuda capastokens="true">
+            <dev name="/dev/nvidia0" lib="/software/ncbr/softrepo/core/cudart/8.0.44/x86_64/single/libcudart.so" tokens="cuda"/>
+        </cuda>
+        <net>
+            <iface filter="ib*" tokens="ib" />
+        </net>
+        <!-- compatibility points -->
+        <compat>
+            <!-- 64 bit amd64 compatible -->
+            <arch name="x86_64">
+                <nextmatch name="i686"/>
+                <nextmatch name="i386"/>
+                <nextmatch name="noarch"/>
+            </arch>
+        </compat>
+    </archs>
+<!-- cuda compatible capabilities -->
+    <cuda_caps>
+        <cap name="cuda20"/>
+        <cap name="cuda21"/>
+        <cap name="cuda35"/>
+        <cap name="cuda61"/>
+    </cuda_caps>
+<!-- cpu spec database -->
+    <cpu_specs>
+        <model name="AMD FX(tm)-8150 Eight-Core Processor"          spec="15.0"/>
+        <model name="Intel Core 2 Duo P9xxx (Penryn Class Core 2)"  spec="15.0"/>
+        <model name="Intel(R) Core(TM)2 CPU 6420 @ 2.13GHz"         spec="15.0"/>
+        <model name="Intel(R) Core(TM)2 Duo CPU E4500 @ 2.20GHz"    spec="15.0"/>
+        <model name="Intel(R) Core(TM)2 Quad CPU Q8400 @ 2.66GHz"   spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5620 @ 2.40GHz"          spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5420 @ 2.50GHz"          spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU X3460 @ 2.80GHz"          spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E3-1226 v3 @ 3.30GHz"     spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E3-1241 v3 @ 3.50GHz"     spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E3-1246 v3 @ 3.50GHz"     spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5-1620 0 @ 3.60GHz"      spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5-1620 v2 @ 3.70GHz"     spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5-1620 v3 @ 3.50GHz"     spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5-2620 v2 @ 2.10GHz"     spec="15.0"/>
+        <model name="Intel(R) Xeon(R) CPU E5-2650 v3 @ 2.30GHz"     spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5 CPU 750 @ 2.67GHz"        spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5-4430 CPU @ 3.00GHz"       spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5-2400 CPU @ 3.10GHz"       spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz"       spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz"       spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz"       spec="15.0"/>
+        <model name="Intel(R) Core(TM) i5-4690 CPU @ 3.50GHz"       spec="15.0"/>
+        <model name="Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz"       spec="15.0"/>
+    </cpu_specs>
+<!-- default parallel modes -->
+    <modes>
+        <!-- allowed modes, properties are 
+            one - 1CPU or 1GPU
+            lem - less than or equal to max(cpus)/(gpus)pernode, higher than one
+            gtm - greater than max(cpus)/(gpus)pernode
+            gto - greater than one
+        -->
+        <cmode name="para">
+           <one score="0"/>
+           <lem score="50"/>
+           <gtm score="100"/>
+        </cmode>
+        <cmode name="node">
+           <one score="0"/>
+           <lem score="100"/>
+           <gtm score="0"/>
+        </cmode>
+        <cmode name="single">
+           <one score="100"/>
+           <lem score="0"/>
+           <gtm score="0"/>
+        </cmode>
+        <gmode name="sgpu">
+           <one score="100"/>
+           <gto score="0"/>
+        </gmode>
+        <gmode name="mgpu">
+           <one score="0"/>
+           <gto score="100"/>
+        </gmode>
+    </modes>
+    <!-- tokens priorities -->
+    <tokens>
+        <token name="noarch"  score="0"/>
+        <token name="i386"    score="5"/>
+        <token name="i686"    score="10"/>
+        <token name="x86_64"  score="20"/>
+        <token name="cuda"    score="30"/>
+        <token name="ib"      score="10"/>
+        <token name="avx"     score="50"/>
+        <token name="avx2"    score="60"/>
+        <token name="sse4"    score="35"/>
+        <token name="sse4_1"  score="37"/>
+        <token name="sse4_2"  score="40"/>
+    </tokens>
+</config>

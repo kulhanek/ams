@@ -2,5 +2,4 @@
 # Advanced Module System (AMS) CMake File
 # ==============================================================================
 
-ADD_SUBDIRECTORY(boot)
 ADD_SUBDIRECTORY(lynx)

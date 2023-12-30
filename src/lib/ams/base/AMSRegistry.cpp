@@ -228,7 +228,7 @@ const CFileName CAMSRegistry::GetHostSubSystemsSearchPaths(void)
 
 const CFileName CAMSRegistry::GetUsersConfigFile(void)
 {
-    CFileName path = AMSRegistry.GetETCDIR() / "users.xml";
+    CFileName path = AMSRegistry.GetETCDIR() / "default" / "users.xml";
     return(path);
 }
 
