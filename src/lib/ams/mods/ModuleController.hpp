@@ -71,10 +71,13 @@ public:
 
 // print lists -----------------------------------------------------------------
     /// print active modules
-    void PrintModActiveModules(CTerminal& terminal);
+    void PrintActiveModules(CTerminal& terminal);
 
     /// print exported modules
-    void PrintModExportedModules(CTerminal& terminal);
+    void PrintExportedModules(CTerminal& terminal);
+
+    /// print user auto-loaded modules
+    void PrintUserAutoLoadedModules(CTerminal& terminal);
 
 // update module info ----------------------------------------------------------
     /// update list of active modules

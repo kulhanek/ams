@@ -320,20 +320,20 @@ bool CModuleCmd::Run(void)
 // ----------------------------------------------
     else if( Options.GetArgAction() == "active" ) {
         PrintEngine.InitPrintProfile();
-        ModuleController.PrintModActiveModules(Console.GetTerminal());
+        ModuleController.PrintActiveModules(Console.GetTerminal());
         return(true);
     }
 // ----------------------------------------------
     else if( Options.GetArgAction() == "exported" ) {
         PrintEngine.InitPrintProfile();
-        ModuleController.PrintModExportedModules(Console.GetTerminal());
+        ModuleController.PrintExportedModules(Console.GetTerminal());
         return(true);
     }
 // ----------------------------------------------
     else if( Options.GetArgAction() == "list" ) {
         PrintEngine.InitPrintProfile();
-        ModuleController.PrintModExportedModules(Console.GetTerminal());
-        ModuleController.PrintModActiveModules(Console.GetTerminal());
+        ModuleController.PrintExportedModules(Console.GetTerminal());
+        ModuleController.PrintActiveModules(Console.GetTerminal());
         return(true);
     }
 // ----------------------------------------------
@@ -368,6 +368,7 @@ bool CModuleCmd::Run(void)
 
             site.GetAutoLoadedModules(modules);
         }
+        AMSRegistry.GetUserAutoLoadedModules(modules);
 
         // add modules
         bool ok = true;

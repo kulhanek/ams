@@ -41,12 +41,15 @@ public:
     void LoadRegistry(void);
 
     /// save user registry
-    void SaveUserConfig(void);
+    bool SaveUserConfig(void);
 
     /// save all registry into specified file
     void SaveRegistry(const CFileName& registry_name);
 
 // system config ---------------------------------------------------------------
+    /// get system variable either form the shell environment or the registry
+    const CSmallString GetSystemVariable(const CSmallString& name);
+
     /// return infinity root directory
     const CFileName GetAMSRootDIR(void);
 
@@ -63,8 +66,56 @@ public:
     /// set user umask
     void SetUserUMask(const CSmallString& umask);
 
+// -----------------------------------------------
     /// get list of autoloaded modules
-    void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+    void GetUserAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+
+    /// is module autoloaded
+    bool IsUserAutoLoadedModule(const CSmallString& name);
+
+    /// add module into auto-loaded list
+    void AddUserAutoLoadedModule(const CSmallString& name);
+
+    /// remove module from auto-loaded list
+    void RemoveUserAutoLoadedModule(const CSmallString& name);
+
+    /// remove all modules from auto-loaded list
+    void RemoveAllUserAutoLoadedModules(void);
+
+// -----------------------------------------------
+    /// get list of print profiles
+    void GetPrintProfiles(std::list<CSmallString>& profiles);
+
+    /// is existing user print profile?
+    bool IsUserPrintProfile(const CSmallString& name);
+
+    /// get user print profile name
+    const CSmallString GetUserPrintProfile(void);
+
+    /// set user print profile, NULL - set default
+    void SetUserPrintProfile(const CSmallString& name);
+
+// -----------------------------------------------
+    /// get list of user bundle names
+    void GetUserBundleNames(std::list<CSmallString>& names);
+
+    /// is bundle name specified?
+    bool IsUserBundleName(const CSmallString& name);
+
+    /// add user bundle name
+    void AddUserBundleName(const CSmallString& name);
+
+    /// remove user bundle name
+    void RemoveUserBundleName(const CSmallString& name);
+
+    /// remove all user bundle names
+    void RemoveAllUserBundleNames(void);
+
+    /// get user bundle path
+    const CFileName GetUserBundlePath(void);
+
+    /// set user bundle paths
+    void SetUserBundlePath(const CFileName& path);
 
 // host configuration ----------------------------------------------------------
     /// return full file name to the hosts configurations
@@ -110,8 +161,11 @@ private:
     CXMLDocument    Config;             // global config data
     CSmallString    SiteFlavor;
 
-    /// get user global setup dir
-    const CFileName GetUserGlobalConfigDir(void);
+    /// get user global setup
+    const CFileName GetUserGlobalConfig(void);
+
+    /// set registry value
+    void SetRegistryVariable(const CSmallString& name);
 };
 
 //------------------------------------------------------------------------------

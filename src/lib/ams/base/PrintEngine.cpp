@@ -52,7 +52,12 @@ CPrintEngine::CPrintEngine(void)
 
 void CPrintEngine::InitPrintProfile(void)
 {
+    PrintProfile.RemoveAllChildNodes();
+
     PrintProfileFile = AMSRegistry.GetPrintProfileFile();
+
+    // DEBUG
+    // cout << PrintProfileFile << endl;
 
     if( CFileSystem::IsFile(PrintProfileFile) == false ){
         // no print profile file
@@ -84,7 +89,7 @@ void CPrintEngine::PrintHeader(CTerminal& terminal,const CSmallString& title,EPr
             terminal.Printf("\n");
             terminal.SetColors(GetSiteSectionFgColor(),
                                GetSiteSectionBgColor());
-            terminal.SetBold();
+            if( IsSiteSectionBold() ) terminal.SetBold();
             terminal.PrintTitle(title,GetSiteSectionDelimiter(),3);
             terminal.SetDefault();
             terminal.Printf("\n");
@@ -93,7 +98,7 @@ void CPrintEngine::PrintHeader(CTerminal& terminal,const CSmallString& title,EPr
             terminal.Printf("\n");
             terminal.SetColors(GetSectionFgColor(),
                                GetSectionBgColor());
-            terminal.SetBold();
+            if( IsSectionBold() ) terminal.SetBold();
             terminal.PrintTitle(title,GetSectionDelimiter(),3);
             terminal.SetDefault();
             terminal.Printf("\n");
@@ -102,7 +107,7 @@ void CPrintEngine::PrintHeader(CTerminal& terminal,const CSmallString& title,EPr
             terminal.Printf("\n");
             terminal.SetColors(GetCategoryFgColor(),
                                GetCategoryBgColor());
-            terminal.SetBold();
+             if( IsCategoryBold() ) terminal.SetBold();
             terminal.PrintTitle(title,GetCategoryDelimiter(),3);
             terminal.SetDefault();
             terminal.Printf("\n");
@@ -173,6 +178,16 @@ int  CPrintEngine::GetSiteSectionFgColor(void)
 
 //------------------------------------------------------------------------------
 
+bool CPrintEngine::IsSiteSectionBold(void)
+{
+    bool setup = true;
+    CXMLElement* p_ele = PrintProfile.GetChildElementByPath("print/config");
+    if( p_ele ) p_ele->GetAttribute("SiteSectionBold",setup);
+    return(setup);
+}
+
+//------------------------------------------------------------------------------
+
 char CPrintEngine::GetSectionDelimiter(void)
 {
     char setup = ' ';
@@ -203,6 +218,16 @@ int  CPrintEngine::GetSectionFgColor(void)
 
 //------------------------------------------------------------------------------
 
+bool CPrintEngine::IsSectionBold(void)
+{
+    bool setup = true;
+    CXMLElement* p_ele = PrintProfile.GetChildElementByPath("print/config");
+    if( p_ele ) p_ele->GetAttribute("SectionBold",setup);
+    return(setup);
+}
+
+//------------------------------------------------------------------------------
+
 char CPrintEngine::GetCategoryDelimiter(void)
 {
     char setup = ' ';
@@ -228,6 +253,16 @@ int  CPrintEngine::GetCategoryFgColor(void)
     int setup = -1;
     CXMLElement* p_ele = PrintProfile.GetChildElementByPath("print/config");
     if( p_ele ) p_ele->GetAttribute("CategoryFgColor",setup);
+    return(setup);
+}
+
+//------------------------------------------------------------------------------
+
+bool CPrintEngine::IsCategoryBold(void)
+{
+    bool setup = true;
+    CXMLElement* p_ele = PrintProfile.GetChildElementByPath("print/config");
+    if( p_ele ) p_ele->GetAttribute("CategoryBold",setup);
     return(setup);
 }
 

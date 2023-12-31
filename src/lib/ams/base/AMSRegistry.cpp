@@ -23,6 +23,7 @@
 
 #include <AMSRegistry.hpp>
 #include <XMLParser.hpp>
+#include <XMLPrinter.hpp>
 #include <ErrorSystem.hpp>
 #include <XMLElement.hpp>
 #include <Shell.hpp>
@@ -30,6 +31,7 @@
 #include <FileSystem.hpp>
 #include <string.h>
 #include <vector>
+#include <algorithm>
 
 //------------------------------------------------------------------------------
 
@@ -54,7 +56,24 @@ CAMSRegistry::CAMSRegistry(void)
 
 void CAMSRegistry::LoadRegistry(void)
 {
-    SiteFlavor = CShell::GetSystemVariable("AMS_FLAVOUR");
+    CFileName config_name = GetUserGlobalConfig();
+
+    if( CFileSystem::IsFile(config_name) == false ){
+        // silent error
+        return;
+    }
+
+    CXMLParser xml_parser;
+    xml_parser.SetOutputXMLNode(&Config);
+    if( xml_parser.Parse(config_name) == false ){
+        ErrorSystem.RemoveAllErrors(); // avoid global error
+        CSmallString warning;
+        warning << "unable to parse user-registry file '" << config_name << "'";
+        ES_WARNING(warning);
+        return;
+    }
+
+    SiteFlavor = GetSystemVariable("AMS_FLAVOUR");
     if( SiteFlavor == NULL ){
         SiteFlavor = "regular";
     }
@@ -62,16 +81,84 @@ void CAMSRegistry::LoadRegistry(void)
 
 //------------------------------------------------------------------------------
 
-void CAMSRegistry::SaveUserConfig(void)
+bool CAMSRegistry::SaveUserConfig(void)
 {
+    CFileName config_name = GetUserGlobalConfig();
 
+    CXMLPrinter xml_printer;
+    xml_printer.SetPrintedXMLNode(&Config);
+    if( xml_printer.Print(config_name) == false ){
+        CSmallString error;
+        error << "unable to save user-registry file '" << config_name << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    return(true);
 }
 
 //------------------------------------------------------------------------------
 
 void CAMSRegistry::SaveRegistry(const CFileName& registry_name)
 {
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/variables");
+    if( p_ele != NULL ){
+        p_ele->RemoveAllChildNodes();
+    }
 
+    SetRegistryVariable("AMS_FLAVOUR");
+    SetRegistryVariable("AMS_HOSTS_CONFIG");
+    SetRegistryVariable("AMS_HOST_GROUP");
+    SetRegistryVariable("AMS_HOST_GROUPS_PATH");
+    SetRegistryVariable("AMS_HOST_SUBSYSTEMS_PATH");
+    SetRegistryVariable("AMS_SITE_PATH");
+    SetRegistryVariable("AMS_PRINT_PROFILE_PATH");
+    SetRegistryVariable("AMS_BUNDLE_NAME");
+    SetRegistryVariable("AMS_BUNDLE_PATH");
+
+    CXMLPrinter xml_printer;
+    xml_printer.SetPrintedXMLNode(&Config);
+    if( xml_printer.Print(registry_name) == false ){
+        CSmallString error;
+        error << "unable to save full-registry file '" << registry_name << "'";
+        ES_ERROR(error);
+        return;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAMSRegistry::GetSystemVariable(const CSmallString& name)
+{
+// first try registry records
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/variables/variable");
+
+    while( p_ele != NULL ){
+        CSmallString vname,value;
+        p_ele->SetAttribute("name",vname);
+        p_ele->SetAttribute("value",value);
+
+        if( vname == name ){
+            return(value);
+        }
+
+        p_ele = p_ele->GetNextSiblingElement("variable");
+    }
+
+// then try system ones
+    return( CShell::GetSystemVariable(name) );
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::SetRegistryVariable(const CSmallString& name)
+{
+    CSmallString value = CShell::GetSystemVariable(name);
+
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/variables",true);
+    p_ele = p_ele->CreateChildElement("variable");
+    p_ele->SetAttribute("name",name);
+    p_ele->SetAttribute("value",value);
 }
 
 //==============================================================================
@@ -99,35 +186,40 @@ const CFileName CAMSRegistry::GetModActionPath(const CFileName& action_command)
 
 //------------------------------------------------------------------------------
 
-const CFileName CAMSRegistry::GetUserGlobalConfigDir(void)
+const CFileName CAMSRegistry::GetUserGlobalConfig(void)
 {
-    CFileName user_config_dir;
-    user_config_dir = CShell::GetSystemVariable("AMS_USER_CONFIG_DIR");
-
-    if( user_config_dir == NULL ) {
-        user_config_dir = CShell::GetSystemVariable("HOME");
-        user_config_dir = user_config_dir / ".ams" / LibConfigVersion_AMS ;
-    }
+    CFileName user_config;
+    user_config = CShell::GetSystemVariable("AMS_USER_CONFIG");
 
     // is file?
-    if( CFileSystem::IsFile(user_config_dir) == true ) {
+    if( CFileSystem::IsFile(user_config) == true ) {
         CSmallString error;
-        error << "user config dir '" << user_config_dir << "' is a file";
-        ES_ERROR(error);
-        return("");
+        error << "user config '" << user_config << "' from AMS_USER_CONFIG is not a file";
+        RUNTIME_ERROR(error);
     }
 
-    if( CFileSystem::IsDirectory(user_config_dir) == false ) {
-        // create directory
-        if( CFileSystem::CreateDir(user_config_dir) == false ) {
-            CSmallString error;
-            error << "unable to create user config dir '" << user_config_dir << "'";
-            ES_ERROR(error);
-            return("");
+    if( user_config == NULL ) {
+
+        CFileName user_config_dir = CShell::GetSystemVariable("AMS_USER_CONFIG_DIR");
+
+        if( user_config_dir == NULL ){
+            user_config_dir = CShell::GetSystemVariable("HOME");
+            user_config_dir = user_config_dir / ".ams" / LibConfigVersion_AMS ;
         }
+
+        if( CFileSystem::IsDirectory(user_config_dir) == false ) {
+            // create directory
+            if( CFileSystem::CreateDir(user_config_dir) == false ) {
+                CSmallString error;
+                error << "unable to create user config dir '" << user_config_dir << "'";
+                RUNTIME_ERROR(error);
+            }
+        }
+
+        user_config = user_config_dir / "user-registry.xml" ;
     }
 
-    return(user_config_dir);
+    return(user_config);
 }
 
 //==============================================================================
@@ -136,7 +228,7 @@ const CFileName CAMSRegistry::GetUserGlobalConfigDir(void)
 
 const CSmallString CAMSRegistry::GetUserUMask(void)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("user",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user",true);
     CSmallString umask;
     p_ele->GetAttribute("umask",umask);
     if( umask == NULL ){
@@ -149,15 +241,231 @@ const CSmallString CAMSRegistry::GetUserUMask(void)
 
 void CAMSRegistry::SetUserUMask(const CSmallString& umask)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("user",true);
-    p_ele->SetAttribute("umask",umask);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user",true);
+    if( (umask == NULL) || (umask == "default") ){
+        p_ele->RemoveAttribute("umask");
+    } else {
+        p_ele->SetAttribute("umask",umask);
+    }
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::GetUserAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded/module");
+    if( p_ele == NULL ) return;
+
+    while( p_ele != NULL ){
+        CSmallString mname;
+        p_ele->GetAttribute("name",mname);
+        if( mname != NULL ){
+            if( withorigin ){
+                mname << "[user]";
+            }
+            modules.push_back(mname);
+        }
+        p_ele = p_ele->GetNextSiblingElement("module");
+    }
 }
 
 //------------------------------------------------------------------------------
 
-void CAMSRegistry::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+bool CAMSRegistry::IsUserAutoLoadedModule(const CSmallString& name)
 {
-    // FIXME
+    std::list<CSmallString> modules;
+    GetUserAutoLoadedModules(modules);
+
+    return( std::find(modules.begin(), modules.end(), name) != modules.end() );
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::AddUserAutoLoadedModule(const CSmallString& name)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded/module",true);
+    p_ele->SetAttribute("name",name);
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::RemoveUserAutoLoadedModule(const CSmallString& name)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded/module");
+    if( p_ele == NULL ) return;
+
+    while( p_ele != NULL ){
+        CSmallString mname;
+        p_ele->GetAttribute("name",mname);
+        if( mname == name ){
+            delete p_ele;
+            return;
+        }
+        p_ele = p_ele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::RemoveAllUserAutoLoadedModules(void)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded");
+    if( p_ele != NULL ){
+        p_ele->RemoveAllChildNodes();
+    }
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::GetPrintProfiles(std::list<CSmallString>& profiles)
+{
+    std::list<CFileName> profile_paths;
+
+    CFileName path = GetPrintProfileSearchPaths();
+
+    CUtils::FindAllFilesInPaths(path,"*.xml",profile_paths);
+
+    path = AMSRegistry.GetETCDIR() / "default" / "print-profiles";
+
+    CUtils::FindAllFilesInPaths(path,"*.xml",profile_paths);
+
+    profiles.clear();
+
+    for(CFileName profile_path : profile_paths){
+        CSmallString profile = profile_path.GetFileNameWithoutExt();
+        profiles.push_back(profile);
+    }
+
+    profiles.sort();
+    profiles.unique();
+}
+
+//------------------------------------------------------------------------------
+
+bool CAMSRegistry::IsUserPrintProfile(const CSmallString& name)
+{
+    std::list<CSmallString> profiles;
+    GetPrintProfiles(profiles);
+
+    return( std::find(profiles.begin(), profiles.end(), name) != profiles.end() );
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAMSRegistry::GetUserPrintProfile(void)
+{
+    CSmallString profile = "default";
+
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user");
+    if( p_ele != NULL ){
+        p_ele->GetAttribute("printprofile",profile);
+    }
+
+    return(profile);
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::SetUserPrintProfile(const CSmallString& name)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user",true);
+    if( (name == NULL) || (name == "default") ){
+        p_ele->RemoveAttribute("printprofile");
+    } else {
+        p_ele->SetAttribute("printprofile",name);
+    }
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::GetUserBundleNames(std::list<CSmallString>& names)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles/bundle");
+    if( p_ele == NULL ) return;
+
+    while( p_ele != NULL ){
+        CSmallString bname;
+        p_ele->GetAttribute("name",bname);
+        if( bname != NULL ){
+            names.push_back(bname);
+        }
+        p_ele = p_ele->GetNextSiblingElement("bundle");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+bool CAMSRegistry::IsUserBundleName(const CSmallString& name)
+{
+    std::list<CSmallString> bundles;
+    GetUserBundleNames(bundles);
+
+    return( std::find(bundles.begin(), bundles.end(), name) != bundles.end() );
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::AddUserBundleName(const CSmallString& name)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles",true);
+    CXMLElement* p_bele = p_ele->CreateChildElement("bundle");
+    p_bele->SetAttribute("name",name);
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::RemoveUserBundleName(const CSmallString& name)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles/bundle");
+    if( p_ele == NULL ) return;
+
+    while( p_ele != NULL ){
+        CSmallString mname;
+        p_ele->GetAttribute("name",mname);
+        if( mname == name ){
+            delete p_ele;
+            return;
+        }
+        p_ele = p_ele->GetNextSiblingElement("bundle");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::RemoveAllUserBundleNames(void)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles");
+    if( p_ele != NULL ){
+        p_ele->RemoveAllChildNodes();
+    }
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+const CFileName CAMSRegistry::GetUserBundlePath(void)
+{
+    CFileName path;
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles");
+    if( p_ele != NULL ){
+        p_ele->GetAttribute("path",path);
+    }
+    return(path);
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::SetUserBundlePath(const CFileName& path)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles",true);
+    if( (path == NULL) || (path == "default") ){
+        p_ele->RemoveAttribute("path");
+    } else {
+        p_ele->SetAttribute("path",path);
+    }
 }
 
 //==============================================================================
@@ -166,7 +474,7 @@ void CAMSRegistry::GetAutoLoadedModules(std::list<CSmallString>& modules,bool wi
 
 const CFileName CAMSRegistry::GetHostsConfigFile(void)
 {
-    CFileName path = CShell::GetSystemVariable("AMS_HOSTS_CONFIG");
+    CFileName path = GetSystemVariable("AMS_HOSTS_CONFIG");
     if( path == NULL ){
         path = AMSRegistry.GetETCDIR() / "default" / "hosts.xml";
     }
@@ -177,7 +485,7 @@ const CFileName CAMSRegistry::GetHostsConfigFile(void)
 
 const CFileName CAMSRegistry::GetHostGroup(void)
 {
-    CFileName host_group = CShell::GetSystemVariable("AMS_HOST_GROUP");
+    CFileName host_group = GetSystemVariable("AMS_HOST_GROUP");
     if( CFileSystem::IsFile(host_group) ){
         return(host_group);
     }
@@ -192,7 +500,7 @@ const CFileName CAMSRegistry::GetHostGroup(void)
 
 const CFileName CAMSRegistry::GetHostGroupsSearchPaths(void)
 {
-    CFileName path = CShell::GetSystemVariable("AMS_HOST_GROUPS_PATH");
+    CFileName path = GetSystemVariable("AMS_HOST_GROUPS_PATH");
     if( path == NULL ){
         path = AMSRegistry.GetETCDIR() / "host-groups";
     } else {
@@ -209,7 +517,7 @@ const CFileName CAMSRegistry::GetHostGroupsSearchPaths(void)
 
 const CFileName CAMSRegistry::GetHostSubSystemsSearchPaths(void)
 {
-    CFileName path = CShell::GetSystemVariable("AMS_HOST_SUBSYSTEMS_PATH");
+    CFileName path = GetSystemVariable("AMS_HOST_SUBSYSTEMS_PATH");
     if( path == NULL ){
         path = AMSRegistry.GetETCDIR() / "default" / "host-subsystems";
     } else {
@@ -238,7 +546,7 @@ const CFileName CAMSRegistry::GetUsersConfigFile(void)
 
 const CFileName CAMSRegistry::GetSiteSearchPaths(void)
 {
-    CFileName path = CShell::GetSystemVariable("AMS_SITE_PATH");
+    CFileName path = GetSystemVariable("AMS_SITE_PATH");
     if( path == NULL ){
         path = AMSRegistry.GetETCDIR() / "sites";
     } else {
@@ -264,9 +572,9 @@ const CSmallString CAMSRegistry::GetSiteFlavor(void) const
 
 const CFileName CAMSRegistry::GetPrintProfileSearchPaths(void)
 {
-    CFileName path = CShell::GetSystemVariable("AMS_PRINT_PROFILE_PATH");
+    CFileName path = GetSystemVariable("AMS_PRINT_PROFILE_PATH");
     if( path == NULL ){
-        path = AMSRegistry.GetETCDIR() / "print-profiles";
+        path = AMSRegistry.GetETCDIR() / "default" / "print-profiles";
     } else {
         if( path[0] == ':' ){
             path = AMSRegistry.GetETCDIR() / "print-profiles" + path;
@@ -281,8 +589,7 @@ const CFileName CAMSRegistry::GetPrintProfileSearchPaths(void)
 
 const CFileName CAMSRegistry::GetPrintProfileFile(void)
 {
-    CSmallString profile = "default";
-    // FIXME
+    CSmallString profile = GetUserPrintProfile();
 
     CFileName path = GetPrintProfileSearchPaths();
     CFileName config_file;
@@ -306,7 +613,22 @@ const CFileName CAMSRegistry::GetPrintProfileFile(void)
 
 const CFileName CAMSRegistry::GetBundleName(void)
 {
-    CFileName name = CShell::GetSystemVariable("AMS_BUNDLE_NAME");
+    std::list<CSmallString> bundles;
+    GetUserBundleNames(bundles);
+
+    CSmallString name;
+
+    bool first = true;
+    for(CSmallString bundle : bundles){
+        if( ! first )  name << ",";
+        name << bundle;
+        first = false;
+    }
+
+    CFileName sys_bundles = GetSystemVariable("AMS_BUNDLE_NAME");
+    if( ! first )  name << ",";
+    name << sys_bundles;
+
     return(name);
 }
 
@@ -314,7 +636,14 @@ const CFileName CAMSRegistry::GetBundleName(void)
 
 const CFileName CAMSRegistry::GetBundlePath(void)
 {
-    CFileName path = CShell::GetSystemVariable("AMS_BUNDLE_PATH");
+    CSmallString path = GetUserBundlePath();
+
+    CFileName sys_path = GetSystemVariable("AMS_BUNDLE_PATH");
+    if( path != NULL ){
+        path << ":";
+    }
+    path << sys_path;
+
     return(path);
 }
 

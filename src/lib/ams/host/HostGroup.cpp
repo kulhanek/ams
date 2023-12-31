@@ -299,10 +299,8 @@ void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules,bool with
                 mname << "[hostgroup:" << GetHostGroupName();
                 if( mflavor != NULL ) mname << "@" << mflavor;
                 mname << "]";
-                modules.push_back(mname);
-            } else {
-                modules.push_back(mname);
             }
+            modules.push_back(mname);
         }
         p_ele = p_ele->GetNextSiblingElement("module");
     }

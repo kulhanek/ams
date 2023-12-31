@@ -427,7 +427,7 @@ int CSiteCmd::ActivateSite(void)
     std::list<CSmallString> modules;
     HostGroup.GetAutoLoadedModules(modules);
     site.GetAutoLoadedModules(modules);
-    AMSRegistry.GetAutoLoadedModules(modules);
+    AMSRegistry.GetUserAutoLoadedModules(modules);
 
     vout << high;
     bool result = true;
@@ -674,7 +674,7 @@ int CSiteCmd::InitSite(void)
         std::list<CSmallString> modules;
         HostGroup.GetAutoLoadedModules(modules);
         site.GetAutoLoadedModules(modules);
-        AMSRegistry.GetAutoLoadedModules(modules);
+        AMSRegistry.GetUserAutoLoadedModules(modules);
         for( CSmallString module : modules ){
             // ignore errors from autoloaded modules
             Module.AddModule(vout,module,false,true);

@@ -23,6 +23,12 @@ src/bin/actions/module-add-stat/StatClient.cpp
 src/bin/actions/module-add-stat/StatClient.hpp
 src/bin/actions/module-add-stat/StatClientOptions.cpp
 src/bin/actions/module-add-stat/StatClientOptions.hpp
+src/bin/ams-config/CMakeLists.txt
+src/bin/ams-config/config-cli-opts.cpp
+src/bin/ams-config/config-cli-opts.hpp
+src/bin/ams-config/config-cli-user.cpp
+src/bin/ams-config/config-cli-visualization.cpp
+src/bin/ams-config/config-cli.cpp
 src/lib/ams/base/FSIndex.cpp
 src/lib/ams/base/FSIndex.hpp
 src/lib/ams/base/ServerWatcher.cpp

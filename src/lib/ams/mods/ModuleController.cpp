@@ -68,6 +68,8 @@ void CModuleController::InitModuleControllerConfig(void)
 
 void CModuleController::LoadBundles(EModBundleCache type)
 {
+    Bundles.clear();
+
     std::list<CFileName>    names;
     std::list<CFileName>    paths;
 
@@ -123,6 +125,8 @@ void CModuleController::PrintBundlesInfo(CVerboseStr& vout)
 
 void CModuleController::MergeBundles(void)
 {
+    ModCache.CreateEmptyCache();
+
     for( CModBundlePtr p_bundle : Bundles ){
         CXMLElement* p_cache = p_bundle->GetCacheElement();
         CXMLElement* p_config = p_bundle->GetBundleElement();
@@ -287,7 +291,7 @@ void CModuleController::UpdateExportedModules(const CSmallString& module,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CModuleController::PrintModActiveModules(CTerminal& terminal)
+void CModuleController::PrintActiveModules(CTerminal& terminal)
 {
     PrintEngine.PrintHeader(terminal,"ACTIVE MODULES",EPEHS_SECTION);
 
@@ -311,7 +315,7 @@ void CModuleController::PrintModActiveModules(CTerminal& terminal)
 
 //------------------------------------------------------------------------------
 
-void CModuleController::PrintModExportedModules(CTerminal& terminal)
+void CModuleController::PrintExportedModules(CTerminal& terminal)
 {
     PrintEngine.PrintHeader(terminal,"EXPORTED MODULES",EPEHS_SECTION);
 
@@ -330,6 +334,26 @@ void CModuleController::PrintModExportedModules(CTerminal& terminal)
         PrintEngine.PrintItems(terminal,none,maxmodlen);
     } else {
         PrintEngine.PrintItems(terminal,ExportedModules,maxmodlen);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModuleController::PrintUserAutoLoadedModules(CTerminal& terminal)
+{
+    PrintEngine.PrintHeader(terminal,"User Auto-Loaded Modules",EPEHS_SECTION);
+
+    std::list<CSmallString> amods;
+
+    AMSRegistry.GetUserAutoLoadedModules(amods);
+
+    terminal.Printf("\n");
+    if( amods.size() == 0 ){
+        std::list<CSmallString> none;
+        none.push_back("-none-");
+        PrintEngine.PrintItems(terminal,none);
+    } else {
+        PrintEngine.PrintItems(terminal,amods);
     }
 }
 

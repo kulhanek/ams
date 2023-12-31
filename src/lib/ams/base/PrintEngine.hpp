@@ -64,12 +64,15 @@ public:
     char GetSiteSectionDelimiter(void);
     int  GetSiteSectionBgColor(void);
     int  GetSiteSectionFgColor(void);
+    bool IsSiteSectionBold(void);
     char GetSectionDelimiter(void);
     int  GetSectionBgColor(void);
     int  GetSectionFgColor(void);
+    bool IsSectionBold(void);
     char GetCategoryDelimiter(void);
     int  GetCategoryBgColor(void);
     int  GetCategoryFgColor(void);
+    bool IsCategoryBold(void);
     int  GetModuleBgColor(void);
     int  GetModuleFgColor(void);
 

@@ -25,3 +25,4 @@ src/bin/actions
 src/bin/actions/module-add-stat
 share
 share/lynx
+src/bin/ams-config
