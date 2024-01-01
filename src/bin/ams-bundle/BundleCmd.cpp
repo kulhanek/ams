@@ -119,6 +119,10 @@ bool CBundleCmd::Run(void)
         return( BundleIndex() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "path" ) {
+        return( BundlePath() );
+    }
+    // ----------------------------------------------
     else {
         CSmallString error;
         error << "not implemented action '" << Options.GetArgAction() << "'";
@@ -135,7 +139,7 @@ void CBundleCmd::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    if( ! ForcePrintErrors ) vout << endl;
+    if( (! ForcePrintErrors) && (Options.GetArgAction() != "path") ) vout << endl;
 
     vout << high;
     vout << "# ==============================================================================" << endl;
@@ -380,6 +384,32 @@ bool CBundleCmd::BundleIndex(void)
         ForcePrintErrors = true;
         return(false);
     }
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::BundlePath(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    vout << bundle.GetFullBundleName() << endl;
+
     return(true);
 }
 

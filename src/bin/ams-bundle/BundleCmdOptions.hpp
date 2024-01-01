@@ -55,6 +55,7 @@ public:
     "<green>[--personal] index new</green>                    calculate new index for builds\n"
     "<green>[--skipremoved] [--skipadded] index diff</green>  compare new and old indexes\n"
     "<green>index commit</green>                              commit new index as old index\n"
+    "<green>path</green>                                      print full path to the bundle\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

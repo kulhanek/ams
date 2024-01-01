@@ -365,6 +365,14 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
     }
 }
 
+//------------------------------------------------------------------------------
+
+const CFileName CModBundle::GetFullBundleName(void)
+{
+    CFileName full_name = BundlePath / BundleName;
+    return(full_name);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

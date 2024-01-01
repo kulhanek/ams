@@ -113,6 +113,9 @@ public:
     /// return bundle config element
     CXMLElement* GetBundleElement(void);
 
+    /// get bundle full name including path
+    const CFileName GetFullBundleName(void);
+
 // bundle index operation ------------------------------------------------------
     /// get list of build for index
     bool ListBuildsForIndex(CVerboseStr& vout,bool personal);
