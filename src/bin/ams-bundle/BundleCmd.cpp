@@ -55,7 +55,7 @@ int CBundleCmd::Init(int argc, char* argv[])
 
     // output must be directed to stderr
     // stdout is used for shell processor
-    Console.Attach(stderr);
+    Console.Attach(stdout);
 
     // attach verbose stream to terminal stream and set desired verbosity level
     vout.Attach(Console);
@@ -148,7 +148,7 @@ void CBundleCmd::Finalize(void)
 
     if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
         if( ForcePrintErrors ) vout << low;
-        ErrorSystem.PrintErrors(vout);
+        ErrorSystem.PrintErrors(stderr);
         if( ForcePrintErrors ) vout << endl;
     } else {
         vout << endl;
