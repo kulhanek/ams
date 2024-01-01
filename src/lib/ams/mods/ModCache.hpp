@@ -140,6 +140,9 @@ public:
     /// get column size for all modules
     int GetModulePrintSize(bool includever);
 
+    /// does module need GPU?
+    bool DoesItNeedGPU(const CSmallString& name);
+
 // section of protected data ---------------------------------------------------
 protected:
     CXMLDocument    Cache;

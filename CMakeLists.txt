@@ -17,7 +17,7 @@ SET(AMS_CORE_ONLY   OFF     CACHE BOOL "Only AMS core library?")
 # ==============================================================================
 
 # define project name ----------------------------
-SET(AMS_VERSION 9.0.x)
+SET(AMS_VERSION 9.x)
 
 # what languages we use --------------------------
 ENABLE_LANGUAGE(CXX)

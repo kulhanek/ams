@@ -313,6 +313,15 @@ CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
     return(HostGroup.GetChildElementByPath("group/environment"));
 }
 
+//------------------------------------------------------------------------------
+
+const CSmallString CHostGroup::GetSurrogateMachines(void)
+{
+    CSmallString surrogates;
+    // FIXME
+    return(surrogates);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

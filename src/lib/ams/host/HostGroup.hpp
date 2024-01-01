@@ -100,6 +100,9 @@ public:
     /// execute action hook
     bool ExecuteModAction(const CSmallString& action, const CSmallString& args);
 
+    /// get surrogate machines
+    const CSmallString GetSurrogateMachines(void);
+
 // information methods for all host groups -------------------------------------
     /// find host group namespace
     const CSmallString GetGroupNS(const CSmallString& hostname);

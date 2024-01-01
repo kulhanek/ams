@@ -907,6 +907,34 @@ const CSmallString CModCache::GetVariableValue(CXMLElement* p_rele,
     return("");
 }
 
+//------------------------------------------------------------------------------
+
+bool CModCache::DoesItNeedGPU(const CSmallString& name)
+{
+    CXMLElement* p_module = GetModule(name);
+    if( p_module == NULL ){
+        CSmallString warning;
+        warning << "module '" << name << "'' was not found in the cache";
+        ES_WARNING(warning);
+        return(false);
+    }
+
+    CXMLElement* p_sele = p_module->GetChildElementByPath("builds/build");
+
+    bool gpu = false;
+
+    while( p_sele != NULL ) {
+        CSmallString larch;
+        p_sele->GetAttribute("arch",larch);
+        if( (larch.FindSubString("gpu") >= 0) || (larch.FindSubString("cuda") >= 0) ){
+            gpu = true;
+        }
+        p_sele = p_sele->GetNextSiblingElement("build");
+    }
+
+    return(gpu);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
