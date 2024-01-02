@@ -52,7 +52,8 @@ public:
     bool SaveIndex(const CFileName& index_name);
 
     /// diff two indexes
-    void Diff(CModBundleIndex& old_index, CVerboseStr& vout, bool skip_removed, bool skip_added);
+    void Diff(CModBundleIndex& old_index, CVerboseStr& vout, bool skip_removed,
+              bool skip_added, bool verbose);
 
     /// clear index
     void Clear(void);
@@ -133,7 +134,7 @@ public:
     bool LoadIndexes(void);
 
     /// diff two indexes
-    void DiffIndexes(CVerboseStr& vout, bool skip_removed, bool skip_added);
+    void DiffIndexes(CVerboseStr& vout, bool skip_removed, bool skip_added, bool verbose);
 
 // section of private data -----------------------------------------------------
 private:

@@ -119,8 +119,8 @@ bool CBundleCmd::Run(void)
         return( BundleIndex() );
     }
     // ----------------------------------------------
-    else if( Options.GetArgAction() == "path" ) {
-        return( BundlePath() );
+    else if( Options.GetArgAction() == "dirname" ) {
+        return( BundleDirName() );
     }
     // ----------------------------------------------
     else {
@@ -139,7 +139,8 @@ void CBundleCmd::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    if( (! ForcePrintErrors) && (Options.GetArgAction() != "path") ) vout << endl;
+    if( (! ForcePrintErrors) && (Options.GetArgAction() != "dirname")
+            && (Options.GetOptSilent() == false) ) vout << endl;
 
     vout << high;
     vout << "# ==============================================================================" << endl;
@@ -368,7 +369,8 @@ bool CBundleCmd::BundleIndex(void)
             ForcePrintErrors = true;
             return(false);
         }
-        bundle.DiffIndexes(vout,Options.GetOptSkipRemovedEntries(),Options.GetOptSkipAddedEntries());
+        bundle.DiffIndexes(vout,Options.GetOptSkipRemovedEntries(),
+                           Options.GetOptSkipAddedEntries(),! Options.GetOptSilent());
     } else if( Options.GetProgArg(1) == "commit" ){
         if( bundle.CommitNewIndex()  == false ){
             CSmallString error;
@@ -389,7 +391,7 @@ bool CBundleCmd::BundleIndex(void)
 
 //------------------------------------------------------------------------------
 
-bool CBundleCmd::BundlePath(void)
+bool CBundleCmd::BundleDirName(void)
 {
     CFileName cwd,bundle_root;
     CFileSystem::GetCurrentDir(cwd);

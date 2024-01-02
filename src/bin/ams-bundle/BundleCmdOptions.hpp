@@ -49,13 +49,13 @@ public:
     // program arguments long description
     CSO_PROG_ARGS_LONG_DESC_BEGIN
     "<green>[--force] create name maintainer contact</green>  create a new bundle in the current working directory\n"
-    "<green>[info]</green>                                    print information about the bundle\n"
-    "<green>[--incvers] avail</green>                         print modules in the bundle\n"
-    "<green>rebuild</green>                                   rebuild the bundle cache\n"
-    "<green>[--personal] index new</green>                    calculate new index for builds\n"
-    "<green>[--skipremoved] [--skipadded] index diff</green>  compare new and old indexes\n"
-    "<green>index commit</green>                              commit new index as old index\n"
-    "<green>path</green>                                      print full path to the bundle\n"
+    "<green>[info]</green>                                               print information about the bundle\n"
+    "<green>[--incvers] avail</green>                                    print modules in the bundle\n"
+    "<green>rebuild</green>                                              rebuild the bundle cache\n"
+    "<green>[--personal] index new</green>                               calculate new index for builds\n"
+    "<green>[--silent] [--skipremoved] [--skipadded] index diff</green>  compare new and old indexes\n"
+    "<green>index commit</green>                                         commit new index as old index\n"
+    "<green>dirname</green>                                              print full path to the bundle directory\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN
@@ -69,6 +69,7 @@ public:
     CSO_OPT(bool,Personal)
     CSO_OPT(bool,SkipRemovedEntries)
     CSO_OPT(bool,SkipAddedEntries)
+    CSO_OPT(bool,Silent)
     CSO_OPT(bool,IncludeVersions)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
@@ -112,6 +113,15 @@ public:
                 "skipadded",                      /* long option name */
                 NULL,                           /* parametr name */
                 "skip added index entries")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                Silent,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                '\0',                           /* short option name */
+                "silent",                      /* long option name */
+                NULL,                           /* parametr name */
+                "print only changes")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 IncludeVersions,                        /* option name */

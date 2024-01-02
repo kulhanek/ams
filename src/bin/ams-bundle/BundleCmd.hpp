@@ -52,7 +52,7 @@ private:
     bool RebuildBundle(void);
     bool PrintAvailMods(void);
     bool BundleIndex(void);
-    bool BundlePath(void);
+    bool BundleDirName(void);
 };
 
 // -----------------------------------------------------------------------------

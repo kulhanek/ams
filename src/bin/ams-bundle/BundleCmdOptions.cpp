@@ -75,7 +75,7 @@ int CBundleCmdOptions::CheckArguments(void)
     if( GetNumberOfProgArgs() == 1 ) {
         Action = GetProgArg(0);
 
-        if( (Action == "info") || (Action == "avail") || (Action == "rebuild") || (Action == "path")) {
+        if( (Action == "info") || (Action == "avail") || (Action == "rebuild") || (Action == "dirname")) {
             return(SO_CONTINUE);
         }
 

@@ -965,9 +965,10 @@ bool CModBundle::LoadIndexes(void)
 
 //------------------------------------------------------------------------------
 
-void CModBundle::DiffIndexes(CVerboseStr& vout, bool skip_removed, bool skip_added)
+void CModBundle::DiffIndexes(CVerboseStr& vout, bool skip_removed,
+                             bool skip_added, bool verbose)
 {
-    NewBundleIndex.Diff(OldBundleIndex,vout,skip_removed,skip_added);
+    NewBundleIndex.Diff(OldBundleIndex,vout,skip_removed,skip_added,verbose);
 }
 
 //==============================================================================
@@ -1045,10 +1046,13 @@ bool CModBundleIndex::SaveIndex(const CFileName& index_name)
 
 //------------------------------------------------------------------------------
 
-void CModBundleIndex::Diff(CModBundleIndex& old_index, CVerboseStr& vout, bool skip_removed, bool skip_added)
+void CModBundleIndex::Diff(CModBundleIndex& old_index, CVerboseStr& vout,
+                           bool skip_removed, bool skip_added, bool verbose)
 {
-    vout << endl;
-    vout << "# Diffing two indexes ..." << endl;
+    if( verbose ) {
+        vout << endl;
+        vout << "# Diffing two indexes ..." << endl;
+    }
 
     vout << low;
 
