@@ -124,7 +124,7 @@ rsync_bundle_softrepo()
 
     $AMS_ROOT/bin/ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
         
-        if [[ ("$STATUS" != "+") && ("$STATUS" != "m") ]]; then continue; fi
+        if [[ ("$STATUS" != "+") && ("$STATUS" != "M") ]]; then continue; fi
         if [[ -z "$AMS_PACKAGE_DIR" ]]; then contine; fi
         if [[ -z "$BUILD" ]]; then contine; fi
         
