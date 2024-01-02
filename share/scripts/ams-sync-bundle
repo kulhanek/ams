@@ -1,0 +1,112 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# Advanced Module System synchronization utility
+# (c) 2010,2016,2023 Petr Kulhanek
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------
+
+function print_usage()
+{
+    echo ""
+    echo "Usage: ams-sync-bundle [-h][--help] <profile>"
+    echo ""
+}
+
+# ------------------------------------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+export AMS_BUNDLE_DIR=`$AMS_ROOT/bin/ams-bundle dirname`
+
+echo ""
+echo "# AMS Bundle Directory: $AMS_BUNDLE_DIR"
+echo "# ------------------------------------------------------------------------------"
+
+if [[ (-z $AMS_BUNDLE_DIR) || (! (-d $AMS_BUNDLE_DIR) ) ]]; then
+    echo "" 1>&2
+    echo ">>> ERROR: No AMS module bundle in the current working directory!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+$AMS_ROOT/bin/ams-bundle info
+
+# load library functions
+
+source "$AMS_ROOT/share/sync/ams-sync-lib"
+
+# ------------------------------------------------
+
+SHIFT="-"
+while [ -n "$SHIFT" ]; do
+    SHIFT=""
+    case $1 in
+        '-h'|'--help')
+            print_usage
+            exit 0
+        ;;
+    esac
+done
+
+if [ $# -lt 1 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Incorrect number of parameters!" 1>&2
+    print_usage
+    exit 1
+fi
+
+# ------------------------------------------------
+
+export AMS_SYNC_PROFILE="$1"
+
+echo ""
+echo "# AMS Sync Core Profile: $AMS_SYNC_PROFILE"
+echo "# ------------------------------------------------------------------------------"
+
+export PROFILE="$AMS_BUNDLE_DIR/_ams_bundle/sync/$AMS_SYNC_PROFILE.rsync-push"
+if [[ -f "$PROFILE" ]]; then
+    echo "  Profile file:         $PROFILE" 
+    $AMS_ROOT/share/sync/rsync/push/ams-rsync-bundle "$@"
+    exit $?
+fi
+
+export PROFILE="$AMS_BUNDLE_DIR/_ams_bundle/sync/$AMS_SYNC_PROFILE.exec"
+if [[ -f "$PROFILE" ]]; then
+    echo "  Profile file:         $PROFILE" 
+    exec_profile "$@"
+    exit $?
+fi
+
+export PROFILE="$AMS_ROOT/etc/sync/$AMS_SYNC_PROFILE.rsync-push"
+if [[ -f "$PROFILE" ]]; then
+    echo "  Profile file:         $PROFILE" 
+    $AMS_ROOT/share/sync/rsync/push/ams-rsync-bundle "$@"
+    exit $?
+fi
+
+export PROFILE="$AMS_ROOT/etc/sync/$AMS_SYNC_PROFILE.exec"
+if [[ -f "$PROFILE" ]]; then
+    echo "  Profile file:         $PROFILE" 
+    exec_profile "$@"
+    exit $?
+fi
+
+echo "" 1>&2
+echo ">>> ERROR: Profile '$1' is not defined!" 1>&2
+echo "" 1>&2
+exit 1
+
+
+
+
+
+
+
+
+

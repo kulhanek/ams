@@ -1,0 +1,244 @@
+#!/bin/bash
+# =============================================================================
+# AMS - Advanced Module System
+# (c) 2010,2016,2017,2023 Petr Kulhanek
+# -----------------------------------------------------------------------------
+# common library functions
+
+# ------------------------------------------------------------------------------
+
+function read_profile_rsync_push()
+{
+    export AMS_DST_HOST="`grep DESTINATION "$PROFILE" | awk '{print $2;}'`"
+    echo "  Destination:          $AMS_DST_HOST"
+    if [ -z "$AMS_DST_HOST" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DESTINATION key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_DST_PREFIX="`grep DST_PREFIX "$PROFILE" | awk '{print $2;}'`"
+    echo "  Destination prefix:   $AMS_DST_PREFIX"
+    if [ -z "$AMS_DST_PREFIX" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DST_PREFIX key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_SYNC_AUTH="`grep AUTH $PROFILE | awk '{print $2;}'`"
+    echo "  Authentication mode:  $AMS_SYNC_AUTH"
+    case "`echo "$AMS_SYNC_AUTH" | cut -f 1 -d "("`" in
+        "AFS" | "POSIX" )
+            ;;
+        *)
+            echo "" 1>&2
+            echo ">>> ERROR: AUTH key is not defined or is incorrect!" 1>&2
+            echo "" 1>&2
+            exit 1
+            ;;
+    esac
+    
+    export AMS_RSYNC_OPTS="`grep RSYNCOPTS "$PROFILE" | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
+    if [ -n "$AMS_RSYNC_OPTS" ]; then
+    echo "  rsync options:        $AMS_RSYNC_OPTS"
+    fi
+}
+
+# ------------------------------------------------------------------------------
+
+function set_var_dir()
+{
+    AMS_VAR_DIR="$AMS_ROOT/var/sync"
+    if [[ -n $AMS_BUNDLE_DIR ]]; then
+        AMS_VAR_DIR="$AMS_BUNDLE_DIR/_ams_bundle/var/sync"
+    fi
+}
+
+# ------------------------------------------------------------------------------
+
+function create_log_file()
+{
+    set_var_dir
+    
+    LOG_FILE_DIR="$AMS_VAR_DIR/logs"
+    
+    umask 027
+    mkdir -p $LOG_FILE_DIR
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Unable to create '$LOG_FILE_DIR' directory!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    # log file
+    LOG_FILE="$LOG_FILE_DIR/`date +%Y-%m-%d#%H:%M:%S`-$AMS_SYNC_PROFILE.log"
+
+    echo "> Log file: $LOG_FILE"
+}
+
+# ------------------------------------------------------------------------------
+
+function show_log_error()
+{
+    echo "" 1>&2
+    echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    echo "    Last 10 lines ..." 1>&2
+    tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
+    echo "" 1>&2
+}
+
+# ------------------------------------------------------------------------------
+
+function test_password_less_ssh()
+{
+    echo -n ">>> Testing connection to: $AMS_DST_HOST ... " | tee -a $LOG_FILE
+    ssh -x -o "BatchMode=yes" -o "StrictHostKeyChecking=no" "$AMS_DST_HOST" "/bin/echo" >> $LOG_FILE 2>&1
+    if [ $? -ne 0 ]; then
+        echo "failure" | tee -a $LOG_FILE
+        echo "" 1>&2
+        echo ">>> ERROR: Passwordless ssh connection with $AMS_DST_HOST is not available!"  1>&2
+        echo "" 1>&2
+        show_log_error
+        exit 1
+    fi
+    echo "success" | tee -a $LOG_FILE
+}
+
+# ------------------------------------------------------------------------------
+
+function lock_session()
+{
+    echo "> Locking session ..."
+
+    set_var_dir
+    
+    AMS_LOCK_DIR="$AMS_VAR_DIR/logs/"
+    
+# check/create session lock
+    if [ -f "$AMS_LOCK_DIR/lock-$AMS_SYNC_PROFILE.pid" ]; then
+        PID="`cat "$AMS_LOCK_DIR/lock-$AMS_SYNC_PROFILE.pid"`"
+        if [ -n "$PID" ] && [ -d "/proc/$PID" ]; then
+            echo "" 1>&2
+            echo ">>> ERROR: Profile $AMS_SYNC_PROFILE is used by someone else (PID: $PID)!" 1>&2
+            echo "" 1>&2
+            exit 1
+        fi
+    fi
+    umask 027
+    mkdir -p "$AMS_LOCK_DIR"
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Unable to create $AMS_LOCK_DIR directory!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+    echo $$ > "$AMS_LOCK_DIR/lock-$AMS_SYNC_PROFILE.pid"
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Unable to lock session!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+}
+
+# ------------------------------------------------------------------------------
+
+function unlock_session()
+{
+# unlock session
+    echo "> Unlocking session ..."
+    rm -f "$AMS_LOCK_DIR/lock-$AMS_SYNC_PROFILE.pid"
+}
+
+# ------------------------------------------------------------------------------
+
+function check_auth()
+{
+# check authentication credentials
+    case "`echo "$AMS_SYNC_AUTH" | cut -f 1 -d "("`" in
+        "AFS"  )
+            echo -n "> AFS mode,"
+            AFS_CELL="`echo "$AMS_SYNC_AUTH" | tr "()" " " | awk '{ print $2;}'`"
+            if [ -z "$AFS_CELL" ]; then
+                echo "" 1>&2
+                echo ">>> ERROR: AFS cell is not specified!" 1>&2
+                echo "" 1>&2
+                exit 1
+            fi
+            echo " cell: $AFS_CELL"
+            if (! (tokens | grep "$AFS_CELL" &> /dev/null)) || (tokens | grep "$AFS_CELL" | grep -i "Expired" &> /dev/null); then
+                echo "" 1>&2
+                echo ">>> ERROR: Tokens to access AFS does not exist or are expired!" 1>&2
+                echo "" 1>&2
+                exit 1
+            fi
+            ;;
+        "POSIX" )
+            echo "> POSIX mode ..."
+            ;;
+        *)
+            echo "" 1>&2
+            echo ">>> ERROR: AUTH key is not defined or is incorrect!" 1>&2
+            echo "" 1>&2
+            exit 1
+            ;;
+    esac
+}
+
+# ------------------------------------------------
+
+function read_profile_exec()
+{
+    export AMS_WORKING_DIR="`grep CWD "$PROFILE" | awk '{print $2;}'`"
+    echo ""
+    echo "> Working directory: $AMS_WORKING_DIR"
+    if [ -z "$AMS_WORKING_DIR" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: CWD key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+}
+
+# ------------------------------------------------
+
+function exec_profile() {
+
+    echo ""
+    echo "# AMS Command Execution"
+    echo "# ------------------------------------------------"
+
+    read_profile_exec
+
+    cd $AMS_WORKING_DIR
+    if [ $? -ne 0 ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: Unable to set the working directory '$AMS_WORKING_DIR'!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    while read AMS_COMMAND; do
+        echo ""
+        echo "$ $AMS_COMMAND"
+        echo "--------------------"
+        eval "$AMS_COMMAND"
+        if [ $? -ne 0 ]; then
+            echo "" 1>&2
+            echo ">>> ERROR: Unable to execute the command '$AMS_COMMAND'!" 1>&2
+            echo "" 1>&2
+            exit 1
+        fi
+        echo "--------------------"
+    done < <( grep CMD "$PROFILE" | sed -e 's/CMD//g' )
+    echo ""
+}
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# ==============================================================================
+
+

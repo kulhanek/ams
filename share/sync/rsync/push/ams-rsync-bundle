@@ -1,0 +1,224 @@
+#!/bin/bash
+# =============================================================================
+# AMS - Advanced Module System
+# (c) 2010,2016,2017 Petr Kulhanek
+# -----------------------------------------------------------------------------
+# ams-rsync-bundle - synchronize module bundle
+
+# ------------------------------------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# load library functions
+
+source "$AMS_ROOT/share/sync/ams-sync-lib"
+
+# ------------------------------------------------
+
+# we have piped commands and all must succeed
+set -o pipefail
+
+# ------------------------------------------------
+
+read_profile_rsync_push
+
+# -----------------------------------------------------------------------------
+
+if [ -z "$AMS_SYNC_PROFILE" ]; then
+    echo ">>> ERROR: AMS_SYNC_PROFILE is not set!" 1>&2
+    exit 1
+fi
+if [ -z "$AMS_DST_HOST" ]; then
+    echo ">>> ERROR: AMS_DST_HOST is not set!" 1>&2
+    exit 1
+fi
+
+# ------------------------------------------------------------------------------
+
+AMS_SRC_SOFTMODS="$AMS_BUNDLE_DIR/_ams_bundle"
+AMS_DST_SOFTMODS="$AMS_DST_PREFIX/$AMS_BUNDLE_DIR/_ams_bundle"
+
+# SOFTREPO is without bundle name - historical reasons :-)
+AMS_SRC_SOFTREPO="`dirname $AMS_BUNDLE_DIR`"
+AMS_DST_SOFTREPO="$AMS_DST_PREFIX/`dirname $AMS_BUNDLE_DIR`"
+
+# ------------------------------------------------------------------------------
+
+echo ""
+create_log_file || exit 1
+check_auth      || exit 1
+lock_session    || exit 1
+
+if [[ $AMS_DST_HOST != "localhost" ]]; then
+    test_password_less_ssh || exit 1
+fi
+
+# ------------------------------------------------------------------------------
+
+rsync_bundle_core()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS Module Bundle - Syncing Core ..." | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    if [[ $AMS_DST_HOST == "localhost" ]]; then
+        umask 022
+        if [[ ! (-d "$AMS_DST_SOFTMODS") ]]; then
+            mkdir -p "$AMS_DST_SOFTMODS" >> $LOG_FILE 2>&1
+            if [ $? -ne 0 ]; then exit 1; fi
+        fi
+        rsync -av --delete $AMS_RSYNC_OPTS \
+            --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-bundle-core \
+            "$AMS_SRC_SOFTMODS/" "$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
+    else
+        ssh -x $AMS_DST_HOST \
+            "umask 022; if [[ ! (-d "$AMS_DST_SOFTMODS") ]]; then mkdir -p "$AMS_DST_SOFTMODS" ; fi;" \
+            >> $LOG_FILE 2>&1
+        if [ $? -ne 0 ]; then exit 1; fi
+        rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS \
+            --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-bundle-core \
+            "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1    
+    fi    
+
+    if [ $? -eq 0 ]; then
+        echo "AMS Module Bundle Core Synchronization ... [OK]"
+    else
+        echo "AMS Module Bundle Core Synchronization ... [FAILED]"
+        show_log_error
+        exit 1
+    fi
+}
+
+# -------------------------------------------------------------------------------------
+
+rsync_bundle_softrepo()
+{
+# create new index file
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS Module Bundle - Generating New Repository Index" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    $AMS_ROOT/bin/ams-bundle index new | tee -a $LOG_FILE
+    if [ $? -ne 0 ]; then exit 1; fi;
+    
+    echo "# Changed builds ..." | tee -a $LOG_FILE
+    $AMS_ROOT/bin/ams-bundle --silent index diff | tee -a $LOG_FILE
+    if [ $? -ne 0 ]; then exit 1; fi;
+
+    NCHANGES="`$AMS_ROOT/bin/ams-bundle --silent index diff | wc -l`"
+    if [ "$NCHANGES" -eq 0 ]; then
+        echo "> No changed builds were detected ..."
+        rm -f "$NEW_INDEX"
+        return
+    fi
+
+# propagate changes
+    echo "" | tee -a $LOG_FILE
+    echo "# AMS Module Bundle - Syncing Builds" | tee -a $LOG_FILE
+    echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+    $AMS_ROOT/bin/ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
+        
+        if [[ ("$STATUS" != "+") && ("$STATUS" != "m") ]]; then continue; fi
+        if [[ -z "$AMS_PACKAGE_DIR" ]]; then contine; fi
+        if [[ -z "$BUILD" ]]; then contine; fi
+        
+        (
+        printf "%-60s " "$BUILD"
+        echo "==== $BUILD" >> $LOG_FILE
+
+        if ! [ -d "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" ]; then
+            echo " - [ERROR] - package directory does not exists: $AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/"
+            exit 1
+        fi
+
+    # get list of root app directories and their setup (permision and group)
+        BACKUP_PWD=$PWD
+        cd $AMS_SRC_SOFTREPO
+        echo $AMS_PACKAGE_DIR | tr '/' '\n' | while read A; do
+            stat --format="%n %G %a" "$A"
+            cd $A
+        done > /tmp/perms.$$ 2>> $LOG_FILE
+        cd $BACKUP_PWD
+
+        # overwrite groups
+        if [ -n "$AMS_TARGET_GROUP" ]; then
+            awk -v group=$AMS_TARGET_GROUP '{ printf("%s %s %s\n",$1,group,$3); }' <  /tmp/perms.$$ > /tmp/perms_.$$
+            mv /tmp/perms_.$$ /tmp/perms.$$
+        fi
+
+        if [[ $AMS_DST_HOST == "localhost" ]]; then        
+        
+        # create app root directory
+            (
+                cd $AMS_DST_SOFTREPO
+                cat /tmp/perms.$$ | while read NAME GROUP PERM; do
+                    mkdir -p $NAME 
+                    chmod $PERM $NAME 
+                    chgrp $GROUP $NAME
+                    cd $NAME 
+                done >> $LOG_FILE 2>&1
+                rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
+            )
+        # copy data
+            rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS \
+                  "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" "$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
+            if [ $? -ne 0 ]; then
+                echo "             [FAILED]"
+                show_log_error
+                exit 1
+            else
+                echo "             [SYNC]"
+            fi
+        
+        else
+        
+        # create app root directory
+            cat /tmp/perms.$$ | ssh -x $AMS_DST_HOST "cd $AMS_DST_SOFTREPO; while read NAME GROUP PERM; do mkdir -p \$NAME; chmod \$PERM \$NAME; chgrp \$GROUP \$NAME; cd \$NAME; done" >> $LOG_FILE 2>&1
+            rm -f /tmp/perms.$$ >> $LOG_FILE 2>&1
+
+        # copy data
+            rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS \
+                  "$AMS_SRC_SOFTREPO/$AMS_PACKAGE_DIR/" \
+                  "$AMS_DST_HOST:$AMS_DST_SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
+            if [ $? -ne 0 ]; then
+                echo "             [FAILED]"
+                show_log_error
+                exit 1
+            else
+                echo "             [SYNC]"
+            fi
+        
+        fi
+        ) < /dev/null
+        if [ $? -ne 0 ]; then exit 1; fi
+    done
+    if [ $? -ne 0 ]; then exit 1; fi
+
+# commit changes
+    $AMS_ROOT/bin/ams-bundle index commit >> $LOG_FILE 2>&1
+}
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# ==============================================================================
+
+rsync_bundle_core
+rsync_bundle_softrepo
+
+# ------------------------------------------------------------------------------
+
+echo ""
+unlock_session
+echo "> Log file: $LOG_FILE"
+echo ""
+
+exit 0
+
+# ------------------------------------------------------------------------------
+

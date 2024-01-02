@@ -1,0 +1,99 @@
+#!/bin/bash
+# =============================================================================
+# AMS - Advanced Module System
+# (c) 2010,2016,2017,2023 Petr Kulhanek
+# -----------------------------------------------------------------------------
+# ams-rsync-core - synchronize AMS core
+
+# ------------------------------------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# load library functions
+
+source "$AMS_ROOT/share/sync/ams-sync-lib"
+
+# ------------------------------------------------
+
+# we have piped commands and all must succeed
+set -o pipefail
+
+# ------------------------------------------------
+
+read_profile_rsync_push
+
+# -----------------------------------------------------------------------------
+
+if [ -z "$AMS_SYNC_PROFILE" ]; then
+    echo ">>> ERROR: AMS_SYNC_PROFILE is not set!" 1>&2
+    exit 1
+fi
+if [ -z "$AMS_DST_HOST" ]; then
+    echo ">>> ERROR: AMS_DST_HOST is not set!" 1>&2
+    exit 1
+fi
+
+# ------------------------------------------------------------------------------
+
+AMS_SRC_SOFTMODS="$AMS_ROOT"
+AMS_DST_SOFTMODS="$AMS_DST_PREFIX/$AMS_ROOT"
+
+# ------------------------------------------------------------------------------
+
+echo ""
+create_log_file || exit 1
+check_auth      || exit 1
+lock_session    || exit 1
+
+if [[ $AMS_DST_HOST != "localhost" ]]; then
+    test_password_less_ssh || exit 1
+fi
+
+# ------------------------------------------------------------------------------
+
+echo "" | tee -a $LOG_FILE
+echo "# AMS Core - Syncing Data" | tee -a $LOG_FILE
+echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
+
+if [[ $AMS_DST_HOST == "localhost" ]]; then
+    umask 022
+    if [[ ! (-d "$AMS_DST_SOFTMODS") ]]; then
+        mkdir -p "$AMS_DST_SOFTMODS" >> $LOG_FILE 2>&1
+        if [ $? -ne 0 ]; then exit 1; fi
+    fi
+    rsync -av --delete $AMS_RSYNC_OPTS \
+          --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-core \
+          "$AMS_SRC_SOFTMODS/" "$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
+else
+    ssh -x $AMS_DST_HOST \
+        "umask 022; if [[ ! (-d "$AMS_DST_SOFTMODS") ]]; then mkdir -p "$AMS_DST_SOFTMODS" ; fi;" \
+        >> $LOG_FILE 2>&1
+    if [ $? -ne 0 ]; then exit 1; fi
+    rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS \
+          --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-core \
+          "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1    
+fi
+
+if [ $? -eq 0 ]; then
+    echo "AMS Core Synchronization             ... [OK]"
+else
+    echo "AMS Core Synchronization             ... [FAILED]"
+    show_log_error
+    exit 1
+fi
+
+# ------------------------------------------------------------------------------
+
+echo ""
+unlock_session
+echo "> Log file: $LOG_FILE"
+echo ""
+
+exit 0
+
+# ------------------------------------------------------------------------------

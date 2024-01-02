@@ -26,3 +26,8 @@ src/bin/actions/module-add-stat
 share
 share/lynx
 src/bin/ams-config
+share/scripts
+share/sync
+share/sync/rsync/exclude
+share/sync/rsync/push
+share/sync/rsync
