@@ -51,7 +51,7 @@ class CPVerRecord {
     CSmallString    ver;
     CSmallString    arch;
     CSmallString    mode;
-    int             verindx;
+    double          verindx;
     bool operator == (const CPVerRecord& left) const;
 };
 
@@ -350,8 +350,8 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
         p_bele->GetAttribute("arch",bldrcd.arch);
         p_bele->GetAttribute("mode",bldrcd.mode);
         p_bele->GetAttribute("verindx",bldrcd.verindx);
-        if( (bldrcd.ver != NULL) || (bldrcd.arch != NULL) || (bldrcd.mode != NULL) ){
-        pvlist.push_back(bldrcd);
+        if( (bldrcd.ver != NULL) && (bldrcd.arch != NULL) && (bldrcd.mode != NULL) ){
+            pvlist.push_back(bldrcd);
         }
         p_bele = p_bele->GetNextSiblingElement("build");
     }
