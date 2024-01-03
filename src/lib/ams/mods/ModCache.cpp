@@ -347,7 +347,6 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
         CPVerRecord bldrcd;
         bldrcd.verindx = 0.0;
         p_bele->GetAttribute("ver",bldrcd.ver);
-        cerr << bldrcd.ver << endl;
         p_bele->GetAttribute("arch",bldrcd.arch);
         p_bele->GetAttribute("mode",bldrcd.mode);
         p_bele->GetAttribute("verindx",bldrcd.verindx);
@@ -358,7 +357,9 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
     }
 
     pvlist.sort(sort_tokens);
-    pvlist.unique();
+
+    // do not call unique as it makes it unique per version!!
+    // pvlist.unique();
 
     for(CPVerRecord pvrec : pvlist){
         CSmallString build;
