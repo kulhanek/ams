@@ -1374,8 +1374,10 @@ bool CModule::PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name)
     }
 
     Host.PrintHostInfoForModule(vout);
-    if( (GetMaintainerName(p_module) != NULL) && (GetMaintainerEMail(p_module) != NULL) ){
-        vout << "  Module maintainer  : " << GetMaintainerName(p_module) << " (" << GetMaintainerEMail(p_module) << ")" << endl;
+    if( (GetMaintainerName(p_module) != NULL) && (GetMaintainerEMail(p_module) != NULL) && (GetBundleName(p_module) != NULL) ){
+        vout << "  Module maintainer  : " << GetMaintainerName(p_module)
+             << " (" << GetMaintainerEMail(p_module) << ")"
+             << " | Bundle: " << GetBundleName(p_module) << endl;
     }
     vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
@@ -1571,6 +1573,17 @@ const CSmallString CModule::GetMaintainerEMail(CXMLElement* p_module)
     CXMLElement* p_ele = p_module->GetChildElementByPath("bundle/maintainer");
     if( p_ele == NULL ) return(name);
     p_ele->GetAttribute("email",name);
+    return(name);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CModule::GetBundleName(CXMLElement* p_module)
+{
+    CSmallString name;
+    CXMLElement* p_ele = p_module->GetChildElementByPath("bundle");
+    if( p_ele == NULL ) return(name);
+    p_ele->GetAttribute("name",name);
     return(name);
 }
 

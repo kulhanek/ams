@@ -170,6 +170,9 @@ private:
     /// return support contact email
     const CSmallString GetMaintainerEMail(CXMLElement* p_module);
 
+    /// return bundle name
+    const CSmallString GetBundleName(CXMLElement* p_module);
+
 // architectures
     /// compare two architectures
     static bool AreSameTokens(const CSmallString& user_arch,const CSmallString& build_arch);
