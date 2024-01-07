@@ -363,8 +363,10 @@ void CModuleController::PrintUserAutoLoadedModules(CTerminal& terminal)
 
 bool CModuleController::ReactivateModules(CVerboseStr& vout)
 {
+    std::list<CSmallString> modules = ActiveModules;
+
     bool result = true;
-    for(CSmallString mod : ActiveModules){
+    for(CSmallString mod : modules){
         bool exported = IsModuleExported(mod);
         result &= Module.AddModule(vout,mod,false,!exported);
     }
@@ -378,14 +380,9 @@ bool CModuleController::PurgeModules(CVerboseStr& vout)
     std::list<CSmallString> modules = ActiveModules;
     modules.reverse();
 
-    std::list<CSmallString>::iterator it = modules.begin();
-    std::list<CSmallString>::iterator ie = modules.end();
     bool result = true;
-
-    while( it != ie ){
-        CSmallString module = *it;
-        result &= Module.RemoveModule(vout,module);
-        it++;
+    for(CSmallString mod : modules){
+        result &= Module.RemoveModule(vout,mod);
     }
 
     return(result);
