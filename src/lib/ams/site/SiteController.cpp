@@ -32,10 +32,13 @@
 #include <ShellProcessor.hpp>
 #include <FileSystem.hpp>
 #include <UserUtils.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
+using namespace boost;
 
 //------------------------------------------------------------------------------
 
@@ -175,8 +178,12 @@ const CSmallString CSiteController::GetSSHSite(void)
 
 void CSiteController::GetSSHExportedModules(std::list<CSmallString>& modules)
 {
-    CFileName ssh_emods;
+    std::string ssh_emods;
     ssh_emods = CShell::GetSystemVariable("LC_AMS_SSH_EXPORTED_MODULES");
+    if( ! ssh_emods.empty() ){
+        split(modules,ssh_emods,is_any_of("|"));
+    }
+
 }
 
 //------------------------------------------------------------------------------
