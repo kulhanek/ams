@@ -677,7 +677,7 @@ int CSiteCmd::InitSite(void)
     if( reactivate ) {
         // site is already active - reactivate modules
         Module.SetFlags(Module.GetFlags() | MFB_REACTIVATED);
-        return(ModuleController.ReactivateModules(vout));
+        ModuleController.ReactivateModules(vout);
     } else {
         // load autoloaded modules
         Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);

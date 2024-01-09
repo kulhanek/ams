@@ -180,7 +180,7 @@ void CSiteController::GetSSHExportedModules(std::list<CSmallString>& modules)
 {
     std::string ssh_emods;
     ssh_emods = CShell::GetSystemVariable("LC_AMS_SSH_EXPORTED_MODULES");
-    cerr << "em=" << ssh_emods << endl;
+    cerr << ">>>>>>>> em=" << ssh_emods << endl;
     if( ! ssh_emods.empty() ){
         split(modules,ssh_emods,is_any_of("|"));
     }
