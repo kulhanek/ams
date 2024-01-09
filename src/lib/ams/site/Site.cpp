@@ -321,7 +321,7 @@ bool CSite::ActivateSite(void)
     }
 
     // install hooks from site config ---------------
-    HostGroup.ExecuteModAction("activate",GetName());
+    HostGroup.ExecuteModAction("activate",GetName(),~0);
 
     // boot host environments -----------------------
     CXMLElement* p_env_ele = HostGroup.GetHostGroupEnvironment();
@@ -342,6 +342,9 @@ bool CSite::ActivateSite(void)
     ShellProcessor.UnsetVariable("INF_COLLECTION_NAME");
     ShellProcessor.UnsetVariable("INF_COLLECTION_PATH");
     ShellProcessor.UnsetVariable("INF_COLLECTION_ID");
+
+    // set umask
+    ShellProcessor.SetUMask(AMSRegistry.GetUserUMask());
 
     return(true);
 }

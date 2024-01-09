@@ -81,6 +81,12 @@ public:
                                 const CSmallString& value,
                                 const CSmallString& delimiter);
 
+    /// set umask
+    void SetUMask(const CSmallString& umask);
+
+    /// get current umask set
+    const CSmallString GetCurrentUMask(void);
+
     /// set variable
     void SetVariable(const CSmallString& name,const CSmallString& value);
 
@@ -122,6 +128,7 @@ public:
 private:
     /// list of all actions that has to executed by shell to activate/deactivate module
     CXMLDocument        ShellActions;
+    CSmallString        CurrentUMask;
 
     /// final exit code set by module system as _MODULE_EXIT_CODE
     int            ExitCode;

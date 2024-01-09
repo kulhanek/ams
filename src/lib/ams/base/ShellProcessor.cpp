@@ -45,9 +45,8 @@ CShellProcessor::CShellProcessor(void)
 {
     ExitCode = 0;
     ShellActions.CreateChildElement("actions");
+    CurrentUMask = "unset";
 }
-
-
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -133,7 +132,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForDeps(CXMLElement* p_build)
 //==============================================================================
 
 bool CShellProcessor::PrepareModuleEnvironmentForModActionI(
-    CXMLElement* p_build)
+                            CXMLElement* p_build)
 {
     CXMLElement* p_setup = NULL;
     if( p_build != NULL ) p_setup = p_build->GetFirstChildElement("setup");
@@ -213,7 +212,7 @@ bool CShellProcessor::PrepareModuleEnvironmentForModActionI(
 //==============================================================================
 
 bool CShellProcessor::PrepareModuleEnvironmentForModActionII(
-    CXMLElement* p_build)
+                            CXMLElement* p_build)
 {
     CXMLElement* p_setup = NULL;
     if( p_build != NULL ) p_setup = p_build->GetFirstChildElement("setup");
@@ -469,6 +468,31 @@ void CShellProcessor::RemoveValueFromVariable(const CSmallString& name,
 //------------------------------------------------------------------------------
 //==============================================================================
 
+void CShellProcessor::SetUMask(const CSmallString& umask)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    // and set new umask
+    CXMLElement* p_sele = p_ele->CreateChildElement("umask");
+    p_sele->SetAttribute("value",umask);
+
+    CurrentUMask = umask;
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CShellProcessor::GetCurrentUMask(void)
+{
+    return(CurrentUMask);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
 void CShellProcessor::SetVariable(const CSmallString& name,
                                     const CSmallString& value)
 {
@@ -694,6 +718,14 @@ void CShellProcessor::BuildEnvironment(void)
     CXMLIterator    I(p_ele);
 
     while( (p_sele = I.GetNextChildElement()) != NULL ) {
+
+        if( p_sele->GetName() == "umask" ) {
+            CSmallString     value;
+            p_sele->GetAttribute("value",value);
+            if( value != NULL ) {
+                printf("umask 0%s;\n",(const char*)value);
+            }
+        }
 
         if( p_sele->GetName() == "variable" ) {
             CSmallString     name;

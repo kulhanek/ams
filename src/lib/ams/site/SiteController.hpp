@@ -56,7 +56,16 @@ public:
     void GetAllSites(std::list<CSmallString>& list);
 
     /// get site name from ssh wrapper
-    static const CSmallString  GetSSHSite(void);
+    static const CSmallString GetSSHSite(void);
+
+    /// get ssh exported modules
+    static void GetSSHExportedModules(std::list<CSmallString>& modules);
+
+    /// get ssh PWD
+    static const CFileName GetSSH_PWD(void);
+
+    /// unset all SSH variables
+    static void UnsetSSHVariables(void);
 
     /// is TTY available for stdin?
     static bool  HasTTY(void);

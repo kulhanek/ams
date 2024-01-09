@@ -365,7 +365,6 @@ void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
     vout << endl;
     vout << "# User name          : " << Name << " (uid: " << UID << ")" << endl;
     vout << "# Real group name    : " << RGroup << " (gid: " << RGID << ")" << endl;
-    // FIXME - cover situations with umask change via shellprocessor
     vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ") [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
 
     vout << "# ==============================================================================" << endl;
@@ -415,7 +414,6 @@ void CUser::PrintUserInfoForSite(CVerboseStr& vout)
     vout << endl;
 
     vout <<                  "  User name  : " << GetName() << endl;
-    // FIXME - cover situations with umask change via shellprocessor
     vout <<                  "  User group : " << GetEGroup() << " [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
     CUtils::PrintTokens(vout,"  ACL groups : ",GetACLGroups(),80);
 }
@@ -424,7 +422,6 @@ void CUser::PrintUserInfoForSite(CVerboseStr& vout)
 
 const CSmallString CUser::GetRequestedUserUMask(void)
 {
-    // FIXME - AMSERegistry > users.xml > default_umask
     return( AMSRegistry.GetUserUMask() );
 }
 

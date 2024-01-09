@@ -98,7 +98,7 @@ public:
     CXMLElement* GetHostGroupEnvironment(void);
 
     /// execute action hook
-    bool ExecuteModAction(const CSmallString& action, const CSmallString& args);
+    bool ExecuteModAction(const CSmallString& action, const CSmallString& args, int flags);
 
     /// get surrogate machines
     const CSmallString GetSurrogateMachines(void);

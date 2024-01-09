@@ -625,6 +625,7 @@ int CSiteCmd::InitSite(void)
             return(SITE_ERROR_NOT_ALLOWED);
         }
 
+        // this will set umask
         if( site.ActivateSite() == false ){
             CSmallString error;
             error << "unable to activate site environment '" << site.GetName() << "' (init)";
@@ -650,6 +651,14 @@ int CSiteCmd::InitSite(void)
             return(SITE_ERROR_CONFIG_PROBLEM);
         }
 
+        // this will set umask
+        if( site.ActivateSite() == false ){
+            CSmallString error;
+            error << "unable to activate site environment '" << site.GetName() << "' (init)";
+            ES_TRACE_ERROR(error);
+            return(SITE_ERROR_CONFIG_PROBLEM);
+        }
+
         // we will reactivate all active modules as the site is already activated
         reactivate = true;
     }
@@ -657,6 +666,7 @@ int CSiteCmd::InitSite(void)
 // print site info if TTY is available
     if( SiteController.HasTTY() && ( ! SiteController.IsSiteInfoPrinted() ) ) {
         vout << low;
+        // umask is set above in ActivateSite
         site.PrintShortSiteInfo(vout);
         vout << endl;
         SiteController.SetSiteInfoPrinted();
@@ -681,6 +691,22 @@ int CSiteCmd::InitSite(void)
         }
     }
 
+// ssh setup
+    if( SiteController.GetSSHSite() != NULL ){
+        // restore exported modules transffered via ssh
+        std::list<CSmallString> modules;
+        SiteController.GetSSHExportedModules(modules);
+        for( CSmallString module : modules ){
+            // ignore errors from autoloaded modules
+            Module.AddModule(vout,module,false,false);
+        }
+
+        // restore PWD
+        if( SiteController.GetSSH_PWD() != NULL ){
+            ShellProcessor.ChangeCurrentDir(SiteController.GetSSH_PWD());
+        }
+        SiteController.UnsetSSHVariables();
+    }
     vout << low;
     if( ErrorSystem.IsError() ){
         return(SITE_ERROR_CONFIG_PROBLEM);

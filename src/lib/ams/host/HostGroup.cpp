@@ -371,7 +371,7 @@ CXMLElement* CHostGroup::FindGroup(const CSmallString& hostname)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString& args)
+bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString& args, int flags)
 {
     // try first the host group specific setup
     CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/actions");
@@ -395,6 +395,11 @@ bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString
         CSmallString laction;
         if( p_cele->GetAttribute("name",laction) == false ) continue;
         if( laction != action ) continue;
+
+        int lflags;
+        if( p_cele->GetAttribute("flags",lflags) == true ){
+            if( (flags & lflags) != flags ) continue; // incompatible flags
+        }
 
         // action found - get the remaining specification
         CSmallString lcommand,ltype,largs;

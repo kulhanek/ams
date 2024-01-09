@@ -29,6 +29,7 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <grp.h>
+#include <ShellProcessor.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -65,10 +66,14 @@ gid_t CUserUtils::GetGroupID(const CSmallString& name,bool trynobody)
 
 const CSmallString CUserUtils::GetUMask(void)
 {
-   mode_t mumask = 0;
-   mumask = umask(mumask); // get umask - it destroys current setup
-   umask(mumask); // restore umask
-   return(CUserUtils::GetUMask(mumask));
+    mode_t mumask = 0;
+    if(ShellProcessor.GetCurrentUMask() == "unset" ){
+        mumask = umask(mumask); // get umask - it destroys current setup
+        umask(mumask); // restore umask
+    } else {
+        mumask = GetUMaskMode(ShellProcessor.GetCurrentUMask());
+    }
+    return(CUserUtils::GetUMask(mumask));
 }
 
 //------------------------------------------------------------------------------
@@ -76,8 +81,12 @@ const CSmallString CUserUtils::GetUMask(void)
 const CSmallString CUserUtils::GetUMaskPermissions(void)
 {
     mode_t mumask = 0;
-    mumask = umask(mumask); // get umask - it destroys current setup
-    umask(mumask); // restore umask
+    if(ShellProcessor.GetCurrentUMask() == "unset" ){
+        mumask = umask(mumask); // get umask - it destroys current setup
+        umask(mumask); // restore umask
+    } else {
+        mumask = GetUMaskMode(ShellProcessor.GetCurrentUMask());
+    }
     return(CUserUtils::GetUMaskPermissions(mumask));
 }
 

@@ -502,11 +502,11 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
             break;
         }
 
-        if( HostGroup.ExecuteModAction("add",args) == false ) {
+        if( HostGroup.ExecuteModAction("add",args,ModuleFlags) == false ) {
             return(false);
         }
     } else {
-        if( HostGroup.ExecuteModAction("remove","\""+complete_module+"\"") == false ) {
+        if( HostGroup.ExecuteModAction("remove","\""+complete_module+"\"",ModuleFlags) == false ) {
             return(false);
         }
     }

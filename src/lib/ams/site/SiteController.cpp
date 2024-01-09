@@ -30,6 +30,8 @@
 #include <list>
 #include <unistd.h>
 #include <ShellProcessor.hpp>
+#include <FileSystem.hpp>
+#include <UserUtils.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -162,11 +164,45 @@ void CSiteController::GetAllSites(std::list<CSmallString>& list)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CSmallString  CSiteController::GetSSHSite(void)
+const CSmallString CSiteController::GetSSHSite(void)
 {
     CSmallString ssh_site;
-    ssh_site = CShell::GetSystemVariable("AMS_SSH_SITE");
+    ssh_site = CShell::GetSystemVariable("LC_AMS_SSH_SITE");
     return(ssh_site);
+}
+
+//------------------------------------------------------------------------------
+
+void CSiteController::GetSSHExportedModules(std::list<CSmallString>& modules)
+{
+    CFileName ssh_emods;
+    ssh_emods = CShell::GetSystemVariable("LC_AMS_SSH_EXPORTED_MODULES");
+}
+
+//------------------------------------------------------------------------------
+
+const CFileName CSiteController::GetSSH_PWD(void)
+{
+    CFileName ssh_pwd;
+    ssh_pwd = CShell::GetSystemVariable("LC_AMS_SSH_PWD");
+    if( CFileSystem::IsDirectory(ssh_pwd) == false ){
+        return(NULL);
+    }
+    CFileName home_dir = CFileName("/home") / CUserUtils::GetUserName();
+    if( home_dir == ssh_pwd ){
+        // do not restore home directory, which can be on the different location at remote site
+        return(NULL);
+    }
+    return(ssh_pwd);
+}
+
+//------------------------------------------------------------------------------
+
+void CSiteController::UnsetSSHVariables(void)
+{
+    ShellProcessor.UnsetVariable("LC_AMS_SSH_SITE");
+    ShellProcessor.UnsetVariable("LC_AMS_SSH_EXPORTED_MODULES");
+    ShellProcessor.UnsetVariable("LC_AMS_SSH_PWD");
 }
 
 //------------------------------------------------------------------------------
