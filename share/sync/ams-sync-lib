@@ -199,9 +199,9 @@ function exec_profile() {
     while read AMS_CMD AMS_ACTION; do
         if [[ "$AMS_CMD" == "CWD" ]]; then
             echo ""
-            echo "$ CWD: $AMS_ACTION"
+            echo "# CWD: $AMS_ACTION"
             echo "--------------------"
-            cd $AMS_COMMAND
+            cd $AMS_ACTION
             if [ $? -ne 0 ]; then
                 echo "" 1>&2
                 echo ">>> ERROR: Unable to change the current working directory to '$AMS_ACTION'!" 1>&2
@@ -210,7 +210,7 @@ function exec_profile() {
             fi
         elif [[ "$AMS_CMD" == "CMD" ]]; then
             echo ""
-            echo "$ $AMS_ACTION"
+            echo "# CMD: $AMS_ACTION"
             echo "--------------------"
             eval "$AMS_ACTION"
             if [ $? -ne 0 ]; then
@@ -226,7 +226,7 @@ function exec_profile() {
             exit 1
         fi
         echo "--------------------"
-    done < "$PROFILE"
+    done < <(grep -v "^#" "$PROFILE")
     echo ""
 }
 
