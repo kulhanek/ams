@@ -226,7 +226,7 @@ function exec_profile() {
             exit 1
         fi
         echo "--------------------"
-    done < <(grep -v "^#" "$PROFILE")
+    done < <(sed -e 's/[[:blank:]]*#.*//' -e '/^[[:space:]]*$/d' "$PROFILE")
     echo ""
 }
 
