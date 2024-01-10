@@ -143,6 +143,9 @@ public:
     /// does module need GPU?
     bool DoesItNeedGPU(const CSmallString& name);
 
+    /// get new version index for the build
+    double GetNewVerIndex(const CSmallString& build);
+
 // section of protected data ---------------------------------------------------
 protected:
     CXMLDocument    Cache;

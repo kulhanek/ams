@@ -44,7 +44,9 @@ public:
 private:
     CBundleCmdOptions   Options;
     CTerminalStr        Console;
+    CTerminalStr        ConsoleErr;
     CVerboseStr         vout;
+    CVerboseStr         verr;
     bool                ForcePrintErrors;
 
     bool InfoBundle(void);
@@ -53,6 +55,7 @@ private:
     bool PrintAvailMods(void);
     bool BundleIndex(void);
     bool BundleDirName(void);
+    bool NewVerIndex(void);
 };
 
 // -----------------------------------------------------------------------------

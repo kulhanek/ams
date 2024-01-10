@@ -97,17 +97,23 @@ int CBundleCmdOptions::CheckArguments(void)
             }
             return(SO_OPTS_ERROR);
         }
-        if( IsVerbose() ) {
-            if( IsError == false ) fprintf(stderr,"\n");
-            fprintf(stderr,"%s: specified action '%s' is not supported\n",
-                    (const char*)GetProgramName(), (const char*)GetProgArg(0));
-            IsError = true;
+        if( GetProgArg(0) == "newverindex" ) {
+            if( IsVerbose() ) {
+                if( IsError == false ) fprintf(stderr,"\n");
+                fprintf(stderr,"%s: specified action '%s' requires the specification of the build\n",
+                        (const char*)GetProgramName(), (const char*)GetProgArg(0));
+                IsError = true;
+            }
+            return(SO_OPTS_ERROR);
         }
-        return(SO_OPTS_ERROR);
     }
 
     if( GetNumberOfProgArgs() == 2 ) {
         Action = GetProgArg(0);
+
+        if( Action == "index" ) return(SO_CONTINUE);
+        if( Action == "newverindex" ) return(SO_CONTINUE);
+
         if( (Action == "info") || (Action == "avail") ) {
             if( IsVerbose() ) {
                 if( IsError == false ) fprintf(stderr,"\n");
@@ -117,11 +123,11 @@ int CBundleCmdOptions::CheckArguments(void)
             }
             return(SO_OPTS_ERROR);
         }
-        if( Action == "index" ) return(SO_CONTINUE);
     }
 
     if( GetNumberOfProgArgs() == 4 ) {
         Action = GetProgArg(0);
+
         if( Action == "create" ) return(SO_CONTINUE);
     }
 

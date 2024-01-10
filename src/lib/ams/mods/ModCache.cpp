@@ -937,6 +937,45 @@ bool CModCache::DoesItNeedGPU(const CSmallString& name)
     return(gpu);
 }
 
+//------------------------------------------------------------------------------
+
+double CModCache::GetNewVerIndex(const CSmallString& build)
+{
+    CSmallString modname = CModUtils::GetModuleName(build);
+    CSmallString modver  = CModUtils::GetModuleVer(build);
+
+    double verindex = 0.0;
+
+    CXMLElement* p_module = GetModule(modname);
+    if( p_module == NULL ){
+        CSmallString warning;
+        warning << "module '" << modname << "'' was not found in the cache";
+        ES_WARNING(warning);
+        return(verindex);
+    }
+
+    CXMLElement* p_sele = p_module->GetChildElementByPath("builds/build");
+
+    while( p_sele != NULL ) {
+        double lverindex = 0.0;
+        p_sele->GetAttribute("verindx",lverindex);
+
+        CSmallString lver;
+        p_sele->GetAttribute("ver",lver);
+        if( lver == modver ){
+            return(lverindex);
+        }
+
+        if( lverindex > verindex ){
+            verindex = lverindex;
+        }
+        p_sele = p_sele->GetNextSiblingElement("build");
+    }
+
+    verindex++;
+    return(verindex);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

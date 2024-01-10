@@ -52,6 +52,7 @@ public:
     "<green>[info]</green>                                               print information about the bundle\n"
     "<green>[--incvers] avail</green>                                    print modules in the bundle\n"
     "<green>rebuild</green>                                              rebuild the bundle cache\n"
+    "<green>newverindex build</green>                                    retunr new version index for the specified build\n"
     "<green>[--personal] index new</green>                               calculate new index for builds\n"
     "<green>[--silent] [--skipremoved] [--skipadded] index diff</green>  compare new and old indexes\n"
     "<green>index commit</green>                                         commit new index as old index\n"

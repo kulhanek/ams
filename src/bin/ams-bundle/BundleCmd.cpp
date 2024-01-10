@@ -56,13 +56,17 @@ int CBundleCmd::Init(int argc, char* argv[])
     // output must be directed to stderr
     // stdout is used for shell processor
     Console.Attach(stdout);
+    ConsoleErr.Attach(stderr);
 
     // attach verbose stream to terminal stream and set desired verbosity level
     vout.Attach(Console);
+    verr.Attach(ConsoleErr);
     if( Options.GetOptVerbose() ) {
         vout.Verbosity(CVerboseStr::high);
+        verr.Verbosity(CVerboseStr::high);
     } else {
         vout.Verbosity(CVerboseStr::low);
+        verr.Verbosity(CVerboseStr::low);
     }
 
     CSmallTimeAndDate dt;
@@ -123,6 +127,10 @@ bool CBundleCmd::Run(void)
         return( BundleDirName() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "newverindex" ) {
+        return( NewVerIndex() );
+    }
+    // ----------------------------------------------
     else {
         CSmallString error;
         error << "not implemented action '" << Options.GetArgAction() << "'";
@@ -148,9 +156,10 @@ void CBundleCmd::Finalize(void)
     vout << "# ==============================================================================" << endl;
 
     if( ErrorSystem.IsError() || (ErrorSystem.IsAnyRecord() && Options.GetOptVerbose()) ){
-        if( ForcePrintErrors ) vout << low;
-        ErrorSystem.PrintErrors(stderr);
-        if( ForcePrintErrors ) vout << endl;
+        verr << high;
+        if( ForcePrintErrors ) verr << low;
+        ErrorSystem.PrintErrors(verr);
+        if( ForcePrintErrors ) verr << endl;
     } else {
         vout << endl;
     }
@@ -412,6 +421,43 @@ bool CBundleCmd::BundleDirName(void)
 
     vout << bundle.GetFullBundleName() << endl;
 
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::NewVerIndex(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    double verindex = bundle.GetNewVerIndex(Options.GetProgArg(1));
+    vout << low;
+    vout << verindex;
     return(true);
 }
 
