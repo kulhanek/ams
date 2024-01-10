@@ -217,8 +217,10 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     // print rest of module info -------------------
     if( (print_level == EAPL_FULL) || (print_level == EAPL_VERBOSE) ) {
         Host.PrintHostInfoForModule(vout);
-        if( (GetMaintainerName(p_module) != NULL) && (GetMaintainerEMail(p_module) != NULL) ){
-            vout << "  Module maintainer  : " << GetMaintainerName(p_module) << " (" << GetMaintainerEMail(p_module) << ")" << endl;
+        if( (GetMaintainerName(p_module) != NULL) && (GetMaintainerEMail(p_module) != NULL) && (GetBundleName(p_module) != NULL) ){
+            vout << "  Module maintainer  : " << GetMaintainerName(p_module)
+                 << " (" << GetMaintainerEMail(p_module) << ")"
+                 << " | Bundle: " << GetBundleName(p_module) << endl;
         }
         vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( (CModCache::CanModuleBeExported(p_module) == true) && (do_not_export == false) ) {

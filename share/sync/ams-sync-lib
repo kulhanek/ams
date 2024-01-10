@@ -190,50 +190,43 @@ function check_auth()
 
 # ------------------------------------------------
 
-function read_profile_exec()
-{
-    export AMS_WORKING_DIR="`grep CWD "$PROFILE" | awk '{print $2;}'`"
-    echo ""
-    echo "> Working directory: $AMS_WORKING_DIR"
-    if [ -z "$AMS_WORKING_DIR" ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: CWD key is not defined!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-}
-
-# ------------------------------------------------
-
 function exec_profile() {
 
     echo ""
     echo "# AMS Command Execution"
     echo "# ------------------------------------------------"
 
-    read_profile_exec
-
-    cd $AMS_WORKING_DIR
-    if [ $? -ne 0 ]; then
-        echo "" 1>&2
-        echo ">>> ERROR: Unable to set the working directory '$AMS_WORKING_DIR'!" 1>&2
-        echo "" 1>&2
-        exit 1
-    fi
-
-    while read AMS_COMMAND; do
-        echo ""
-        echo "$ $AMS_COMMAND"
-        echo "--------------------"
-        eval "$AMS_COMMAND"
-        if [ $? -ne 0 ]; then
+    while read AMS_CMD AMS_ACTION; do
+        if [[ "$AMS_CMD" == "CWD" ]]; then
+            echo ""
+            echo "$ CWD: $AMS_ACTION"
+            echo "--------------------"
+            cd $AMS_COMMAND
+            if [ $? -ne 0 ]; then
+                echo "" 1>&2
+                echo ">>> ERROR: Unable to change the current working directory to '$AMS_ACTION'!" 1>&2
+                echo "" 1>&2
+                exit 1
+            fi
+        elif [[ "$AMS_CMD" == "CMD" ]]; then
+            echo ""
+            echo "$ $AMS_ACTION"
+            echo "--------------------"
+            eval "$AMS_ACTION"
+            if [ $? -ne 0 ]; then
+                echo "" 1>&2
+                echo ">>> ERROR: Unable to execute the command '$AMS_ACTION'!" 1>&2
+                echo "" 1>&2
+                exit 1
+            fi
+        else
             echo "" 1>&2
-            echo ">>> ERROR: Unable to execute the command '$AMS_COMMAND'!" 1>&2
+            echo ">>> ERROR: Unknown command: '$AMS_ACTION'!" 1>&2
             echo "" 1>&2
             exit 1
         fi
         echo "--------------------"
-    done < <( grep CMD "$PROFILE" | sed -e 's/CMD//g' )
+    done < "$PROFILE"
     echo ""
 }
 
