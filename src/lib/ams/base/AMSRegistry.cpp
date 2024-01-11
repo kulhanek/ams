@@ -122,8 +122,10 @@ bool CAMSRegistry::SaveRegistry(const CFileName& registry_name)
         CSmallString error;
         error << "unable to save full-registry file '" << registry_name << "'";
         ES_ERROR(error);
-        return;
+        return(false);
     }
+
+    return(true);
 }
 
 //------------------------------------------------------------------------------
