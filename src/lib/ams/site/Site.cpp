@@ -343,9 +343,6 @@ bool CSite::ActivateSite(void)
     ShellProcessor.UnsetVariable("INF_COLLECTION_PATH");
     ShellProcessor.UnsetVariable("INF_COLLECTION_ID");
 
-    // set umask
-    ShellProcessor.SetUMask(AMSRegistry.GetUserUMask());
-
     return(true);
 }
 

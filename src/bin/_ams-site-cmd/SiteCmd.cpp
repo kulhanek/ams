@@ -625,7 +625,6 @@ int CSiteCmd::InitSite(void)
             return(SITE_ERROR_NOT_ALLOWED);
         }
 
-        // this will set umask
         if( site.ActivateSite() == false ){
             CSmallString error;
             error << "unable to activate site environment '" << site.GetName() << "' (init)";
@@ -651,7 +650,6 @@ int CSiteCmd::InitSite(void)
             return(SITE_ERROR_CONFIG_PROBLEM);
         }
 
-        // this will set umask
         if( site.ActivateSite() == false ){
             CSmallString error;
             error << "unable to activate site environment '" << site.GetName() << "' (init)";
@@ -663,10 +661,15 @@ int CSiteCmd::InitSite(void)
         reactivate = true;
     }
 
+    if( SiteController.IsBatchJob() == false ){
+        // set umask but not in jobs
+        ShellProcessor.SetUMask(AMSRegistry.GetUserUMask());
+    }
+
 // print site info if TTY is available
     if( SiteController.HasTTY() && ( ! SiteController.IsSiteInfoPrinted() ) ) {
         vout << low;
-        // umask is set above in ActivateSite
+        // umask is set above
         site.PrintShortSiteInfo(vout);
         vout << endl;
         SiteController.SetSiteInfoPrinted();
