@@ -703,7 +703,7 @@ int CSiteCmd::InitSite(void)
 
         // restore PWD
         if( SiteController.GetSSH_PWD() != NULL ){
-            ShellProcessor.ChangeCurrentDir(SiteController.GetSSH_PWD());
+            ShellProcessor.ChangeCurrentDir(SiteController.GetSSH_PWD(),true);
         }
         SiteController.UnsetSSHVariables();
     }

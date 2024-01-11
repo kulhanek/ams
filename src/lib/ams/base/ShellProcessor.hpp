@@ -116,7 +116,7 @@ public:
     void RestorePWD(void);
 
     /// change current directory
-    void ChangeCurrentDir(const CFileName& path);
+    void ChangeCurrentDir(const CFileName& path,bool silent=false);
 
     /// execute command
     void ExecuteCMD(const CSmallString& cmd);

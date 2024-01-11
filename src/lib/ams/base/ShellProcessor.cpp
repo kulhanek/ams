@@ -630,7 +630,7 @@ void CShellProcessor::RestorePWD(void)
 
 //------------------------------------------------------------------------------
 
-void CShellProcessor::ChangeCurrentDir(const CFileName& path)
+void CShellProcessor::ChangeCurrentDir(const CFileName& path,bool silent)
 {
     CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
     if( p_ele == NULL ){
@@ -640,6 +640,7 @@ void CShellProcessor::ChangeCurrentDir(const CFileName& path)
     CXMLElement* p_sele = p_ele->CreateChildElement("shell");
     p_sele->SetAttribute("action","cd");
     p_sele->SetAttribute("path",path);
+    p_sele->SetAttribute("silent",silent);
 }
 
 //------------------------------------------------------------------------------
@@ -850,8 +851,14 @@ void CShellProcessor::BuildEnvironment(void)
             }
             if( action == "cd" ){
                 CSmallString path;
+                bool silent = false;
                 p_sele->GetAttribute("path",path);
-                printf("cd \"%s\";\n",(const char*)path);
+                p_sele->GetAttribute("silent",silent);
+                if( silent ){
+                    printf("cd \"%s\" 2> /dev/null;\n",(const char*)path);
+                } else {
+                    printf("cd \"%s\";\n",(const char*)path);
+                }
             }
             if( action == "exec" ){
                 CSmallString cmd;
