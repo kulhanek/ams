@@ -99,9 +99,9 @@ bool CAMSRegistry::SaveUserConfig(void)
 
 //------------------------------------------------------------------------------
 
-void CAMSRegistry::SaveRegistry(const CFileName& registry_name)
+bool CAMSRegistry::SaveRegistry(const CFileName& registry_name)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/variables");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/variables");
     if( p_ele != NULL ){
         p_ele->RemoveAllChildNodes();
     }
@@ -131,7 +131,7 @@ void CAMSRegistry::SaveRegistry(const CFileName& registry_name)
 const CSmallString CAMSRegistry::GetSystemVariable(const CSmallString& name)
 {
 // first try registry records
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/variables/variable");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/variables/variable");
 
     while( p_ele != NULL ){
         CSmallString vname,value;
@@ -155,7 +155,7 @@ void CAMSRegistry::SetRegistryVariable(const CSmallString& name)
 {
     CSmallString value = CShell::GetSystemVariable(name);
 
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/variables",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/variables",true);
     p_ele = p_ele->CreateChildElement("variable");
     p_ele->SetAttribute("name",name);
     p_ele->SetAttribute("value",value);
@@ -228,7 +228,7 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(void)
 
 const CSmallString CAMSRegistry::GetUserUMask(void)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user",true);
     CSmallString umask;
     p_ele->GetAttribute("umask",umask);
     if( umask == NULL ){
@@ -241,7 +241,7 @@ const CSmallString CAMSRegistry::GetUserUMask(void)
 
 void CAMSRegistry::SetUserUMask(const CSmallString& umask)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user",true);
     if( (umask == NULL) || (umask == "default") ){
         p_ele->RemoveAttribute("umask");
     } else {
@@ -254,7 +254,7 @@ void CAMSRegistry::SetUserUMask(const CSmallString& umask)
 
 void CAMSRegistry::GetUserAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded/module");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/autoloaded/module");
     if( p_ele == NULL ) return;
 
     while( p_ele != NULL ){
@@ -284,7 +284,7 @@ bool CAMSRegistry::IsUserAutoLoadedModule(const CSmallString& name)
 
 void CAMSRegistry::AddUserAutoLoadedModule(const CSmallString& name)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded/module",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/autoloaded/module",true);
     p_ele->SetAttribute("name",name);
 }
 
@@ -292,7 +292,7 @@ void CAMSRegistry::AddUserAutoLoadedModule(const CSmallString& name)
 
 void CAMSRegistry::RemoveUserAutoLoadedModule(const CSmallString& name)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded/module");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/autoloaded/module");
     if( p_ele == NULL ) return;
 
     while( p_ele != NULL ){
@@ -310,7 +310,7 @@ void CAMSRegistry::RemoveUserAutoLoadedModule(const CSmallString& name)
 
 void CAMSRegistry::RemoveAllUserAutoLoadedModules(void)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/autoloaded");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/autoloaded");
     if( p_ele != NULL ){
         p_ele->RemoveAllChildNodes();
     }
@@ -358,7 +358,7 @@ const CSmallString CAMSRegistry::GetUserPrintProfile(void)
 {
     CSmallString profile = "default";
 
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user");
     if( p_ele != NULL ){
         p_ele->GetAttribute("printprofile",profile);
     }
@@ -370,7 +370,7 @@ const CSmallString CAMSRegistry::GetUserPrintProfile(void)
 
 void CAMSRegistry::SetUserPrintProfile(const CSmallString& name)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user",true);
     if( (name == NULL) || (name == "default") ){
         p_ele->RemoveAttribute("printprofile");
     } else {
@@ -383,7 +383,7 @@ void CAMSRegistry::SetUserPrintProfile(const CSmallString& name)
 
 void CAMSRegistry::GetUserBundleNames(std::list<CSmallString>& names)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles/bundle");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/bundles/bundle");
     if( p_ele == NULL ) return;
 
     while( p_ele != NULL ){
@@ -410,7 +410,7 @@ bool CAMSRegistry::IsUserBundleName(const CSmallString& name)
 
 void CAMSRegistry::AddUserBundleName(const CSmallString& name)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/bundles",true);
     CXMLElement* p_bele = p_ele->CreateChildElement("bundle");
     p_bele->SetAttribute("name",name);
 }
@@ -419,7 +419,7 @@ void CAMSRegistry::AddUserBundleName(const CSmallString& name)
 
 void CAMSRegistry::RemoveUserBundleName(const CSmallString& name)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles/bundle");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/bundles/bundle");
     if( p_ele == NULL ) return;
 
     while( p_ele != NULL ){
@@ -437,7 +437,7 @@ void CAMSRegistry::RemoveUserBundleName(const CSmallString& name)
 
 void CAMSRegistry::RemoveAllUserBundleNames(void)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/bundles");
     if( p_ele != NULL ){
         p_ele->RemoveAllChildNodes();
     }
@@ -449,7 +449,7 @@ void CAMSRegistry::RemoveAllUserBundleNames(void)
 const CFileName CAMSRegistry::GetUserBundlePath(void)
 {
     CFileName path;
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles");
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/bundles");
     if( p_ele != NULL ){
         p_ele->GetAttribute("path",path);
     }
@@ -460,7 +460,7 @@ const CFileName CAMSRegistry::GetUserBundlePath(void)
 
 void CAMSRegistry::SetUserBundlePath(const CFileName& path)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/user/bundles",true);
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/bundles",true);
     if( (path == NULL) || (path == "default") ){
         p_ele->RemoveAttribute("path");
     } else {
@@ -645,6 +645,16 @@ const CFileName CAMSRegistry::GetBundlePath(void)
     path << sys_path;
 
     return(path);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+CXMLElement* CAMSRegistry::GetABSConfiguration(void)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/abs",true);
+    return(p_ele);
 }
 
 //==============================================================================

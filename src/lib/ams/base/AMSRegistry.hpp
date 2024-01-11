@@ -44,7 +44,7 @@ public:
     bool SaveUserConfig(void);
 
     /// save all registry into specified file
-    void SaveRegistry(const CFileName& registry_name);
+    bool SaveRegistry(const CFileName& registry_name);
 
 // system config ---------------------------------------------------------------
     /// get system variable either form the shell environment or the registry
@@ -154,6 +154,10 @@ public:
 
     /// column separated bundle search paths
     const CFileName GetBundlePath(void);
+
+// ABS integration -------------------------------------------------------------
+    /// get ABS configuration
+    CXMLElement* GetABSConfiguration(void);
 
 // section of private data -----------------------------------------------------
 private:
