@@ -114,12 +114,17 @@ void CHostGroup::InitAllHostGroups(void)
     CUtils::FindAllFilesInPaths(paths,"*.xml",host_files);
 
     for(CFileName host_file : host_files){
+        CXMLDocument xml_document;
         CXMLParser xml_parser;
-        xml_parser.SetOutputXMLNode(p_ele);
+        xml_parser.SetOutputXMLNode(&xml_document);
         if( xml_parser.Parse(host_file) == false ){
             CSmallString error;
             error << "unable to parse host group file '" << host_file << "'";
             RUNTIME_ERROR(error);
+        }
+        CXMLElement* p_hele = xml_document.GetFirstChildElement("host");
+        if( p_hele != NULL ){
+            p_hele->Duplicate(p_ele);
         }
     }
 }
