@@ -61,7 +61,7 @@ public:
     "   <green>listamods [site]</green> list autoloaded modules for the active or requested site\n"
     "\n"
     "Supported actions (system):\n"
-    "   <green>init [site]</green>      init the site\n"
+    "   <green>[--job] init</green>      init the site\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN
@@ -71,6 +71,7 @@ public:
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
     // options ------------------------------
+    CSO_OPT(bool,Job)
     CSO_OPT(bool,All)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
@@ -96,6 +97,15 @@ public:
                 "all",                      /* long option name */
                 NULL,                           /* parametr name */
                 "print all sites with 'avail' action")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                Job,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                'j',                           /* short option name */
+                "job",                      /* long option name */
+                NULL,                           /* parametr name */
+                "init the site for the job")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Version,                        /* option name */

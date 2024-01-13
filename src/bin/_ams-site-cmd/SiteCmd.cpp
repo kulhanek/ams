@@ -575,7 +575,8 @@ int CSiteCmd::InitSite(void)
     vout << "# Batch Job Site : " << none_if_empty(SiteController.GetBatchJobSite()) << endl;
     vout << "# Has TTY        : " << bool_to_str(SiteController.HasTTY()) << endl;
 
-    if( SiteController.IsBatchJob() && (SiteController.GetActiveSite() == NULL) ){
+    if( SiteController.IsBatchJob() && (SiteController.GetActiveSite() == NULL) &&
+        (Options.GetOptJob() == false) ){
         vout << endl;
         vout << ">>> INFO: this is is a batch job which is not initialized yet" << endl;
         return(SITE_STATUS_OK);
@@ -676,7 +677,7 @@ int CSiteCmd::InitSite(void)
     ShellProcessor.SetUMask(CUserUtils::GetUMask(User.GetRequestedUserUMaskMode(origin)));
 
 // print site info if TTY is available
-    if( SiteController.HasTTY() && ( ! SiteController.IsSiteInfoPrinted() ) ) {
+    if( (SiteController.HasTTY() || (Options.GetOptJob() == true)) && ( ! SiteController.IsSiteInfoPrinted() ) ) {
         vout << low;
         // umask is set above
         site.PrintShortSiteInfo(vout);
