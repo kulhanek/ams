@@ -124,7 +124,7 @@ void CHostGroup::InitAllHostGroups(void)
         }
         CXMLElement* p_hele = xml_document.GetFirstChildElement("host");
         if( p_hele != NULL ){
-            p_hele->Duplicate(p_ele);
+            p_hele->DuplicateNode(p_ele);
         }
     }
 }
