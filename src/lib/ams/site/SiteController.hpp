@@ -73,6 +73,9 @@ public:
     /// is a batch job?
     static bool  IsBatchJob(void);
 
+    /// get batch job site name
+    static const CSmallString GetBatchJobSite(void);
+
     /// was site info already printed?
     static bool IsSiteInfoPrinted(void);
 

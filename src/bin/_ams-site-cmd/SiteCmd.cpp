@@ -568,11 +568,12 @@ int CSiteCmd::InitSite(void)
 // general info about setup
     vout << high;
     vout << endl;
-    vout << "# Active site   : " << none_if_empty(SiteController.GetActiveSite()) << endl;
-    vout << "# SSH site      : " << none_if_empty(SiteController.GetSSHSite()) << endl;
-    vout << "# Default site  : " << none_if_empty(HostGroup.GetDefaultSite()) << endl;
-    vout << "# Is Batch Job  : " << bool_to_str(SiteController.IsBatchJob()) << endl;
-    vout << "# Has TTY       : " << bool_to_str(SiteController.HasTTY()) << endl;
+    vout << "# Active site    : " << none_if_empty(SiteController.GetActiveSite()) << endl;
+    vout << "# SSH site       : " << none_if_empty(SiteController.GetSSHSite()) << endl;
+    vout << "# Default site   : " << none_if_empty(HostGroup.GetDefaultSite()) << endl;
+    vout << "# Is Batch Job   : " << bool_to_str(SiteController.IsBatchJob()) << endl;
+    vout << "# Batch Job Site : " << none_if_empty(SiteController.GetBatchJobSite()) << endl;
+    vout << "# Has TTY        : " << bool_to_str(SiteController.HasTTY()) << endl;
 
     if( SiteController.IsBatchJob() && (SiteController.GetActiveSite() == NULL) ){
         vout << endl;
@@ -593,17 +594,20 @@ int CSiteCmd::InitSite(void)
     CSmallString site_name = SiteController.GetActiveSite();
     if( site_name == NULL ){
         vout << endl;
-        site_name = SiteController.GetSSHSite();
-        if(  site_name != NULL ){
-            if( ! HostGroup.IsSiteAllowed(site_name) ){
-                site_name = HostGroup.GetDefaultSite();
-                vout << ">>> the SSH site is not alloved on this host group, switching to the default site" << endl;
+        site_name = SiteController.GetBatchJobSite();
+        if( site_name == NULL ){
+            site_name = SiteController.GetSSHSite();
+            if(  site_name != NULL ){
+                if( ! HostGroup.IsSiteAllowed(site_name) ){
+                    site_name = HostGroup.GetDefaultSite();
+                    vout << ">>> the SSH site is not alloved on this host group, switching to the default site" << endl;
+                } else {
+                    vout << ">>> the SSH site is accepted: " << site_name << endl;
+                }
             } else {
-                vout << ">>> the SSH site is accepted: " << site_name << endl;
+                site_name = HostGroup.GetDefaultSite();
+                vout << ">>> the default site is accepted: " << site_name << endl;
             }
-        } else {
-            site_name = HostGroup.GetDefaultSite();
-            vout << ">>> the default site is accepted: " << site_name << endl;
         }
         if( site_name == NULL ){
             CSmallString error;

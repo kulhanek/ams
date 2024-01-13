@@ -231,6 +231,15 @@ bool CSiteController::IsBatchJob(void)
 
 //------------------------------------------------------------------------------
 
+const CSmallString CSiteController::GetBatchJobSite(void)
+{
+    CSmallString site_name;
+    site_name = CShell::GetSystemVariable("INF_AMS_SITE");
+    return( site_name );
+}
+
+//------------------------------------------------------------------------------
+
 bool CSiteController::IsSiteInfoPrinted(void)
 {
     CSmallString site_info_printed;
