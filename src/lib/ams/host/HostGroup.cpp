@@ -414,7 +414,6 @@ const CSmallString CHostGroup::GetHostGroupBundleSyncSuggestions(void)
     CXMLElement* p_ele = HostGroup.GetChildElementByPath("group");
     if( p_ele == NULL ) return(profiles);
     p_ele->GetAttribute("bundle_sync_profiles",profiles);
-    cerr << profiles << endl;
     return(profiles);
 }
 
