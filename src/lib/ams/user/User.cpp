@@ -471,6 +471,9 @@ const CSmallString CUser::GetJobUMask(void)
     CSmallString umask;
     if( SiteController.IsBatchJob() == true ){
         umask = CShell::GetSystemVariable("INF_UMASK");
+        if( umask == NULL ){
+            umask = CShell::GetSystemVariable("INF_GO_UMASK");
+        }
     }
     return(umask);
 }

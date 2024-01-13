@@ -226,7 +226,9 @@ bool CSiteController::IsBatchJob(void)
 {
     CSmallString pbs_jobid;
     pbs_jobid = CShell::GetSystemVariable("PBS_JOBID");
-    return( pbs_jobid != NULL );
+    CSmallString go_site;
+    go_site = CShell::GetSystemVariable("INF_GO_SITE");
+    return( (pbs_jobid != NULL) || (go_site != NULL) );
 }
 
 //------------------------------------------------------------------------------
@@ -235,6 +237,10 @@ const CSmallString CSiteController::GetBatchJobSite(void)
 {
     CSmallString site_name;
     site_name = CShell::GetSystemVariable("INF_AMS_SITE");
+    if( site_name != NULL ){
+        return( site_name );
+    }
+    site_name = CShell::GetSystemVariable("INF_GO_SITE");
     return( site_name );
 }
 
