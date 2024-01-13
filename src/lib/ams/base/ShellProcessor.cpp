@@ -879,6 +879,11 @@ void CShellProcessor::BuildEnvironment(void)
 
 void CShellProcessor::PrintBuild(std::ostream& vout,CXMLElement* p_build)
 {
+    if( p_build == NULL ){
+        vout << "-none-" << endl;
+        return;
+    }
+
     // info out ----------------------------------------------------------------------------
     unsigned int col1 = 1;
     unsigned int col2 = 1;
