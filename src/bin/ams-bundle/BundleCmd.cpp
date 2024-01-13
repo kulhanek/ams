@@ -473,7 +473,7 @@ bool CBundleCmd::SyncBundle(void)
     CFileName cmd;
     cmd = AMSRegistry.GetAMSRootDIR() / "share" / "scripts" / "ams-sync-bundle";
 
-    execl(cmd,Options.GetProgArg(1).GetBuffer(),(char*)NULL);
+    execl(cmd, cmd, Options.GetProgArg(1).GetBuffer(),(char*)NULL);
 
     // The exec() functions return only if an error has occurred.
 
