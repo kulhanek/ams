@@ -195,11 +195,13 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(void)
     CFileName user_config;
     user_config = CShell::GetSystemVariable("AMS_REGISTRY_CONFIG");
 
-    // is file?
-    if( CFileSystem::IsFile(user_config) == true ) {
-        CSmallString error;
-        error << "user config '" << user_config << "' from AMS_REGISTRY_CONFIG is not a file";
-        RUNTIME_ERROR(error);
+    if( user_config != NULL ){
+        // is file?
+        if( CFileSystem::IsFile(user_config) == false ) {
+            CSmallString error;
+            error << "user config '" << user_config << "' from AMS_REGISTRY_CONFIG is not a file";
+            RUNTIME_ERROR(error);
+        }
     }
 
     if( user_config == NULL ) {
