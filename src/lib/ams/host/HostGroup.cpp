@@ -107,7 +107,7 @@ void CHostGroup::InitHostGroup(void)
 
 void CHostGroup::InitAllHostGroups(void)
 {
-    CXMLElement* p_ele = AllHostGroups.CreateChildElement("hosts");
+    CXMLElement* p_ele = AllHostGroups.CreateChildElement("groups");
     std::list<CFileName> host_files;
 
     CFileName paths = AMSRegistry.GetHostGroupsSearchPaths();
@@ -122,7 +122,7 @@ void CHostGroup::InitAllHostGroups(void)
             error << "unable to parse host group file '" << host_file << "'";
             RUNTIME_ERROR(error);
         }
-        CXMLElement* p_hele = xml_document.GetFirstChildElement("host");
+        CXMLElement* p_hele = xml_document.GetFirstChildElement("group");
         if( p_hele != NULL ){
             p_hele->DuplicateNode(p_ele);
         }
