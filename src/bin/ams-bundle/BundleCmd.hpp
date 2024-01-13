@@ -56,6 +56,7 @@ private:
     bool BundleIndex(void);
     bool BundleDirName(void);
     bool NewVerIndex(void);
+    bool SyncBundle(void);
 };
 
 // -----------------------------------------------------------------------------

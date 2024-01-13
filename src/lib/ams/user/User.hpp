@@ -69,8 +69,23 @@ public:
     /// is in posix group
     bool IsInPosixGroup(const CSmallString& group);
 
+// informational methods -------------------------------------------------------
+
+    /// get user umask
+    const CSmallString GetUserUMask(void);
+
+    /// get user umask - for job
+    const CSmallString GetJobUMask(void);
+
     /// return user requested umask
-    const CSmallString GetRequestedUserUMask(void);
+    /// umask origins
+    /// S - system
+    /// D - default
+    /// H - host group
+    /// G - ACL group
+    /// U - user
+    /// J - job
+    mode_t GetRequestedUserUMaskMode(char& origin);
 
 // informational methods -------------------------------------------------------
     /// print info about user
@@ -100,6 +115,9 @@ private:
     std::list<CSmallString>     PosixACLGroups;
     std::list<CSmallString>     AMSACLGroups;
     std::list<CSmallString>     AllACLGroups;          // only those groups in which the user belongs
+
+    // umask
+    CSmallString                UMask;
 
     /// init user from the system
     void InitPosixUser(void);

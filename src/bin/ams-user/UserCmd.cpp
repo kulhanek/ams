@@ -25,6 +25,7 @@
 #include <SmallTimeAndDate.hpp>
 #include <AMSRegistry.hpp>
 #include <User.hpp>
+#include <UserUtils.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -82,7 +83,9 @@ bool CUserCmd::Run(void)
     User.InitUser();
 
     if ( Options.GetOptUMask() ) {
-        vout << User.GetRequestedUserUMask();
+        char origin = 'U';
+        mode_t umask = User.GetRequestedUserUMaskMode(origin);
+        vout << CUserUtils::GetUMask(umask) << "/" << origin;
     } else {
         // print info
         vout << low;

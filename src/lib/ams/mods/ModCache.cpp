@@ -209,11 +209,13 @@ CXMLElement* CModCache::GetModule(const CSmallString& name,bool create)
         RUNTIME_ERROR("unable to open cache element");
     }
 
+    CSmallString modname = CModUtils::GetModuleName(name);
+
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
     while( p_mele != NULL ) {
-        CSmallString modname;
-        p_mele->GetAttribute("name",modname);
-        if( modname == name ) return(p_mele);
+        CSmallString lname;
+        p_mele->GetAttribute("name",lname);
+        if( lname == modname ) return(p_mele);
         p_mele = p_mele->GetNextSiblingElement("module");
     }
 
@@ -935,6 +937,23 @@ bool CModCache::DoesItNeedGPU(const CSmallString& name)
     }
 
     return(gpu);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModCache::IsAutoloadEnabled(const CSmallString& name)
+{
+    CXMLElement* p_module = GetModule(name);
+    if( p_module == NULL ){
+        CSmallString warning;
+        warning << "module '" << name << "'' was not found in the cache";
+        ES_WARNING(warning);
+        return(false);
+    }
+
+    bool enabled = true;
+    p_module->GetAttribute("autoload",enabled);
+    return(enabled);
 }
 
 //------------------------------------------------------------------------------

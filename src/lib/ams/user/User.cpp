@@ -40,6 +40,10 @@
 #include <boost/algorithm/string/join.hpp>
 #include <UserUtils.hpp>
 #include <Utils.hpp>
+#include <iomanip>
+#include <HostGroup.hpp>
+#include <SiteController.hpp>
+#include <Shell.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -211,6 +215,9 @@ void CUser::InitDefaultACLGroups(CXMLElement* p_ele)
     if( p_ele->GetAttribute("groups",value) ){
         split(DefaultACLGroups,value,is_any_of(","));
     }
+    if( UMask == NULL ){
+        p_ele->GetAttribute("umask",UMask);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -235,6 +242,9 @@ void CUser::InitPosixACLGroups(CXMLElement* p_ele)
                     PosixACLGroups.push_back(alias);
                 } else {
                     PosixACLGroups.push_back(pgrp);
+                }
+                if( UMask == NULL ){
+                    p_fele->GetAttribute("umask",UMask);
                 }
             }
         }
@@ -261,6 +271,9 @@ void CUser::InitAMSACLGroups(CXMLElement* p_ele)
             CSmallString usrname;
             p_uele->GetAttribute("name",usrname);
             if( usrname == Name ){
+                if( UMask == NULL ){
+                    p_fele->GetAttribute("umask",UMask);
+                }
                 AMSACLGroups.push_back(grpname);
                 break;
             }
@@ -365,7 +378,11 @@ void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
     vout << endl;
     vout << "# User name          : " << Name << " (uid: " << UID << ")" << endl;
     vout << "# Real group name    : " << RGroup << " (gid: " << RGID << ")" << endl;
-    vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ") [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
+    vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ")" << endl;
+    mode_t umask_mode = CUserUtils::GetUMaskMode();
+    char uorigin = 'S';
+    vout << "# Current UMask      : " << CUserUtils::GetUMask(umask_mode) << "/" << uorigin;
+    vout << " [" << CUserUtils::GetUMaskPermissions(umask_mode) << "]" << endl;
 
     vout << "# ==============================================================================" << endl;
     vout << "# Configuration      : " << ConfigName <<  endl;
@@ -388,6 +405,16 @@ void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
         p_ele = p_ele->GetNextSiblingElement();
     }
     vout << "# ==============================================================================" << endl;
+
+    CSmallString umask = GetUserUMask();
+    if( umask != NULL ){
+        char uorigin = 'G';
+        if( umask != 0 ){}
+        vout << "# Requested UMask    : " << umask << "/" << uorigin;
+        vout << " [" << CUserUtils::GetUMaskPermissions(CUserUtils::GetUMaskMode(umask)) << "]" << endl;
+    } else {
+        vout << "# Requested UMask    : unset/G" << endl;
+    }
     CUtils::PrintTokens(vout,"# Final ACL Groups   : ",GetGroupList(AllACLGroups),80);
 }
 
@@ -402,6 +429,11 @@ void CUser::PrintUserInfo(CVerboseStr& vout)
     vout << "# Effective group name : " << EGroup << endl;
     vout << "# Effective group ID   : " << EGID << endl;
     vout << "# Posix groups         : " << GetPosixGroups() << endl;
+    if( UMask != NULL ){
+    vout << "# UMask                : " << UMask << endl;
+    } else {
+    vout << "# UMask                : " << "unset" << endl;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -413,16 +445,58 @@ void CUser::PrintUserInfoForSite(CVerboseStr& vout)
     for(int n=25; n < 80;n++) vout << "~";
     vout << endl;
 
+    mode_t umask = CUserUtils::GetUMaskMode();
+    char uorigin;
+    mode_t req_umask = User.GetRequestedUserUMaskMode(uorigin);
+    if( umask != req_umask ){
+        uorigin = 'S';
+    }
     vout <<                  "  User name  : " << GetName() << endl;
-    vout <<                  "  User group : " << GetEGroup() << " [umask: " << CUserUtils::GetUMask() << " " << CUserUtils::GetUMaskPermissions() << "]" << endl;
+    vout <<                  "  User group : " << GetEGroup() << " [umask: " << CUserUtils::GetUMask(umask);
+    vout << "/" << setw(1) << uorigin << " " << CUserUtils::GetUMaskPermissions(umask) << "]" << endl;
     CUtils::PrintTokens(vout,"  ACL groups : ",GetACLGroups(),80);
 }
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUser::GetRequestedUserUMask(void)
+const CSmallString CUser::GetUserUMask(void)
 {
-    return( AMSRegistry.GetUserUMask() );
+    return(UMask);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CUser::GetJobUMask(void)
+{
+    CSmallString umask;
+    if( SiteController.IsBatchJob() == true ){
+        umask = CShell::GetSystemVariable("INF_UMASK");
+    }
+    return(umask);
+}
+
+//------------------------------------------------------------------------------
+
+mode_t CUser::GetRequestedUserUMaskMode(char& origin)
+{
+    if( GetJobUMask() != NULL ){
+        origin = 'J';
+        return(CUserUtils::GetUMaskMode(GetJobUMask()));
+    }
+    if( AMSRegistry.GetUserUMask() != NULL ){
+        origin = 'U';
+        return(CUserUtils::GetUMaskMode(AMSRegistry.GetUserUMask()));
+    }
+    if( GetUserUMask() != NULL ){
+        origin = 'G';
+        return(CUserUtils::GetUMaskMode(GetUserUMask()));
+    }
+    if( HostGroup.GetUserUMask() != NULL ){
+        origin = 'H';
+        return(CUserUtils::GetUMaskMode(HostGroup.GetUserUMask()));
+    }
+    origin = 'D';
+    return( CUserUtils::GetUMaskMode(AMSRegistry.GetDefaultUMask()) );
 }
 
 //==============================================================================

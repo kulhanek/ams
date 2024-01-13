@@ -171,7 +171,31 @@ bool CAMSCompletion::GetSuggestions(void)
             return(true);
         }
         return(true);
-    } 
+    }
+    // ----------------------------------------------
+    else if( GetCommand() == "ams-bundle" ) {
+        // what part should be completed?
+        switch(CWord) {
+        case 1:
+            AddSuggestions("avail rebuild index sync");
+            FilterSuggestions();
+            PrintSuggestions();
+            return(true);
+        case 2:
+            if( GetAction() == "index" ) {
+                AddSuggestions("new diff");
+            } else if ( GetAction() == "sync" ){
+                AddSyncProfileSuggestions();
+            }
+            FilterSuggestions();
+            PrintSuggestions();
+            return(true);
+        default:
+            // out of command requirements -> no suggestions
+            return(true);
+        }
+        return(true);
+    }
     // ----------------------------------------------
     else {
         // unsupported command return
@@ -349,6 +373,23 @@ bool CAMSCompletion::AddModuleSuggestions(void)
         Suggestions.push_back(build);
     }
 
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CAMSCompletion::AddSyncProfileSuggestions(void)
+{
+// init AMS registry
+    AMSRegistry.LoadRegistry();
+
+// init host group
+    HostGroup.InitHostsConfig();
+    HostGroup.InitHostGroup();
+
+// set suggestions
+    CSmallString suggestions = HostGroup.GetHostGroupBundleSyncSuggestions();
+    if( suggestions != NULL ) AddSuggestions(suggestions);
     return(true);
 }
 

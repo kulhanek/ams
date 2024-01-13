@@ -39,6 +39,7 @@
 #include <HostGroup.hpp>
 #include <iomanip>
 #include <SiteController.hpp>
+#include <ModCache.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -181,26 +182,39 @@ void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigi
 {
     CSmallString flavor = AMSRegistry.GetSiteFlavor();
 
-    CXMLElement* p_ele = Config.GetChildElementByPath("site/autoload");
+    CXMLElement* p_ele = GetAutoLoadedModules();
     if( p_ele ){
         p_ele = p_ele->GetFirstChildElement("module");
     }
     while( p_ele ){
         CSmallString mname,mflavor;
         p_ele->GetAttribute("name",mname);
+        bool enabled = ModCache.IsAutoloadEnabled(mname);
+
         p_ele->GetAttribute("flavor",mflavor);
         if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
             if( withorigin ){
                 mname << "[site:" << GetName();
                 if( mflavor != NULL ) mname << "@" << mflavor;
                 mname << "]";
+                if( ! enabled ){
+                    mname << " - disabled by admin";
+                }
                 modules.push_back(mname);
             } else {
-                modules.push_back(mname);
+                if( enabled ) modules.push_back(mname);
             }
         }
         p_ele = p_ele->GetNextSiblingElement("module");
     }
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CSite::GetAutoLoadedModules(void)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("site/autoload");
+    return(p_ele);
 }
 
 //==============================================================================
@@ -210,10 +224,11 @@ void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigi
 void CSite::PrintShortSiteInfo(CVerboseStr& vout)
 {
     CSmallString name = GetName();
-    CSmallString status;
+    CSmallString title;
 
+    title << "<b><green>" << name << "</green></b>";
     if( ! IsSiteActive() ) {
-        status =  " (not active)";
+        title <<  " (not active)";
     }
 
     vout << endl;
@@ -224,8 +239,9 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
     for(unsigned int n=18; n < 80 - version.GetLength(); n++) vout << "~";
     vout << version << "~~" << endl;
 
-    vout << "  Site name  : <b><green>" << name << "</green></b>" << status << endl;
-    vout << "  Site ID    : " << GetID() << endl;
+    vout << "  Site name  : " << title << endl;
+    vout << "  Host group : " << setw(33) << left << HostGroup.GetHostGroupName();
+    vout << " | Site flavor : " << setw(15) << right << AMSRegistry.GetSiteFlavor() << endl;
 
     User.PrintUserInfoForSite(vout);
     Host.PrintHostInfoForSite(vout);
@@ -252,15 +268,21 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
 
     vout << endl;
     vout << "# ~~~ <b>Site Attributes</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    vout << "# Site config   : " << ConfigFile << endl;
-    vout << "# Site flavor   : " << AMSRegistry.GetSiteFlavor() << endl;
+    vout << "# Site config : " << ConfigFile << endl;
+    vout << "# Site ID     : " << GetID() << endl;
+
+    if( HostGroup.GetHostGroupEnvironment() != NULL ){
+        vout << endl;
+        vout << "# ~~~ <b>Environment Variables (host-group)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+        CShellProcessor::PrintBuild(vout,HostGroup.GetHostGroupEnvironment());
+    }
 
     vout << endl;
-    vout << "# ~~~ <b>Environment Variables</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    vout << "# ~~~ <b>Environment Variables (site)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     CShellProcessor::PrintBuild(vout,GetSiteEnvironment());
 
     vout << endl;
-    vout << "# ~~~ <b>Autoloaded Modules</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    vout << "# ~~~ <b>AutoLoaded Modules</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
     PrintAutoLoadedModules(vout);
 }
 
@@ -268,32 +290,59 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
 
 void CSite::PrintAutoLoadedModules(CVerboseStr& vout)
 {
+    vout << "# Origin Action   Module                                              Flavor    " << endl;
+    vout << "# ------ -------- --------------------------------------------------- ----------" << endl;
+
+    CXMLElement* p_ele;
+    p_ele = HostGroup.GetHostsConfigAutoLoadedModules();
+    PrintAutoLoadedModules(vout,p_ele,"hostcfg");
+
+    p_ele = HostGroup.GetHostGroupAutoLoadedModules();
+    PrintAutoLoadedModules(vout,p_ele,"hostgrp");
+
+    p_ele = GetAutoLoadedModules();
+    PrintAutoLoadedModules(vout,p_ele,"site");
+
+    p_ele = AMSRegistry.GetUserAutoLoadedModules();
+    PrintAutoLoadedModules(vout,p_ele,"user");
+}
+
+//------------------------------------------------------------------------------
+
+void CSite::PrintAutoLoadedModules(CVerboseStr& vout,CXMLElement* p_ele,const CSmallString& origin)
+{
+    if( p_ele == NULL ) return;
+    p_ele = p_ele->GetFirstChildElement("module");
+
     CSmallString flavor = AMSRegistry.GetSiteFlavor();
 
-    vout << "# Action Module                                                       Flavor    " << endl;
-    vout << "# ------ ------------------------------------------------------------ ----------" << endl;
-    CXMLElement* p_ele = Config.GetChildElementByPath("site/autoload");
-    if( p_ele ){
-        p_ele = p_ele->GetFirstChildElement("module");
-    }
+//  vout << "# Origin Action   Module                                              Flavor    " << endl;
+//  vout << "# ------ -------- --------------------------------------------------- ----------" << endl;
+
     while( p_ele ){
         CSmallString mname,mflavor;
         p_ele->GetAttribute("name",mname);
         p_ele->GetAttribute("flavor",mflavor);
-        if( mname != NULL ){
-            if( mflavor == NULL ){
-                vout << setw(8) << "regular";
-            } else if ( mflavor == flavor ){
-                vout << setw(8) << "flavor";
+        p_ele = p_ele->GetNextSiblingElement("module");
+        if( mname == NULL ) continue;
+
+        vout << setw(8) << origin << " ";
+
+        bool enabled = ModCache.IsAutoloadEnabled(mname);
+
+        if( enabled ){
+            if( (mflavor == NULL) || (mflavor == flavor) ){
+                vout << setw(8) << "add";
             } else {
                 vout << setw(8) << "ignored";
             }
-            vout << " " << setw(60) << mname;
-            vout << " " << setw(10) << mflavor;
-            vout << endl;
+        } else {
+            vout << setw(8) << "disabled";
         }
 
-        p_ele = p_ele->GetNextSiblingElement("module");
+        vout << " " << setw(51) << mname;
+        vout << " " << setw(10) << mflavor;
+        vout << endl;
     }
 }
 
@@ -324,7 +373,12 @@ bool CSite::ActivateSite(void)
     HostGroup.ExecuteModAction("activate",GetName(),~0);
 
     // boot host environments -----------------------
-    CXMLElement* p_env_ele = HostGroup.GetHostGroupEnvironment();
+    CXMLElement* p_env_ele;
+
+    p_env_ele = HostGroup.GetHostsConfigEnvironment();
+    PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);
+
+    p_env_ele = HostGroup.GetHostGroupEnvironment();
     PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);
 
     // boot site environments -----------------------

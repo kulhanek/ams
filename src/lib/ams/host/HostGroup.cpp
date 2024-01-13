@@ -30,6 +30,8 @@
 #include <XMLParser.hpp>
 #include <FileSystem.hpp>
 #include <ShellProcessor.hpp>
+#include <ModCache.hpp>
+#include <Utils.hpp>
 #include <fnmatch.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -105,7 +107,21 @@ void CHostGroup::InitHostGroup(void)
 
 void CHostGroup::InitAllHostGroups(void)
 {
-    // FIXME
+    CXMLElement* p_ele = AllHostGroups.CreateChildElement("hosts");
+    std::list<CFileName> host_files;
+
+    CFileName paths = AMSRegistry.GetHostGroupsSearchPaths();
+    CUtils::FindAllFilesInPaths(paths,"*.xml",host_files);
+
+    for(CFileName host_file : host_files){
+        CXMLParser xml_parser;
+        xml_parser.SetOutputXMLNode(p_ele);
+        if( xml_parser.Parse(host_file) == false ){
+            CSmallString error;
+            error << "unable to parse host group file '" << host_file << "'";
+            RUNTIME_ERROR(error);
+        }
+    }
 }
 
 //==============================================================================
@@ -282,11 +298,11 @@ const CSmallString CHostGroup::GetRealm(void)
 
 //------------------------------------------------------------------------------
 
-void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+void CHostGroup::GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
     CSmallString flavor = AMSRegistry.GetSiteFlavor();
 
-    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/autoload");
+    CXMLElement* p_ele = GetHostGroupAutoLoadedModules();
     if( p_ele ){
         p_ele = p_ele->GetFirstChildElement("module");
     }
@@ -295,15 +311,26 @@ void CHostGroup::GetAutoLoadedModules(std::list<CSmallString>& modules,bool with
         p_ele->GetAttribute("name",mname);
         p_ele->GetAttribute("flavor",mflavor);
         if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+            bool enabled = ModCache.IsAutoloadEnabled(mname);
             if( withorigin ){
                 mname << "[hostgroup:" << GetHostGroupName();
                 if( mflavor != NULL ) mname << "@" << mflavor;
                 mname << "]";
+                modules.push_back(mname);
+            } else {
+                if( enabled ) modules.push_back(mname);
             }
-            modules.push_back(mname);
+
         }
         p_ele = p_ele->GetNextSiblingElement("module");
     }
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CHostGroup::GetHostGroupAutoLoadedModules(void)
+{
+    return(HostGroup.GetChildElementByPath("group/autoload"));
 }
 
 //------------------------------------------------------------------------------
@@ -315,11 +342,79 @@ CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
 
 //------------------------------------------------------------------------------
 
+void CHostGroup::GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+{
+    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+
+    CXMLElement* p_ele = GetHostsConfigAutoLoadedModules();
+    if( p_ele ){
+        p_ele = p_ele->GetFirstChildElement("module");
+    }
+    while( p_ele ){
+        CSmallString mname,mflavor;
+        p_ele->GetAttribute("name",mname);
+        p_ele->GetAttribute("flavor",mflavor);
+        if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+            bool enabled = ModCache.IsAutoloadEnabled(mname);
+            if( withorigin ){
+                mname << "[hostsconfig:" << GetHostGroupName();
+                if( mflavor != NULL ) mname << "@" << mflavor;
+                mname << "]";
+                modules.push_back(mname);
+            } else {
+                if( enabled ) modules.push_back(mname);
+            }
+
+        }
+        p_ele = p_ele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CHostGroup::GetHostsConfigAutoLoadedModules(void)
+{
+    return(HostsConfig.GetChildElementByPath("config/autoload"));
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CHostGroup::GetHostsConfigEnvironment(void)
+{
+    return(HostsConfig.GetChildElementByPath("config/environment"));
+}
+
+//------------------------------------------------------------------------------
+
 const CSmallString CHostGroup::GetSurrogateMachines(void)
 {
-    CSmallString surrogates;
-    // FIXME
-    return(surrogates);
+    CSmallString surrogate_machines;
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group");
+    if( p_ele == NULL ) return(surrogate_machines);
+    p_ele->GetAttribute("surrogate_machines",surrogate_machines);
+    return(surrogate_machines);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CHostGroup::GetUserUMask(void)
+{
+    CSmallString umask;
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group");
+    if( p_ele == NULL ) return(umask);
+    p_ele->GetAttribute("umask",umask);
+    return(umask);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CHostGroup::GetHostGroupBundleSyncSuggestions(void)
+{
+    CSmallString profiles;
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group");
+    if( p_ele == NULL ) return(profiles);
+    p_ele->GetAttribute("bundle_sync_profiles",profiles);
+    return(profiles);
 }
 
 //==============================================================================

@@ -48,15 +48,16 @@ public:
 
     // program arguments long description
     CSO_PROG_ARGS_LONG_DESC_BEGIN
-    "<green>[--force] create name maintainer contact</green>  create a new bundle in the current working directory\n"
+    "<green>[--force] create name maintainer contact</green>             create a new bundle in the current working directory\n"
     "<green>[info]</green>                                               print information about the bundle\n"
     "<green>[--incvers] avail</green>                                    print modules in the bundle\n"
     "<green>rebuild</green>                                              rebuild the bundle cache\n"
-    "<green>newverindex build</green>                                    retunr new version index for the specified build\n"
-    "<green>[--personal] index new</green>                               calculate new index for builds\n"
+    "<green>newverindex build</green>                                    return a new version index for the specified build\n"
+    "<green>[--personal] index new</green>                               calculate a new index for builds\n"
     "<green>[--silent] [--skipremoved] [--skipadded] index diff</green>  compare new and old indexes\n"
-    "<green>index commit</green>                                         commit new index as old index\n"
-    "<green>dirname</green>                                              print full path to the bundle directory\n"
+    "<green>index commit</green>                                         commit the new index as an old index\n"
+    "<green>dirname</green>                                              print the full path to the bundle directory\n"
+    "<green>sync [profile]</green>                                       synchronize the bundle with a remote site according to the profile\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

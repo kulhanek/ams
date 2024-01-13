@@ -30,6 +30,7 @@
 #include <FileSystem.hpp>
 #include <ModBundle.hpp>
 #include <PrintEngine.hpp>
+#include <string.h>
 
 //------------------------------------------------------------------------------
 
@@ -129,6 +130,10 @@ bool CBundleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "newverindex" ) {
         return( NewVerIndex() );
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "sync" ) {
+        return( SyncBundle() );
     }
     // ----------------------------------------------
     else {
@@ -459,6 +464,25 @@ bool CBundleCmd::NewVerIndex(void)
     vout << low;
     vout << verindex;
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::SyncBundle(void)
+{
+    CFileName cmd;
+    cmd = AMSRegistry.GetAMSRootDIR() / "share" / "scripts" / "ams-sync-bundle";
+
+    execl(cmd,Options.GetProgArg(1).GetBuffer(),(char*)NULL);
+
+    // The exec() functions return only if an error has occurred.
+
+    CSmallString error;
+    error << "Unable to run '" << cmd << " " << Options.GetProgArg(1) << "' errno: ";
+    error << strerror(errno);
+    ES_ERROR(error);
+
+    return(false);
 }
 
 //==============================================================================

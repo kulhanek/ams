@@ -344,10 +344,11 @@ bool CModuleCmd::Run(void)
 
         Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
 
-        std::list<CSmallString> modules;
-        HostGroup.GetAutoLoadedModules(modules);
-
         CFileName active_site = SiteController.GetActiveSite();
+
+        std::list<CSmallString> modules;
+        HostGroup.GetHostsConfigAutoLoadedModules(modules);
+        HostGroup.GetHostGroupAutoLoadedModules(modules);
 
         if( active_site != NULL ){
             CFileName site_config = SiteController.GetSiteConfig(active_site);
@@ -368,6 +369,7 @@ bool CModuleCmd::Run(void)
 
             site.GetAutoLoadedModules(modules);
         }
+
         AMSRegistry.GetUserAutoLoadedModules(modules);
 
         // add modules

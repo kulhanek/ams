@@ -32,6 +32,8 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include <ModCache.hpp>
+#include <UserUtils.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -191,12 +193,12 @@ const CFileName CAMSRegistry::GetModActionPath(const CFileName& action_command)
 const CFileName CAMSRegistry::GetUserGlobalConfig(void)
 {
     CFileName user_config;
-    user_config = CShell::GetSystemVariable("AMS_USER_CONFIG");
+    user_config = CShell::GetSystemVariable("AMS_REGISTRY_CONFIG");
 
     // is file?
     if( CFileSystem::IsFile(user_config) == true ) {
         CSmallString error;
-        error << "user config '" << user_config << "' from AMS_USER_CONFIG is not a file";
+        error << "user config '" << user_config << "' from AMS_REGISTRY_CONFIG is not a file";
         RUNTIME_ERROR(error);
     }
 
@@ -233,10 +235,14 @@ const CSmallString CAMSRegistry::GetUserUMask(void)
     CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user",true);
     CSmallString umask;
     p_ele->GetAttribute("umask",umask);
-    if( umask == NULL ){
-        umask = DEFAULT_UMASK;
-    }
     return(umask);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAMSRegistry::GetDefaultUMask(void)
+{
+    return(DEFAULT_UMASK);
 }
 
 //------------------------------------------------------------------------------
@@ -256,20 +262,33 @@ void CAMSRegistry::SetUserUMask(const CSmallString& umask)
 
 void CAMSRegistry::GetUserAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
-    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/autoloaded/module");
-    if( p_ele == NULL ) return;
+    CXMLElement* p_ele = GetUserAutoLoadedModules();
+    if( p_ele ){
+        p_ele = p_ele->GetFirstChildElement("module");
+    }
 
     while( p_ele != NULL ){
         CSmallString mname;
         p_ele->GetAttribute("name",mname);
         if( mname != NULL ){
+            bool enabled = ModCache.IsAutoloadEnabled(mname);
             if( withorigin ){
                 mname << "[user]";
+                modules.push_back(mname);
+            } else {
+                if( enabled ) modules.push_back(mname);
             }
-            modules.push_back(mname);
         }
         p_ele = p_ele->GetNextSiblingElement("module");
     }
+}
+
+//------------------------------------------------------------------------------
+
+CXMLElement* CAMSRegistry::GetUserAutoLoadedModules(void)
+{
+   CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user/autoloaded");
+   return(p_ele);
 }
 
 //------------------------------------------------------------------------------

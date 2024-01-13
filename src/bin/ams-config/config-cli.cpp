@@ -823,6 +823,16 @@ void ChangeUserUMask(void)
 
         if( strcmp(buffer,"") == 0 ) return;
 
+    // set default
+        if( strcmp(buffer,"default") == 0 ){
+            AMSRegistry.SetUserUMask(buffer);
+            printf(" >>> The umask was successfully set!\n");
+            printf("\n");
+            UserSetupChanged = true;
+            return;
+        }
+
+    // set user setup
         if( strlen(buffer) != 3 ){
             printf(" >>> ERROR: User file creation mask (umask) must be composed from three numbers!\n");
             printf("\n");

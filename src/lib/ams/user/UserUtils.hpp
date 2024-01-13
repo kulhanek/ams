@@ -42,6 +42,9 @@ public:
     /// get user name
     static const CSmallString GetUserName(void);
 
+    /// get umask mode
+    static mode_t GetUMaskMode(void);
+
     /// get umask
     static const CSmallString GetUMask(void);
 

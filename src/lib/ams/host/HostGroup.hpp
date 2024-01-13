@@ -92,16 +92,34 @@ public:
     const CSmallString GetRealm(void);
 
     /// get list of autoloaded modules
-    void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+    void GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+
+    /// get list of autoloaded modules
+    CXMLElement* GetHostGroupAutoLoadedModules(void);
 
     /// get host group environment block
     CXMLElement* GetHostGroupEnvironment(void);
+
+    /// get list of autoloaded modules
+    void GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+
+    /// get list of autoloaded modules
+    CXMLElement* GetHostsConfigAutoLoadedModules(void);
+
+    /// get host config environment block
+    CXMLElement* GetHostsConfigEnvironment(void);
 
     /// execute action hook
     bool ExecuteModAction(const CSmallString& action, const CSmallString& args, int flags);
 
     /// get surrogate machines
     const CSmallString GetSurrogateMachines(void);
+
+    /// get user umask
+    const CSmallString GetUserUMask(void);
+
+    /// return space separated list of sync profiles for given host group
+    const CSmallString GetHostGroupBundleSyncSuggestions(void);
 
 // information methods for all host groups -------------------------------------
     /// find host group namespace

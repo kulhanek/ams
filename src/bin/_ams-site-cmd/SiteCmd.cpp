@@ -36,6 +36,7 @@
 #include <FileName.hpp>
 #include <Module.hpp>
 #include <ModuleController.hpp>
+#include <UserUtils.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -425,7 +426,8 @@ int CSiteCmd::ActivateSite(void)
     site.PrintShortSiteInfo(vout);
 
     std::list<CSmallString> modules;
-    HostGroup.GetAutoLoadedModules(modules);
+    HostGroup.GetHostsConfigAutoLoadedModules(modules);
+    HostGroup.GetHostGroupAutoLoadedModules(modules);
     site.GetAutoLoadedModules(modules);
     AMSRegistry.GetUserAutoLoadedModules(modules);
 
@@ -507,6 +509,9 @@ int CSiteCmd::DispSite(void)
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
 
+    ModuleController.LoadBundles(EMBC_SMALL);
+    ModuleController.MergeBundles();
+
     site.PrintFullSiteInfo(vout);
 
     return(SITE_STATUS_OK);
@@ -532,13 +537,14 @@ int CSiteCmd::ListAMods(void)
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
 
+    ModuleController.LoadBundles(EMBC_SMALL);
+    ModuleController.MergeBundles();
+
     std::list<CSmallString> modules;
     site.GetAutoLoadedModules(modules);
 
-    ModuleController.LoadBundles(EMBC_SMALL);
-    ModuleController.MergeBundles();
     PrintEngine.InitPrintProfile();
-    PrintEngine.PrintHeader(Console.GetTerminal(),"AUTOLOADES MODULES (Infinity Software Base | amsmodule)",EPEHS_SECTION);
+    PrintEngine.PrintHeader(Console.GetTerminal(),"AUTOLOADED MODULES (Infinity Software Base | amsmodule)",EPEHS_SECTION);
     PrintEngine.PrintItems(Console.GetTerminal(),modules);
 
     return(SITE_STATUS_OK);
@@ -661,10 +667,9 @@ int CSiteCmd::InitSite(void)
         reactivate = true;
     }
 
-    if( SiteController.IsBatchJob() == false ){
-        // set umask but not in jobs
-        ShellProcessor.SetUMask(AMSRegistry.GetUserUMask());
-    }
+    // set umask but not in jobs
+    char origin;
+    ShellProcessor.SetUMask(CUserUtils::GetUMask(User.GetRequestedUserUMaskMode(origin)));
 
 // print site info if TTY is available
     if( SiteController.HasTTY() && ( ! SiteController.IsSiteInfoPrinted() ) ) {
@@ -685,7 +690,8 @@ int CSiteCmd::InitSite(void)
         // load autoloaded modules
         Module.SetFlags(Module.GetFlags() | MFB_AUTOLOADED);
         std::list<CSmallString> modules;
-        HostGroup.GetAutoLoadedModules(modules);
+        HostGroup.GetHostsConfigAutoLoadedModules(modules);
+        HostGroup.GetHostGroupAutoLoadedModules(modules);
         site.GetAutoLoadedModules(modules);
         AMSRegistry.GetUserAutoLoadedModules(modules);
         for( CSmallString module : modules ){

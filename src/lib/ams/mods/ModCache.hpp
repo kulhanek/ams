@@ -146,6 +146,9 @@ public:
     /// get new version index for the build
     double GetNewVerIndex(const CSmallString& build);
 
+    /// is autoload enabled for the module
+    bool IsAutoloadEnabled(const CSmallString& name);
+
 // section of protected data ---------------------------------------------------
 protected:
     CXMLDocument    Cache;

@@ -64,6 +64,9 @@ public:
     /// return short site description, these module are not exported
     void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
 
+    /// get autoloaded modules
+    CXMLElement* GetAutoLoadedModules(void);
+
     /// get site environment block
     CXMLElement* GetSiteEnvironment(void);
 
@@ -91,6 +94,9 @@ private:
 
     /// prepare site environment
     bool PrepareSiteEnvironment(CXMLElement* p_build, EModuleAction action);
+
+    /// print autoloaded modules
+    void PrintAutoLoadedModules(CVerboseStr& vout,CXMLElement* p_ele,const CSmallString& origin);
 };
 
 //------------------------------------------------------------------------------

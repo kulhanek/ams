@@ -66,9 +66,15 @@ public:
     /// set user umask
     void SetUserUMask(const CSmallString& umask);
 
+    /// get default umask
+    const CSmallString GetDefaultUMask(void);
+
 // -----------------------------------------------
     /// get list of autoloaded modules
     void GetUserAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+
+    /// get list of autoloaded modules
+    CXMLElement* GetUserAutoLoadedModules(void);
 
     /// is module autoloaded
     bool IsUserAutoLoadedModule(const CSmallString& name);

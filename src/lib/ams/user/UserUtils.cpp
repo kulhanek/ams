@@ -64,7 +64,7 @@ gid_t CUserUtils::GetGroupID(const CSmallString& name,bool trynobody)
 
 //------------------------------------------------------------------------------
 
-const CSmallString CUserUtils::GetUMask(void)
+mode_t CUserUtils::GetUMaskMode(void)
 {
     mode_t mumask = 0;
     if(ShellProcessor.GetCurrentUMask() == "unset" ){
@@ -73,6 +73,14 @@ const CSmallString CUserUtils::GetUMask(void)
     } else {
         mumask = GetUMaskMode(ShellProcessor.GetCurrentUMask());
     }
+    return(mumask);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CUserUtils::GetUMask(void)
+{
+    mode_t mumask = GetUMaskMode();
     return(CUserUtils::GetUMask(mumask));
 }
 
