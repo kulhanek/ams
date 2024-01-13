@@ -271,11 +271,13 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
     vout << "# Site config : " << ConfigFile << endl;
     vout << "# Site ID     : " << GetID() << endl;
 
-    if( HostGroup.GetHostGroupEnvironment() != NULL ){
-        vout << endl;
-        vout << "# ~~~ <b>Environment Variables (host-group)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-        CShellProcessor::PrintBuild(vout,HostGroup.GetHostGroupEnvironment());
-    }
+    vout << endl;
+    vout << "# ~~~ <b>Environment Variables (hosts-config)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    CShellProcessor::PrintBuild(vout,HostGroup.GetHostsConfigEnvironment());
+
+    vout << endl;
+    vout << "# ~~~ <b>Environment Variables (host-group)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+    CShellProcessor::PrintBuild(vout,HostGroup.GetHostGroupEnvironment());
 
     vout << endl;
     vout << "# ~~~ <b>Environment Variables (site)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
