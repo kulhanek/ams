@@ -235,7 +235,6 @@ void CUser::InitPosixACLGroups(CXMLElement* p_ele)
         p_fele->GetAttribute("value",filter);
         bool primary_group = false;
         p_fele->GetAttribute("primary_group",primary_group);
-        cout << primary_group << endl;
         if( primary_group == true ){
             CSmallString pgrp = RGroup;
             if( fnmatch(filter,pgrp,0) == 0 ){
