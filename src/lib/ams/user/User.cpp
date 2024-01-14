@@ -233,8 +233,11 @@ void CUser::InitPosixACLGroups(CXMLElement* p_ele)
     while( p_fele != NULL ){
         CSmallString filter;
         p_fele->GetAttribute("value",filter);
-
-        for(CSmallString pgrp: PosixGroups){
+        bool primary_group = false;
+        p_fele->GetAttribute("primary_group",primary_group);
+        cout << primary_group << endl;
+        if( primary_group == true ){
+            CSmallString pgrp = RGroup;
             if( fnmatch(filter,pgrp,0) == 0 ){
                 CSmallString alias;
                 p_fele->GetAttribute("alias",alias);
@@ -247,7 +250,23 @@ void CUser::InitPosixACLGroups(CXMLElement* p_ele)
                     p_fele->GetAttribute("umask",UMask);
                 }
             }
+        } else {
+            for(CSmallString pgrp: PosixGroups){
+                if( fnmatch(filter,pgrp,0) == 0 ){
+                    CSmallString alias;
+                    p_fele->GetAttribute("alias",alias);
+                    if( alias != NULL ){
+                        PosixACLGroups.push_back(alias);
+                    } else {
+                        PosixACLGroups.push_back(pgrp);
+                    }
+                    if( UMask == NULL ){
+                        p_fele->GetAttribute("umask",UMask);
+                    }
+                }
+            }
         }
+
         p_fele = p_fele->GetNextSiblingElement("filter");
     }
 }
