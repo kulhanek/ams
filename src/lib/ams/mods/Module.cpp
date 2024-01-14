@@ -485,7 +485,8 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
     // install hooks from module config ------------
 
     if( action == EMA_ADD_MODULE ) {
-        CXMLElement* p_module = dynamic_cast<CXMLElement*>(p_build->GetParentNode());
+        CXMLElement* p_builds = dynamic_cast<CXMLElement*>(p_build->GetParentNode());
+        CXMLElement* p_module = dynamic_cast<CXMLElement*>(p_builds->GetParentNode());
         // do postaction if necessary
         CSmallString bundle_name = GetBundleName(p_module);
         CSmallString args;
