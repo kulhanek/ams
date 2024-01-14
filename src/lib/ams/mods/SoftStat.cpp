@@ -38,6 +38,7 @@ CAddStatDatagram::CAddStatDatagram(void)
     memset(ModuleVers,0,sizeof(ModuleVers));
     memset(ModuleArch,0,sizeof(ModuleArch));
     memset(ModuleMode,0,sizeof(ModuleMode));
+    memset(BundleName,0,sizeof(BundleName));
     memset(User,0,sizeof(User));
     memset(HostName,0,sizeof(HostName));
     memset(NCPUs,0,sizeof(NCPUs));
@@ -56,7 +57,7 @@ CAddStatDatagram::CAddStatDatagram(void)
 void CAddStatDatagram::Finish(void)
 {
     // magic header
-    strncpy(Magic,"AMS6",4);
+    strncpy(Magic,"AMS9",4);
 
     // controll sum
     int control_sum = 0;
@@ -66,6 +67,7 @@ void CAddStatDatagram::Finish(void)
     for(unsigned int i=0; i < sizeof(ModuleVers); i++) control_sum += ModuleVers[i];
     for(unsigned int i=0; i < sizeof(ModuleArch); i++) control_sum += ModuleArch[i];
     for(unsigned int i=0; i < sizeof(ModuleMode); i++) control_sum += ModuleMode[i];
+    for(unsigned int i=0; i < sizeof(BundleName); i++) control_sum += BundleName[i];
     for(unsigned int i=0; i < sizeof(User); i++) control_sum += User[i];
     for(unsigned int i=0; i < sizeof(HostName); i++) control_sum += HostName[i];
     for(unsigned int i=0; i < sizeof(NCPUs); i++) control_sum += NCPUs[i];
@@ -116,6 +118,13 @@ void CAddStatDatagram::SetModuleArch(const CSmallString& arch)
 void CAddStatDatagram::SetModuleMode(const CSmallString& mode)
 {
     strncpy(ModuleMode,mode,sizeof(ModuleMode)-1);
+}
+
+//------------------------------------------------------------------------------
+
+void CAddStatDatagram::SetBundleName(const CSmallString& name)
+{
+    strncpy(BundleName,name,sizeof(BundleName)-1);
 }
 
 //------------------------------------------------------------------------------
@@ -211,7 +220,7 @@ void CAddStatDatagram::SetTimeAndDate(const CSmallTimeAndDate& dt)
 bool CAddStatDatagram::IsValid(void)
 {
     // magic header
-    if( strncmp(Magic,"AMS6",4) != 0 ) {
+    if( strncmp(Magic,"AMS9",4) != 0 ) {
         return(false);
     }
 
@@ -223,6 +232,7 @@ bool CAddStatDatagram::IsValid(void)
     for(unsigned int i=0; i < sizeof(ModuleVers); i++) control_sum += ModuleVers[i];
     for(unsigned int i=0; i < sizeof(ModuleArch); i++) control_sum += ModuleArch[i];
     for(unsigned int i=0; i < sizeof(ModuleMode); i++) control_sum += ModuleMode[i];
+    for(unsigned int i=0; i < sizeof(BundleName); i++) control_sum += BundleName[i];
     for(unsigned int i=0; i < sizeof(User); i++) control_sum += User[i];
     for(unsigned int i=0; i < sizeof(HostName); i++) control_sum += HostName[i];
     for(unsigned int i=0; i < sizeof(NCPUs); i++) control_sum += NCPUs[i];
@@ -280,6 +290,13 @@ const CSmallString CAddStatDatagram::GetModuleArch(void) const
 const CSmallString CAddStatDatagram::GetModuleMode(void) const
 {
     return(ModuleMode);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAddStatDatagram::GetBundleName(void) const
+{
+    return(BundleName);
 }
 
 //------------------------------------------------------------------------------

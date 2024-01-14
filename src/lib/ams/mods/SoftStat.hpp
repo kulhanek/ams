@@ -41,6 +41,7 @@ struct CAddStatDatagram {
     void SetModuleVers(const CSmallString& vers);
     void SetModuleArch(const CSmallString& arch);
     void SetModuleMode(const CSmallString& mode);
+    void SetBundleName(const CSmallString& name);
     void SetUser(const CSmallString& user);
     void SetHostName(const CSmallString& name);
     void SetNCPUs(int ncpus);
@@ -59,6 +60,7 @@ struct CAddStatDatagram {
     const CSmallString      GetModuleVers(void) const;
     const CSmallString      GetModuleArch(void) const;
     const CSmallString      GetModuleMode(void) const;
+    const CSmallString      GetBundleName(void) const;
     const CSmallString      GetUser(void) const;
     const CSmallString      GetHostName(void) const;
     int                     GetNCPUs(void) const;
@@ -78,6 +80,7 @@ private:
     char            ModuleVers[32];
     char            ModuleArch[32];
     char            ModuleMode[32];
+    char            BundleName[32];
     char            User[32];               // user name
     char            HostName[32];           // hostname
     unsigned char   NCPUs[4];               // ncpus
