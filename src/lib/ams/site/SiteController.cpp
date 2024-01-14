@@ -250,15 +250,32 @@ bool CSiteController::IsSiteInfoPrinted(void)
 {
     CSmallString site_info_printed;
     site_info_printed = CShell::GetSystemVariable("AMS_SITE_INFO_PRINTED");
-    return( site_info_printed == "y" );
+    return( site_info_printed == "Y" );
 }
 
 //------------------------------------------------------------------------------
 
 void CSiteController::SetSiteInfoPrinted(void)
 {
-    CShell::SetSystemVariable("AMS_SITE_INFO_PRINTED","y");
-    ShellProcessor.SetVariable("AMS_SITE_INFO_PRINTED","y");
+    CShell::SetSystemVariable("AMS_SITE_INFO_PRINTED","Y");
+    ShellProcessor.SetVariable("AMS_SITE_INFO_PRINTED","Y");
+}
+
+//------------------------------------------------------------------------------
+
+bool CSiteController::IsSiteInitIgnored(void)
+{
+    CSmallString flag;
+    flag = CShell::GetSystemVariable("LC_SSH_AMS_IGNORE_SITE_INIT");
+    return( flag == "Y" );
+}
+
+//------------------------------------------------------------------------------
+
+void CSiteController::UnsetIgnoreSiteInitFlag(void)
+{
+    CShell::SetSystemVariable("LC_SSH_AMS_IGNORE_SITE_INIT","");
+    ShellProcessor.UnsetVariable("LC_SSH_AMS_IGNORE_SITE_INIT");
 }
 
 //==============================================================================

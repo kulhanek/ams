@@ -82,6 +82,12 @@ public:
     /// set taht site infor was already shown to users
     static void SetSiteInfoPrinted(void);
 
+    /// is site init ignored
+    static bool IsSiteInitIgnored(void);
+
+    /// unset the flag
+    static void UnsetIgnoreSiteInitFlag(void);
+
 // section of private data ----------------------------------------------------
 private:
     CSmallString    ActiveSite;

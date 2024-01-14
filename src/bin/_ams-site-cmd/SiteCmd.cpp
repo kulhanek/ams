@@ -107,6 +107,13 @@ bool CSiteCmd::Run(void)
         Module.SetFlags(MFB_INFINITY);
     }
 
+// ignore all if LC_SSH_AMS_IGNORE_SITE_INIT is set
+    if( SiteController.IsSiteInitIgnored() && (Options.GetOptForce() == false) ){
+        vout << endl;
+        vout << ">>> INFO: site init is ignored (LC_SSH_AMS_IGNORE_SITE_INIT)" << endl;
+        return(true);
+    }
+
 // init AMS registry
     AMSRegistry.LoadRegistry();
 
@@ -347,50 +354,7 @@ int CSiteCmd::ActivateSite(void)
 
     // deactivate current site
     if( active_site != NULL ) {
-
-        bool result = true;
-        CFileName site_config = SiteController.GetSiteConfig(active_site);
-        if( site_config == NULL ){
-            CSmallString error;
-            error << "specified site '" << active_site << "' was not found (deactivate)";
-            ES_TRACE_ERROR(error);
-            // ignore error
-            result = false;
-        }
-
-        CSite site;
-
-        if( result ){
-            if( site.LoadConfig(site_config) == false ){
-                CSmallString error;
-                error << "unable to load site configuration from '" << site_config << "' (deactivate)";
-                ES_TRACE_ERROR(error);
-                // ignore error
-                result = false;
-            }
-        }
-
-        if( result ){
-            // purge all modules
-            if( ModuleController.PurgeModules(vout) == false ){
-                CSmallString error;
-                error << "currnet active site '" << active_site << "' cannot be deactivated";
-                ES_TRACE_ERROR(error);
-                // ignore error
-                result = false;
-            }
-        }
-
-        if( result ){
-            // destroy environment
-            if( site.DeactivateSite() == false ){
-                CSmallString error;
-                error << "currnet active site '" << active_site << "' cannot be deactivated";
-                ES_TRACE_ERROR(error);
-                // ignore error
-                result = false;
-            }
-        }
+        DeactivateSite(active_site);
     }
 
     active_site = Options.GetArgSite();
@@ -444,6 +408,57 @@ int CSiteCmd::ActivateSite(void)
     }
 
     return(SITE_STATUS_OK);
+}
+
+//------------------------------------------------------------------------------
+
+bool CSiteCmd::DeactivateSite(const CSmallString& site_name)
+{
+    bool result = true;
+    CFileName site_config = SiteController.GetSiteConfig(site_name);
+    if( site_config == NULL ){
+        CSmallString error;
+        error << "specified site '" << site_name << "' was not found (deactivate)";
+        ES_TRACE_ERROR(error);
+        // ignore error
+        result = false;
+    }
+
+    CSite site;
+
+    if( result ){
+        if( site.LoadConfig(site_config) == false ){
+            CSmallString error;
+            error << "unable to load site configuration from '" << site_config << "' (deactivate)";
+            ES_TRACE_ERROR(error);
+            // ignore error
+            result = false;
+        }
+    }
+
+    if( result ){
+        // purge all modules
+        if( ModuleController.PurgeModules(vout) == false ){
+            CSmallString error;
+            error << "current active site '" << site_name << "' cannot be deactivated";
+            ES_TRACE_ERROR(error);
+            // ignore error
+            result = false;
+        }
+    }
+
+    if( result ){
+        // destroy environment
+        if( site.DeactivateSite() == false ){
+            CSmallString error;
+            error << "current active site '" << site_name << "' cannot be deactivated";
+            ES_TRACE_ERROR(error);
+            // ignore error
+            result = false;
+        }
+    }
+
+    return(result);
 }
 
 //------------------------------------------------------------------------------
@@ -575,8 +590,14 @@ int CSiteCmd::InitSite(void)
     vout << "# Batch Job Site : " << none_if_empty(SiteController.GetBatchJobSite()) << endl;
     vout << "# Has TTY        : " << bool_to_str(SiteController.HasTTY()) << endl;
 
+    if( SiteController.IsSiteInitIgnored() && (Options.GetOptForce() == false) ){
+        vout << endl;
+        vout << ">>> INFO: site init is ignored (LC_SSH_AMS_IGNORE_SITE_INIT)" << endl;
+        return(SITE_STATUS_OK);
+    }
+
     if( SiteController.IsBatchJob() && (SiteController.GetActiveSite() == NULL) &&
-        (Options.GetOptJob() == false) ){
+        (Options.GetOptForce() == false) ){
         vout << endl;
         vout << ">>> INFO: this is is a batch job which is not initialized yet" << endl;
         return(SITE_STATUS_OK);
@@ -593,7 +614,12 @@ int CSiteCmd::InitSite(void)
 
 // activate site if not active
     CSmallString site_name = SiteController.GetActiveSite();
-    if( site_name == NULL ){
+    if( (site_name == NULL) || (Options.GetOptForce() == true) ){
+        // in force mode we will deactivate the site
+        if( site_name != NULL ){
+            DeactivateSite(site_name);
+        }
+        // activate the site
         vout << endl;
         site_name = SiteController.GetBatchJobSite();
         if( site_name == NULL ){
@@ -609,6 +635,8 @@ int CSiteCmd::InitSite(void)
                 site_name = HostGroup.GetDefaultSite();
                 vout << ">>> the default site is accepted: " << site_name << endl;
             }
+        } else {
+            vout << ">>> the batch job site is accepted: " << site_name << endl;
         }
         if( site_name == NULL ){
             CSmallString error;
@@ -677,7 +705,7 @@ int CSiteCmd::InitSite(void)
     ShellProcessor.SetUMask(CUserUtils::GetUMask(User.GetRequestedUserUMaskMode(origin)));
 
 // print site info if TTY is available
-    if( (SiteController.HasTTY() || (Options.GetOptJob() == true)) && ( ! SiteController.IsSiteInfoPrinted() ) ) {
+    if( (SiteController.HasTTY() || (Options.GetOptForce() == true)) && ( ! SiteController.IsSiteInfoPrinted() ) ) {
         vout << low;
         // umask is set above
         site.PrintShortSiteInfo(vout);
@@ -721,6 +749,11 @@ int CSiteCmd::InitSite(void)
         }
         SiteController.UnsetSSHVariables();
     }
+
+    if( Options.GetOptForce() == true ){
+        SiteController.UnsetIgnoreSiteInitFlag();
+    }
+
     vout << low;
     if( ErrorSystem.IsError() ){
         return(SITE_ERROR_CONFIG_PROBLEM);

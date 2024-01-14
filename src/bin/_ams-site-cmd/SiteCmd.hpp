@@ -55,6 +55,9 @@ private:
     int     DispSite(void);
     int     ListAMods(void);
     int     InitSite(void);
+
+    // helper methods
+    bool DeactivateSite(const CSmallString& site_name);
 };
 
 // -----------------------------------------------------------------------------

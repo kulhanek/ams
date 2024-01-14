@@ -58,6 +58,13 @@ CAMSRegistry::CAMSRegistry(void)
 
 void CAMSRegistry::LoadRegistry(void)
 {
+// environmental setup
+    SiteFlavor = GetSystemVariable("AMS_FLAVOUR");
+    if( SiteFlavor == NULL ){
+        SiteFlavor = "regular";
+    }
+
+// load config
     CFileName config_name = GetUserGlobalConfig();
 
     if( CFileSystem::IsFile(config_name) == false ){
@@ -73,11 +80,6 @@ void CAMSRegistry::LoadRegistry(void)
         warning << "unable to parse user-registry file '" << config_name << "'";
         ES_WARNING(warning);
         return;
-    }
-
-    SiteFlavor = GetSystemVariable("AMS_FLAVOUR");
-    if( SiteFlavor == NULL ){
-        SiteFlavor = "regular";
     }
 }
 
