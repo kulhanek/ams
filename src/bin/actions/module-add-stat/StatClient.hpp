@@ -46,7 +46,7 @@ public:
 
 // executive methods -----------------------------------------------------------
     /// populate datagram with statistics data
-    bool PopulateDatagram(const CSmallString& build,int flags);
+    bool PopulateDatagram(const CSmallString& build,const CSmallString& bname,int flags);
 
     /// send data to server
     bool SendDataToServer(const CSmallString& servername,int port);

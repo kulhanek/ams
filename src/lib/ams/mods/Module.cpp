@@ -485,9 +485,12 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
     // install hooks from module config ------------
 
     if( action == EMA_ADD_MODULE ) {
+        CXMLElement* p_module = dynamic_cast<CXMLElement*>(p_build->GetParentNode());
         // do postaction if necessary
+        CSmallString bundle_name = GetBundleName(p_module);
         CSmallString args;
-        args << "\""+complete_module+"\" " << ModuleFlags;
+        args << "\"" << complete_module;
+        args << "\" \"" << bundle_name << "\" \"" << ModuleFlags << "\"";
 
         switch(GlobalPrintLevel) {
         case EAPL_NONE:

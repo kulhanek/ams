@@ -73,7 +73,7 @@ int CStatClient::Init(int argc, char* argv[])
 
 bool CStatClient::Run(void)
 {
-    if( PopulateDatagram(Options.GetArgBuild(),Options.GetArgFlags()) == false ) {
+    if( PopulateDatagram(Options.GetArgBuild(),Options.GetArgBundle(),Options.GetArgFlags()) == false ) {
         ES_ERROR("unable to populate datagram");
         return(false);
     }
@@ -100,7 +100,7 @@ void CStatClient::Finalize(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CStatClient::PopulateDatagram(const CSmallString& build,int flags)
+bool CStatClient::PopulateDatagram(const CSmallString& build,const CSmallString& bname,int flags)
 {
     CSmallString site_sid;
 
@@ -119,6 +119,12 @@ bool CStatClient::PopulateDatagram(const CSmallString& build,int flags)
     Datagram.SetModuleVers(vers);
     Datagram.SetModuleArch(arch);
     Datagram.SetModuleMode(mode);
+
+    if( bname != NULL ){
+        Datagram.SetBundleName(bname);
+    } else {
+        Datagram.SetBundleName("unknown");
+    }
 
     CSmallString user = CShell::GetSystemVariable("USER");
     if( user == NULL ){

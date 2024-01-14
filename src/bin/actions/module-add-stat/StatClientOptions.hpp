@@ -52,6 +52,7 @@ public:
     // arguments ------------------------------
     CSO_ARG(CSmallString,ServerName)
     CSO_ARG(CSmallString,Build)
+    CSO_ARG(CSmallString,Bundle)
     CSO_ARG(int,Flags)
     CSO_ARG(CSmallString,Verbosity)
     // options ------------------------------
@@ -76,6 +77,13 @@ public:
                 true,                           /* is argument mandatory */
                 "build",                        /* parametr name */
                 "module build, which is added\n")   /* argument description */
+    //----------------------------------------------------------------------
+    CSO_MAP_ARG(CSmallString,                   /* argument type */
+                Bundle,                          /* argument name */
+                NULL,                           /* default value */
+                true,                           /* is argument mandatory */
+                "bundle",                        /* parametr name */
+                "name of bundle\n")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_ARG(int,                   /* argument type */
                 Flags,                          /* argument name */
