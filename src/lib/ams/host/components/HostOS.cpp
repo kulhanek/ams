@@ -321,8 +321,8 @@ void CHostSubSystemOS::GetVirtualization(void)
     std::string line;
     while( getline(fin,line) ){
         boost::algorithm::to_lower(line);
-        if( line.find("vmvare") != std::string::npos ){
-            Virtualization = "vmvare";
+        if( line.find("vmware") != std::string::npos ){
+            Virtualization = "vmware";
             break;
         }
         if( line.find("qemu") != std::string::npos ){
