@@ -7,16 +7,16 @@
 
 # ------------------------------------------------
 
-if [ -z "$AMS_ROOT" ]; then
+if [ -z "$AMS_ROOT_V9" ]; then
     echo "" 1>&2
-    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 is not set!" 1>&2
     echo "" 1>&2
     exit 1
 fi
 
 # load library functions
 
-source "$AMS_ROOT/share/sync/ams-sync-lib"
+source "$AMS_ROOT_V9/share/sync/ams-sync-lib"
 
 # ------------------------------------------------
 
@@ -73,7 +73,7 @@ rsync_bundle_core()
             if [ $? -ne 0 ]; then exit 1; fi
         fi
         rsync -av --delete $AMS_RSYNC_OPTS \
-            --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-bundle-core \
+            --exclude-from=$AMS_ROOT_V9/share/sync/rsync/exclude/ams-exclude-rules-bundle-core \
             "$AMS_SRC_SOFTMODS/" "$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
     else
         ssh -x $AMS_DST_HOST \
@@ -81,7 +81,7 @@ rsync_bundle_core()
             >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then exit 1; fi
         rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS \
-            --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-bundle-core \
+            --exclude-from=$AMS_ROOT_V9/share/sync/rsync/exclude/ams-exclude-rules-bundle-core \
             "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1    
     fi    
 
@@ -103,14 +103,14 @@ rsync_bundle_softrepo()
     echo "# AMS Module Bundle - Generating New Repository Index" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
-    $AMS_ROOT/bin/ams-bundle index new | tee -a $LOG_FILE
+    $AMS_ROOT_V9/bin/ams-bundle index new | tee -a $LOG_FILE
     if [ $? -ne 0 ]; then exit 1; fi;
     
     echo "# Changed builds ..." | tee -a $LOG_FILE
-    $AMS_ROOT/bin/ams-bundle --silent index diff | tee -a $LOG_FILE
+    $AMS_ROOT_V9/bin/ams-bundle --silent index diff | tee -a $LOG_FILE
     if [ $? -ne 0 ]; then exit 1; fi;
 
-    NCHANGES="`$AMS_ROOT/bin/ams-bundle --silent index diff | wc -l`"
+    NCHANGES="`$AMS_ROOT_V9/bin/ams-bundle --silent index diff | wc -l`"
     if [ "$NCHANGES" -eq 0 ]; then
         echo "> No changed builds were detected ..."
         rm -f "$NEW_INDEX"
@@ -122,7 +122,7 @@ rsync_bundle_softrepo()
     echo "# AMS Module Bundle - Syncing Builds" | tee -a $LOG_FILE
     echo "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" | tee -a $LOG_FILE
 
-    $AMS_ROOT/bin/ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
+    $AMS_ROOT_V9/bin/ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
         
         if [[ ("$STATUS" != "+") && ("$STATUS" != "M") ]]; then continue; fi
         if [[ -z "$AMS_PACKAGE_DIR" ]]; then contine; fi
@@ -201,7 +201,7 @@ rsync_bundle_softrepo()
     if [ $? -ne 0 ]; then exit 1; fi
 
 # commit changes
-    $AMS_ROOT/bin/ams-bundle index commit >> $LOG_FILE 2>&1
+    $AMS_ROOT_V9/bin/ams-bundle index commit >> $LOG_FILE 2>&1
 }
 
 # ==============================================================================

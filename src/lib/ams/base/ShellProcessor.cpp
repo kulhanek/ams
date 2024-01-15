@@ -757,7 +757,7 @@ void CShellProcessor::BuildEnvironment(void)
             p_sele->GetAttribute("name",name);
             p_sele->GetAttribute("value",value);
             p_sele->GetAttribute("delimiter",delimiter);
-            printf("export %s=`$AMS_ROOT/bin/_ams-module-var prepend \"$%s\" \"%s\" \"%s\"`;\n",
+            printf("export %s=`$AMS_ROOT_V9/bin/_ams-module-var prepend \"$%s\" \"%s\" \"%s\"`;\n",
                    (const char*)name,(const char*)name,
                    (const char*)delimiter,(const char*)value);
         }
@@ -769,7 +769,7 @@ void CShellProcessor::BuildEnvironment(void)
             p_sele->GetAttribute("name",name);
             p_sele->GetAttribute("value",value);
             p_sele->GetAttribute("delimiter",delimiter);
-            printf("export %s=`$AMS_ROOT/bin/_ams-module-var append \"$%s\" \"%s\" \"%s\"`;\n",
+            printf("export %s=`$AMS_ROOT_V9/bin/_ams-module-var append \"$%s\" \"%s\" \"%s\"`;\n",
                    (const char*)name,(const char*)name,
                    (const char*)delimiter,(const char*)value);
         }
@@ -781,7 +781,7 @@ void CShellProcessor::BuildEnvironment(void)
             p_sele->GetAttribute("name",name);
             p_sele->GetAttribute("value",value);
             p_sele->GetAttribute("delimiter",delimiter);
-            printf("export %s=`$AMS_ROOT/bin/_ams-module-var remove \"$%s\" \"%s\" \"%s\"`;\n",
+            printf("export %s=`$AMS_ROOT_V9/bin/_ams-module-var remove \"$%s\" \"%s\" \"%s\"`;\n",
                    (const char*)name,(const char*)name,
                    (const char*)delimiter,(const char*)value);
         }

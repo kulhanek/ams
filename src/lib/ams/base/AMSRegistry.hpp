@@ -167,7 +167,7 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT variable
+    CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT_V9 variable
     CXMLDocument    Config;             // global config data
     CSmallString    SiteFlavor;
 

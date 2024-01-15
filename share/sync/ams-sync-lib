@@ -50,7 +50,7 @@ function read_profile_rsync_push()
 
 function set_var_dir()
 {
-    AMS_VAR_DIR="$AMS_ROOT/var/sync"
+    AMS_VAR_DIR="$AMS_ROOT_V9/var/sync"
     if [[ -n $AMS_BUNDLE_DIR ]]; then
         AMS_VAR_DIR="$AMS_BUNDLE_DIR/_ams_bundle/var/sync"
     fi

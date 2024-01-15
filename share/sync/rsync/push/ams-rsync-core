@@ -7,16 +7,16 @@
 
 # ------------------------------------------------
 
-if [ -z "$AMS_ROOT" ]; then
+if [ -z "$AMS_ROOT_V9" ]; then
     echo "" 1>&2
-    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 is not set!" 1>&2
     echo "" 1>&2
     exit 1
 fi
 
 # load library functions
 
-source "$AMS_ROOT/share/sync/ams-sync-lib"
+source "$AMS_ROOT_V9/share/sync/ams-sync-lib"
 
 # ------------------------------------------------
 
@@ -40,8 +40,8 @@ fi
 
 # ------------------------------------------------------------------------------
 
-AMS_SRC_SOFTMODS="$AMS_ROOT"
-AMS_DST_SOFTMODS="$AMS_DST_PREFIX/$AMS_ROOT"
+AMS_SRC_SOFTMODS="$AMS_ROOT_V9"
+AMS_DST_SOFTMODS="$AMS_DST_PREFIX/$AMS_ROOT_V9"
 
 # ------------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ if [[ $AMS_DST_HOST == "localhost" ]]; then
         if [ $? -ne 0 ]; then exit 1; fi
     fi
     rsync -av --delete $AMS_RSYNC_OPTS \
-          --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-core \
+          --exclude-from=$AMS_ROOT_V9/share/sync/rsync/exclude/ams-exclude-rules-core \
           "$AMS_SRC_SOFTMODS/" "$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1
 else
     ssh -x $AMS_DST_HOST \
@@ -75,7 +75,7 @@ else
         >> $LOG_FILE 2>&1
     if [ $? -ne 0 ]; then exit 1; fi
     rsync -e "ssh -x" -av --delete $AMS_RSYNC_OPTS \
-          --exclude-from=$AMS_ROOT/share/sync/rsync/exclude/ams-exclude-rules-core \
+          --exclude-from=$AMS_ROOT_V9/share/sync/rsync/exclude/ams-exclude-rules-core \
           "$AMS_SRC_SOFTMODS/" "$AMS_DST_HOST:$AMS_DST_SOFTMODS/" >> $LOG_FILE 2>&1    
 fi
 

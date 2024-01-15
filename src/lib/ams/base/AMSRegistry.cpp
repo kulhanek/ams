@@ -49,7 +49,7 @@ CAMSRegistry AMSRegistry;
 
 CAMSRegistry::CAMSRegistry(void)
 {
-    AMSRoot = CShell::GetSystemVariable("AMS_ROOT");
+    AMSRoot = CShell::GetSystemVariable("AMS_ROOT_V9");
 }
 
 //==============================================================================

@@ -15,16 +15,16 @@ function print_usage()
 
 # ------------------------------------------------
 
-if [ -z "$AMS_ROOT" ]; then
+if [ -z "$AMS_ROOT_V9" ]; then
     echo "" 1>&2
-    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 is not set!" 1>&2
     echo "" 1>&2
     exit 1
 fi
 
 # load library functions
 
-source "$AMS_ROOT/share/sync/ams-sync-lib"
+source "$AMS_ROOT_V9/share/sync/ams-sync-lib"
 
 # ------------------------------------------------
 
@@ -54,14 +54,14 @@ echo ""
 echo "# AMS Sync Core Profile: $AMS_SYNC_PROFILE"
 echo "# ------------------------------------------------------------------------------"
 
-export PROFILE="$AMS_ROOT/etc/sync/$AMS_SYNC_PROFILE.rsync-push"
+export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.rsync-push"
 if [[ -f "$PROFILE" ]]; then
     echo "  Profile file:         $PROFILE" 
-    $AMS_ROOT/share/sync/rsync/push/ams-rsync-core "$@"
+    $AMS_ROOT_V9/share/sync/rsync/push/ams-rsync-core "$@"
     exit $?
 fi
 
-export PROFILE="$AMS_ROOT/etc/sync/$AMS_SYNC_PROFILE.exec"
+export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.exec"
 if [[ -f "$PROFILE" ]]; then
     echo "  Profile file:         $PROFILE" 
     exec_profile "$@"
