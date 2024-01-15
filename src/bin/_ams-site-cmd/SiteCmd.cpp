@@ -609,7 +609,7 @@ int CSiteCmd::InitSite(void)
     ModuleController.MergeBundles();
     ModuleController.PrintBundlesInfo(vout);
 
-    if( (Options.GetOptForce() == false) || (SiteController.WasSiteInitExecuted() == true) ){
+    if( (Options.GetOptForce() == false) && (SiteController.WasSiteInitExecuted() == true) ){
         Module.SetFlags(Module.GetFlags() | MFB_OTHER_PASS);
     }
 
