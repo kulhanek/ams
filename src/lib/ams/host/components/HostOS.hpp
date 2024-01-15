@@ -67,6 +67,15 @@ private:
     CSmallString            Virtualization;
     CSmallString            Architecture;
     CSmallString            DistroToken;
+
+    // get OS name
+    void GetDistribution(void);
+
+    // determine kernel and architecture
+    void GetKernelNameAndArch(void);
+
+    // get virtualization type
+    void GetVirtualization(void);
 };
 
 //------------------------------------------------------------------------------

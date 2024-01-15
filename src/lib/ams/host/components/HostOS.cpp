@@ -27,6 +27,10 @@
 #include <Host.hpp>
 #include <ErrorSystem.hpp>
 #include <fnmatch.h>
+#include <sys/utsname.h>
+#include <string.h>
+#include <FileSystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -60,47 +64,9 @@ void CHostSubSystemOS::Init(void)
         INVALID_ARGUMENT("config element 'os' is NULL");
     }
 
-    CSmallString cmd = "/usr/bin/hostnamectl";
-
-    FILE* p_file = popen(cmd,"r");
-    if( p_file != NULL ){
-        CSmallString line;
-        while( line.ReadLineFromFile(p_file,true,true) ){
-            if( line.FindSubString("Operating System:") != -1 ){
-                int start = line.FindSubString(": ");
-                int stop = line.GetLength() - 1;
-                start += 2;
-                if( start < stop ){
-                    Distribution = line.GetSubStringFromTo(start,stop);
-                }
-            }
-            if( line.FindSubString("Kernel:") != -1 ){
-                int start = line.FindSubString(": ");
-                int stop = line.GetLength() - 1;
-                start += 2;
-                if( start < stop ){
-                    Kernel = line.GetSubStringFromTo(start,stop);
-                }
-            }
-            if( line.FindSubString("Virtualization:") != -1 ){
-                int start = line.FindSubString(": ");
-                int stop = line.GetLength() - 1;
-                start += 2;
-                if( start < stop ){
-                    Virtualization = line.GetSubStringFromTo(start,stop);
-                }
-            }
-            if( line.FindSubString("Architecture:") != -1 ){
-                int start = line.FindSubString(": ");
-                int stop = line.GetLength() - 1;
-                start += 2;
-                if( start < stop ){
-                    Architecture = line.GetSubStringFromTo(start,stop);
-                }
-            }
-        }
-        pclose(p_file);
-    }
+    GetDistribution();
+    GetKernelNameAndArch();
+    GetVirtualization();
 
     if( Virtualization == NULL ) Virtualization = "-none-";
 
@@ -250,6 +216,122 @@ void CHostSubSystemOS::PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode)
     }
     vout << endl;
     }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+// https://thispointer.com/get-string-between-quotes-in-c/
+
+std::string GetSubString(const std::string& strValue)
+{
+    std::string str = "";
+    // Get index position of first quote in string
+    size_t pos1 = strValue.find("\"");
+    // Check if index is valid
+    if(pos1 != std::string::npos)
+    {
+        // Get index position of second quote in string
+        size_t pos2 = strValue.find("\"", pos1+1);
+        // Check if index is valid
+        if(pos2 != std::string::npos)
+        {
+            // Get substring between index positions of two quotes
+            str = strValue.substr(pos1 + 1, pos2 - pos1 - 1);
+        }
+    }
+    return str;
+}
+
+//------------------------------------------------------------------------------
+
+void CHostSubSystemOS::GetDistribution(void)
+{
+    CFileName release_file;
+    release_file="/etc/os-release";
+
+    if( CFileSystem::IsFile(release_file) == false ){
+        release_file="/usr/lib/os-release";
+        if( CFileSystem::IsFile(release_file) == false ){
+            CSmallString error;
+            error << "no /etc/os-release nor /usr/lib/os-release found";
+            ES_ERROR(error);
+            return;
+        }
+    }
+
+    ifstream fin;
+    fin.open(release_file);
+    if( ! fin ){
+        CSmallString error;
+        error << "unable to open release file";
+        ES_ERROR(error);
+        return;
+    }
+
+    std::string line;
+    while( getline(fin,line) ){
+        if( line.find("PRETTY_NAME") != std::string::npos ){
+            Distribution = GetSubString(line);
+            break;
+        }
+    }
+
+    fin.close();
+}
+
+//------------------------------------------------------------------------------
+
+void CHostSubSystemOS::GetKernelNameAndArch(void)
+{
+    struct utsname data;
+    if( uname(&data) != 0 ){
+        CSmallString error;
+        error << "unable to call uname(), errno: " << strerror(errno);
+        ES_ERROR(error);
+        return;
+    }
+    Kernel = "";
+    Kernel << data.sysname << " " << data.release;
+    Architecture << data.machine;
+}
+
+//------------------------------------------------------------------------------
+
+void CHostSubSystemOS::GetVirtualization(void)
+{
+    Virtualization = "";
+
+    CFileName sys_vendor;
+    sys_vendor = "/sys/devices/virtual/dmi/id/sys_vendor";
+    if( CFileSystem::IsFile(sys_vendor) == false ){
+        return;
+    }
+
+    ifstream fin;
+    fin.open(sys_vendor);
+    if( ! fin ){
+        CSmallString error;
+        error << "unable to open /sys/devices/virtual/dmi/id/sys_vendor";
+        ES_ERROR(error);
+        return;
+    }
+
+    std::string line;
+    while( getline(fin,line) ){
+        boost::algorithm::to_lower(line);
+        if( line.find("vmvare") != std::string::npos ){
+            Virtualization = "vmvare";
+            break;
+        }
+        if( line.find("qemu") != std::string::npos ){
+            Virtualization = "kvm";
+            break;
+        }
+    }
+
+    fin.close();
 }
 
 //==============================================================================
