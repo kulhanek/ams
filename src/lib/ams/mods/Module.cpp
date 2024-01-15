@@ -113,7 +113,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     CSmallString name,ver,arch,mode;
 
     if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
-        ES_ERROR("module name is empty string");
+        ES_TRACE_ERROR("module name is empty string");
         Level--;
         return(EAE_MODULE_NOT_FOUND);
     }
@@ -158,7 +158,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
         error << "build '" <<
               name << ":" << ver << ":" << arch << ":" << mode <<
               "' does not have any record in the AMS database";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         Level--;
         return(EAE_BUILD_NOT_FOUND);
     }
@@ -181,7 +181,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     if( ShellProcessor.PrepareModuleEnvironmentForDeps(p_build) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (PrepareModuleEnvironmentForDeps)";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         Level--;
         return(EAE_DEPENDENCY_ERROR);
     }
@@ -189,7 +189,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     if( SolveModuleDeps(vout,p_module) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (root)";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         Level--;
         return(EAE_DEPENDENCY_ERROR);
     }
@@ -197,7 +197,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     if( SolveModuleDeps(vout,p_build) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (build)";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         Level--;
         return(EAE_DEPENDENCY_ERROR);
     }
@@ -251,7 +251,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     if( SolveModulePostDeps(vout,p_build) == false ) {
         CSmallString error;
         error << "unable to solve post dependencies for module '" << name << "' (build)";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         Level--;
         return(EAE_DEPENDENCY_ERROR);
     }
@@ -285,7 +285,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     CSmallString name,ver,arch,mode;
 
     if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
-        ES_ERROR("module name is empty string");
+        ES_TRACE_ERROR("module name is empty string");
         Level--;
         return(EAE_MODULE_NOT_FOUND);
     }
@@ -304,7 +304,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     if( ModuleController.IsModuleActive(name) == false ) {
         CSmallString error;
         error << "unable to remove module '" << name << "' because it is not active";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         Level--;
         return(EAE_NOT_ACTIVE);
     }
@@ -324,7 +324,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     }
 
     if( CModUtils::ParseModuleName(complete_module,name,ver,arch,mode) == false ) {
-        ES_ERROR("unable to parse complete module specification");
+        ES_TRACE_ERROR("unable to parse complete module specification");
         Level--;
         return(EAE_CONFIG_ERROR);
     }
@@ -332,7 +332,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     CXMLElement* p_build = ModCache.GetBuild(p_module,ver,arch,mode);
 
     if( p_build == NULL ) {
-        ES_ERROR("unable to get module build");
+        ES_TRACE_ERROR("unable to get module build");
         Level--;
         return(EAE_BUILD_NOT_FOUND);
     }
@@ -478,7 +478,7 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
 {
     // prepare module environment ------------------
     if( ShellProcessor.PrepareModuleEnvironmentForModActionI(p_build) == false ) {
-        ES_ERROR("unable to prepare EnvironmentForModActionI");
+        ES_TRACE_ERROR("unable to prepare EnvironmentForModActionI");
         return(false);
     }
 
@@ -603,7 +603,7 @@ bool CModule::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
     if( CModCache::IsPermissionGrantedForModule(p_module) == false ){
         CSmallString error;
         error << "module '" << name << "' is not allowed for the current user";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         return(false);
     }
 
@@ -643,7 +643,7 @@ bool CModule::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
             CSmallString error;
             error << "no build was found for default version '" << defver
                   << "' of module '" << name << "'";
-            ES_ERROR(error);
+            ES_TRACE_ERROR(error);
             return(false);
         }
 
@@ -654,7 +654,7 @@ bool CModule::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
             CSmallString error;
             error << "no build was found for specified version '" << ver
                   << "' of module '" << name << "'";
-            ES_ERROR(error);
+            ES_TRACE_ERROR(error);
             return(false);
         }
         if( GlobalPrintLevel == EAPL_VERBOSE ) {
@@ -706,7 +706,7 @@ bool CModule::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
         CSmallString error;
         error << "no build was found for module '" << name
               << "' with version '" << ver << "' and architecture '" << arch << "'";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         return(false);
     }
 
@@ -757,7 +757,7 @@ bool CModule::CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
         error << "no build was found for module '" << name
               << "' with version '" << ver << "', architecture '" << arch
               << "' and mode '" << mode << "'";
-        ES_ERROR(error);
+        ES_TRACE_ERROR(error);
         return(false);
     }
 
@@ -1012,7 +1012,7 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
             ncgpu = Host.GetNGPUs();
             mcgpu = Host.GetNumOfHostGPUs();
         } else {
-            ES_ERROR("unknown element in host modes");
+            ES_TRACE_ERROR("unknown element in host modes");
             return(false);
         }
         // add token name
