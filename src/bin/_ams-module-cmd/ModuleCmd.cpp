@@ -384,6 +384,8 @@ bool CModuleCmd::Run(void)
     }
 // ----------------------------------------------
     else if( Options.GetArgAction() == "reactivate" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
         ForcePrintErrors = true;
         Module.SetFlags(Module.GetFlags() | MFB_REACTIVATED);
         return(ModuleController.ReactivateModules(vout));
