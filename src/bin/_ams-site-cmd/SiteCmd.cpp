@@ -273,7 +273,7 @@ bool CSiteCmd::Run(void)
         if( error > 0 ) {
             vout << low;
             vout << endl;
-            vout << "<red>>>> ERROR:</red> Unable to init the site <u>" << Options.GetArgSite() << "</u> setup." << endl;
+            vout << "<red>>>> ERROR:</red> Unable to init the site setup." << endl;
         }
 
         switch(error){
@@ -761,10 +761,7 @@ int CSiteCmd::InitSite(void)
     // instruct that site init was performed
     SiteController.SetSiteInitExecuted();
 
-    vout << low;
-    if( ErrorSystem.IsError() ){
-        return(SITE_ERROR_CONFIG_PROBLEM);
-    }
+    // do not rise here any error, all module activation is optional
 
     return(SITE_STATUS_OK);
 }
