@@ -274,8 +274,22 @@ bool CSiteController::IsSiteInitIgnored(void)
 
 void CSiteController::UnsetIgnoreSiteInitFlag(void)
 {
-    CShell::SetSystemVariable("LC_SSH_AMS_IGNORE_SITE_INIT","");
     ShellProcessor.UnsetVariable("LC_SSH_AMS_IGNORE_SITE_INIT");
+}
+//------------------------------------------------------------------------------
+
+bool CSiteController::WasSiteInitExecuted(void)
+{
+    CSmallString flag;
+    flag = CShell::GetSystemVariable("AMS_SITE_INIT_EXECUTED");
+    return( flag == "Y" );
+}
+
+//------------------------------------------------------------------------------
+
+void CSiteController::SetSiteInitExecuted(void)
+{
+    ShellProcessor.SetVariable("AMS_SITE_INIT_EXECUTED","Y");
 }
 
 //==============================================================================

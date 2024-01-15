@@ -609,6 +609,10 @@ int CSiteCmd::InitSite(void)
     ModuleController.MergeBundles();
     ModuleController.PrintBundlesInfo(vout);
 
+    if( (Options.GetOptForce() == false) || (SiteController.WasSiteInitExecuted() == true) ){
+        Module.SetFlags(Module.GetFlags() | MFB_OTHER_PASS);
+    }
+
     CSite   site;
     bool    reactivate = false;
 
@@ -753,6 +757,9 @@ int CSiteCmd::InitSite(void)
     if( Options.GetOptForce() == true ){
         SiteController.UnsetIgnoreSiteInitFlag();
     }
+
+    // instruct that site init was performed
+    SiteController.SetSiteInitExecuted();
 
     vout << low;
     if( ErrorSystem.IsError() ){

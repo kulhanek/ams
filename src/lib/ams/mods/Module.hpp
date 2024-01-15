@@ -42,14 +42,19 @@
 // module is activated within infinity job
 #define MFB_INFINITY        (1 << 2)
 
+// reserved                 (1 << 3)
+
 // module is reactivated
-#define MFB_REACTIVATED     (1 << 16)
+#define MFB_REACTIVATED     (1 << 4)
 
 // module is reexported
-#define MFB_REEXPORTED      (1 << 17)
+#define MFB_REEXPORTED      (1 << 5)
 
 // module was autoloaded
-#define MFB_AUTOLOADED      (1 << 18)
+#define MFB_AUTOLOADED      (1 << 6)
+
+// other passes in nested instances of bash
+#define MFB_OTHER_PASS      (1 << 7)
 
 //-----------------------------------------------------------------------------
 

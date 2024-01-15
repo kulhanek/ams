@@ -88,6 +88,12 @@ public:
     /// unset the flag
     static void UnsetIgnoreSiteInitFlag(void);
 
+    /// was site init executed
+    bool WasSiteInitExecuted(void);
+
+    /// set site init execution flag
+    void SetSiteInitExecuted(void);
+
 // section of private data ----------------------------------------------------
 private:
     CSmallString    ActiveSite;
