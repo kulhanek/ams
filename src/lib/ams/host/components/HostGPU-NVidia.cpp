@@ -247,6 +247,7 @@ void CHostSubSystemGPUNVidia::PrintSubSystemInfo(CVerboseStr& vout)
 
 void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
 {
+    vout << "ngpus " << NumOfHostGPUs << endl;
     vout << "gpu_model " << GPURawModelName << endl;
 
     // FIXME - maybe here we want also compatible cuda capabilities?

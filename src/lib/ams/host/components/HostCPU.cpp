@@ -289,6 +289,7 @@ void CHostSubSystemCPU::PrintSubSystemInfo(CVerboseStr& vout)
 
 void CHostSubSystemCPU::PrintNodeResources(CVerboseStr& vout)
 {
+    vout << "ncpus " << NumOfHostCPUs << endl;
     vout << "cpu_model " << CPURawModelName << endl;
     vout << "cpu_flag " << GetTokenList(CPUFlags,",") << endl;
     bool HTDetected = NumOfHostThreads > NumOfHostCPUs;
