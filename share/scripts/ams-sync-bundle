@@ -83,22 +83,9 @@ if [[ -f "$PROFILE" ]]; then
     exit $?
 fi
 
-export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.rsync-push"
-if [[ -f "$PROFILE" ]]; then
-    echo "  Profile file:         $PROFILE" 
-    $AMS_ROOT_V9/share/sync/rsync/push/ams-rsync-bundle "$@"
-    exit $?
-fi
-
-export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.exec"
-if [[ -f "$PROFILE" ]]; then
-    echo "  Profile file:         $PROFILE" 
-    exec_profile "$@"
-    exit $?
-fi
-
 echo "" 1>&2
-echo ">>> ERROR: Profile '$1' is not defined!" 1>&2
+echo ">>> ERROR: Profile '$1' is not defined in the directory:" 1>&2
+echo ">>>        '$AMS_BUNDLE_DIR/_ams_bundle/sync/'" 1>&2
 echo "" 1>&2
 exit 1
 

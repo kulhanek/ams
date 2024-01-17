@@ -394,9 +394,10 @@ const CSmallString CUser::GetGroupList(std::list<CSmallString>& list,const CSmal
 void CUser::PrintUserDetailedInfo(CVerboseStr& vout)
 {
     vout << endl;
-    vout << "# User name          : " << Name << " (uid: " << UID << ")" << endl;
-    vout << "# Real group name    : " << RGroup << " (gid: " << RGID << ")" << endl;
-    vout << "# Eff. group name    : " << EGroup << " (gid: " << EGID << ")" << endl;
+    vout << "# User name          : " << Name << " ( uid: " << UID << ")" << endl;
+    vout << "# Real group name    : " << RGroup << " (rgid: " << RGID << ")" << endl;
+                     vout << "# Eff. group name    : " << EGroup << " (egid: " << EGID << ")" << endl;
+    CUtils::PrintTokens(vout,"# Posix groups       : ",GetGroupList(PosixGroups),80,'#');
     mode_t umask_mode = CUserUtils::GetUMaskMode();
     char uorigin = 'S';
     vout << "# Current UMask      : " << CUserUtils::GetUMask(umask_mode) << "/" << uorigin;

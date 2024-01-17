@@ -305,21 +305,21 @@ const CSmallString CHostGroup::GetRealm(void)
 
 void CHostGroup::GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
-    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+    CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
     CXMLElement* p_ele = GetHostGroupAutoLoadedModules();
     if( p_ele ){
         p_ele = p_ele->GetFirstChildElement("module");
     }
     while( p_ele ){
-        CSmallString mname,mflavor;
+        CSmallString mname,mflavour;
         p_ele->GetAttribute("name",mname);
-        p_ele->GetAttribute("flavor",mflavor);
-        if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+        p_ele->GetAttribute("flavour",mflavour);
+        if( (mname != NULL) && ((mflavour == NULL) || (mflavour == flavour))){
             bool enabled = ModCache.IsAutoloadEnabled(mname);
             if( withorigin ){
                 mname << "[hostgroup:" << GetHostGroupName();
-                if( mflavor != NULL ) mname << "@" << mflavor;
+                if( mflavour != NULL ) mname << "@" << mflavour;
                 mname << "]";
                 modules.push_back(mname);
             } else {
@@ -349,21 +349,21 @@ CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
 
 void CHostGroup::GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
-    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+    CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
     CXMLElement* p_ele = GetHostsConfigAutoLoadedModules();
     if( p_ele ){
         p_ele = p_ele->GetFirstChildElement("module");
     }
     while( p_ele ){
-        CSmallString mname,mflavor;
+        CSmallString mname,mflavour;
         p_ele->GetAttribute("name",mname);
-        p_ele->GetAttribute("flavor",mflavor);
-        if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+        p_ele->GetAttribute("flavour",mflavour);
+        if( (mname != NULL) && ((mflavour == NULL) || (mflavour == flavour))){
             bool enabled = ModCache.IsAutoloadEnabled(mname);
             if( withorigin ){
                 mname << "[hostsconfig:" << GetHostGroupName();
-                if( mflavor != NULL ) mname << "@" << mflavor;
+                if( mflavour != NULL ) mname << "@" << mflavour;
                 mname << "]";
                 modules.push_back(mname);
             } else {
@@ -419,6 +419,17 @@ const CSmallString CHostGroup::GetHostGroupBundleSyncSuggestions(void)
     CXMLElement* p_ele = HostGroup.GetChildElementByPath("group");
     if( p_ele == NULL ) return(profiles);
     p_ele->GetAttribute("bundle_sync_profiles",profiles);
+    return(profiles);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CHostGroup::GetHostGroupCoreSyncSuggestions(void)
+{
+    CSmallString profiles;
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group");
+    if( p_ele == NULL ) return(profiles);
+    p_ele->GetAttribute("core_sync_profiles",profiles);
     return(profiles);
 }
 

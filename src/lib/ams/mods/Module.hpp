@@ -103,6 +103,9 @@ public:
     /// set module flags
     int  GetFlags(void);
 
+    /// return error for EModuleError
+    static const CSmallString GetErrorStr(EModuleError error);
+
 // print methods ---------------------------------------------------------------
 
     /// print informations about module activation

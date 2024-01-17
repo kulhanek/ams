@@ -1593,6 +1593,38 @@ const CSmallString CModule::GetBundleName(CXMLElement* p_module)
     return(name);
 }
 
+//------------------------------------------------------------------------------
+
+const CSmallString CModule::GetErrorStr(EModuleError error)
+{
+    CSmallString errstr;
+
+    switch(error){
+        case(EAE_STATUS_OK):
+            break;
+        case(EAE_CONFIG_ERROR):
+            errstr << "configuration problem";
+            break;
+        case(EAE_MODULE_NOT_FOUND):
+            errstr << "module not found";
+            break;
+        case(EAE_BUILD_NOT_FOUND):
+            errstr << "build not found";
+            break;
+        case(EAE_DEPENDENCY_ERROR):
+            errstr << "dependency error";
+            break;
+        case(EAE_NOT_ACTIVE):
+            errstr << "module is not active";
+            break;
+        case(EAE_PERMISSION_DENIED):
+            errstr << "persmission denied";
+            break;
+    }
+
+    return(errstr);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

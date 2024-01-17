@@ -368,7 +368,11 @@ bool CModuleController::ReactivateModules(CVerboseStr& vout)
     bool result = true;
     for(CSmallString mod : modules){
         bool exported = IsModuleExported(mod);
-        result &= Module.AddModule(vout,mod,false,!exported);
+        EModuleError rcode = Module.AddModule(vout,mod,false,!exported);
+        if( rcode != EAE_STATUS_OK ){
+            vout << "  >>> ERROR: " << CModule::GetErrorStr(rcode) << endl;
+            result = false;
+        }
     }
     return(result);
 }
@@ -382,7 +386,11 @@ bool CModuleController::PurgeModules(CVerboseStr& vout)
 
     bool result = true;
     for(CSmallString mod : modules){
-        result &= Module.RemoveModule(vout,mod);
+        EModuleError rcode = Module.RemoveModule(vout,mod);
+        if( rcode != EAE_STATUS_OK ){
+            vout << "  >>> ERROR: " << CModule::GetErrorStr(rcode) << endl;
+            result = false;
+        }
     }
 
     return(result);

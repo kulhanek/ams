@@ -180,22 +180,22 @@ CXMLElement* CSite::GetSiteEnvironment(void)
 
 void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
 {
-    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+     CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
     CXMLElement* p_ele = GetAutoLoadedModules();
     if( p_ele ){
         p_ele = p_ele->GetFirstChildElement("module");
     }
     while( p_ele ){
-        CSmallString mname,mflavor;
+        CSmallString mname,mflavour;
         p_ele->GetAttribute("name",mname);
         bool enabled = ModCache.IsAutoloadEnabled(mname);
 
-        p_ele->GetAttribute("flavor",mflavor);
-        if( (mname != NULL) && ((mflavor == NULL) || (mflavor == flavor))){
+        p_ele->GetAttribute("flavour",mflavour);
+        if( (mname != NULL) && ((mflavour == NULL) || (mflavour == flavour))){
             if( withorigin ){
                 mname << "[site:" << GetName();
-                if( mflavor != NULL ) mname << "@" << mflavor;
+                if( mflavour != NULL ) mname << "@" << mflavour;
                 mname << "]";
                 if( ! enabled ){
                     mname << " - disabled by admin";
@@ -240,8 +240,8 @@ void CSite::PrintShortSiteInfo(CVerboseStr& vout)
     vout << version << "~~" << endl;
 
     vout << "  Site name  : " << title << endl;
-    vout << "  Host group : " << setw(33) << left << HostGroup.GetHostGroupName();
-    vout << " | Site flavor : " << setw(15) << right << AMSRegistry.GetSiteFlavor() << endl;
+    vout << "  Host group : " << setw(27) << left << HostGroup.GetHostGroupName();
+    vout << " | User site flavour : " << setw(15) << right << AMSRegistry.GetUserSiteFlavour() << endl;
 
     User.PrintUserInfoForSite(vout);
     Host.PrintHostInfoForSite(vout);
@@ -292,7 +292,7 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
 
 void CSite::PrintAutoLoadedModules(CVerboseStr& vout)
 {
-    vout << "# Origin Action   Module                                              Flavor    " << endl;
+    vout << "# Origin Action   Module                                              Flavour   " << endl;
     vout << "# ------ -------- --------------------------------------------------- ----------" << endl;
 
     CXMLElement* p_ele;
@@ -316,15 +316,15 @@ void CSite::PrintAutoLoadedModules(CVerboseStr& vout,CXMLElement* p_ele,const CS
     if( p_ele == NULL ) return;
     p_ele = p_ele->GetFirstChildElement("module");
 
-    CSmallString flavor = AMSRegistry.GetSiteFlavor();
+    CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
-//  vout << "# Origin Action   Module                                              Flavor    " << endl;
+//  vout << "# Origin Action   Module                                              Flavour   " << endl;
 //  vout << "# ------ -------- --------------------------------------------------- ----------" << endl;
 
     while( p_ele ){
-        CSmallString mname,mflavor;
+        CSmallString mname,mflavour;
         p_ele->GetAttribute("name",mname);
-        p_ele->GetAttribute("flavor",mflavor);
+        p_ele->GetAttribute("flavour",mflavour);
         p_ele = p_ele->GetNextSiblingElement("module");
         if( mname == NULL ) continue;
 
@@ -333,7 +333,7 @@ void CSite::PrintAutoLoadedModules(CVerboseStr& vout,CXMLElement* p_ele,const CS
         bool enabled = ModCache.IsAutoloadEnabled(mname);
 
         if( enabled ){
-            if( (mflavor == NULL) || (mflavor == flavor) ){
+            if( (mflavour == NULL) || (mflavour == flavour) ){
                 vout << setw(8) << "add";
             } else {
                 vout << setw(8) << "ignored";
@@ -343,7 +343,7 @@ void CSite::PrintAutoLoadedModules(CVerboseStr& vout,CXMLElement* p_ele,const CS
         }
 
         vout << " " << setw(51) << mname;
-        vout << " " << setw(10) << mflavor;
+        vout << " " << setw(10) << mflavour;
         vout << endl;
     }
 }

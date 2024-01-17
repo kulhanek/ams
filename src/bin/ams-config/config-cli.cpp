@@ -83,6 +83,8 @@ void PrintUserSetupMenu(void);
 void UserSetupMenu(void);
 void PrintUserUMask(void);
 void ChangeUserUMask(void);
+void PrintUserFlavour(void);
+void ChangeUserFlavour(void);
 
 //-----------------------------------------------------------------------------
 
@@ -219,8 +221,8 @@ void PrintMainMenu(void)
     printf("------------------------------------------------------------\n");
     printf(" 1   - configure visualization (color profiles)\n");
     printf(" 2   - configure auto-loaded modules\n");
-    printf(" 3   - configure user details (umask)\n");
-    printf(" 4   - module bundles\n");
+    printf(" 3   - configure user details (umask, AMS flavour)\n");
+    printf(" 4   - configure user module bundles\n");
     printf("------------------------------------------------------------\n");
     printf(" s   - save changes\n");
     printf(" p   - print this menu once again\n");
@@ -743,9 +745,11 @@ void PrintUserSetupMenu(void)
     printf(" Item                                                       \n");
     printf("----------------------------------------- ------------------\n");
     printf(" 1 - Print user umask\n");
-    printf(" 2 - Change user umask\n"); 
+    printf(" 2 - Change user umask\n");
+    printf(" 3 - Print user AMS flavour\n");
+    printf(" 4 - Change user AMS flavour\n");
     printf("-----------------------------------------                   \n");
-    printf(" 3 - Print user info\n");
+    printf(" 5 - Print user info\n");
     printf("------------------------------------------------------------\n");
     printf("* NOTE: All changes are effective in new terminal sessions !\n");
     printf("------------------------------------------------------------\n");
@@ -765,6 +769,7 @@ void UserSetupMenu(void)
         printf(" Type menu item and press enter: ");
         if( fgets(buffer,79,stdin) == NULL ) continue;
         switch(buffer[0]) {
+
         case '1':
             PrintUserUMask();
             PrintUserSetupMenu();
@@ -773,7 +778,17 @@ void UserSetupMenu(void)
             ChangeUserUMask();
             PrintUserSetupMenu();
             break;
-        case '3':{
+
+        case '3':
+            PrintUserFlavour();
+            PrintUserSetupMenu();
+            break;
+        case '4':
+            ChangeUserFlavour();
+            PrintUserSetupMenu();
+            break;
+
+        case '5':{
             CVerboseStr vout;
             vout.Attach(Console);
             User.PrintUserDetailedInfo(vout);
@@ -852,6 +867,39 @@ void ChangeUserUMask(void)
 
         AMSRegistry.SetUserUMask(buffer);
         printf(" >>> The umask was successfully set!\n");
+        printf("\n");
+        UserSetupChanged = true;
+        return;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void PrintUserFlavour(void)
+{
+    printf("\n");
+    printf(" >>> User site flavour is : %s\n",(const char*)AMSRegistry.GetUserSiteFlavour());
+    printf("\n");
+}
+
+//-----------------------------------------------------------------------------
+
+void ChangeUserFlavour(void)
+{
+    printf("\n");
+    for(;;) {
+        printf(" Type user site flavour setup, or 'default' to set the default one (or empty string to return back): ");
+        char buffer[80];
+        if( fgets(buffer,79,stdin) == NULL ) continue;
+
+        if( strlen(buffer) > 0 ) {
+            if( buffer[strlen(buffer)-1] == '\n' ) buffer[strlen(buffer)-1] = '\0';
+        }
+
+        if( strcmp(buffer,"") == 0 ) return;
+
+        AMSRegistry.SetUserSiteFlavour(buffer);
+        printf(" >>> The user site flavour was successfully set!\n");
         printf("\n");
         UserSetupChanged = true;
         return;

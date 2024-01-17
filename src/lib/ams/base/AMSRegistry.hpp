@@ -69,6 +69,12 @@ public:
     /// get default umask
     const CSmallString GetDefaultUMask(void);
 
+    /// get site flavour
+    const CSmallString GetUserSiteFlavour(void);
+
+    /// get site flavour
+    void SetUserSiteFlavour(const CSmallString& site_flavour);
+
 // -----------------------------------------------
     /// get list of autoloaded modules
     void GetUserAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
@@ -144,9 +150,6 @@ public:
     /// return column separated paths for site configurations
     const CFileName GetSiteSearchPaths(void);
 
-    /// get site flavor
-    const CSmallString GetSiteFlavor(void) const;
-
 // print engine setup ----------------------------------------------------------
     /// return column separated paths for print profiles
     const CFileName GetPrintProfileSearchPaths(void);
@@ -169,7 +172,6 @@ public:
 private:
     CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT_V9 variable
     CXMLDocument    Config;             // global config data
-    CSmallString    SiteFlavor;
 
     /// get user global setup
     const CFileName GetUserGlobalConfig(void);

@@ -152,9 +152,9 @@ bool CModuleCmd::Run(void)
         for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
             EModuleError error = Module.RemoveModule(vout,Options.GetProgArg(i));
 
-            if( error > 0 ){
+            if( error != EAE_STATUS_OK ){
                 CSmallString error;
-                error << "unable to add module '" << Options.GetProgArg(i) << "'";
+                error << "unable to remove module '" << Options.GetProgArg(i) << "'";
                 ES_TRACE_ERROR(error);
                 vout << low;
                 vout << endl;

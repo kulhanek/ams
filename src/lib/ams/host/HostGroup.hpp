@@ -118,8 +118,11 @@ public:
     /// get user umask
     const CSmallString GetUserUMask(void);
 
-    /// return space separated list of sync profiles for given host group
+    /// return space separated list of bundle sync profiles for given host group
     const CSmallString GetHostGroupBundleSyncSuggestions(void);
+
+    /// return space separated list of core sync profiles for given host group
+    const CSmallString GetHostGroupCoreSyncSuggestions(void);
 
 // information methods for all host groups -------------------------------------
     /// find host group namespace

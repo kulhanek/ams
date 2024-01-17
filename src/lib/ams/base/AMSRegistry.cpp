@@ -58,12 +58,6 @@ CAMSRegistry::CAMSRegistry(void)
 
 void CAMSRegistry::LoadRegistry(void)
 {
-// environmental setup
-    SiteFlavor = GetSystemVariable("AMS_FLAVOUR");
-    if( SiteFlavor == NULL ){
-        SiteFlavor = "regular";
-    }
-
 // load config
     CFileName config_name = GetUserGlobalConfig();
 
@@ -258,6 +252,36 @@ void CAMSRegistry::SetUserUMask(const CSmallString& umask)
         p_ele->RemoveAttribute("umask");
     } else {
         p_ele->SetAttribute("umask",umask);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAMSRegistry::GetUserSiteFlavour(void)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user",true);
+    CSmallString site_flavour;
+    // try user setup
+    if( (p_ele->GetAttribute("site_flavour",site_flavour) == false) || (site_flavour == NULL) ){
+        // try envirnoment setup
+        site_flavour = GetSystemVariable("AMS_FLAVOUR");
+    }
+    if( site_flavour == NULL ){
+        // use default
+        site_flavour = "amsbase";
+    }
+    return(site_flavour);
+}
+
+//------------------------------------------------------------------------------
+
+void CAMSRegistry::SetUserSiteFlavour(const CSmallString& site_flavour)
+{
+    CXMLElement* p_ele = Config.GetChildElementByPath("registry/ams/user",true);
+    if( (site_flavour == NULL) || (site_flavour == "default") ){
+        p_ele->RemoveAttribute("site_flavour");
+    } else {
+        p_ele->SetAttribute("site_flavour",site_flavour);
     }
 }
 
@@ -582,13 +606,6 @@ const CFileName CAMSRegistry::GetSiteSearchPaths(void)
         }
     }
     return(path);
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CAMSRegistry::GetSiteFlavor(void) const
-{
-    return(SiteFlavor);
 }
 
 //==============================================================================

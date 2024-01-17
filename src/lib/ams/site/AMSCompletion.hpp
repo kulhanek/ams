@@ -77,8 +77,11 @@ private:
     // add module name suggestions
     bool AddModuleSuggestions(void);
 
-    // add sync profiles
-    bool AddSyncProfileSuggestions(void);
+    // add bundle sync profiles
+    bool AddBundleSyncProfileSuggestions(void);
+
+    // add core sync profiles
+    bool AddCoreSyncProfileSuggestions(void);
 
     // what part from build should be printed?
     unsigned int WhatBuildPart(void);

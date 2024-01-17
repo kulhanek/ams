@@ -704,6 +704,10 @@ int CSiteCmd::InitSite(void)
         reactivate = true;
     }
 
+    if( AMSRegistry.GetUserBundlePath() != NULL ){
+        ShellProcessor.SetVariable("USERSOFT",AMSRegistry.GetUserBundlePath());
+    }
+
     // set umask but not in jobs
     char origin;
     ShellProcessor.SetUMask(CUserUtils::GetUMask(User.GetRequestedUserUMaskMode(origin)));
