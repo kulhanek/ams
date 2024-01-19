@@ -215,22 +215,22 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(CVerboseStr& vout)
 
         CFileName user_config_dir = CShell::GetSystemVariable("AMS_USER_CONFIG_DIR");
 
-        if( CFileSystem::IsDirectory(user_config_dir) == false ) {
-            // create directory
-            if( CFileSystem::CreateDir(user_config_dir) == false ) {
-                vout << "<red><b>" << endl;
-                vout << ">>> ERROR:   The non-standard AMS config directory is not accessible!" << endl;
-                vout << "             Directory: '" << user_config_dir << "'" << endl;
-                vout << "             Error:     " << ErrorSystem.GetLastError() << endl;
-                vout << endl;
-                vout << ">>> WARNING: Switching into the emergency mode employing the standard configuration directory." << endl;
-                vout << "             This is not optimal and can lead to many problems!" << endl;
-                vout << "             Thus, solve the problem as soon as possible!" << endl;
-                vout << "</b></red>" << endl;
+        if( user_config_dir != NULL ) {
+            if( CFileSystem::IsDirectory(user_config_dir) == false ) {
+                // create directory
+                if( CFileSystem::CreateDir(user_config_dir) == false ) {
+                    vout << "<red><b>" << endl;
+                    vout << ">>> ERROR:   The non-standard AMS config directory is not accessible!" << endl;
+                    vout << "             Directory: '" << user_config_dir << "'" << endl;
+                    vout << "             Error:     " << ErrorSystem.GetLastError() << endl;
+                    vout << endl;
+                    vout << ">>> WARNING: Switching into the emergency mode employing the standard configuration directory." << endl;
+                    vout << "             This is not optimal and can lead to many problems!" << endl;
+                    vout << "             Thus, solve the problem as soon as possible!" << endl;
+                    vout << "</b></red>" << endl;
 
-                CSmallString error;
-                error << "unable to create user config dir '" << user_config_dir << "'";
-                RUNTIME_ERROR(error);
+                    user_config_dir = NULL;
+                }
             }
         }
 
