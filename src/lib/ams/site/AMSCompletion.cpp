@@ -333,7 +333,8 @@ bool CAMSCompletion::AddSuggestions(const CSmallString& list)
 bool CAMSCompletion::AddSiteSuggestions(void)
 {
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    CVerboseStr fake;
+    AMSRegistry.LoadRegistry(fake);
 
 // init host group
     HostGroup.InitHostsConfig();
@@ -354,7 +355,8 @@ bool CAMSCompletion::AddSiteSuggestions(void)
 bool CAMSCompletion::AddModuleSuggestions(void)
 {
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    CVerboseStr fake;
+    AMSRegistry.LoadRegistry(fake);
 
 // init host group
     HostGroup.InitHostsConfig();
@@ -396,7 +398,8 @@ bool CAMSCompletion::AddModuleSuggestions(void)
 bool CAMSCompletion::AddBundleSyncProfileSuggestions(void)
 {
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    CVerboseStr fake;
+    AMSRegistry.LoadRegistry(fake);
 
 // init host group
     HostGroup.InitHostsConfig();
@@ -413,7 +416,8 @@ bool CAMSCompletion::AddBundleSyncProfileSuggestions(void)
 bool CAMSCompletion::AddCoreSyncProfileSuggestions(void)
 {
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    CVerboseStr fake;
+    AMSRegistry.LoadRegistry(fake);
 
 // init host group
     HostGroup.InitHostsConfig();

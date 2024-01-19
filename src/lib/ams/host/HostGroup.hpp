@@ -79,11 +79,17 @@ public:
     /// get default site
     const CSmallString GetDefaultSite(void);
 
-    /// is site allowed?
+    /// is site allowed on the host group?
     bool IsSiteAllowed(const CSmallString& name);
+
+    /// is site transferrable to the host group?
+    bool IsSiteTransferable(const CSmallString& name);
 
     /// get list of allowed sites
     void GetAllowedSites(std::set<CSmallString>& list);
+
+    /// get list of transferable sites
+    void GetTransferableSites(std::set<CSmallString>& list);
 
     /// find host group namespace
     const CSmallString GetGroupNS(void);

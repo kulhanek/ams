@@ -41,6 +41,7 @@
 
 CConfigCliOpts  Options;
 CTerminalStr    Console;
+CVerboseStr     vout;
 
 //------------------------------------------------------------------------------
 
@@ -116,6 +117,8 @@ int main(int argc, char* argv[])
     int result = Init(argc,argv);
 
     Console.Attach(stdout);
+    vout.Attach(Console);
+    vout.Verbosity(CVerboseStr::low);
 
     switch(result) {
     case SO_EXIT:
@@ -159,7 +162,7 @@ int Init(int argc, char* argv[])
 bool Run(void)
 {
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    AMSRegistry.LoadRegistry(vout);
 
 // init host group
     HostGroup.InitHostsConfig();

@@ -125,12 +125,19 @@ void CModuleController::PrintBundlesInfo(CVerboseStr& vout)
 
 void CModuleController::MergeBundles(void)
 {
-    ModCache.CreateEmptyCache();
+    MergeBundles(ModCache);
+}
+
+//------------------------------------------------------------------------------
+
+void CModuleController::MergeBundles(CModCache& mod_cache)
+{
+    mod_cache.CreateEmptyCache();
 
     for( CModBundlePtr p_bundle : Bundles ){
         CXMLElement* p_cache = p_bundle->GetCacheElement();
         CXMLElement* p_config = p_bundle->GetBundleElement();
-        ModCache.MergeWithCache(p_cache,p_config);
+        mod_cache.MergeWithCache(p_cache,p_config);
     }
 }
 

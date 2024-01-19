@@ -90,7 +90,7 @@ bool CSetEnv::Run(void)
     CShell::SetSystemVariable("AMS_HOST_CACHE",cachename);
 
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    AMSRegistry.LoadRegistry(vout);
 
 // init host group
     HostGroup.InitHostsConfig();

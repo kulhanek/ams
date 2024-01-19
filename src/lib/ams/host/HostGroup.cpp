@@ -272,7 +272,36 @@ void CHostGroup::GetAllowedSites(std::set<CSmallString>& list)
 
 //------------------------------------------------------------------------------
 
+void CHostGroup::GetTransferableSites(std::set<CSmallString>& list)
+{
+    CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/sites");
+    if( p_ele == NULL ){
+        CSmallString warning;
+        warning << "no sites defined in the file '" << HostGroupFile << "'";
+        RUNTIME_ERROR(warning);
+    }
+    std::string transferable_sites;
+    if( p_ele->GetAttribute("transferable",transferable_sites) == false ){
+        // keep without warning
+        return;
+    }
+    split(list,transferable_sites,boost::is_any_of(","));
+
+    list.insert(GetDefaultSite());
+}
+
+//------------------------------------------------------------------------------
+
 bool CHostGroup::IsSiteAllowed(const CSmallString& name)
+{
+    std::set<CSmallString> allowed_sites;
+    GetAllowedSites(allowed_sites);
+    return( std::find(allowed_sites.begin(), allowed_sites.end(), name) != allowed_sites.end() );
+}
+
+//------------------------------------------------------------------------------
+
+bool CHostGroup::IsSiteTransferable(const CSmallString& name)
 {
     std::set<CSmallString> allowed_sites;
     GetAllowedSites(allowed_sites);

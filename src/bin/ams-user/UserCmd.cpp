@@ -78,7 +78,7 @@ int CUserCmd::Init(int argc, char* argv[])
 bool CUserCmd::Run(void)
 {   
     // init global setup
-    AMSRegistry.LoadRegistry();
+    AMSRegistry.LoadRegistry(vout);
     User.InitUserConfig();
     User.InitUser();
 

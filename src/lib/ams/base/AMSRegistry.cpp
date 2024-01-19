@@ -37,6 +37,10 @@
 
 //------------------------------------------------------------------------------
 
+using namespace std;
+
+//------------------------------------------------------------------------------
+
 #define DEFAULT_UMASK "077"
 
 //------------------------------------------------------------------------------
@@ -50,19 +54,23 @@ CAMSRegistry AMSRegistry;
 CAMSRegistry::CAMSRegistry(void)
 {
     AMSRoot = CShell::GetSystemVariable("AMS_ROOT_V9");
+    ConfigLoaded = false;
 }
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CAMSRegistry::LoadRegistry(void)
+void CAMSRegistry::LoadRegistry(CVerboseStr& vout)
 {
+    if( ConfigLoaded ) return;
+
 // load config
-    CFileName config_name = GetUserGlobalConfig();
+    CFileName config_name = GetUserGlobalConfig(vout);
 
     if( CFileSystem::IsFile(config_name) == false ){
         // silent error
+        ConfigLoaded = true;
         return;
     }
 
@@ -75,13 +83,16 @@ void CAMSRegistry::LoadRegistry(void)
         ES_WARNING(warning);
         return;
     }
+
+    ConfigLoaded = true;
 }
 
 //------------------------------------------------------------------------------
 
 bool CAMSRegistry::SaveUserConfig(void)
 {
-    CFileName config_name = GetUserGlobalConfig();
+    CVerboseStr fake;
+    CFileName config_name = GetUserGlobalConfig(fake);
 
     CXMLPrinter xml_printer;
     xml_printer.SetPrintedXMLNode(&Config);
@@ -186,7 +197,7 @@ const CFileName CAMSRegistry::GetModActionPath(const CFileName& action_command)
 
 //------------------------------------------------------------------------------
 
-const CFileName CAMSRegistry::GetUserGlobalConfig(void)
+const CFileName CAMSRegistry::GetUserGlobalConfig(CVerboseStr& vout)
 {
     CFileName user_config;
     user_config = CShell::GetSystemVariable("AMS_REGISTRY_CONFIG");
@@ -203,6 +214,25 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(void)
     if( user_config == NULL ) {
 
         CFileName user_config_dir = CShell::GetSystemVariable("AMS_USER_CONFIG_DIR");
+
+        if( CFileSystem::IsDirectory(user_config_dir) == false ) {
+            // create directory
+            if( CFileSystem::CreateDir(user_config_dir) == false ) {
+                vout << "<red><b>" << endl;
+                vout << ">>> ERROR:   The non-standard AMS config directory is not accessible!" << endl;
+                vout << "             Directory: '" << user_config_dir << "'" << endl;
+                vout << "             Error:     " << ErrorSystem.GetLastError() << endl;
+                vout << endl;
+                vout << ">>> WARNING: Switching into the emergency mode employing the standard configuration directory." << endl;
+                vout << "             This is not optimal and can lead to many problems!" << endl;
+                vout << "             Thus, solve the problem as soon as possible!" << endl;
+                vout << "</b></red>" << endl;
+
+                CSmallString error;
+                error << "unable to create user config dir '" << user_config_dir << "'";
+                RUNTIME_ERROR(error);
+            }
+        }
 
         if( user_config_dir == NULL ){
             user_config_dir = CShell::GetSystemVariable("HOME");

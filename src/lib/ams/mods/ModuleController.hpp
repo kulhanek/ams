@@ -47,6 +47,9 @@ public:
     /// merge them into a single cache
     void MergeBundles(void);
 
+     /// merge them into a single cache
+    void MergeBundles(CModCache& mod_cache);
+
 // information about modules ---------------------------------------------------
     /// check if module is active
     bool IsModuleActive(const CSmallString& module);

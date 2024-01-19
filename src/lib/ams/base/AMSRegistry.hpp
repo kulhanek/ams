@@ -28,6 +28,7 @@
 #include <FileName.hpp>
 #include <AmsUUID.hpp>
 #include <list>
+#include <VerboseStr.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ public:
 
 // registry initialization -----------------------------------------------------
     /// init all registry
-    void LoadRegistry(void);
+    void LoadRegistry(CVerboseStr& vout);
 
     /// save user registry
     bool SaveUserConfig(void);
@@ -172,9 +173,10 @@ public:
 private:
     CFileName       AMSRoot;            // ams root directory - read from AMS_ROOT_V9 variable
     CXMLDocument    Config;             // global config data
+    bool            ConfigLoaded;
 
     /// get user global setup
-    const CFileName GetUserGlobalConfig(void);
+    const CFileName GetUserGlobalConfig(CVerboseStr& vout);
 
     /// set registry value
     void SetRegistryVariable(const CSmallString& name);

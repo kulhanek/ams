@@ -96,7 +96,7 @@ int CModuleCmd::Init(int argc, char* argv[])
 bool CModuleCmd::Run(void)
 {
 // init AMS registry
-    AMSRegistry.LoadRegistry();
+    AMSRegistry.LoadRegistry(vout);
 
 // init host group
     HostGroup.InitHostsConfig();
