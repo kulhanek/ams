@@ -70,6 +70,9 @@ public:
     /// get name of the host group
     const CFileName GetHostGroupName(void);
 
+    /// get nick name of the host group (short one)
+    const CFileName GetHostGroupNickName(void);
+
     /// print host group info
     void PrintHostGroupInfo(CVerboseStr& vout);
 

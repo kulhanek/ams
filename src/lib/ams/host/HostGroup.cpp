@@ -209,6 +209,20 @@ const CFileName CHostGroup::GetHostGroupName(void)
 
 //------------------------------------------------------------------------------
 
+const CFileName CHostGroup::GetHostGroupNickName(void)
+{
+    CFileName group_name;
+    CXMLElement* p_grp = HostGroup.GetFirstChildElement("group");
+    if( p_grp != NULL ){
+        if( p_grp->GetAttribute("nickname",group_name) == true ){
+            return(group_name);
+        }
+    }
+    return(group_name);
+}
+
+//------------------------------------------------------------------------------
+
 void CHostGroup::PrintHostGroupInfo(CVerboseStr& vout)
 {
     vout << endl;
