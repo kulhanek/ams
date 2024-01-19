@@ -227,7 +227,7 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(CVerboseStr& vout)
                     vout << endl;
                     vout << ">>> WARNING: Switching into the emergency mode employing the standard configuration directory!" << endl;
                     vout << "             This is not optimal and can lead to many problems." << endl;
-                    vout << "             Remove the problem as soon as possible!" << endl;
+                    vout << "             Remove the error as soon as possible!" << endl;
                     vout << "</b></red>" << endl;
 
                     user_config_dir = NULL;
