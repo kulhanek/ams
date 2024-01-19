@@ -235,9 +235,11 @@ void CUser::InitPosixACLGroups(CXMLElement* p_ele)
         p_fele->GetAttribute("value",filter);
         bool primary_group = false;
         p_fele->GetAttribute("primary_group",primary_group);
+        CSmallString host_group;
+        p_fele->GetAttribute("host_group",host_group);
         if( primary_group == true ){
             CSmallString pgrp = RGroup;
-            if( fnmatch(filter,pgrp,0) == 0 ){
+            if( (fnmatch(filter,pgrp,0) == 0) && ( (host_group==NULL) || (host_group == HostGroup.GetHostGroupName()) ) ){
                 CSmallString alias;
                 p_fele->GetAttribute("alias",alias);
                 if( alias != NULL ){
@@ -251,7 +253,7 @@ void CUser::InitPosixACLGroups(CXMLElement* p_ele)
             }
         } else {
             for(CSmallString pgrp: PosixGroups){
-                if( fnmatch(filter,pgrp,0) == 0 ){
+                if( (fnmatch(filter,pgrp,0) == 0) && ( (host_group==NULL) || (host_group == HostGroup.GetHostGroupName()) ) ){
                     CSmallString alias;
                     p_fele->GetAttribute("alias",alias);
                     if( alias != NULL ){
