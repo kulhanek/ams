@@ -62,6 +62,14 @@ void CModuleController::InitModuleControllerConfig(void)
     if( ! sExportedModules.empty() ) split(ExportedModules,sExportedModules,is_any_of("|"),boost::token_compress_on);
 }
 
+//------------------------------------------------------------------------------
+
+void CModuleController::InitModuleControllerConfig(const CSmallString& bundle_name, const CFileName& bundle_path)
+{
+    BundleName  = bundle_name;
+    BundlePath  = bundle_path;
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

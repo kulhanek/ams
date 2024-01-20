@@ -37,6 +37,9 @@ public:
     /// init module controller configuration
     void InitModuleControllerConfig(void);
 
+    /// init module controller configuration
+    void InitModuleControllerConfig(const CSmallString& bundle_name, const CFileName& bundle_path);
+
 // bundles operation -----------------------------------------------------------
     /// load bundles
     void LoadBundles(EModBundleCache type);
