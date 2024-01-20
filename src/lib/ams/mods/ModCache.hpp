@@ -90,6 +90,9 @@ public:
     /// get module builds
     static void GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list);
 
+    /// get module builds
+    static void GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& vers, std::list<CSmallString>& list);
+
     /// check if module can be exported - default true
     static bool CanModuleBeExported(CXMLElement* p_mele);
 

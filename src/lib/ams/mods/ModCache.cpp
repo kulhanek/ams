@@ -372,6 +372,41 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
 
 //------------------------------------------------------------------------------
 
+void GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& vers, std::list<CSmallString>& list)
+{
+    CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
+
+    std::list<CPVerRecord>  pvlist;
+
+    while( p_bele != NULL ) {
+        CPVerRecord bldrcd;
+        bldrcd.verindx = 0.0;
+        p_bele->GetAttribute("ver",bldrcd.ver);
+        p_bele->GetAttribute("arch",bldrcd.arch);
+        p_bele->GetAttribute("mode",bldrcd.mode);
+        p_bele->GetAttribute("verindx",bldrcd.verindx);
+        if( (bldrcd.ver != NULL) && (bldrcd.arch != NULL) && (bldrcd.mode != NULL) ){
+            pvlist.push_back(bldrcd);
+        }
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+
+    pvlist.sort(sort_tokens);
+
+    // do not call unique as it makes it unique per version!!
+    // pvlist.unique();
+
+    for(CPVerRecord pvrec : pvlist){
+        if( pvrec.ver == vers ){
+            CSmallString build;
+            build << pvrec.ver << ":" << pvrec.arch << ":" << pvrec.mode;
+            list.push_back(build);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
 bool CModCache::CanModuleBeExported(CXMLElement* p_mele)
 {
     if( p_mele == NULL ) return(true);
