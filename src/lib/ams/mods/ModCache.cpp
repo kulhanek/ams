@@ -372,7 +372,7 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
 
 //------------------------------------------------------------------------------
 
-void GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& vers, std::list<CSmallString>& list)
+void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& vers, std::list<CSmallString>& list)
 {
     CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
 
