@@ -286,6 +286,10 @@ bool CSiteCmd::Run(void)
                 vout << "           The site is not defined in the AMS database (mispelled name?)." << endl;
                 ExitCode = 1;
                 return(false);
+            case SITE_ERROR_NOT_ALLOWED:
+                vout << "           The site is not allowed on the given host group." << endl;
+                ExitCode = 1;
+                return(false);
         }
         return(true);
     }
@@ -665,6 +669,9 @@ int CSiteCmd::InitSite(void)
         }
 
         if( HostGroup.IsSiteAllowed(site.GetName()) == false ) {
+            CSmallString error;
+            error << "site is not allowd on the host group: '" << HostGroup.GetHostGroupName() << "'" ;
+            ES_TRACE_ERROR(error);
             return(SITE_ERROR_NOT_ALLOWED);
         }
 

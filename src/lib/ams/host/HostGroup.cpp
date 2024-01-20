@@ -274,13 +274,13 @@ void CHostGroup::GetAllowedSites(std::set<CSmallString>& list)
         warning << "no sites defined in the file '" << HostGroupFile << "'";
         RUNTIME_ERROR(warning);
     }
-    std::string allowed_sites;
-    if( p_ele->GetAttribute("allowed",allowed_sites) == false ){
-        // keep without warning
-        return;
-    }
-    split(list,allowed_sites,boost::is_any_of(","));
 
+    std::string allowed_sites;
+    if( p_ele->GetAttribute("allowed",allowed_sites) == true ){
+        split(list,allowed_sites,boost::is_any_of(","));
+    }
+
+    // add the default site
     list.insert(GetDefaultSite());
 }
 
@@ -295,12 +295,11 @@ void CHostGroup::GetTransferableSites(std::set<CSmallString>& list)
         RUNTIME_ERROR(warning);
     }
     std::string transferable_sites;
-    if( p_ele->GetAttribute("transferable",transferable_sites) == false ){
-        // keep without warning
-        return;
+    if( p_ele->GetAttribute("transferable",transferable_sites) == true ){
+        split(list,transferable_sites,boost::is_any_of(","));
     }
-    split(list,transferable_sites,boost::is_any_of(","));
 
+    // add the default site
     list.insert(GetDefaultSite());
 }
 
