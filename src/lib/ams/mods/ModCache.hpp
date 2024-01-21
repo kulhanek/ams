@@ -105,8 +105,11 @@ public:
     /// get module bundle
     static const CSmallString  GetBundleName(CXMLElement* p_mele);
 
-    /// get module maintainer
+    /// get module bundle maintainer
     static const CSmallString  GetBundleMaintainer(CXMLElement* p_mele);
+
+    /// get module bundle contact
+    static const CSmallString  GetBundleContact(CXMLElement* p_mele);
 
 // permissions
     /// test if permission is granted (only module)

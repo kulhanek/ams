@@ -463,11 +463,31 @@ const CSmallString CModCache::GetBundleMaintainer(CXMLElement* p_mele)
 
     CXMLElement* p_maintainer = p_bundle->GetFirstChildElement("maintainer");
     if( p_maintainer ){
-        p_maintainer->GetAttribute("name",baintainer);
-        p_maintainer->GetAttribute("email",bcontact);
+        p_maintainer->GetAttribute("name",name);
     }
 
     name << baintainer << " (" << bcontact << ")";
+    return(name);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CModCache::GetBundleContact(CXMLElement* p_mele)
+{
+    CSmallString name;
+
+    CXMLElement* p_bundle = p_mele->GetFirstChildElement("bundle");
+    if( p_bundle == NULL ){
+        return(name);
+    }
+
+    CSmallString baintainer,bcontact;
+
+    CXMLElement* p_maintainer = p_bundle->GetFirstChildElement("maintainer");
+    if( p_maintainer ){
+        p_maintainer->GetAttribute("email",name);
+    }
+
     return(name);
 }
 
