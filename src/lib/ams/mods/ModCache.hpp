@@ -102,6 +102,12 @@ public:
     /// return value of build variable
     static const CSmallString GetVariableValue(CXMLElement* p_rele, const CSmallString& name);
 
+    /// get module bundle
+    static const CSmallString  GetBundleName(CXMLElement* p_mele);
+
+    /// get module maintainer
+    static const CSmallString  GetBundleMaintainer(CXMLElement* p_mele);
+
 // permissions
     /// test if permission is granted (only module)
     static bool IsPermissionGrantedForModule(CXMLElement* p_mele);

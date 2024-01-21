@@ -435,6 +435,44 @@ bool CModCache::CheckModuleVersion(CXMLElement* p_mele,const CSmallString& ver)
 
 //------------------------------------------------------------------------------
 
+const CSmallString CModCache::GetBundleName(CXMLElement* p_mele)
+{
+    CSmallString name;
+
+    CXMLElement* p_bundle = p_mele->GetFirstChildElement("bundle");
+    if( p_bundle == NULL ){
+        return(name);
+    }
+
+    p_bundle->GetAttribute("name",name);
+    return(name);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CModCache::GetBundleMaintainer(CXMLElement* p_mele)
+{
+    CSmallString name;
+
+    CXMLElement* p_bundle = p_mele->GetFirstChildElement("bundle");
+    if( p_bundle == NULL ){
+        return(name);
+    }
+
+    CSmallString baintainer,bcontact;
+
+    CXMLElement* p_maintainer = p_bundle->GetFirstChildElement("maintainer");
+    if( p_maintainer ){
+        p_maintainer->GetAttribute("name",baintainer);
+        p_maintainer->GetAttribute("email",bcontact);
+    }
+
+    name << baintainer << " (" << bcontact << ")";
+    return(name);
+}
+
+//------------------------------------------------------------------------------
+
 bool CModCache::IsPermissionGrantedForModule(CXMLElement* p_mele)
 {
     if( p_mele == NULL ){
