@@ -35,6 +35,9 @@
 #include <iomanip>
 #include <map>
 #include <list>
+#include <AddDatagramSender.hpp>
+#include <SiteController.hpp>
+#include <User.hpp>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -482,39 +485,9 @@ bool CModule::PrepareModuleEnvironment(CXMLElement* p_build,
         return(false);
     }
 
-    // install hooks from module config ------------
-
+    // gather statistics ------------
     if( action == EMA_ADD_MODULE ) {
-        CXMLElement* p_builds = dynamic_cast<CXMLElement*>(p_build->GetParentNode());
-        CXMLElement* p_module = dynamic_cast<CXMLElement*>(p_builds->GetParentNode());
-        // do postaction if necessary
-        CSmallString bundle_name = GetBundleName(p_module);
-        CSmallString args;
-        args << "\"" << complete_module;
-        args << "\" \"" << bundle_name << "\" \"" << ModuleFlags << "\"";
-
-        switch(GlobalPrintLevel) {
-        case EAPL_NONE:
-            args << " none";
-            break;
-        case EAPL_SHORT:
-            args << " short";
-            break;
-        case EAPL_FULL:
-            args << " full";
-            break;
-        case EAPL_VERBOSE:
-            args << " verbose";
-            break;
-        }
-
-        if( HostGroup.ExecuteModAction("add",args,ModuleFlags) == false ) {
-            return(false);
-        }
-    } else {
-        if( HostGroup.ExecuteModAction("remove","\""+complete_module+"\"",ModuleFlags) == false ) {
-            return(false);
-        }
+        EmitAddAction(complete_module);
     }
 
     if( ShellProcessor.PrepareModuleEnvironmentForLowPriority(p_build,action) == false ) {
@@ -1623,6 +1596,50 @@ const CSmallString CModule::GetErrorStr(EModuleError error)
     }
 
     return(errstr);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CModule::EmitAddAction(const CSmallString& build_name)
+{
+    CAddDatagramSender ads;
+
+    ads.Datagram.SetSite(SiteController.GetActiveSite());
+    ads.Datagram.SetUser(User.GetName());
+    ads.Datagram.SetHostName(Host.GetHostName());
+    ads.Datagram.SetHostName(HostGroup.GetHostGroupNickName());
+
+    CSmallString name,vers,arch,mode;
+    CModUtils::ParseModuleName(build_name,name,vers,arch,mode);
+
+    ads.Datagram.SetModuleName(name);
+    ads.Datagram.SetModuleVers(vers);
+    ads.Datagram.SetModuleArch(arch);
+    ads.Datagram.SetModuleMode(mode);
+
+//    if( bname != NULL ){
+//        Datagram.SetBundleName(bname);
+//    } else {
+//        Datagram.SetBundleName("unknown");
+//    }
+
+    ads.Datagram.SetNCPUs(Host.GetNCPUs());
+    ads.Datagram.SetNumOfHostCPUs(Host.GetNumOfHostCPUs());
+    ads.Datagram.SetNGPUs(Host.GetNGPUs());
+    ads.Datagram.SetNumOfHostGPUs(Host.GetNumOfHostGPUs());
+    ads.Datagram.SetNumOfNodes(Host.GetNNodes());
+
+    ads.Datagram.SetFlags(ModuleFlags);
+
+    CSmallTimeAndDate dt;
+    dt.GetActualTimeAndDate();
+    ads.Datagram.SetTimeAndDate(dt);
+
+    ads.Datagram.Finish();
+
+    HostGroup.ExecuteStatAction("add",&ads);
 }
 
 //==============================================================================

@@ -30,6 +30,7 @@
 #include <SmallString.hpp>
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
+#include <StatDatagramSender.hpp>
 #include <set>
 #include <list>
 
@@ -119,7 +120,7 @@ public:
     CXMLElement* GetHostsConfigEnvironment(void);
 
     /// execute action hook
-    bool ExecuteModAction(const CSmallString& action, const CSmallString& args, int flags);
+    bool ExecuteStatAction(const CSmallString& action, CStatDatagramSender* p_sender);
 
     /// get surrogate machines
     const CSmallString GetSurrogateMachines(void);

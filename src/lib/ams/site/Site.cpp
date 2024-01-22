@@ -372,7 +372,7 @@ bool CSite::ActivateSite(void)
     }
 
     // install hooks from site config ---------------
-    HostGroup.ExecuteModAction("activate",GetName(),~0);
+    EmitActivateAction(GetName());
 
     // boot host environments -----------------------
     CXMLElement* p_env_ele;
@@ -448,6 +448,15 @@ bool CSite::PrepareSiteEnvironment(CXMLElement* p_build, EModuleAction action)
     }
 
     return(true);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CSite::EmitActivateAction(const CSmallString& site_name)
+{
+    // RESERVED
 }
 
 //==============================================================================

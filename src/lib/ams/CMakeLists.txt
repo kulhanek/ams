@@ -21,6 +21,7 @@ SET(AMS_SRC
     # HOST
         host/HostGroup.cpp
         host/Host.cpp
+        host/StatDatagramSender.cpp
         host/components/HostSubSystem.cpp
         host/components/HostDefault.cpp
         host/components/HostOS.cpp
@@ -47,6 +48,7 @@ SET(AMS_SRC
         mods/ModuleController.cpp
         mods/Module.cpp
         mods/SoftStat.cpp
+        mods/AddDatagramSender.cpp
     )
 
 # create shared library --------------------------------------------------------

@@ -191,6 +191,9 @@ private:
 
     /// for module help
     void PreprocessHelpHeaders(CXMLElement* p_ele);
+
+    /// emit add action
+    void EmitAddAction(const CSmallString& build_name);
 };
 
 //-----------------------------------------------------------------------------

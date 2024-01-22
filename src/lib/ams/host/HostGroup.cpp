@@ -524,8 +524,15 @@ CXMLElement* CHostGroup::FindGroup(const CSmallString& hostname)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString& args, int flags)
+bool CHostGroup::ExecuteStatAction(const CSmallString& action, CStatDatagramSender* p_sender)
 {
+    if( p_sender == NULL ){
+        ES_ERROR("no stat sender");
+        return(false);
+    }
+
+    int flags = p_sender->GetFlags();
+
     // try first the host group specific setup
     CXMLElement* p_ele = HostGroup.GetChildElementByPath("group/actions");
     if( p_ele == NULL ){
@@ -554,34 +561,23 @@ bool CHostGroup::ExecuteModAction(const CSmallString& action, const CSmallString
             if( (flags & lflags) != flags ) continue; // incompatible flags
         }
 
-        // action found - get the remaining specification
-        CSmallString lcommand,ltype,largs;
-        if( p_cele->GetAttribute("command",lcommand) == false ) {
-            CSmallString error;
-            error << "action '" << action << "' found but command is not provided";
-            ES_ERROR(error);
+        CSmallString server;
+        if( p_cele->GetAttribute("server",server) == true ){
+            ES_ERROR("no server");
             return(false);
         }
-        p_cele->GetAttribute("type",ltype);
-        p_cele->GetAttribute("args",largs);
 
-        // complete entire comand
-        CFileName full_command;
-        full_command = AMSRegistry.GetModActionPath(lcommand);
-
-        CFileName full_arguments;
-        full_arguments = largs + " " + args;
-
-        if( ltype == "inline" ) {
-            ShellProcessor.RegisterScript(full_command,full_arguments,EST_INLINE);
-        } else if( ltype == "child" ) {
-            ShellProcessor.RegisterScript(full_command,full_arguments,EST_CHILD);
-        } else {
-            CSmallString error;
-            error << "unsupported script type '" << ltype << "'";
-            ES_ERROR(error);
+        int port = 0;
+        if( p_cele->GetAttribute("port",port) == true ){
+            ES_ERROR("no port");
             return(false);
         }
+
+        CSmallString warning;
+        warning << "action '" << laction << "' emmited";
+        ES_WARNING(warning);
+
+        return(p_sender->SendDataToServer(server,port));
     }
 
     return(true);
