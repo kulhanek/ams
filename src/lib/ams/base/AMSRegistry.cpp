@@ -69,6 +69,9 @@ void CAMSRegistry::LoadRegistry(CVerboseStr& vout)
     CFileName config_name = GetUserGlobalConfig(vout);
 
     if( CFileSystem::IsFile(config_name) == false ){
+        CSmallString warning;
+        warning << "file '" << config_name << "' does not exist";
+        ES_WARNING(warning);
         // silent error
         ConfigLoaded = true;
         return;
@@ -146,8 +149,8 @@ const CSmallString CAMSRegistry::GetSystemVariable(const CSmallString& name)
 
     while( p_ele != NULL ){
         CSmallString vname,value;
-        p_ele->SetAttribute("name",vname);
-        p_ele->SetAttribute("value",value);
+        p_ele->GetAttribute("name",vname);
+        p_ele->GetAttribute("value",value);
 
         if( vname == name ){
             return(value);
@@ -572,7 +575,13 @@ const CFileName CAMSRegistry::GetHostGroup(void)
     }
     CFileName paths  = GetHostGroupsSearchPaths();
     CFileName module = host_group;
-    host_group = "host group '" + host_group + "' not found";
+
+    if( host_group == NULL ){
+        host_group = "-notset-";
+    } else {
+        host_group = host_group + "-notfound";
+    }
+
     CUtils::FindFile(paths,module,".xml",host_group);
     return(host_group);
 }
