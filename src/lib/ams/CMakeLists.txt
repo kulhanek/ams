@@ -56,7 +56,6 @@ ADD_DEFINITIONS(-DAMS_BUILDING_DLL)
 ADD_LIBRARY(ams_shared SHARED ${AMS_SRC})
 TARGET_LINK_LIBRARIES(ams_shared
         ${HWLOC_LIB_NAME}
-        ${W3TK_LIB_NAME}
         ${HIPOLY_LIB_NAME}
         )
 
