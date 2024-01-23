@@ -70,7 +70,6 @@ SET(HIPOLY_LIB_NAME hipoly)
 # all libs ---------------------------------------
 SET(AMS_LIBS
         ams
-        ${W3TK_LIB_NAME}
         ${HIPOLY_LIB_NAME}
         ${SYSTEM_LIBS}
         )
