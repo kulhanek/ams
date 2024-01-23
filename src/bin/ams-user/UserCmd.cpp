@@ -77,8 +77,10 @@ int CUserCmd::Init(int argc, char* argv[])
 
 bool CUserCmd::Run(void)
 {   
-    // init global setup
+// init AMS registry
     AMSRegistry.LoadRegistry(vout);
+
+// user setup
     User.InitUserConfig();
     User.InitUser();
 

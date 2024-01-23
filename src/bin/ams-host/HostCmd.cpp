@@ -26,6 +26,7 @@
 #include <HostGroup.hpp>
 #include <Host.hpp>
 #include <User.hpp>
+#include <AMSRegistry.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -77,17 +78,20 @@ int CHostCmd::Init(int argc, char* argv[])
 
 bool CHostCmd::Run(void)
 {
-    // init host group
+// init AMS registry
+    AMSRegistry.LoadRegistry(vout);
+
+// init host group
     HostGroup.InitHostsConfig();
     HostGroup.InitHostGroup();
 
-    // init host subsystem modules
+// init host subsystem modules
     Host.InitHostSubSystems(HostGroup.GetHostSubSystems());
 
-    // init host specification
+// init host specification
     Host.InitHost(Options.GetOptNoCache());
 
-    // print node info and ignore the rest
+// print node info and ignore the rest
     if( Options.GetOptNodeResource() == true ){
         Host.PrintNodeResources(vout);
         return(true);
