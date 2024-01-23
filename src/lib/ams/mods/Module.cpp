@@ -1064,7 +1064,7 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
         p_build->GetAttribute("ver",bver);
         if( bver != ver ){
             p_build = p_build->GetNextSiblingElement("build");
-            cerr << "ver err '" << bver << "' '" << ver << "'" << endl;
+            // cerr << "ver err '" << bver << "' '" << ver << "'" << endl;
             continue;
         }
 
@@ -1072,7 +1072,7 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
         p_build->GetAttribute("arch",barch);
         if( AreSameTokens(arch,barch) == false ){
             p_build = p_build->GetNextSiblingElement("build");
-            cerr << "arch err" << endl;
+            // cerr << "arch err" << endl;
             continue;
         }
 
