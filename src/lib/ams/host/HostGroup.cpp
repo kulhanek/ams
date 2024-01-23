@@ -580,6 +580,8 @@ bool CHostGroup::ExecuteStatAction(const CSmallString& action, CStatDatagramSend
         return(p_sender->SendDataToServer(server,port));
     }
 
+    ES_WARNING("no valid action was found");
+
     return(true);
 }
 
