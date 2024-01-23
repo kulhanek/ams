@@ -1014,17 +1014,20 @@ bool CModCache::DoesItNeedGPU(const CSmallString& name)
     CXMLElement* p_sele = p_module->GetChildElementByPath("builds/build");
 
     bool gpu = false;
+    bool others = false;
 
     while( p_sele != NULL ) {
         CSmallString larch;
         p_sele->GetAttribute("arch",larch);
         if( (larch.FindSubString("gpu") >= 0) || (larch.FindSubString("cuda") >= 0) ){
             gpu = true;
+        } else {
+            others = true;
         }
         p_sele = p_sele->GetNextSiblingElement("build");
     }
 
-    return(gpu);
+    return(gpu && (others == false));
 }
 
 //------------------------------------------------------------------------------
