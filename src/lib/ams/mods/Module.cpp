@@ -854,9 +854,11 @@ bool CModule::DetermineArchAuto(CVerboseStr& vout,
 
         p_build = p_build->GetNextSiblingElement("build");
     }
+
     if( GlobalPrintLevel == EAPL_VERBOSE ) {
         vout << " INFO:   -> No more builds to test." << endl;
     }
+
     if( found_arch != NULL ){
         if( GlobalPrintLevel == EAPL_VERBOSE ) {
             vout << " INFO:   -> The best build was found for '" << found_arch << "'." << endl;
@@ -974,7 +976,11 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
     std::map<std::string,int>   ModeScore;
 
     CXMLElement* p_ele = HostGroup.GetParallelModes();
-    CXMLElement* p_mele = p_ele->GetFirstChildElement();
+    CXMLElement* p_mele = NULL;
+    if( p_ele != NULL ){
+        p_mele = p_ele->GetFirstChildElement();
+    }
+
     while( p_mele != NULL ){
         int ncgpu = 0; // current number of cpus/gpus
         int mcgpu = 0; // max number of cpus/gpus per node
@@ -1024,10 +1030,12 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
             }
             p_sele = p_sele->GetNextSiblingElement();
         }
+
         if( score >= 0 ){
             Modes.push_back(name);
             ModeScore[name] = score;
         }
+
         p_mele = p_mele->GetNextSiblingElement();
     }
 
@@ -1050,11 +1058,13 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
 
     // find the best architecture build
     CXMLElement* p_build = p_module->GetChildElementByPath("builds/build");
-    while( p_build ){
+
+    while( p_build != NULL ){
         CSmallString bver;
         p_build->GetAttribute("ver",bver);
         if( bver != ver ){
             p_build = p_build->GetNextSiblingElement("build");
+            cerr << "ver err" << endl;
             continue;
         }
 
@@ -1062,6 +1072,7 @@ bool CModule::DetermineModeAuto(CVerboseStr& vout,CXMLElement* p_module,
         p_build->GetAttribute("arch",barch);
         if( AreSameTokens(arch,barch) == false ){
             p_build = p_build->GetNextSiblingElement("build");
+            cerr << "arch err" << endl;
             continue;
         }
 
