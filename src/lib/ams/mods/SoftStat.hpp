@@ -44,6 +44,7 @@ struct CAddStatDatagram {
     void SetBundleName(const CSmallString& name);
     void SetUser(const CSmallString& user);
     void SetHostName(const CSmallString& name);
+    void SetHostGroup(const CSmallString& name);
     void SetNCPUs(int ncpus);
     void SetNumOfHostCPUs(int ncpus);
     void SetNGPUs(int ngpus);
@@ -63,6 +64,7 @@ struct CAddStatDatagram {
     const CSmallString      GetBundleName(void) const;
     const CSmallString      GetUser(void) const;
     const CSmallString      GetHostName(void) const;
+    const CSmallString      GetHostGroup(void) const;
     int                     GetNCPUs(void) const;
     int                     GetNumOfHostCPUs(void) const;
     int                     GetNGPUs(void) const;
@@ -75,7 +77,7 @@ struct CAddStatDatagram {
 private:
     char            Magic[4];               // magic word
     unsigned char   Control[4];             // control sum
-    char            Site[128];              // site name
+    char            Site[32];               // site name
     char            ModuleName[32];         // module build
     char            ModuleVers[32];
     char            ModuleArch[32];
@@ -83,6 +85,7 @@ private:
     char            BundleName[32];
     char            User[32];               // user name
     char            HostName[32];           // hostname
+    char            HostGroup[32];          // host group
     unsigned char   NCPUs[4];               // ncpus
     unsigned char   NumOfHostCPUs[4];       // ncpus on node
     unsigned char   NGPUs[4];               // ngpus

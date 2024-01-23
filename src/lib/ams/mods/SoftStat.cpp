@@ -41,6 +41,7 @@ CAddStatDatagram::CAddStatDatagram(void)
     memset(BundleName,0,sizeof(BundleName));
     memset(User,0,sizeof(User));
     memset(HostName,0,sizeof(HostName));
+    memset(HostGroup,0,sizeof(HostGroup));
     memset(NCPUs,0,sizeof(NCPUs));
     memset(NumOfHostCPUs,0,sizeof(NumOfHostCPUs));
     memset(NGPUs,0,sizeof(NGPUs));
@@ -70,6 +71,7 @@ void CAddStatDatagram::Finish(void)
     for(unsigned int i=0; i < sizeof(BundleName); i++) control_sum += BundleName[i];
     for(unsigned int i=0; i < sizeof(User); i++) control_sum += User[i];
     for(unsigned int i=0; i < sizeof(HostName); i++) control_sum += HostName[i];
+    for(unsigned int i=0; i < sizeof(HostGroup); i++) control_sum += HostGroup[i];
     for(unsigned int i=0; i < sizeof(NCPUs); i++) control_sum += NCPUs[i];
     for(unsigned int i=0; i < sizeof(NumOfHostCPUs); i++) control_sum += NumOfHostCPUs[i];
     for(unsigned int i=0; i < sizeof(NGPUs); i++) control_sum += NGPUs[i];
@@ -139,6 +141,13 @@ void CAddStatDatagram::SetUser(const CSmallString& user)
 void CAddStatDatagram::SetHostName(const CSmallString& name)
 {
     strncpy(HostName,name,sizeof(HostName)-1);
+}
+
+//------------------------------------------------------------------------------
+
+void CAddStatDatagram::SetHostGroup(const CSmallString& name)
+{
+    strncpy(HostGroup,name,sizeof(HostGroup)-1);
 }
 
 //------------------------------------------------------------------------------
@@ -235,6 +244,7 @@ bool CAddStatDatagram::IsValid(void)
     for(unsigned int i=0; i < sizeof(BundleName); i++) control_sum += BundleName[i];
     for(unsigned int i=0; i < sizeof(User); i++) control_sum += User[i];
     for(unsigned int i=0; i < sizeof(HostName); i++) control_sum += HostName[i];
+    for(unsigned int i=0; i < sizeof(HostGroup); i++) control_sum += HostGroup[i];
     for(unsigned int i=0; i < sizeof(NCPUs); i++) control_sum += NCPUs[i];
     for(unsigned int i=0; i < sizeof(NumOfHostCPUs); i++) control_sum += NumOfHostCPUs[i];
     for(unsigned int i=0; i < sizeof(NGPUs); i++) control_sum += NGPUs[i];
@@ -311,6 +321,13 @@ const CSmallString CAddStatDatagram::GetUser(void) const
 const CSmallString CAddStatDatagram::GetHostName(void) const
 {
     return(HostName);
+}
+
+//------------------------------------------------------------------------------
+
+const CSmallString CAddStatDatagram::GetHostGroup(void) const
+{
+    return(HostGroup);
 }
 
 //------------------------------------------------------------------------------

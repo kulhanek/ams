@@ -1609,7 +1609,7 @@ void CModule::EmitAddAction(const CSmallString& build_name)
     ads.Datagram.SetSite(SiteController.GetActiveSite());
     ads.Datagram.SetUser(User.GetName());
     ads.Datagram.SetHostName(Host.GetHostName());
-    ads.Datagram.SetHostName(HostGroup.GetHostGroupNickName());
+    ads.Datagram.SetHostGroup(HostGroup.GetHostGroupNickName());
 
     CSmallString name,vers,arch,mode;
     CModUtils::ParseModuleName(build_name,name,vers,arch,mode);
@@ -1619,11 +1619,10 @@ void CModule::EmitAddAction(const CSmallString& build_name)
     ads.Datagram.SetModuleArch(arch);
     ads.Datagram.SetModuleMode(mode);
 
-//    if( bname != NULL ){
-//        Datagram.SetBundleName(bname);
-//    } else {
-//        Datagram.SetBundleName("unknown");
-//    }
+    CXMLElement* p_module = ModCache.GetModule(name);
+    if( p_module == NULL ) return;
+
+    ads.Datagram.SetBundleName(CModCache::GetBundleName(p_module));
 
     ads.Datagram.SetNCPUs(Host.GetNCPUs());
     ads.Datagram.SetNumOfHostCPUs(Host.GetNumOfHostCPUs());
