@@ -77,15 +77,15 @@ struct CAddStatDatagram {
 private:
     char            Magic[4];               // magic word
     unsigned char   Control[4];             // control sum
-    char            Site[32];               // site name
-    char            ModuleName[32];         // module build
-    char            ModuleVers[32];
-    char            ModuleArch[32];
-    char            ModuleMode[32];
-    char            BundleName[32];
-    char            User[32];               // user name
-    char            HostName[32];           // hostname
-    char            HostGroup[32];          // host group
+    char            Site[128];              // site name
+    char            ModuleName[128];        // module build
+    char            ModuleVers[128];
+    char            ModuleArch[128];
+    char            ModuleMode[128];
+    char            BundleName[128];
+    char            User[128];              // user name
+    char            HostName[128];          // hostname
+    char            HostGroup[128];         // host group
     unsigned char   NCPUs[4];               // ncpus
     unsigned char   NumOfHostCPUs[4];       // ncpus on node
     unsigned char   NGPUs[4];               // ngpus
