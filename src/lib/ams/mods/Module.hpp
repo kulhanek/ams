@@ -137,7 +137,7 @@ private:
 
 // actions related ------------------------------
     /// solve module deps
-    bool SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container);
+    bool SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container,bool do_not_export);
 
     /// solve module desp  -  after module is activated
     bool SolveModulePostDeps(CVerboseStr& vout,CXMLElement* p_dep_container);

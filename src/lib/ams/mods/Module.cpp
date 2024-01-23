@@ -189,7 +189,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
         return(EAE_DEPENDENCY_ERROR);
     }
 
-    if( SolveModuleDeps(vout,p_module) == false ) {
+    if( SolveModuleDeps(vout,p_module,do_not_export) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (root)";
         ES_TRACE_ERROR(error);
@@ -197,7 +197,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
         return(EAE_DEPENDENCY_ERROR);
     }
 
-    if( SolveModuleDeps(vout,p_build) == false ) {
+    if( SolveModuleDeps(vout,p_build,do_not_export) == false ) {
         CSmallString error;
         error << "unable to solve dependencies for module '" << name << "' (build)";
         ES_TRACE_ERROR(error);
@@ -353,7 +353,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container)
+bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container,bool do_not_export)
 {
     if( p_dep_container == NULL ) return(true);
 
@@ -392,7 +392,7 @@ bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container)
                 }
 
                 if( found == false) {
-                    result &= AddModule(vout,lname,true) == EAE_STATUS_OK;
+                    result &= AddModule(vout,lname,true,do_not_export) == EAE_STATUS_OK;
                 }
 
             } else if( ltype == "rm" ) {
