@@ -562,13 +562,13 @@ bool CHostGroup::ExecuteStatAction(const CSmallString& action, CStatDatagramSend
         }
 
         CSmallString server;
-        if( p_cele->GetAttribute("server",server) == true ){
+        if( p_cele->GetAttribute("server",server) == false ){
             ES_ERROR("no server");
             return(false);
         }
 
         int port = 0;
-        if( p_cele->GetAttribute("port",port) == true ){
+        if( p_cele->GetAttribute("port",port) == false ){
             ES_ERROR("no port");
             return(false);
         }
