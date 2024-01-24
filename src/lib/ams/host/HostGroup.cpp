@@ -316,9 +316,9 @@ bool CHostGroup::IsSiteAllowed(const CSmallString& name)
 
 bool CHostGroup::IsSiteTransferable(const CSmallString& name)
 {
-    std::set<CSmallString> allowed_sites;
-    GetAllowedSites(allowed_sites);
-    return( std::find(allowed_sites.begin(), allowed_sites.end(), name) != allowed_sites.end() );
+    std::set<CSmallString> transferable_sites;
+    GetTransferableSites(transferable_sites);
+    return( std::find(transferable_sites.begin(), transferable_sites.end(), name) != transferable_sites.end() );
 }
 
 //------------------------------------------------------------------------------
