@@ -569,7 +569,14 @@ const CFileName CAMSRegistry::GetHostsConfigFile(void)
 
 const CFileName CAMSRegistry::GetHostGroup(void)
 {
-    CFileName host_group = GetSystemVariable("AMS_HOST_GROUP");
+    // this is from the job
+    CFileName host_group = CShell::GetSystemVariable("INF_JOB_HOST_GROUP");
+
+    // if not set, use standard setup
+    if( host_group == NULL ){
+       host_group = GetSystemVariable("AMS_HOST_GROUP");
+    }
+
     if( CFileSystem::IsFile(host_group) ){
         return(host_group);
     }

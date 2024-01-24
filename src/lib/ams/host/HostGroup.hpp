@@ -141,6 +141,9 @@ public:
     /// find host realm
     const CSmallString GetRealm(const CSmallString& hostname);
 
+    /// get host group nick name for given hostname
+    const CSmallString GetHostGroupNickName(const CSmallString& hostname);
+
 // section of private date -----------------------------------------------------
 private:
     CFileName    HostsConfigFile;
