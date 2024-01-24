@@ -633,11 +633,11 @@ int CSiteCmd::InitSite(void)
         if( site_name == NULL ){
             site_name = SiteController.GetSSHSite();
             if(  site_name != NULL ){
-                if( ! (HostGroup.IsSiteAllowed(site_name) && HostGroup.IsSiteTransferable(site_name)) ){
+                if( HostGroup.IsSiteAllowed(site_name) && HostGroup.IsSiteTransferable(site_name) ){
+                    vout << ">>> the SSH site is accepted: " << site_name << endl;
+                } else {
                     site_name = HostGroup.GetDefaultSite();
                     vout << ">>> the SSH site is not alloved on this host group, switching to the default site" << endl;
-                } else {
-                    vout << ">>> the SSH site is accepted: " << site_name << endl;
                 }
             } else {
                 site_name = HostGroup.GetDefaultSite();

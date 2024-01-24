@@ -97,9 +97,6 @@ private:
 
     /// print autoloaded modules
     void PrintAutoLoadedModules(CVerboseStr& vout,CXMLElement* p_ele,const CSmallString& origin);
-
-    /// emit activate action
-    void EmitActivateAction(const CSmallString& site_name);
 };
 
 //------------------------------------------------------------------------------
