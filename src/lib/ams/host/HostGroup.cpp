@@ -505,7 +505,7 @@ const CSmallString CHostGroup::GetHostGroupNickName(const CSmallString& hostname
 {
     CXMLElement* p_grp = FindGroup(hostname);
     if( p_grp == NULL ) return("");
-    CSmallString nick = HostGroup.GetHostGroupNickName();
+    CSmallString nick = GetHostGroupNickName();
     p_grp->GetAttribute("nickname",nick);
     return(nick);
 }
