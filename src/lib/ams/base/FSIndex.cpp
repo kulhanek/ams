@@ -108,6 +108,64 @@ std::string CFSIndex::CalculateBuildHash(const CFileName& build_path)
 
 //------------------------------------------------------------------------------
 
+std::string CFSIndex::CalculateDirHash(const CFileName& dir_path)
+{
+    SHA1 sha1;
+
+    CFileName full_path;
+    if( dir_path == '/' ){
+        full_path = dir_path;
+    } else {
+        full_path = RootDir / dir_path;
+    }
+
+    if( PersonalBundle == true ){
+        // the build might not be synchronized yet
+        if( CFileSystem::IsDirectory(full_path) == false ){
+            // return null sha1
+            return("0000000000000000000000000000000000000000");
+        }
+    }
+
+    // scan the build directory
+    HashDir(full_path,sha1);
+
+    // final hash
+    return( sha1.final() );
+}
+
+//------------------------------------------------------------------------------
+
+std::string CFSIndex::CalculateFileHash(const CFileName& file_path)
+{
+    SHA1 sha1;
+
+    CFileName full_path;
+    if( file_path == '/' ){
+        full_path = file_path;
+    } else {
+        full_path = RootDir / file_path;
+    }
+
+    if( PersonalBundle == true ){
+        // the build might not be synchronized yet
+        if( CFileSystem::IsFile(full_path) == false ){
+            // return null sha1
+            return("0000000000000000000000000000000000000000");
+        }
+    }
+
+    struct stat my_stat;
+    if( lstat(full_path,&my_stat) == 0 ) {
+        HashNode(full_path,my_stat,true,sha1);
+    }
+
+    // final hash
+    return( sha1.final() );
+}
+
+//------------------------------------------------------------------------------
+
 void CFSIndex::HashDir(const CFileName& full_path,SHA1& sha1)
 {   
     DIR* p_dir = opendir(full_path);

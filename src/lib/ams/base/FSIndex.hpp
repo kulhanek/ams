@@ -32,8 +32,12 @@ public:
 
     CFSIndex(void);
 
-// main methods ----------------------------------------------------------------    
+// main methods ----------------------------------------------------------------
+
     std::string CalculateBuildHash(const CFileName& build_path);
+    std::string CalculateDirHash(const CFileName& dir_path);
+    std::string CalculateFileHash(const CFileName& file_path);
+
     void HashDir(const CFileName& full_path,SHA1& sha1);
     void HashNode(const CFileName& name,struct stat& my_stat,bool build_node,SHA1& sha1);
 

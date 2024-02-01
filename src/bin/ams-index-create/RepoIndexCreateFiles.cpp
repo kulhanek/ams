@@ -117,6 +117,11 @@ bool CRepoIndexCreateFiles::Run(void)
             ES_ERROR(error);
             return(false);
         }
+    } else {
+        CSmallString error;
+        error << "unsupported mode: " << Options.GetArgMode();
+        ES_ERROR(error);
+        return(false);
     }
 
     // calculate index
@@ -133,7 +138,15 @@ bool CRepoIndexCreateFiles::Run(void)
     while( it != ie ){
         CSmallString    build_id    = it->first;
         CFileName       build_path  = it->second;
-        string sha1 = index.CalculateBuildHash(build_path);
+        string sha1;
+        if( Options.GetArgMode() == "files" ){
+            sha1 = index.CalculateFileHash(build_path);
+        } else if( Options.GetArgMode() == "directories" ){
+            sha1 = index.CalculateDirHash(build_path);
+        } else if( Options.GetArgMode() == "builds" ){
+            sha1 = index.CalculateBuildHash(build_path);
+        }
+
         NewIndex.Hashes[build_id] = sha1;
         vout << sha1 << " " << build_id << endl;
         it++;
