@@ -91,14 +91,14 @@ bool CRepoIndexCreateFiles::Run(void)
     if( Options.GetArgMode() == "files" ){
         if( ListFiles() == false ){
             CSmallString error;
-            error << "unable to read source files";
+            error << "unable to read source file";
             ES_ERROR(error);
             return(false);
         }
     } else if( Options.GetArgMode() == "builds" ){
         if( ListBuilds() == false ){
             CSmallString error;
-            error << "unable to read source builds";
+            error << "unable to read source file";
             ES_ERROR(error);
             return(false);
         }
@@ -153,9 +153,10 @@ bool CRepoIndexCreateFiles::ListFiles(void)
 
     if( Options.GetArgSourceNames() == "-" ){
         ListFilesRead(cin);
-        if( ! cin ){
+        if(  cin.fail() ){
             CSmallString error;
             error << "an error occured during reading the source file with file names: '" << Options.GetArgSourceNames() << "'";
+            ES_ERROR(error);
             return(false);
         }
     } else {
@@ -164,12 +165,14 @@ bool CRepoIndexCreateFiles::ListFiles(void)
         if( ! ifs ){
             CSmallString error;
             error << "unable to open for reading the source file with file names: '" << Options.GetArgSourceNames() << "'";
+            ES_ERROR(error);
             return(false);
         }
         ListFilesRead(ifs);
-        if( ! ifs ){
+        if( ifs.fail() ){
             CSmallString error;
             error << "an error occured during reading the source file with file names: '" << Options.GetArgSourceNames() << "'";
+            ES_ERROR(error);
             return(false);
         }
         ifs.close();
@@ -215,9 +218,10 @@ bool CRepoIndexCreateFiles::ListBuilds(void)
     UniqueBuildPaths.clear();
 
     if( Options.GetArgSourceNames() == "-" ){
-        if( (ListBuildsRead(cin) == false) || (! cin) ){
+        if( (ListBuildsRead(cin) == false) || cin.fail() ){
             CSmallString error;
             error << "an error occured during reading the source file with builds: '" << Options.GetArgSourceNames() << "'";
+            ES_ERROR(error);
             return(false);
         }
     } else {
@@ -226,11 +230,13 @@ bool CRepoIndexCreateFiles::ListBuilds(void)
         if( ! ifs ){
             CSmallString error;
             error << "unable to open for reading the source file with builds: '" << Options.GetArgSourceNames() << "'";
+            ES_ERROR(error);
             return(false);
         }
-        if( (ListBuildsRead(ifs) == false) || (! ifs) ){
+        if( (ListBuildsRead(ifs) == false) || ifs.fail() ){
             CSmallString error;
             error << "an error occured during reading the source file with builds: '" << Options.GetArgSourceNames() << "'";
+            ES_ERROR(error);
             return(false);
         }
         ifs.close();
@@ -258,6 +264,7 @@ bool CRepoIndexCreateFiles::ListBuildsRead(std::istream& ifs)
         if( items.size() != 2 ){
             CSmallString error;
             error << "incorrect number if items on the line " << nline << " (" << line << "), expecting two words: build and path";
+            ES_ERROR(error);
             return(false);
         }
 
