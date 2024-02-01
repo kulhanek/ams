@@ -56,6 +56,13 @@ private:
     bool ListFiles(void);
     void ListFilesRead(std::istream& ifs);
 
+// directories
+    int                             NumOfAllDirectories;
+    int                             NumOfUniqueDirectories;
+
+    bool ListDirectories(void);
+    void ListDirectoriesRead(std::istream& ifs);
+
 // builds
     int                             NumOfAllBuilds;
     int                             NumOfUniqueBuilds;

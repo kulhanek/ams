@@ -49,7 +49,7 @@ public:
     CSO_ARG(CSmallString,Mode)
     CSO_ARG(CSmallString,IndexName)
     CSO_ARG(CSmallString,SourcePath)
-    CSO_ARG(CSmallString,SourceNames)
+    CSO_ARG(CSmallString,SourceList)
     // options ------------------------------
     CSO_OPT(bool,IsPersonalBundle)
     CSO_OPT(bool,Help)
@@ -64,14 +64,14 @@ public:
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
                 "mode",                        /* parametr name */
-                "the following modes are supported: files and builds")   /* argument description */
+                "the following modes are supported: files, directories, or builds")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_ARG(CSmallString,                   /* argument type */
                 IndexName,                          /* argument name */
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
                 "index",                        /* parametr name */
-                "name of create index file")   /* argument description */
+                "name of new index file")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_ARG(CSmallString,                   /* argument type */
                 SourcePath,                          /* argument name */
@@ -81,11 +81,11 @@ public:
                 "where to look for data")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_ARG(CSmallString,                   /* argument type */
-                SourceNames,                          /* argument name */
+                SourceList,                          /* argument name */
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
                 "source",                        /* parametr name */
-                "list of files or list of couples (build and path)")   /* argument description */
+                "list of files, directories, or list of couples (build and path)")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 IsPersonalBundle,                        /* option name */

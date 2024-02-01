@@ -42,8 +42,11 @@ MAIN_ENTRY(CRepoIndexCreateFiles)
 
 CRepoIndexCreateFiles::CRepoIndexCreateFiles(void)
 {
-    NumOfAllFiles = 0;
-    NumOfUniqueFiles = 0;
+    NumOfAllFiles           = 0;
+    NumOfUniqueFiles        = 0;
+
+    NumOfAllDirectories     = 0;
+    NumOfUniqueDirectories  = 0;
 
     NumOfAllBuilds          = 0;
     NumOfUniqueBuilds       = 0;
@@ -78,7 +81,7 @@ int CRepoIndexCreateFiles::Init(int argc, char* argv[])
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    vout << high;
+    vout << low;
     vout << endl;
     vout << "# ==============================================================================" << endl;
     vout << "# ams-index-create (AMS utility) started at " << dt.GetSDateAndTime() << endl;
@@ -102,6 +105,13 @@ bool CRepoIndexCreateFiles::Run(void)
             ES_ERROR(error);
             return(false);
         }
+    } else if( Options.GetArgMode() == "directories" ){
+        if( ListDirectories() == false ){
+            CSmallString error;
+            error << "unable to read source file";
+            ES_ERROR(error);
+            return(false);
+        }
     } else if( Options.GetArgMode() == "builds" ){
         if( ListBuilds() == false ){
             CSmallString error;
@@ -117,7 +127,7 @@ bool CRepoIndexCreateFiles::Run(void)
 
     CFSIndex index;
     index.RootDir = Options.GetArgSourcePath();
-    index.PersonalBundle = false;
+    index.PersonalBundle = Options.GetOptIsPersonalBundle();
 
     map<CSmallString,CFileName>::iterator it = NewIndex.Paths.begin();
     map<CSmallString,CFileName>::iterator ie = NewIndex.Paths.end();
@@ -138,12 +148,13 @@ bool CRepoIndexCreateFiles::Run(void)
     vout << endl;
     vout << "# Saving index ..." << endl;
 
-    if( NewIndex.SaveIndex(Options.GetProgArg(0)) == false ){
+    if( NewIndex.SaveIndex(Options.GetArgIndexName()) == false ){
         CSmallString error;
-        error << "unable to save the index into the '" << Options.GetProgArg(0) << "' file";
+        error << "unable to save the index into the '" << Options.GetArgIndexName() << "' file";
         ES_ERROR(error);
         return(false);
     }
+    vout << "   > Saved as: "  << Options.GetArgIndexName() << endl;
 
     return(true);
 }
@@ -154,18 +165,21 @@ bool CRepoIndexCreateFiles::ListFiles(void)
 {
     vout << endl;
     vout << "# Assembling list of files ..." << endl;
+    vout << "  > Source path                = " << Options.GetArgSourcePath() << endl;
+    vout << "  > Source list                = " << Options.GetArgSourceList() << endl;
+    vout << "  > Personal bundle            = " << bool_to_str(Options.GetOptIsPersonalBundle()) << endl;
 
-    NumOfAllFiles = 0;
-    NumOfUniqueFiles = 0;
+    NumOfAllFiles           = 0;
+    NumOfUniqueFiles        = 0;
 
-    if( Options.GetArgSourceNames() == "-" ){
+    if( Options.GetArgSourceList() == "-" ){
         ListFilesRead(cin);
     } else {
         ifstream ifs;
-        ifs.open(Options.GetArgSourceNames());
+        ifs.open(Options.GetArgSourceList());
         if( ! ifs ){
             CSmallString error;
-            error << "unable to open for reading the source file with file names: '" << Options.GetArgSourceNames() << "'";
+            error << "unable to open for reading the source file with file names: '" << Options.GetArgSourceList() << "'";
             ES_ERROR(error);
             return(false);
         }
@@ -173,9 +187,9 @@ bool CRepoIndexCreateFiles::ListFiles(void)
         ifs.close();
     }
 
-    vout << "  > Number of files           = " << NumOfAllFiles << endl;
-    vout << "  > Number of unique files    = " << NumOfUniqueFiles << endl;
-    vout << "  > Number of files for index = " << NewIndex.Paths.size() << endl;
+    vout << "  > Number of files            = " << NumOfAllFiles << endl;
+    vout << "  > Number of unique files     = " << NumOfUniqueFiles << endl;
+    vout << "  > Number of files for index  = " << NewIndex.Paths.size() << endl;
 
     return(true);
 }
@@ -189,6 +203,22 @@ void CRepoIndexCreateFiles::ListFilesRead(std::istream& ifs)
         CFileName file = line;
         // DEBUG: cout << "f: " << file << endl;
 
+        CFileName path;
+        if( file[0] == '/' ){
+            path = file;
+        } else {
+            path = Options.GetArgSourcePath() / file;
+        }
+
+        if( ! Options.GetOptIsPersonalBundle() ){
+            // ignore this test for personal site as the build might not be synchronized yet
+            if( CFileSystem::IsFile(path) == false ){
+                CSmallString error;
+                error << file << " -> AMS_PACKAGE_DIR: " << path << " does not exist!";
+                RUNTIME_ERROR(error);
+            }
+        }
+
         // register fake build for index
         if( NewIndex.Paths.count(file) == 0 ){
             NumOfUniqueFiles++;
@@ -200,11 +230,83 @@ void CRepoIndexCreateFiles::ListFilesRead(std::istream& ifs)
 
 //------------------------------------------------------------------------------
 
+bool CRepoIndexCreateFiles::ListDirectories(void)
+{
+    vout << endl;
+    vout << "# Assembling list of directories ..." << endl;
+    vout << "  > Source path                     = " << Options.GetArgSourcePath() << endl;
+    vout << "  > Source list                     = " << Options.GetArgSourceList() << endl;
+    vout << "  > Personal bundle                 = " << bool_to_str(Options.GetOptIsPersonalBundle()) << endl;
+
+    NumOfAllDirectories = 0;
+    NumOfUniqueDirectories = 0;
+
+    if( Options.GetArgSourceList() == "-" ){
+        ListFilesRead(cin);
+    } else {
+        ifstream ifs;
+        ifs.open(Options.GetArgSourceList());
+        if( ! ifs ){
+            CSmallString error;
+            error << "unable to open for reading the source file with directory names: '" << Options.GetArgSourceList() << "'";
+            ES_ERROR(error);
+            return(false);
+        }
+        ListFilesRead(ifs);
+        ifs.close();
+    }
+
+    vout << "  > Number of directories           = " << NumOfAllDirectories << endl;
+    vout << "  > Number of unique directories    = " << NumOfUniqueDirectories << endl;
+    vout << "  > Number of directories for index = " << NewIndex.Paths.size() << endl;
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CRepoIndexCreateFiles::ListDirectoriesRead(std::istream& ifs)
+{
+    std::string line;
+    while( (ifs.eof() == false ) && getline(ifs,line) ){
+        CFileName dir = line;
+        // DEBUG: cout << "f: " << file << endl;
+
+        CFileName path;
+        if( dir[0] == '/' ){
+            path = dir;
+        } else {
+            path = Options.GetArgSourcePath() / dir;
+        }
+
+        if( ! Options.GetOptIsPersonalBundle() ){
+            // ignore this test for personal site as the build might not be synchronized yet
+            if( CFileSystem::IsFile(path) == false ){
+                CSmallString error;
+                error << dir << " -> AMS_PACKAGE_DIR: " << path << " does not exist!";
+                RUNTIME_ERROR(error);
+            }
+        }
+
+        // register fake build for index
+        if( NewIndex.Paths.count(path) == 0 ){
+            NumOfUniqueDirectories++;
+        }
+        NewIndex.Paths[dir] = path;
+        NumOfAllDirectories++;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 bool CRepoIndexCreateFiles::ListBuilds(void)
 {
     // create list of builds
     vout << endl;
     vout << "# Assembling list of builds ..." << endl;
+    vout << "  > Source path                                          = " << Options.GetArgSourcePath() << endl;
+    vout << "  > Source list                                          = " << Options.GetArgSourceList() << endl;
+    vout << "  > Personal bundle                                      = " << bool_to_str(Options.GetOptIsPersonalBundle()) << endl;
 
     NumOfAllBuilds          = 0;
     NumOfUniqueBuilds       = 0;
@@ -214,25 +316,25 @@ bool CRepoIndexCreateFiles::ListBuilds(void)
     UniqueBuilds.clear();
     UniqueBuildPaths.clear();
 
-    if( Options.GetArgSourceNames() == "-" ){
+    if( Options.GetArgSourceList() == "-" ){
         if( ListBuildsRead(cin) == false ){
             CSmallString error;
-            error << "an error occured during reading the source file with builds: '" << Options.GetArgSourceNames() << "'";
+            error << "an error occured during reading the source file with builds: '" << Options.GetArgSourceList() << "'";
             ES_ERROR(error);
             return(false);
         }
     } else {
         ifstream ifs;
-        ifs.open(Options.GetArgSourceNames());
+        ifs.open(Options.GetArgSourceList());
         if( ! ifs ){
             CSmallString error;
-            error << "unable to open for reading the source file with builds: '" << Options.GetArgSourceNames() << "'";
+            error << "unable to open for reading the source file with builds: '" << Options.GetArgSourceList() << "'";
             ES_ERROR(error);
             return(false);
         }
         if( ListBuildsRead(ifs) == false ){
             CSmallString error;
-            error << "an error occured during reading the source file with builds: '" << Options.GetArgSourceNames() << "'";
+            error << "an error occured during reading the source file with builds: '" << Options.GetArgSourceList() << "'";
             ES_ERROR(error);
             return(false);
         }
