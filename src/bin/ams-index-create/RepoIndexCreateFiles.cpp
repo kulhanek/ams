@@ -279,7 +279,7 @@ void CRepoIndexCreateFiles::ListDirectoriesRead(std::istream& ifs)
 
         if( ! Options.GetOptIsPersonalBundle() ){
             // ignore this test for personal site as the build might not be synchronized yet
-            if( CFileSystem::IsFile(path) == false ){
+            if( CFileSystem::IsDirectory(path) == false ){
                 CSmallString error;
                 error << dir << " -> AMS_PACKAGE_DIR: " << path << " does not exist!";
                 RUNTIME_ERROR(error);
