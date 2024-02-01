@@ -127,12 +127,12 @@ std::string CFSIndex::CalculateDirHash(const CFileName& dir_path)
         }
     }
 
-//    struct stat my_stat;
-//    if( lstat(full_path,&my_stat) == 0 ) {
-//        HashNode(full_path,my_stat,true,sha1);
-//    }
+    struct stat my_stat;
+    if( lstat(full_path,&my_stat) == 0 ) {
+        HashNode(full_path,my_stat,true,sha1);
+    }
 
-    cout << full_path << endl;
+    // DEBUG: cout << full_path << endl;
 
     // scan the build directory
     HashDir(full_path,sha1);
@@ -194,7 +194,7 @@ void CFSIndex::HashDir(const CFileName& full_path,SHA1& sha1)
     // calculate hash
 
     for( CFileName name : nodes ){
-        cout << name << endl;
+        // DEBUG: cout << name << endl;
 
         CFileName   sub_node = full_path / name;
 
