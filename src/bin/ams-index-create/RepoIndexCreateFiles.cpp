@@ -190,7 +190,7 @@ bool CRepoIndexCreateFiles::ListFiles(void)
 void CRepoIndexCreateFiles::ListFilesRead(std::istream& ifs)
 {
     std::string line;
-    while( getline(ifs,line) ){
+    while( (ifs.eof() == false ) && getline(ifs,line) ){
         CFileName file = line;
         // register fake build for index
         if( NewIndex.Paths.count(file) == 0 ){
