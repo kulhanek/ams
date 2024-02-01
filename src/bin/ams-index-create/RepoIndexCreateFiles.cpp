@@ -240,7 +240,7 @@ bool CRepoIndexCreateFiles::ListDirectories(void)
     NumOfUniqueDirectories = 0;
 
     if( Options.GetArgSourceList() == "-" ){
-        ListFilesRead(cin);
+        ListDirectoriesRead(cin);
     } else {
         ifstream ifs;
         ifs.open(Options.GetArgSourceList());
@@ -250,7 +250,7 @@ bool CRepoIndexCreateFiles::ListDirectories(void)
             ES_ERROR(error);
             return(false);
         }
-        ListFilesRead(ifs);
+        ListDirectoriesRead(ifs);
         ifs.close();
     }
 
