@@ -192,6 +192,7 @@ void CRepoIndexCreateFiles::ListFilesRead(std::istream& ifs)
     std::string line;
     while( (ifs.eof() == false ) && getline(ifs,line) ){
         CFileName file = line;
+        cout << "f: " << file << endl;
         // register fake build for index
         if( NewIndex.Paths.count(file) == 0 ){
             NumOfUniqueFiles++;
