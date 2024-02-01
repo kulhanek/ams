@@ -16,4 +16,7 @@ ADD_SUBDIRECTORY(_ams-setenv)
 
 # administrative commands ------------------------
 ADD_SUBDIRECTORY(ams-bundle)
+ADD_SUBDIRECTORY(ams-index-create)
+ADD_SUBDIRECTORY(ams-index-diff)
+
 
