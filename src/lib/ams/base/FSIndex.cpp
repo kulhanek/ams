@@ -132,6 +132,8 @@ std::string CFSIndex::CalculateDirHash(const CFileName& dir_path)
 //        HashNode(full_path,my_stat,true,sha1);
 //    }
 
+    cout << full_path << endl;
+
     // scan the build directory
     HashDir(full_path,sha1);
 
