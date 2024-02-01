@@ -87,8 +87,6 @@ int CRepoIndexCreateFiles::Init(int argc, char* argv[])
     vout << "# ams-index-create (AMS utility) started at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
-    vout << high;
-
     return(SO_CONTINUE);
 }
 
@@ -418,7 +416,6 @@ void CRepoIndexCreateFiles::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    vout << high;
     vout << endl;
     vout << "# ==============================================================================" << endl;
     vout << "# ams-index-create (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
