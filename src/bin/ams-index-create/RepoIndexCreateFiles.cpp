@@ -303,7 +303,7 @@ void CRepoIndexCreateFiles::ListDirectoriesRead(std::istream& ifs)
         if( NewIndex.Paths.count(path) == 0 ){
             NumOfUniqueDirectories++;
         }
-        NewIndex.Paths[dir] = path;
+        NewIndex.Paths[dir] = dir;
         NumOfAllDirectories++;
     }
 }
