@@ -42,6 +42,13 @@ MAIN_ENTRY(CRepoIndexCreateFiles)
 
 CRepoIndexCreateFiles::CRepoIndexCreateFiles(void)
 {
+    NumOfAllFiles = 0;
+    NumOfUniqueFiles = 0;
+
+    NumOfAllBuilds          = 0;
+    NumOfUniqueBuilds       = 0;
+    NumOfNonSoftRepoBuilds  = 0;
+    NumOfSharedBuilds       = 0;
 }
 
 //==============================================================================
@@ -148,8 +155,8 @@ bool CRepoIndexCreateFiles::ListFiles(void)
     vout << endl;
     vout << "# Assembling list of files ..." << endl;
 
-    int NumOfAllFiles = 0;
-    int NumOfUniqueFiles = 0;
+    NumOfAllFiles = 0;
+    NumOfUniqueFiles = 0;
 
     if( Options.GetArgSourceNames() == "-" ){
         ListFilesRead(cin);
@@ -180,7 +187,8 @@ void CRepoIndexCreateFiles::ListFilesRead(std::istream& ifs)
     std::string line;
     while( (ifs.eof() == false ) && getline(ifs,line) ){
         CFileName file = line;
-        cout << "f: " << file << endl;
+        // DEBUG: cout << "f: " << file << endl;
+
         // register fake build for index
         if( NewIndex.Paths.count(file) == 0 ){
             NumOfUniqueFiles++;
