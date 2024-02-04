@@ -361,6 +361,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     CSmallString name,ver,arch,mode;
 
     if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
+        vout << "# No module provided ... " << endl;
         ES_TRACE_ERROR("module name is empty string");
         return;
     }
@@ -369,7 +370,8 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     if( fordep == false ) DepList.clear();
 
     if( std::find(DepList.begin(), DepList.end(), name) != DepList.end() ){
-        return; // already processed
+        vout << "# Already processed ... " << endl;
+        return;
     }
 
     // add module to dependency list to avoid cyclic dependency problems
@@ -378,6 +380,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     // get module specification --------------------
     CXMLElement* p_module = ModCache.GetModule(name);
     if( p_module == NULL ) {
+        vout << "# No such module in the AMS databaze ... " << endl;
         CSmallString error;
         error << "module '" << name << "' does not have any record in AMS software database";
         ES_TRACE_ERROR(error);
@@ -386,14 +389,19 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
 
     // complete module specification ---------------
     if( CompleteModule(vout,p_module,name,ver,arch,mode) == false ) {
+        vout << "# Unable to complete module ... " << endl;
         return;
     }
+
+    CSmallString build_name;
+    build_name << name << ":" << ver << ":" << arch << ":" << mode;
 
     // solve module dependencies -------------------
     CXMLElement* p_build = CModCache::GetBuild(p_module,ver,arch,mode);
     if( p_build == NULL ) {
+        vout << "# Unable to get the build: '" << build_name << "'" << endl;
         CSmallString error;
-        error << "build '" << name << ":" << ver << ":" << arch << ":" << mode << "' does not have any record in AMS software database";
+        error << "build '" << build_name << "' does not have any record in AMS software database";
         ES_TRACE_ERROR(error);
         return;
     }
@@ -409,7 +417,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     CSmallString bsource;
     p_build->GetAttribute("source",bsource);
     if( bsource != NULL ) list.push_back(bsource);
-    vout << "# Build source :  " << bsource << endl;
+    vout << "# Build source  : " << bsource << endl;
 
     vout << "# Dependencies ... " << endl;
 
@@ -424,8 +432,6 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
         }
         p_dep = p_dep->GetNextSiblingElement("dep");
     }
-
-
 }
 
 //==============================================================================
