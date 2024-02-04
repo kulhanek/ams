@@ -596,7 +596,7 @@ bool CBundleCmd::BundleDirList(void)
 
     CDirNodeItemPtr  dir_tree(new CDirNodeItem);
 
-    dir_tree->ScanSoftRepoTree(bundle.GetBundleRootPath(),bundle.GetName(),3);
+    dir_tree->ScanSoftRepoTree(bundle.GetBundleRootPath(),bundle.GetName(),4);
 
      CXMLElement* p_cele = bundle.GetCacheElement();
      if( p_cele == NULL ){

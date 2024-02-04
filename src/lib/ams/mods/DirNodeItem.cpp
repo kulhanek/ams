@@ -95,6 +95,8 @@ void CDirNodeItem::ScanSoftRepoTree(const CFileName& path,int level)
     while( dir_enum.FindFile(child_name) ) {
         if( child_name == "." ) continue;
         if( child_name == ".." ) continue;
+        if( child_name == "_ams_bundle" ) continue;
+
         if( CFileSystem::IsDirectory(path / child_name) == true ){
             CDirNodeItemPtr child_item = SubItems[string(child_name)];
             if( child_item == NULL ) {
@@ -123,6 +125,7 @@ void CDirNodeItem::ScanSoftRepoTree(const CFileName& path,const CFileName& subdi
         if( child_name == "." ) continue;
         if( child_name == ".." ) continue;
 
+        if( child_name == "_ams_bundle" ) continue;
         if( child_name != subdir ) continue;
 
         if( CFileSystem::IsDirectory(path / child_name) == true ){
