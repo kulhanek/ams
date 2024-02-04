@@ -7,7 +7,7 @@ ADD_SUBDIRECTORY(DEBIAN)
 INSTALL(DIRECTORY
             software
         DESTINATION
-            share/dpkg/
+            share/dpkg/personal
         FILE_PERMISSIONS
             OWNER_READ OWNER_WRITE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DIRECTORY_PERMISSIONS
