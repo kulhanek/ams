@@ -5,7 +5,7 @@
 ADD_SUBDIRECTORY(DEBIAN)
 
 INSTALL(DIRECTORY
-            softrepo
+            software
         DESTINATION
             share/dpkg/
         FILE_PERMISSIONS
