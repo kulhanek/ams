@@ -211,8 +211,8 @@ void CModCache::RemoveDocumentation(void)
     if( p_cele == NULL ){
         RUNTIME_ERROR("unable to open cache element");
     }
-    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
 
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
     while( p_mele != NULL ) {
         p_mele->RemoveAttribute("source");
 

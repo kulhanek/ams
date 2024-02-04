@@ -355,7 +355,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
 void CModule::AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list)
 {
     vout << endl;
-    vout << "# Module name: " << module << " (all origins)" << endl;
+    vout << "# Module name: " << module << " (all origins with filters)" << endl;
     vout << "# ==============================================================================" << endl;
 
     // parse module input --------------------------
@@ -412,6 +412,11 @@ void CModule::AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString mod
 
     modules.sort();
     modules.unique();
+
+    vout << "# Selected builds ..." <<  endl;
+    for( CSmallString mod : modules ){
+        vout << "  |- " << mod << endl;
+    }
 
     for( CSmallString mod : modules ){
         AddAllOrigins(vout,mod,list,false);
