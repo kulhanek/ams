@@ -61,7 +61,7 @@ if [[ -f "$PROFILE" ]]; then
     exit $?
 fi
 
-export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.exec"
+export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.dpkg-exec"
 if [[ -f "$PROFILE" ]]; then
     echo "  Profile file:         $PROFILE" 
     exec_profile "$@"
