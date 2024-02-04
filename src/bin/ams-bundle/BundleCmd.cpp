@@ -594,7 +594,7 @@ bool CBundleCmd::BundleDirList(void)
         return(false);
     }
 
-    CDirNodeItemPtr  dir_tree;
+    CDirNodeItemPtr  dir_tree(new CDirNodeItem);
 
     dir_tree->ScanSoftRepoTree(bundle.GetBundleRootPath(),bundle.GetName(),3);
 
