@@ -212,16 +212,19 @@ void CModCache::RemoveDocumentation(void)
         RUNTIME_ERROR("unable to open cache element");
     }
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
-    p_mele->RemoveAttribute("source");
 
     while( p_mele != NULL ) {
-        CXMLElement* p_dele  = p_mele->GetFirstChildElement("doc");
+        p_mele->RemoveAttribute("source");
+
         CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
         while( p_build != NULL ) {
             p_build->RemoveAttribute("source");
             p_build = p_build->GetNextSiblingElement("build");
         }
+
+        CXMLElement* p_dele  = p_mele->GetFirstChildElement("doc");
         if( p_dele != NULL ) delete p_dele;
+
         p_mele = p_mele->GetNextSiblingElement("module");
     }
 }

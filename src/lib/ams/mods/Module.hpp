@@ -92,6 +92,9 @@ public:
     EModuleError RemoveModule(CVerboseStr& vout,CSmallString module);
 
     /// print module origins
+    void AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list);
+
+    /// print module origins
     void AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list, bool fordep=false);
 
     /// set print level

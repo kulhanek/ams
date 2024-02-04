@@ -38,6 +38,7 @@
 #include <AddDatagramSender.hpp>
 #include <SiteController.hpp>
 #include <User.hpp>
+#include <fnmatch.h>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -351,6 +352,74 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
 
 //------------------------------------------------------------------------------
 
+void CModule::AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list)
+{
+    vout << endl;
+    vout << "# Module name: " << module << " (all origins)" << endl;
+    vout << "# ==============================================================================" << endl;
+
+    // parse module input --------------------------
+    CSmallString name,ver,arch,mode;
+
+    if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
+        vout << "# No module provided ... " << endl;
+        ES_TRACE_ERROR("module name is empty string");
+        return;
+    }
+
+    // get module specification --------------------
+    CXMLElement* p_mele = ModCache.GetModule(name);
+    if( p_mele == NULL ) {
+        vout << "# No such module in the AMS database ... " << endl;
+        CSmallString error;
+        error << "module '" << name << "' does not have any record in AMS software database";
+        ES_TRACE_ERROR(error);
+        return;
+    }
+
+    std::list<CSmallString> modules;
+    // filter builds
+    CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
+    while( p_build != NULL ) {
+        CSmallString bver,barch,bmode;
+        p_build->GetAttribute("ver",bver);
+        p_build->GetAttribute("arch",barch);
+        p_build->GetAttribute("mode",bmode);
+
+        bool pass = false;
+
+        if( (ver != NULL) && (arch == NULL) && (mode == NULL) ){
+            if( fnmatch(ver,bver,0) == 0 ) pass = true;
+        }
+        if( (ver != NULL) && (arch != NULL) && (mode == NULL) ) {
+            if( (fnmatch(ver,bver,0) == 0) && (fnmatch(arch,barch,0) == 0) ) pass = true;
+        }
+        if( (ver != NULL) && (arch != NULL) && (mode != NULL) ) {
+            if( (fnmatch(ver,bver,0) == 0) && (fnmatch(arch,barch,0) == 0) && (fnmatch(mode,bmode,0) == 0) ) pass = true;
+        }
+
+        if( pass ) {
+            CSmallString build_name;
+            build_name << name;
+            if( ver != NULL ) build_name << ":" << bver;
+            if( (ver != NULL) && (arch != NULL) ) build_name << ":" << barch;
+            if( (ver != NULL) && (arch != NULL) && (mode != NULL) ) build_name << ":" << bmode;
+            modules.push_back(build_name);
+        }
+
+        p_build = p_build->GetNextSiblingElement("build");
+    }
+
+    modules.sort();
+    modules.unique();
+
+    for( CSmallString mod : modules ){
+        AddAllOrigins(vout,mod,list,false);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list, bool fordep)
 {
     vout << endl;
@@ -378,17 +447,21 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     DepList.push_back(name);
 
     // get module specification --------------------
-    CXMLElement* p_module = ModCache.GetModule(name);
-    if( p_module == NULL ) {
-        vout << "# No such module in the AMS databaze ... " << endl;
+    CXMLElement* p_mele = ModCache.GetModule(name);
+    if( p_mele == NULL ) {
+        vout << "# No such module in the AMS database ... " << endl;
         CSmallString error;
         error << "module '" << name << "' does not have any record in AMS software database";
         ES_TRACE_ERROR(error);
         return;
     }
 
+    if( fordep == false ) {
+
+    }
+
     // complete module specification ---------------
-    if( CompleteModule(vout,p_module,name,ver,arch,mode) == false ) {
+    if( CompleteModule(vout,p_mele,name,ver,arch,mode) == false ) {
         vout << "# Unable to complete module ... " << endl;
         return;
     }
@@ -397,7 +470,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     build_name << name << ":" << ver << ":" << arch << ":" << mode;
 
     // solve module dependencies -------------------
-    CXMLElement* p_build = CModCache::GetBuild(p_module,ver,arch,mode);
+    CXMLElement* p_build = CModCache::GetBuild(p_mele,ver,arch,mode);
     if( p_build == NULL ) {
         vout << "# Unable to get the build: '" << build_name << "'" << endl;
         CSmallString error;
@@ -408,7 +481,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
 
     // add origins - module
     CSmallString msource;
-    p_module->GetAttribute("source",msource);
+    p_mele->GetAttribute("source",msource);
     if( msource != NULL ) list.push_back(msource);
     vout << "# Module source : " << msource << endl;
 

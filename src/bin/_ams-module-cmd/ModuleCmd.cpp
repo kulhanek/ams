@@ -235,7 +235,7 @@ bool CModuleCmd::Run(void)
             if( Options.GetOptVerbose() == true ) Module.SetPrintLevel(EAPL_VERBOSE);
             vout << high;
             for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
-                Module.AddAllOrigins(vout,Options.GetProgArg(i),origins);
+                Module.AddAllOriginsWithFilters(vout,Options.GetProgArg(i),origins);
             }
             vout << low;
             origins.sort();
@@ -441,7 +441,9 @@ void CModuleCmd::Finalize(void)
     }
 
     vout << low;
-    if( (Options.GetArgAction() != "getactmod") && (Options.GetArgAction() != "getactver") ){
+    if( (Options.GetArgAction() != "getactmod") &&
+        (Options.GetArgAction() != "getactver") &&
+        (Options.GetArgAction() != "allorigins") ){
         if( ! ForcePrintErrors ) vout << endl;
     }
 
