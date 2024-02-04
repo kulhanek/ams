@@ -1,0 +1,178 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# Advanced Module System synchronization utility for personal site
+# ------------------------------------------------------------------------------
+
+function print_header()
+{
+    echo "#-------------------------------------------------------------------------------"
+    echo "#                             *** Removing builds ***                         "
+    echo "#-------------------------------------------------------------------------------"
+}
+
+# ------------------------------------------------
+
+function show_log_error()
+{
+    echo "" 1>&2
+    echo ">>> ERROR: Log file: $LOG_FILE" 1>&2
+    echo "    Last 10 lines ..." 1>&2
+    tail -10 "$LOG_FILE" | awk '{ printf("    %s\n",$0); }' 1>&2
+    echo "" 1>&2
+}
+
+# ------------------------------------------------
+
+function gen_list_of_packages()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 1) Get full builds and remove them from the map ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+    echo "# Number of requests : $#" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+
+    for SITE in `site listavail 2>&1`; do
+        echo ">>> Site: $SITE" | tee -a $LOG_FILE
+        for FILTER in "$@"; do
+            # remove prefix if any
+            FILTER="`basename $FILTER`"
+            printf "    %s\n" "$FILTER" | tee -a $LOG_FILE
+            I=0
+            for BUILD in `ams-cache --site "$SITE" getbuilds "$FILTER"`; do
+                printf "    |-> %-60s\n" "$BUILD" | tee -a $LOG_FILE
+                # remove build from the map
+                ams-map-manip rmbuilds "$SITE" "$BUILD" >> $LOG_FILE 2>&1
+                ((I++))
+            done
+            if [ "$I" -eq 0 ]; then
+                printf "    |-> nothing removed\n"
+            fi
+        done
+    done
+
+    umask 022
+
+    echo "" | tee -a $LOG_FILE
+
+    ams-map-manip distribute  >> $LOG_FILE 2>&1
+    if [ $? -eq 0 ]; then
+        echo "AMS map distributed               ... [OK]" | tee -a $LOG_FILE
+    else
+        echo "AMS map distributed               ... [FAILED]" | tee -a $LOG_FILE
+        show_log_error
+        exit 1
+    fi
+
+    ams-cache rebuildall  >> $LOG_FILE 2>&1
+    if [ $? -eq 0 ]; then
+        echo "AMS module cache rebuilded        ... [OK]" | tee -a $LOG_FILE
+    else
+        echo "AMS module cache rebuilded        ... [FAILED]" | tee -a $LOG_FILE
+        show_log_error
+        exit 1
+    fi
+
+}
+# ------------------------------------------------
+
+function remmove_packages()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 2) Removing build directories ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+
+    echo "# The following directories will be removed ..." | tee -a $LOG_FILE
+    ams-list-dirs orphans |tee -a $LOG_FILE
+
+    echo ""
+    echo -n "Do you want to continue (YES/NO)? "
+    read ANSW
+    if [ "$ANSW" != "YES" ]; then
+        echo ""
+        echo ">>> No build directories were removed from the disk."
+        echo "    They can be removed later ..."
+        echo ""
+        exit 1
+    fi
+
+    echo ""
+
+    # remove directories
+    for DIR in `ams-list-dirs orphans`; do
+        printf ">>> %-80s " "$DIR" | tee -a $LOG_FILE
+        rm -rf "$DIR/" >> $LOG_FILE
+        if [ $? -eq 0 ]; then
+            echo "    [REMOVED]"
+        else
+            echo " [FAILED]"
+        fi
+    done
+}
+
+# --------------------------------------
+
+function print_bottom()
+{
+    echo ""
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "#                           *** End of build removal ***                        " | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+}
+
+# ------------------------------------------------------------------------------
+
+print_header
+
+if [ "`id -u -n`" != "infinity" ]; then
+    echo "" 2>&1
+    echo ">>> ERROR: This script must be run by the infinity user!"  2>&1
+    echo "" 2>&1
+    exit 1
+fi
+
+# check if AMS_ROOT is set -----------------------
+
+if [ -z "$AMS_ROOT" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+if [ -z "$SOFTREPO" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: SOFTREPO variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# ------------------------------------------------
+
+umask 027
+mkdir -p "$AMS_ROOT/var/personal/logs"
+if [ $? -ne 0 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Unable to create $AMS_ROOT/var/personal/logs directory!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# log file
+LOG_FILE="$AMS_ROOT/var/personal/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
+
+echo ">>> Log file: $LOG_FILE"
+
+gen_list_of_packages "$@"
+remmove_packages
+print_bottom
+
+echo ""
+echo "END: Log file is in: $LOG_FILE"
+echo ""
+
+
+

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+echo "  * Running postinst: $*"
+if [ "$1" == "configure" ]; then
+    echo "== ncbr-ams-core-9.0-personal (postinst):"
+
+    # create infinity user
+    echo "   creating infinity user ..."
+    useradd --system --user-group --shell /bin/bash --create-home --home-dir /var/lib/infinity \
+            --skel /software/ncbr/softmods/9.0/share/skel infinity
+
+    # change file ownership
+    echo "   updating access rights to softmods ..."
+    chmod 755 /software
+    chmod 755 /software/ncbr
+    chown -R infinity:infinity /software/ncbr/softmods || exit 1
+
+    # setup softrepo
+    echo "   creating softrepo ..."
+    mkdir -m 755 -p /software/ncbr/softrepo
+    chown -R infinity:infinity /software/ncbr/softrepo || exit 1
+fi
+
+exit 0
+

@@ -1,0 +1,84 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# Advanced Module System synchronization utility
+# (c) 2010,2016,2023 Petr Kulhanek
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------
+
+function print_usage()
+{
+    echo ""
+    echo "Usage: ams-sync-dpkg [-h][--help] <profile>"
+    echo ""
+}
+
+# ------------------------------------------------
+
+if [ -z "$AMS_ROOT_V9" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# load library functions
+
+source "$AMS_ROOT_V9/share/sync/ams-sync-lib"
+
+# ------------------------------------------------
+
+SHIFT="-"
+while [ -n "$SHIFT" ]; do
+    SHIFT=""
+    case $1 in
+        '-h'|'--help')
+            print_usage
+            exit 0
+        ;;
+    esac
+done
+
+if [ $# -lt 1 ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Incorrect number of parameters!" 1>&2
+    print_usage
+    exit 1
+fi
+
+# ------------------------------------------------
+
+export AMS_SYNC_PROFILE="$1"
+
+echo ""
+echo "# AMS Sync DPKG Profile: $AMS_SYNC_PROFILE"
+echo "# ------------------------------------------------------------------------------"
+
+export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.dpkg"
+if [[ -f "$PROFILE" ]]; then
+    echo "  Profile file:         $PROFILE" 
+    $AMS_ROOT_V9/share/sync/rsync/push/ams-rsync-dpkg "$@"
+    exit $?
+fi
+
+export PROFILE="$AMS_ROOT_V9/etc/sync/$AMS_SYNC_PROFILE.exec"
+if [[ -f "$PROFILE" ]]; then
+    echo "  Profile file:         $PROFILE" 
+    exec_profile "$@"
+    exit $?
+fi
+
+echo "" 1>&2
+echo ">>> ERROR: Profile '$AMS_SYNC_PROFILE' is not defined in the directory:" 1>&2
+echo ">>>        '$AMS_ROOT_V9/etc/sync/'" 1>&2
+echo "" 1>&2
+exit 1
+
+
+
+
+
+
+
+
+
