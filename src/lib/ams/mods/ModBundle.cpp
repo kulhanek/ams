@@ -551,8 +551,35 @@ bool CModBundle::SaveSourceFile(const CFileName& name)
 
 bool CModBundle::SaveSourceFile(std::ostream& ofs,const CFileName& name)
 {
-    // FIXME
-    return(false);
+    CXMLElement* p_cele = GetCacheElement();
+    if( p_cele == NULL ){
+        RUNTIME_ERROR("unable to find root cache element");
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+
+    while( p_mele != NULL ) {
+        CSmallString name;
+        p_mele->GetAttribute("name",name);
+        CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
+        while( p_build != NULL ) {
+            CSmallString ver,arch,mode;
+            p_build->GetAttribute("ver",ver);
+            p_build->GetAttribute("arch",arch);
+            p_build->GetAttribute("mode",mode);
+            CFileName package_dir;
+            package_dir = CModCache::GetVariableValue(p_build,"AMS_PACKAGE_DIR");
+            if( package_dir != NULL ){
+                CSmallString build_name;
+                build_name << name << ":" << ver << ":" << arch << ":" << mode;
+                ofs << build_name << " " << package_dir << endl;
+            }
+            p_build = p_build->GetNextSiblingElement("build");
+        }
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+
+    return(true);
 }
 
 //==============================================================================
