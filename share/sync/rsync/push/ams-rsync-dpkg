@@ -97,19 +97,19 @@ VERSION="`cat \"$AMS_ROOT_V9/var/sync/dpkgver\" 2>/dev/null`"
 ((VERSION++))
 echo "$VERSION" > "$AMS_ROOT_V9/var/sync/dpkgver"
 
-rm -rf "$AMS_ROOT_V9/var/sync/dpkg"
-cp -r  "$AMS_ROOT_V9/share/dpkg" "$AMS_ROOT_V9/var/sync/dpkg"
+rm -rf "$AMS_ROOT_V9/var/sync/dpkg/personal"
+cp -r  "$AMS_ROOT_V9/share/dpkg/personal" "$AMS_ROOT_V9/var/sync/dpkg/personal"
 
-sed -e "s/VERSION/$VERSION/g" < "$AMS_ROOT_V9/var/sync/dpkg/DEBIAN/control.tmp" > "$AMS_ROOT_V9/var/sync/dpkg/DEBIAN/control"
+sed -e "s/VERSION/$VERSION/g" < "$AMS_ROOT_V9/var/sync/dpkg/personal/DEBIAN/control.tmp" > "$AMS_ROOT_V9/var/sync/dpkg/personal/DEBIAN/control"
 
 if [[ $AMS_DST_HOST == "localhost" ]]; then
     rsync -e "ssh -x" -av $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w \
           --exclude-from=$AMS_ROOT_V9/share/sync/rsync/exclude/ams-exclude-rules-ctrl \
-          "$AMS_SRC_SOFTMODS/var/sync/dpkg/" "$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
+          "$AMS_SRC_SOFTMODS/var/sync/dpkg/personal/" "$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
 else
     rsync -e "ssh -x" -av $AMS_RSYNC_OPTS --chmod=u+rwX,og+rX,og-w \
           --exclude-from=$AMS_ROOT_V9/share/sync/rsync/exclude/ams-exclude-rules-ctrl \
-          "$AMS_SRC_SOFTMODS/var/sync/dpkg/" "$AMS_DST_HOST:$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
+          "$AMS_SRC_SOFTMODS/var/sync/dpkg/personal/" "$AMS_DST_HOST:$AMS_DST_DPKGROOT/" >> $LOG_FILE 2>&1
 fi
 
 if [ $? -eq 0 ]; then

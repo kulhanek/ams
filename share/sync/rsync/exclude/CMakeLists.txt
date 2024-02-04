@@ -3,8 +3,10 @@
 # ==============================================================================
 
 INSTALL(FILES
-            ams-exclude-rules-core
             ams-exclude-rules-bundle-core
+            ams-exclude-rules-core
+            ams-exclude-rules-ctrl
+            ams-exclude-rules-dpkg
        DESTINATION
             share/sync/rsync/exclude
         PERMISSIONS
