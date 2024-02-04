@@ -162,10 +162,9 @@ void CBundleCmd::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
+    vout << high;
     if( (! ForcePrintErrors) && (Options.GetArgAction() != "dirname")
             && (Options.GetOptSilent() == false) ) vout << endl;
-
-    vout << high;
     vout << "# ==============================================================================" << endl;
     vout << "# ams-bundle (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
