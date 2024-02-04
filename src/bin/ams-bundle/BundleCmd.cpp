@@ -141,10 +141,15 @@ bool CBundleCmd::Run(void)
         return( SyncBundle() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "dirlist" ) {
+        return( BundleDirList() );
+    }
+    // ----------------------------------------------
     else {
         CSmallString error;
         error << "not implemented action '" << Options.GetArgAction() << "'";
         ES_ERROR(error);
+        ForcePrintErrors =true;
     }
 
     return(false);
