@@ -42,8 +42,10 @@ SET(AMS_SRC
         site/AMSCompletion.cpp
 
     # MODULES
+        mods/DirNodeItem.cpp
         mods/ModUtils.cpp
         mods/ModCache.cpp
+        mods/ModBundleIndex.cpp
         mods/ModBundle.cpp
         mods/ModuleController.cpp
         mods/Module.cpp

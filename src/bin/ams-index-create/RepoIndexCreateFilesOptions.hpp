@@ -71,7 +71,7 @@ public:
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
                 "index",                        /* parametr name */
-                "name of new index file")   /* argument description */
+                "name of new index file, or - for standard output")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_ARG(CSmallString,                   /* argument type */
                 SourcePath,                          /* argument name */
@@ -85,7 +85,7 @@ public:
                 NULL,                           /* default value */
                 true,                           /* is argument mandatory */
                 "source",                        /* parametr name */
-                "list of files, directories, or list of couples (build and path)")   /* argument description */
+                "file with list of files, directories, or list of couples (build and path), or - for standard input")   /* argument description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 IsPersonalBundle,                        /* option name */

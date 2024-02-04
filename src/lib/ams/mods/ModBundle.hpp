@@ -30,6 +30,7 @@
 #include <XMLDocument.hpp>
 #include <VerboseStr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <ModBundleIndex.hpp>
 #include <set>
 #include <map>
 
@@ -39,29 +40,6 @@ enum EModBundleCache {
     EMBC_NONE   = 0,
     EMBC_SMALL  = 1,
     EMBC_BIG    = 2,
-};
-
-//------------------------------------------------------------------------------
-
-class AMS_PACKAGE CModBundleIndex {
-public:
-    /// load index
-    bool LoadIndex(const CFileName& index_name);
-
-    /// save index
-    bool SaveIndex(const CFileName& index_name);
-
-    /// diff two indexes
-    void Diff(CModBundleIndex& old_index, CVerboseStr& vout, bool skip_removed,
-              bool skip_added, bool verbose);
-
-    /// clear index
-    void Clear(void);
-
-// section of public data ------------------------------------------------------
-public:
-    std::map<CSmallString,CFileName>    Paths;
-    std::map<CSmallString,std::string>  Hashes;
 };
 
 //------------------------------------------------------------------------------
@@ -98,7 +76,16 @@ public:
     /// save small and big caches
     bool SaveCaches(void);
 
+    /// save source file
+    bool SaveSourceFile(const CFileName& name);
+
+    /// save source file
+    bool SaveSourceFile(std::ostream& ofs,const CFileName& name);
+
 // information methods ---------------------------------------------------------
+    /// get bundle name
+    const CFileName GetName(void);
+
     /// return ID of the bundle
     const CSmallString GetID(void) const;
 
@@ -116,6 +103,9 @@ public:
 
     /// get bundle full name including path
     const CFileName GetFullBundleName(void);
+
+    /// get bundle root path
+    const CFileName GetBundleRootPath(void);
 
 // bundle index operation ------------------------------------------------------
     /// get list of build for index

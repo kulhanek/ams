@@ -33,3 +33,4 @@ share/sync/rsync/push
 share/sync/rsync
 src/bin/ams-index-diff
 src/bin/ams-index-create
+share/personal

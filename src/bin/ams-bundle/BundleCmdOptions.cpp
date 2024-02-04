@@ -75,7 +75,8 @@ int CBundleCmdOptions::CheckArguments(void)
     if( GetNumberOfProgArgs() == 1 ) {
         Action = GetProgArg(0);
 
-        if( (Action == "info") || (Action == "avail") || (Action == "rebuild") || (Action == "dirname")) {
+        if( (Action == "info") || (Action == "avail") || (Action == "rebuild") ||
+            (Action == "dirname") || (Action == "rootpath")) {
             return(SO_CONTINUE);
         }
 
@@ -123,6 +124,8 @@ int CBundleCmdOptions::CheckArguments(void)
         if( Action == "index" ) return(SO_CONTINUE);
         if( Action == "newverindex" ) return(SO_CONTINUE);
         if( Action == "sync" ) return(SO_CONTINUE);
+        if( Action == "sources" ) return(SO_CONTINUE);
+        if( Action == "dirlist" ) return(SO_CONTINUE);
 
         if( (Action == "info") || (Action == "avail") ) {
             if( IsVerbose() ) {

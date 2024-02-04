@@ -31,6 +31,7 @@
 #include <ModBundle.hpp>
 #include <PrintEngine.hpp>
 #include <string.h>
+#include <DirNodeItem.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -126,6 +127,10 @@ bool CBundleCmd::Run(void)
     // ----------------------------------------------
     else if( Options.GetArgAction() == "dirname" ) {
         return( BundleDirName() );
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "sources" ) {
+        return( BundleSources() );
     }
     // ----------------------------------------------
     else if( Options.GetArgAction() == "newverindex" ) {
@@ -431,6 +436,32 @@ bool CBundleCmd::BundleDirName(void)
 
 //------------------------------------------------------------------------------
 
+bool CBundleCmd::BundleRootPath(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        return(false);
+    }
+
+    vout << bundle.GetBundleRootPath() << endl;
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
 bool CBundleCmd::NewVerIndex(void)
 {
     CFileName cwd,bundle_root;
@@ -483,6 +514,134 @@ bool CBundleCmd::SyncBundle(void)
     ES_ERROR(error);
 
     return(false);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::BundleSources(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.SaveSourceFile(Options.GetProgArg(1)) == false ){
+        CSmallString error;
+        error << "unable to save bundle source file";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::BundleDirList(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CDirNodeItemPtr  dir_tree;
+
+    dir_tree->ScanSoftRepoTree(bundle.GetBundleRootPath(),bundle.GetName(),3);
+
+     CXMLElement* p_cele = ModCache.GetCacheElement();
+     if( p_cele == NULL ){
+         RUNTIME_ERROR("unable to find root cache element");
+     }
+
+     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+
+     while( p_mele != NULL ) {
+         CSmallString name;
+         p_mele->GetAttribute("name",name);
+         CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
+         while( p_build != NULL ) {
+             CSmallString ver,arch,mode;
+             p_build->GetAttribute("ver",ver);
+             p_build->GetAttribute("arch",arch);
+             p_build->GetAttribute("mode",mode);
+             CFileName package_dir;
+             package_dir = ModCache.GetVariableValue(p_build,"AMS_PACKAGE_DIR");
+             if( package_dir != NULL ){
+                 CSmallString build_name;
+                 build_name << name << ":" << ver << ":" << arch << ":" << mode;
+                 dir_tree->AddPackageDir(package_dir,build_name);
+             }
+             p_build = p_build->GetNextSiblingElement("build");
+         }
+         p_mele = p_mele->GetNextSiblingElement("module");
+     }
+
+    if( Options.GetProgArg(1) == "missing" ){
+        // print missing records
+        dir_tree->PrintMissing(vout,bundle.GetBundleRootPath());
+    } else if( Options.GetProgArg(1) == "orphans" ){
+        // print missing records
+        dir_tree->CountOrphanedChilds();
+        dir_tree->PrintOrphans(vout,bundle.GetBundleRootPath());
+    } else if( Options.GetProgArg(1) == "existing" ){
+        // print missing records
+        dir_tree->PrintExisting(vout,bundle.GetBundleRootPath());
+    } else if( Options.GetProgArg(1) == "all" ){
+        // print all records
+        dir_tree->PrintTree(vout,bundle.GetBundleRootPath(),0);
+    } else {
+        CSmallString error;
+        error << "unsupported action for dirlist: '" << Options.GetProgArg(1) << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+    }
+
+    return(true);
 }
 
 //==============================================================================

@@ -8,6 +8,8 @@
 INSTALL(FILES
             ams-sync-bundle
             ams-sync-core
+            ams-sync-dpkg
+            ams-sync-personal
        DESTINATION
             share/scripts
         PERMISSIONS

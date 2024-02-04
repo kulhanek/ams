@@ -57,6 +57,9 @@ public:
     "<green>[--silent] [--skipremoved] [--skipadded] index diff</green>  compare new and old indexes\n"
     "<green>index commit</green>                                         commit the new index as an old index\n"
     "<green>dirname</green>                                              print the full path to the bundle directory\n"
+    "<green>rootpath</green>                                             print the full path to the bundle directory root\n"
+    "<green>dirlist missing|orphans|existing|all                         bundle softrepo directory tree validator</green>                                             print the full path to the bundle directory root\n"
+    "<green>sources name</green>                                         print list of builds for ams-index-create to the file with 'name'\n"
     "<green>sync [profile]</green>                                       synchronize the bundle with a remote site according to the profile\n"
     CSO_PROG_ARGS_LONG_DESC_END
 

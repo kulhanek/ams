@@ -69,7 +69,7 @@ if [[ -f "$PROFILE" ]]; then
 fi
 
 echo "" 1>&2
-echo ">>> ERROR: Profile '$1' is not defined in the directory:" 1>&2
+echo ">>> ERROR: Profile '$AMS_SYNC_PROFILE' is not defined in the directory:" 1>&2
 echo ">>>        '$AMS_ROOT_V9/etc/sync/'" 1>&2
 echo "" 1>&2
 exit 1

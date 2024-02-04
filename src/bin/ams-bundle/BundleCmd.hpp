@@ -55,8 +55,11 @@ private:
     bool PrintAvailMods(void);
     bool BundleIndex(void);
     bool BundleDirName(void);
+    bool BundleRootPath(void);
     bool NewVerIndex(void);
     bool SyncBundle(void);
+    bool BundleSources(void);
+    bool BundleDirList(void);
 };
 
 // -----------------------------------------------------------------------------

@@ -80,9 +80,9 @@ else
 fi
 
 if [ $? -eq 0 ]; then
-    echo "AMS Core Synchronization             ... [OK]"
+    echo "  AMS Core Synchronization ... [OK]"
 else
-    echo "AMS Core Synchronization             ... [FAILED]"
+    echo "  AMS Core Synchronization ... [FAILED]"
     show_log_error
     exit 1
 fi

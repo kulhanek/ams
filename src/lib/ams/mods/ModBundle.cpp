@@ -250,6 +250,13 @@ void CModBundle::FindAllFragmentFiles(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
+const CFileName CModBundle::GetName(void)
+{
+    return(BundleName);
+}
+
+//------------------------------------------------------------------------------
+
 const CSmallString CModBundle::GetID(void) const
 {
     CSmallString id;
@@ -370,6 +377,14 @@ void CModBundle::PrintInfo(CVerboseStr& vout,bool mods,bool stat,bool audit)
 const CFileName CModBundle::GetFullBundleName(void)
 {
     CFileName full_name = BundlePath / BundleName;
+    return(full_name);
+}
+
+//------------------------------------------------------------------------------
+
+const CFileName CModBundle::GetBundleRootPath(void)
+{
+    CFileName full_name = BundlePath;
     return(full_name);
 }
 
@@ -509,6 +524,35 @@ bool CModBundle::SaveCaches(void)
         return(false);
     }
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModBundle::SaveSourceFile(const CFileName& name)
+{
+    bool result = false;
+    if( name == "-" ){
+        result = SaveSourceFile(cout,"stdout");
+    } else {
+        ofstream ofs(name);
+        if( ! ofs ){
+            CSmallString error;
+            error << "unable to open the source file '" << name << "' for writing!";
+            ES_ERROR(error);
+            return(false);
+        }
+        result = SaveSourceFile(ofs,name);
+        ofs.close();
+    }
+    return(result);
+}
+
+//-------------------------------------------------------------------------
+
+bool CModBundle::SaveSourceFile(std::ostream& ofs,const CFileName& name)
+{
+    // FIXME
+    return(false);
 }
 
 //==============================================================================
@@ -969,136 +1013,6 @@ void CModBundle::DiffIndexes(CVerboseStr& vout, bool skip_removed,
                              bool skip_added, bool verbose)
 {
     NewBundleIndex.Diff(OldBundleIndex,vout,skip_removed,skip_added,verbose);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-bool CModBundleIndex::LoadIndex(const CFileName& index_name)
-{
-    ifstream ifs(index_name);
-    if( ! ifs ){
-        CSmallString error;
-        error << "Unable to open the index file '" << index_name << "'";
-        ES_ERROR(error);
-        return(false);
-    }
-
-    string  line;
-    int     lino = 0;
-    while( getline(ifs,line) ){
-        lino++;
-        string flag,sha1,build,path;
-        stringstream str(line);
-        str >> flag >> sha1 >> build >> path;
-        if( ! str ){
-            CSmallString error;
-            error << "Corrupted index file '" << index_name << "' at line " << lino;
-            ES_ERROR(error);
-            return(false);
-        }
-
-        if( Hashes.count(build) == 1 ){
-            CSmallString error;
-            error << "SHA1 collision in index file '" << index_name << "' at line " << lino;
-            ES_ERROR(error);
-            return(false);
-        }
-        // flag is ignored, set only sha1,build,path
-        Hashes[build] = sha1;
-        Paths[build] = path;
-    }
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CModBundleIndex::SaveIndex(const CFileName& index_name)
-{
-    ofstream ofs(index_name);
-    if( ! ofs ){
-        CSmallString error;
-        error << "unable to open the index file '" << index_name << "' for writing!";
-        ES_ERROR(error);
-        return(false);
-    }
-
-    map<CSmallString,CFileName>::iterator it = Paths.begin();
-    map<CSmallString,CFileName>::iterator ie = Paths.end();
-
-    while( it != ie ){
-        CSmallString build_id = it->first;
-        string sha1 = Hashes[build_id];
-        ofs << "* " << sha1 << " " << build_id << " " << it->second << endl;
-        it++;
-    }
-
-    if( ! ofs ){
-        ES_ERROR("The index was not saved due to error!");
-        return(false);
-    }
-
-    ofs.close();
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-void CModBundleIndex::Diff(CModBundleIndex& old_index, CVerboseStr& vout,
-                           bool skip_removed, bool skip_added, bool verbose)
-{
-    if( verbose ) {
-        vout << endl;
-        vout << "# Diffing two indexes ..." << endl;
-    }
-
-    vout << low;
-
-    map<CSmallString,string>::iterator it;
-    map<CSmallString,string>::iterator ie;
-
-    if( skip_removed == false ){
-
-        // determine removed entries (-)
-        it = old_index.Hashes.begin();
-        ie = old_index.Hashes.end();
-
-        while( it != ie ){
-            CSmallString build = it->first;
-            if( Hashes.count(build) == 0 ){
-                vout << "- " << old_index.Hashes[build] << " " << left << setw(50) << build << " " << old_index.Paths[build] <<  endl;
-            }
-            it++;
-        }
-    }
-
-    // determine new entries (+) or modified (M)
-    it = Hashes.begin();
-    ie = Hashes.end();
-
-    while( it != ie ){
-        CSmallString build = it->first;
-        if( old_index.Hashes.count(build) == 0 ){
-            if( skip_added == false ){
-                vout << "+ " << Hashes[build] << " " << left << setw(50) << build << " " << Paths[build] <<  endl;
-            }
-        } else {
-            if( Hashes[build] != old_index.Hashes[build] ){
-                vout << "M " << Hashes[build] << " " << left << setw(50) << build << " " << Paths[build] <<  endl;
-            }
-        }
-        it++;
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void CModBundleIndex::Clear(void)
-{
-    Paths.clear();
-    Hashes.clear();
 }
 
 //==============================================================================

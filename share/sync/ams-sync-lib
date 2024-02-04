@@ -48,6 +48,48 @@ function read_profile_rsync_push()
 
 # ------------------------------------------------------------------------------
 
+function read_profile_rsync_dpkg()
+{
+    export AMS_DST_HOST="`grep DESTINATION "$PROFILE" | awk '{print $2;}'`"
+    echo "  Destination:          $AMS_DST_HOST"
+    if [ -z "$AMS_DST_HOST" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DESTINATION key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_DST_DPKGROOT="`grep DST_DPKGROOT "$PROFILE" | awk '{print $2;}'`"
+    echo "  Destination prefix:   $AMS_DST_DPKGROOT"
+    if [ -z "$AMS_DST_DPKGROOT" ]; then
+        echo "" 1>&2
+        echo ">>> ERROR: DST_DPKGROOT key is not defined!" 1>&2
+        echo "" 1>&2
+        exit 1
+    fi
+
+    export AMS_SYNC_AUTH="`grep AUTH $PROFILE | awk '{print $2;}'`"
+    echo "  Authentication mode:  $AMS_SYNC_AUTH"
+    case "`echo "$AMS_SYNC_AUTH" | cut -f 1 -d "("`" in
+        "AFS" | "POSIX" )
+            ;;
+        *)
+            echo "" 1>&2
+            echo ">>> ERROR: AUTH key is not defined or is incorrect!" 1>&2
+            echo "" 1>&2
+            exit 1
+            ;;
+    esac
+
+    export AMS_RSYNC_OPTS="`grep RSYNCOPTS "$PROFILE" | awk '{for(i=2;i<=NF;i++) printf("%s ", $i);}'`"
+    if [ -n "$AMS_RSYNC_OPTS" ]; then
+    echo "  rsync options:        $AMS_RSYNC_OPTS"
+    fi
+}
+
+
+# ------------------------------------------------------------------------------
+
 function set_var_dir()
 {
     AMS_VAR_DIR="$AMS_ROOT_V9/var/sync"
