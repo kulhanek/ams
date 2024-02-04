@@ -413,6 +413,10 @@ void CModule::AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString mod
     modules.sort();
     modules.unique();
 
+    if( modules.size() == 0 ){
+        modules.push_back(module);
+    }
+
     vout << "# Selected builds ..." <<  endl;
     for( CSmallString mod : modules ){
         vout << "  |- " << mod << endl;
