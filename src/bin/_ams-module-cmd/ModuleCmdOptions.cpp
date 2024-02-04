@@ -125,6 +125,8 @@ int CModuleCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "isactive" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "help" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "origin" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "allorigins" ) return(SO_CONTINUE);
+
         if( (GetProgArg(0) == "getactver") || (GetProgArg(0) == "getactmod") ) {
             if( GetNumberOfProgArgs() != 2 ) {
                 if( IsVerbose() ) {

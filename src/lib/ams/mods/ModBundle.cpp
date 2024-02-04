@@ -526,62 +526,6 @@ bool CModBundle::SaveCaches(void)
     return(true);
 }
 
-//------------------------------------------------------------------------------
-
-bool CModBundle::SaveSourceFile(const CFileName& name)
-{
-    bool result = false;
-    if( name == "-" ){
-        result = SaveSourceFile(cout,"stdout");
-    } else {
-        ofstream ofs(name);
-        if( ! ofs ){
-            CSmallString error;
-            error << "unable to open the source file '" << name << "' for writing!";
-            ES_ERROR(error);
-            return(false);
-        }
-        result = SaveSourceFile(ofs,name);
-        ofs.close();
-    }
-    return(result);
-}
-
-//-------------------------------------------------------------------------
-
-bool CModBundle::SaveSourceFile(std::ostream& ofs,const CFileName& name)
-{
-    CXMLElement* p_cele = GetCacheElement();
-    if( p_cele == NULL ){
-        RUNTIME_ERROR("unable to find root cache element");
-    }
-
-    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
-
-    while( p_mele != NULL ) {
-        CSmallString name;
-        p_mele->GetAttribute("name",name);
-        CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
-        while( p_build != NULL ) {
-            CSmallString ver,arch,mode;
-            p_build->GetAttribute("ver",ver);
-            p_build->GetAttribute("arch",arch);
-            p_build->GetAttribute("mode",mode);
-            CFileName package_dir;
-            package_dir = CModCache::GetVariableValue(p_build,"AMS_PACKAGE_DIR");
-            if( package_dir != NULL ){
-                CSmallString build_name;
-                build_name << name << ":" << ver << ":" << arch << ":" << mode;
-                ofs << build_name << " " << package_dir << endl;
-            }
-            p_build = p_build->GetNextSiblingElement("build");
-        }
-        p_mele = p_mele->GetNextSiblingElement("module");
-    }
-
-    return(true);
-}
-
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -610,6 +554,9 @@ bool CModBundle::AddDocumentation(CVerboseStr& vout,CXMLElement* p_cele, const C
         ES_ERROR(error);
         return(false);
     }
+
+    // set source tag
+    p_mele->SetAttribute("source",docu_file);
 
 // module name
     CSmallString    modname;
@@ -678,6 +625,9 @@ bool CModBundle::AddBuild(CVerboseStr& vout,CXMLElement* p_cele, const CFileName
         ES_ERROR(error);
         return(false);
     }
+
+    // set source tag
+    p_bele->SetAttribute("source",build_file);
 
 // module name
     CSmallString    modname,modver,modarch,modmode;

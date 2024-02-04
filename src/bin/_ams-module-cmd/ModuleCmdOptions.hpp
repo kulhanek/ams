@@ -53,8 +53,8 @@ public:
     "   <b><cyan>module</cyan></b>          module name\n"
     "\n"
     "Executive actions:\n"
-    "   <green><b>add</green>             activate modules</b>\n"
-    "   <green><b>remove</green>          deactivate modules</b>\n"
+    "   <b><green>add</green>             activate modules</b>\n"
+    "   <b><green>remove</green>          deactivate modules</b>\n"
     "   <green>activate</green>        activate modules but do not export them\n"
     "   <green>reactivate</green>      reactivate all active modules\n"
     "   <green>autoload</green>        activate autoloaded modules\n"
@@ -74,6 +74,7 @@ public:
     "   <green>isactive</green>        return zero if all modules in the argument list are active\n"
     "   <green>getactmod</green>       return name:version if the module is active\n"
     "   <green>getactver</green>       return module version if the module is active\n"
+    "   <green>allorigins</green>      show source files for the module/build and all sync dependencies\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

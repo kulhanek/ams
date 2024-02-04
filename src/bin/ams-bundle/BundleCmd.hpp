@@ -60,6 +60,7 @@ private:
     bool SyncBundle(void);
     bool BundleSources(void);
     bool BundleDirList(void);
+    bool ShowDpkgDeps(void);
 };
 
 // -----------------------------------------------------------------------------

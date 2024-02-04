@@ -76,7 +76,7 @@ int CBundleCmdOptions::CheckArguments(void)
         Action = GetProgArg(0);
 
         if( (Action == "info") || (Action == "avail") || (Action == "rebuild") ||
-            (Action == "dirname") || (Action == "rootpath")) {
+            (Action == "dirname") || (Action == "rootpath") || (Action == "dpkg-deps") ) {
             return(SO_CONTINUE);
         }
 

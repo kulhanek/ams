@@ -91,6 +91,9 @@ public:
     /// remove module
     EModuleError RemoveModule(CVerboseStr& vout,CSmallString module);
 
+    /// print module origins
+    void AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list, bool fordep=false);
+
     /// set print level
     void SetPrintLevel(EModulePrintLevel set);
 
@@ -105,6 +108,13 @@ public:
 
     /// return error for EModuleError
     static const CSmallString GetErrorStr(EModuleError error);
+
+    /// complete module build
+    bool CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
+                                     CSmallString& name,
+                                     CSmallString& ver,
+                                     CSmallString& arch,
+                                     CSmallString& mode);
 
 // print methods ---------------------------------------------------------------
 
@@ -127,13 +137,6 @@ private:
     std::list<CSmallString>     DepList;            // dependency list - to avoid dependency cycles
 
     CXMLDocument                HTMLHelp;
-
-    /// complete module build
-    bool CompleteModule(CVerboseStr& vout,CXMLElement* p_module,
-                                     CSmallString& name,
-                                     CSmallString& ver,
-                                     CSmallString& arch,
-                                     CSmallString& mode);
 
 // actions related ------------------------------
     /// solve module deps

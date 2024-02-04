@@ -145,6 +145,62 @@ bool CModCache::SaveCacheFile(const CFileName& name)
     return(true);
 }
 
+//------------------------------------------------------------------------------
+
+bool CModCache::SaveSourceFile(const CFileName& name)
+{
+    bool result = false;
+    if( name == "-" ){
+        result = SaveSourceFile(cout,"stdout");
+    } else {
+        ofstream ofs(name);
+        if( ! ofs ){
+            CSmallString error;
+            error << "unable to open the source file '" << name << "' for writing!";
+            ES_ERROR(error);
+            return(false);
+        }
+        result = SaveSourceFile(ofs,name);
+        ofs.close();
+    }
+    return(result);
+}
+
+//-------------------------------------------------------------------------
+
+bool CModCache::SaveSourceFile(std::ostream& ofs,const CFileName& name)
+{
+    CXMLElement* p_cele = GetCacheElement();
+    if( p_cele == NULL ){
+        RUNTIME_ERROR("unable to find root cache element");
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+
+    while( p_mele != NULL ) {
+        CSmallString name;
+        p_mele->GetAttribute("name",name);
+        CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
+        while( p_build != NULL ) {
+            CSmallString ver,arch,mode;
+            p_build->GetAttribute("ver",ver);
+            p_build->GetAttribute("arch",arch);
+            p_build->GetAttribute("mode",mode);
+            CFileName package_dir;
+            package_dir = CModCache::GetVariableValue(p_build,"AMS_PACKAGE_DIR");
+            if( package_dir != NULL ){
+                CSmallString build_name;
+                build_name << name << ":" << ver << ":" << arch << ":" << mode;
+                ofs << build_name << " " << package_dir << endl;
+            }
+            p_build = p_build->GetNextSiblingElement("build");
+        }
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+
+    return(true);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -156,11 +212,17 @@ void CModCache::RemoveDocumentation(void)
         RUNTIME_ERROR("unable to open cache element");
     }
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    p_mele->RemoveAttribute("source");
 
     while( p_mele != NULL ) {
-        CXMLElement*  p_dele = p_mele->GetFirstChildElement("doc");
-        p_mele = p_mele->GetNextSiblingElement("module");
+        CXMLElement* p_dele  = p_mele->GetFirstChildElement("doc");
+        CXMLElement* p_build = p_mele->GetChildElementByPath("builds/build");
+        while( p_build != NULL ) {
+            p_build->RemoveAttribute("source");
+            p_build = p_build->GetNextSiblingElement("build");
+        }
         if( p_dele != NULL ) delete p_dele;
+        p_mele = p_mele->GetNextSiblingElement("module");
     }
 }
 
@@ -564,6 +626,35 @@ bool CModCache::IsPermissionGranted(CXMLElement* p_acl)
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
+
+void CModCache::GetDPKGDeps(std::list<CSmallString>& list)
+{
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ) {
+        CSmallString name;
+        p_mele->GetAttribute("name",name);
+        CXMLElement* p_dep = p_mele->GetChildElementByPath("builds/build/deps/dep");
+        while( p_dep != NULL ) {
+            CSmallString name;
+            p_dep->GetAttribute("name",name);
+            CSmallString type;
+            p_dep->GetAttribute("type",type);
+            if( type == "deb" ){
+                list.push_back(name);
+            }
+            p_dep = p_dep->GetNextSiblingElement("dep");
+        }
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
 
 void CModCache::GetCategories(std::list<CSmallString>& list)
 {

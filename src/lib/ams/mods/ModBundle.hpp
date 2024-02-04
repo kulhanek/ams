@@ -76,12 +76,6 @@ public:
     /// save small and big caches
     bool SaveCaches(void);
 
-    /// save source file
-    bool SaveSourceFile(const CFileName& name);
-
-    /// save source file
-    bool SaveSourceFile(std::ostream& ofs,const CFileName& name);
-
 // information methods ---------------------------------------------------------
     /// get bundle name
     const CFileName GetName(void);

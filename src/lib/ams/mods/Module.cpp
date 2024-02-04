@@ -349,6 +349,85 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     return(EAE_STATUS_OK);
 }
 
+//------------------------------------------------------------------------------
+
+void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list, bool fordep)
+{
+    vout << endl;
+    vout << "# Module name: " << module << " (all origins)" << endl;
+    vout << "# ==============================================================================" << endl;
+
+    // parse module input --------------------------
+    CSmallString name,ver,arch,mode;
+
+    if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
+        ES_TRACE_ERROR("module name is empty string");
+        return;
+    }
+
+    // clear dependency list if this module is not due to dependency roles
+    if( fordep == false ) DepList.clear();
+
+    if( std::find(DepList.begin(), DepList.end(), name) != DepList.end() ){
+        return; // already processed
+    }
+
+    // add module to dependency list to avoid cyclic dependency problems
+    DepList.push_back(name);
+
+    // get module specification --------------------
+    CXMLElement* p_module = ModCache.GetModule(name);
+    if( p_module == NULL ) {
+        CSmallString error;
+        error << "module '" << name << "' does not have any record in AMS software database";
+        ES_TRACE_ERROR(error);
+        return;
+    }
+
+    // complete module specification ---------------
+    if( CompleteModule(vout,p_module,name,ver,arch,mode) == false ) {
+        return;
+    }
+
+    // solve module dependencies -------------------
+    CXMLElement* p_build = CModCache::GetBuild(p_module,ver,arch,mode);
+    if( p_build == NULL ) {
+        CSmallString error;
+        error << "build '" << name << ":" << ver << ":" << arch << ":" << mode << "' does not have any record in AMS software database";
+        ES_TRACE_ERROR(error);
+        return;
+    }
+
+    // add origins - module
+    CSmallString msource;
+    p_module->GetAttribute("source",msource);
+    if( msource != NULL ) list.push_back(msource);
+    vout << "# Module source : " << msource << endl;
+
+
+    // add origins - build
+    CSmallString bsource;
+    p_build->GetAttribute("source",bsource);
+    if( bsource != NULL ) list.push_back(bsource);
+    vout << "# Build source :  " << bsource << endl;
+
+    vout << "# Dependencies ... " << endl;
+
+    CXMLElement* p_dep = p_build->GetChildElementByPath("deps/dep");
+    while( p_dep != NULL ) {
+        CSmallString dname;
+        p_dep->GetAttribute("name",dname);
+        CSmallString type;
+        p_dep->GetAttribute("type",type);
+        if( (type == "pre") || (type == "post") || (type == "sync") ){
+            AddAllOrigins(vout,dname,list,true);
+        }
+        p_dep = p_dep->GetNextSiblingElement("dep");
+    }
+
+
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

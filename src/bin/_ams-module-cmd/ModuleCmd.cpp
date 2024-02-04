@@ -227,6 +227,19 @@ bool CModuleCmd::Run(void)
         }
         return(true);
     }
+    // ----------------------------------------------
+        else if( Options.GetArgAction() == "allorigins" ) {
+            std::list<CFileName> origins;
+            ModuleController.LoadBundles(EMBC_BIG);
+            ModuleController.MergeBundles();
+            for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
+                Module.AddAllOrigins(vout,Options.GetProgArg(i),origins);
+            }
+            for( CFileName origin : origins ){
+                vout << origin << endl;
+            }
+            return(true);
+        }
 // ----------------------------------------------
     else if( Options.GetArgAction() == "disp" ) {
         ModuleController.LoadBundles(EMBC_SMALL);

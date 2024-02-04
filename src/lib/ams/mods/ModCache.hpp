@@ -58,6 +58,12 @@ public:
     /// create empty cache and return pointer to <cache> element
     CXMLElement* CreateEmptyCache(void);
 
+    /// save source file
+    bool SaveSourceFile(const CFileName& name);
+
+    /// save source file
+    bool SaveSourceFile(std::ostream& ofs,const CFileName& name);
+
 // information methods ---------------------------------------------------------
     /// return cache element
     CXMLElement* GetCacheElement(void);
@@ -121,7 +127,10 @@ public:
     /// test if permission is granted (only acl)
     static bool IsPermissionGranted(CXMLElement* p_acl);
 
-// information methods ---------------------------------------------------------
+// information methods ---------------------------------------------------------        
+    /// get system package dependencies
+    void GetDPKGDeps(std::list<CSmallString>& list);
+
     /// get module categories
     void GetCategories(std::list<CSmallString>& list);
 

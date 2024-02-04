@@ -145,6 +145,10 @@ bool CBundleCmd::Run(void)
         return( BundleDirList() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "dpkg-deps" ) {
+        return( ShowDpkgDeps() );
+    }
+    // ----------------------------------------------
     else {
         CSmallString error;
         error << "not implemented action '" << Options.GetArgAction() << "'";
@@ -162,9 +166,12 @@ void CBundleCmd::Finalize(void)
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
 
-    vout << high;
     if( (! ForcePrintErrors) && (Options.GetArgAction() != "dirname")
+            && (Options.GetArgAction() != "rootpath")
+            && (Options.GetArgAction() != "sources")
             && (Options.GetOptSilent() == false) ) vout << endl;
+
+    vout << high;
     vout << "# ==============================================================================" << endl;
     vout << "# ams-bundle (AMS utility) terminated at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
@@ -643,6 +650,47 @@ bool CBundleCmd::BundleDirList(void)
         error << "unsupported action for dirlist: '" << Options.GetProgArg(1) << "'";
         ES_ERROR(error);
         ForcePrintErrors = true;
+    }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::ShowDpkgDeps(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    std::list<CSmallString> deps;
+    bundle.GetDPKGDeps(deps);
+
+    for(CSmallString dep : deps){
+        cout << dep << endl;
     }
 
     return(true);
