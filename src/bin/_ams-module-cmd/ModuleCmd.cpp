@@ -232,9 +232,14 @@ bool CModuleCmd::Run(void)
             std::list<CFileName> origins;
             ModuleController.LoadBundles(EMBC_BIG);
             ModuleController.MergeBundles();
+            if( Options.GetOptVerbose() == true ) Module.SetPrintLevel(EAPL_VERBOSE);
+            vout << high;
             for(int i=1; i < Options.GetNumberOfProgArgs(); i++) {
                 Module.AddAllOrigins(vout,Options.GetProgArg(i),origins);
             }
+            vout << low;
+            origins.sort();
+            origins.unique();
             for( CFileName origin : origins ){
                 vout << origin << endl;
             }
