@@ -598,7 +598,7 @@ bool CBundleCmd::BundleDirList(void)
 
     dir_tree->ScanSoftRepoTree(bundle.GetBundleRootPath(),bundle.GetName(),3);
 
-     CXMLElement* p_cele = ModCache.GetCacheElement();
+     CXMLElement* p_cele = bundle.GetCacheElement();
      if( p_cele == NULL ){
          RUNTIME_ERROR("unable to find root cache element");
      }
@@ -615,7 +615,7 @@ bool CBundleCmd::BundleDirList(void)
              p_build->GetAttribute("arch",arch);
              p_build->GetAttribute("mode",mode);
              CFileName package_dir;
-             package_dir = ModCache.GetVariableValue(p_build,"AMS_PACKAGE_DIR");
+             package_dir = CModCache::GetVariableValue(p_build,"AMS_PACKAGE_DIR");
              if( package_dir != NULL ){
                  CSmallString build_name;
                  build_name << name << ":" << ver << ":" << arch << ":" << mode;
