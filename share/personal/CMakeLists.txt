@@ -3,10 +3,10 @@
 # ==============================================================================
 
 INSTALL(FILES
-            ams-personal-addbuilds
+            ams-personal-install
             ams-personal-envinit
             ams-personal-gensshkeys
-            ams-personal-rmbuilds
+            ams-personal-remove
             ams-personal-showsshkey
             ams-personal-useradd
             ams-personal
