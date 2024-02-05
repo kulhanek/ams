@@ -3,12 +3,12 @@
 # ==============================================================================
 
 INSTALL(FILES
+            ams-personal-addbuilds
+            ams-personal-envinit
             ams-personal-gensshkeys
+            ams-personal-rmbuilds
             ams-personal-showsshkey
             ams-personal-useradd
-            ams-personal-addbuilds
-            ams-personal-rmbuilds
-            ams-personal-envinit
             ams-personal
        DESTINATION
             share/personal
