@@ -411,8 +411,12 @@ void CModCache::GetModuleVersionsSorted(CXMLElement* p_mele, std::list<CSmallStr
 
 //------------------------------------------------------------------------------
 
-void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list)
+void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallString>& list,
+                                      bool includename)
 {
+    CSmallString name;
+    p_mele->GetAttribute("name",name);
+
     CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
 
     std::list<CPVerRecord>  pvlist;
@@ -437,6 +441,9 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
 
     for(CPVerRecord pvrec : pvlist){
         CSmallString build;
+        if( includename ){
+            build << name << ":";
+        }
         build << pvrec.ver << ":" << pvrec.arch << ":" << pvrec.mode;
         list.push_back(build);
     }
@@ -444,8 +451,12 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, std::list<CSmallStrin
 
 //------------------------------------------------------------------------------
 
-void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& vers, std::list<CSmallString>& list)
+void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& vers,
+                                      std::list<CSmallString>& list, bool includename)
 {
+    CSmallString name;
+    p_mele->GetAttribute("name",name);
+
     CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
 
     std::list<CPVerRecord>  pvlist;
@@ -471,6 +482,9 @@ void CModCache::GetModuleBuildsSorted(CXMLElement* p_mele, const CSmallString& v
     for(CPVerRecord pvrec : pvlist){
         if( pvrec.ver == vers ){
             CSmallString build;
+            if( includename ){
+                build << name << ":";
+            }
             build << pvrec.ver << ":" << pvrec.arch << ":" << pvrec.mode;
             list.push_back(build);
         }
@@ -777,7 +791,7 @@ void CModCache::GetBuilds(std::list<CSmallString>& list)
 
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
     while( p_mele != NULL ) {
-        GetModuleBuildsSorted(p_mele,list);
+        GetModuleBuildsSorted(p_mele,list,true);
         p_mele = p_mele->GetNextSiblingElement("module");
     }
 }

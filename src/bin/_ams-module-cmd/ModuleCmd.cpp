@@ -464,7 +464,10 @@ void CModuleCmd::Finalize(void)
     vout << low;
     if( (Options.GetArgAction() != "getactmod") &&
         (Options.GetArgAction() != "getactver") &&
-        (Options.GetArgAction() != "allorigins") ){
+        (Options.GetArgAction() != "allorigins") &&
+        (Options.GetArgAction() != "allmodules") &&
+        (Options.GetArgAction() != "allbuilds") &&
+        (Options.GetArgAction() != "dpkg-deps") ){
         if( ! ForcePrintErrors ) vout << endl;
     }
 
