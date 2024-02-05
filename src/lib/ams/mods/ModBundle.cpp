@@ -486,13 +486,13 @@ bool CModBundle::LoadCache(EModBundleCache type)
 // load the cache
     if( type == EMBC_BIG ){
         if( LoadCacheFile(config_dir / "cache_big.xml") == false ){
-            ES_ERROR("unable to load big cache");
+            ES_WARNING("unable to load big cache");
             return(false);
         }
         CacheType = EMBC_BIG;
     } else if( type == EMBC_SMALL ) {
         if( LoadCacheFile(config_dir / "cache.xml") == false ){
-            ES_ERROR("unable to load small cache");
+            ES_WARNING("unable to load small cache");
             return(false);
         }
         CacheType = EMBC_SMALL;
