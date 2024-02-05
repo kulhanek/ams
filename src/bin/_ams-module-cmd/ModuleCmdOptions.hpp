@@ -75,9 +75,9 @@ public:
     "   <green>getactmod</green>       return name:version if the module is active\n"
     "   <green>getactver</green>       return module version if the module is active\n"
     "   <green>allorigins</green>      show source files for the module/build and all sync dependencies\n"
-    "   <green>allmodules</green>      list all available modules for the active or requested site\n"
-    "   <green>allbuilds</green>       list all available builds for the active or requested site\n"
-    "   <green>dpkg-deps</green>       list system package dependencies for the active or requested site\n"
+    "   <green>allmodules</green>      list all available modules\n"
+    "   <green>allbuilds</green>       list all available builds\n"
+    "   <green>dpkg-deps</green>       list system package dependencies\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

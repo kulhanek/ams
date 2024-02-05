@@ -61,6 +61,8 @@ private:
     bool BundleSources(void);
     bool BundleDirList(void);
     bool ShowDpkgDeps(void);
+    bool ListAllModules(void);
+    bool ListAllBuilds(void);
 };
 
 // -----------------------------------------------------------------------------

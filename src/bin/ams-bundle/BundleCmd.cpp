@@ -149,6 +149,14 @@ bool CBundleCmd::Run(void)
         return( ShowDpkgDeps() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "allmodules" ) {
+        return( ListAllModules() );
+    }
+    // ----------------------------------------------
+    else if( Options.GetArgAction() == "allbuilds" ) {
+        return( ListAllBuilds() );
+    }
+    // ----------------------------------------------
     else {
         CSmallString error;
         error << "not implemented action '" << Options.GetArgAction() << "'";
@@ -692,6 +700,78 @@ bool CBundleCmd::ShowDpkgDeps(void)
     for(CSmallString dep : deps){
         cout << dep << endl;
     }
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::ListAllModules(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    bundle.PrintAllModules(vout);
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CBundleCmd::ListAllBuilds(void)
+{
+    CFileName cwd,bundle_root;
+    CFileSystem::GetCurrentDir(cwd);
+    if( CModBundle::GetBundleRoot(cwd,bundle_root) == false ){
+        CSmallString error;
+        error << "no bundle found from the path starting at the current directory: '" << cwd << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    CModBundle bundle;
+    if( bundle.InitBundle(bundle_root) == false ){
+        CSmallString error;
+        error << "unable to load bundle configuration '" << bundle_root << "'";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    if( bundle.LoadCache(EMBC_SMALL) == false ){
+        CSmallString error;
+        error << "unable to load bundle cache";
+        ES_ERROR(error);
+        ForcePrintErrors = true;
+        return(false);
+    }
+
+    bundle.PrintAllBuilds(vout);
 
     return(true);
 }

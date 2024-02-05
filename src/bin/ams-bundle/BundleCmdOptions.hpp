@@ -61,6 +61,8 @@ public:
     "<green>dirlist missing|orphans|existing|all</green>                 bundle softrepo directory tree validator\n"
     "<green>sources name</green>                                         print list of builds for ams-index-create to the file with 'name'\n"
     "<green>sync [profile]</green>                                       synchronize the bundle with a remote site according to the profile\n"
+    "<green>allmodules</green>                                           list all available modules\n"
+    "<green>allbuilds</green>                                            list all available builds\n"
     "<green>dpkg-deps</green>                                            print system package dependencies\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
