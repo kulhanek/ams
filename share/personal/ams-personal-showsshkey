@@ -8,7 +8,15 @@
 function print_bottom()
 {
     echo "Public Infinity ssh key:"
-    cat "/var/lib/infinity/.ssh/id_rsa.pub"
+    if [ -f /var/lib/infinity/.ssh/id_rsa.pub ]; then
+        cat "/var/lib/infinity/.ssh/id_rsa.pub"
+    else
+        echo ">>> ERROR: File with the ssh key '/var/lib/infinity/.ssh/id_rsa.pub' does not exist!" 1>&2
+        echo "           You can generate the key by running the command:" 1>&2
+        echo "" 1>&2
+        echo "           $ ams-personal gensshkeys" 1>&2
+        echo "" 1>&2
+    fi
     echo ""
 }
 

@@ -560,11 +560,13 @@ int CSiteCmd::ListAMods(void)
     ModuleController.MergeBundles();
 
     std::list<CSmallString> modules;
+    HostGroup.GetHostsConfigAutoLoadedModules(modules);
+    HostGroup.GetHostGroupAutoLoadedModules(modules);
     site.GetAutoLoadedModules(modules);
 
-    PrintEngine.InitPrintProfile();
-    PrintEngine.PrintHeader(Console.GetTerminal(),"AUTOLOADED MODULES (Infinity Software Base | amsmodule)",EPEHS_SECTION);
-    PrintEngine.PrintItems(Console.GetTerminal(),modules);
+    for(CSmallString mod : modules){
+        cerr << mod << endl;
+    }
 
     return(SITE_STATUS_OK);
 }
