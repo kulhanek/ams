@@ -911,7 +911,11 @@ void CModBundle::CalculateNewIndex(CVerboseStr& vout)
     map<CSmallString,CFileName>::iterator ie = NewBundleIndex.Paths.end();
 
     CFSIndex index;
-    index.RootDir = BundlePath;
+    if( PersonalBundle ){
+        index.RootDir = BundlePath / BundleName;
+    } else {
+        index.RootDir = BundlePath;
+    }
     index.PersonalBundle = PersonalBundle;
 
     while( it != ie ){
