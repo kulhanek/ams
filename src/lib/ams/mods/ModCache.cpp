@@ -100,6 +100,13 @@ bool CModCache::LoadCacheFile(const CFileName& name)
 {
     Cache.RemoveAllChildNodes();
 
+    if( CFileSystem::IsFile(name) == false ){
+        CSmallString error;
+        error << "no module cache file yet: '" << name << "'";
+        ES_WARNING(error);
+        return(false);
+    }
+
 // open cache file
     CXMLParser   xml_parser;
 
