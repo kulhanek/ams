@@ -6,6 +6,7 @@ ADD_SUBDIRECTORY(DEBIAN)
 
 INSTALL(DIRECTORY
             software
+            usr
         DESTINATION
             share/dpkg/personal
         FILE_PERMISSIONS

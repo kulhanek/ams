@@ -1,6 +1,8 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
-# Advanced Module System synchronization utility for personal site
+# Advanced Module System - personal site management utility
+# (c) 2024 Petr Kulhanek
+# (c) 2017 Petr Kulhanek
 # ------------------------------------------------------------------------------
 
 function print_header()

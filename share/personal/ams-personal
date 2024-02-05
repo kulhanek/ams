@@ -1,6 +1,7 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
 # Advanced Module System - personal site management utility
+# (c) 2024 Petr Kulhanek
 # (c) 2017 Petr Kulhanek
 # ------------------------------------------------------------------------------
 
@@ -19,22 +20,23 @@ function print_usage()
     echo ""
     echo "Supported actions for administrator (sudo user):"
     echo "   Management of module builds:"
-    echo "       addmodules <module1> ...            install modules (only single modes)"
-    echo "                                              and update all local builds"
-    echo "       addbuilds <bldfilter1> ...          install builds specified by full build name or build filter"
+    echo "       addmodules <modfilter1> ...         install modules/builds specified by"
+    echo "                                             * module name"
+    echo "                                             * full build name"
+    echo "                                             * build filter"
     echo "                                              (filter is incomplete buildname with wildcard characters)"
     echo "                                              and update all local builds"
     echo "       rmbuilds <bldfilter1> ...           remove builds specified by full build name or build filter"
     echo "       update                              update all local builds"
-    echo "       debdeps                             install dependent system packages"
+    echo "       upgrade                             upgrade all local modules"
     echo ""
     echo "   Personal site setup:"
     echo "       gensshkeys         setup sshkeys for the local infinity user"
     echo "       showsshkey         show the public key of the local infinity user"
     echo "       useradd [user]     add 'user' to the infnity group, if not provided the current user is added"
     echo "       envinit            initialize bash startup files for the current user"
-    echo "       addcorebuilds      install AMS core builds"
-    echo "       amscore            upgrade AMS core packages"
+    echo "       amscore            install and/or upgrade AMS core packages"
+    echo "       debdeps            install dependent system packages (it is part of update/upgrade)"
     echo ""
     echo "General pre-requisites for a computer:"
     echo "       * ncbr-ams-core-X.Y-personal package must by installed"
@@ -50,7 +52,6 @@ function print_usage()
 # ------------------------------------------------------------------------------
 
 function exec_debdeps() {
-    sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
     echo ""
     echo "# Installing system dependent packages:"
     echo "# ------------------------------------------------------------------------------"
@@ -138,14 +139,14 @@ esac
 
 # -----------------------------------------------------------------------------------------
 
-# check if AMS_ROOT is set -----------------------
+# check if AMS_ROOT_V9 is set -----------------------
 
-if [ -z "$AMS_ROOT" ]; then
+if [ -z "$AMS_ROOT_V9" ]; then
     echo "" 1>&2
-    echo ">>> ERROR: AMS_ROOT is not set!" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 is not set!" 1>&2
     echo "           You need to modify your startup files by running the command:" 1>&2
     echo "" 1>&2
-    echo "           $ ams-personal initenv" 1>&2
+    echo "           $ ams-personal envinit" 1>&2
     echo "" 1>&2
     exit 1
 fi

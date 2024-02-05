@@ -26,7 +26,6 @@ share/personal/ams-personal-showsshkey
 share/personal/ams-personal-useradd
 share/personal/ams-personal.tmp
 share/scripts/CMakeLists.txt
-share/scripts/ams-personal
 share/scripts/ams-sync-bundle
 share/scripts/ams-sync-core
 share/scripts/ams-sync-dpkg
