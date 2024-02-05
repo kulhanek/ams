@@ -89,6 +89,10 @@ int CModuleCmdOptions::CheckArguments(void)
         if( GetProgArg(0) == "reactivate" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "autoload" ) return(SO_CONTINUE);
         if( GetProgArg(0) == "purge" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "allmodules" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "allbuilds" ) return(SO_CONTINUE);
+        if( GetProgArg(0) == "dpkg-deps" ) return(SO_CONTINUE);
+
         if( (GetProgArg(0) == "add") ||
                 (GetProgArg(0) == "remove") ||
                 (GetProgArg(0) == "versions") ||

@@ -245,6 +245,27 @@ bool CModuleCmd::Run(void)
             }
             return(true);
         }
+    // ----------------------------------------------
+        else if( Options.GetArgAction() == "allmodules" ) {
+            ModuleController.LoadBundles(EMBC_SMALL);
+            ModuleController.MergeBundles();
+            ModCache.PrintAllModules(vout);
+            return(true);
+        }
+    // ----------------------------------------------
+        else if( Options.GetArgAction() == "allbuilds" ) {
+            ModuleController.LoadBundles(EMBC_SMALL);
+            ModuleController.MergeBundles();
+            ModCache.PrintAllBuilds(vout);
+            return(true);
+        }
+    // ----------------------------------------------
+        else if( Options.GetArgAction() == "dpkg-deps" ) {
+            ModuleController.LoadBundles(EMBC_SMALL);
+            ModuleController.MergeBundles();
+            ModCache.PrintDPKGDeps(vout);
+            return(true);
+        }
 // ----------------------------------------------
     else if( Options.GetArgAction() == "disp" ) {
         ModuleController.LoadBundles(EMBC_SMALL);

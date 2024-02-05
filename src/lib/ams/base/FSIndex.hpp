@@ -44,6 +44,7 @@ public:
 public:
     CFileName   RootDir;
     bool        PersonalBundle;
+    bool        IncludeParents;
     int         NumOfStats;
 };
 

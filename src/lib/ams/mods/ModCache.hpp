@@ -137,6 +137,12 @@ public:
     /// get modules in the given categories
     void GetModules(const CSmallString& category, std::list<CSmallString>& list,bool includever=false);
 
+    /// get all modules
+    void GetModules(std::list<CSmallString>& list);
+
+    /// get all builds
+    void GetBuilds(std::list<CSmallString>& list);
+
     /// get list of builds for cgen
     void GetBuildsForCGen(std::list<CSmallString>& list,int numparts);
 
@@ -151,6 +157,15 @@ public:
 
     /// print module origin
     void PrintModuleOrigin(CVerboseStr& vout, const CSmallString& module);
+
+    /// print all modules
+    void PrintAllModules(CVerboseStr& vout);
+
+    /// print all builds
+    void PrintAllBuilds(CVerboseStr& vout);
+
+    /// print system package dependencies
+    void PrintDPKGDeps(CVerboseStr& vout);
 
     /// get number of modules
     int GetNumberOfModules(void);

@@ -748,6 +748,42 @@ void CModCache::GetModules(const CSmallString& category, std::list<CSmallString>
 
 //------------------------------------------------------------------------------
 
+void CModCache::GetModules(std::list<CSmallString>& list)
+{
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ) {
+        CSmallString modname;
+        p_mele->GetAttribute("name",modname);
+        if( modname != NULL ) list.push_back(modname);
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::GetBuilds(std::list<CSmallString>& list)
+{
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ) {
+        GetModuleBuildsSorted(p_mele,list);
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+}
+
+//------------------------------------------------------------------------------
+
 int CModCache::GetModulePrintSize(bool includever)
 {
     size_t len = 0;
@@ -981,6 +1017,39 @@ void CModCache::PrintModuleOrigin(CVerboseStr& vout, const CSmallString& module)
     vout << "# Bundle path : " << bpath << endl;
     vout << "# Bundle ID   : " << bid << endl;
     vout << "# Maintainer  : " << baintainer << " (" << bcontact << ")" << endl;
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintAllModules(CVerboseStr& vout)
+{
+    std::list<CSmallString> modules;
+    GetModules(modules);
+    for(CSmallString mod : modules){
+        vout << mod << endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintAllBuilds(CVerboseStr& vout)
+{
+    std::list<CSmallString> builds;
+    GetBuilds(builds);
+    for(CSmallString build : builds){
+        vout << build << endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintDPKGDeps(CVerboseStr& vout)
+{
+    std::list<CSmallString> deps;
+    GetDPKGDeps(deps);
+    for(CSmallString dep : deps){
+        vout << dep << endl;
+    }
 }
 
 //------------------------------------------------------------------------------

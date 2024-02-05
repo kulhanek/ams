@@ -45,14 +45,19 @@ using namespace boost::algorithm;
 
 CFSIndex::CFSIndex(void)
 {
-    PersonalBundle = false;
-    NumOfStats = 0;
+    PersonalBundle  = false;
+    IncludeParents  = true;
+    NumOfStats      = 0;
 }
 
 //------------------------------------------------------------------------------
 
 std::string CFSIndex::CalculateBuildHash(const CFileName& build_path)
 {
+    if( PersonalBundle ){
+        IncludeParents = false;
+    }
+
     SHA1 sha1;
 
     // split build_path into individual directories and hash them
@@ -220,11 +225,14 @@ void CFSIndex::HashNode(const CFileName& name,struct stat& my_stat,bool build_no
 // core data
     str << name;
 
-    // non-regular files (for example directories can have different sizes on different FSs)
-    if( S_ISREG(my_stat.st_mode) ){
-        str << my_stat.st_size;
+    if( IncludeParents || build_node ){
+        // non-regular files (for example directories can have different sizes on different FSs)
+        if( S_ISREG(my_stat.st_mode) ){
+            str << my_stat.st_size;
+        }
+        str << my_stat.st_mode;
     }
-    str << my_stat.st_mode;
+
 
 // time data
     if( build_node ){

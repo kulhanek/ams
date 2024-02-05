@@ -264,7 +264,7 @@ bool CSiteCmd::Run(void)
         return(true);
 
         return(true);
-    }   
+    }
 // ----------------------------------------------
     else if( Options.GetArgAction() == "init" ) {
 
@@ -555,9 +555,6 @@ int CSiteCmd::ListAMods(void)
         ES_TRACE_ERROR(error);
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
-
-    ModuleController.LoadBundles(EMBC_SMALL);
-    ModuleController.MergeBundles();
 
     std::list<CSmallString> modules;
     HostGroup.GetHostsConfigAutoLoadedModules(modules,false,true);

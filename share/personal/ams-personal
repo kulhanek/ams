@@ -12,15 +12,6 @@ if [ -z "$AMS_PERSONAL_ROOT" ]; then
     exit 1
 fi
 
-AMS_PERSONAL_BUNDLE="$SOFTREPO"
-
-if [ -z "$AMS_PERSONAL_BUNDLE" ]; then
-    echo "" 1>&2
-    echo ">>> ERROR: AMS_PERSONAL_BUNDLE is not set!" 1>&2
-    echo "" 1>&2
-    exit 1
-fi
-
 # ------------------------------------------------------------------------------
 
 function print_usage()
@@ -33,8 +24,7 @@ function print_usage()
     echo "       install <modfilter1> ...  install modules/builds specified by"
     echo "                                   * module name"
     echo "                                   * full build name"
-    echo "                                   * build filter"
-    echo "                                   (filter is incomplete buildname with wildcard characters)"
+    echo "                                   * build filter (filter is incomplete buildname with wildcard characters)"
     echo "                                   and update all local builds"
     echo "       remove <bldfilter1> ...   remove builds specified by full build name or build filter"
     echo "       update                    update all local builds"
@@ -44,7 +34,7 @@ function print_usage()
     echo "       gensshkeys         setup sshkeys for the local infinity user"
     echo "       showsshkey         show the public key of the local infinity user"
     echo "       useradd [user]     add 'user' to the infnity group, if not provided the current user is added"
-    echo "       envinit            initialize bash startup files for the current user"  
+    echo "       envinit            initialize bash startup files for the current user"
     echo "       amsdpkg            install and/or upgrade AMS core packages"
     echo "       coremods           install and/or upgrade AMS core modules"
     echo "       dpkgdeps           install dependent system packages (it is part of update/upgrade)"
@@ -68,8 +58,7 @@ function exec_dpkgdeps() {
     echo "# ------------------------------------------------------------------------------"
     echo "# `lsb_release -d`"
     RELEASE=`lsb_release -r | awk '{ print $2; }'`
-    cd $AMS_PERSONAL_BUNDLE || exit 1
-    PKGS="`ams-bundle dpkg-deps`"
+    PKGS="`amsmodule `"
     if [ $? -ne 0 ]; then
         exit 1
     fi
@@ -183,14 +172,29 @@ case "$ACTION" in
         ;;
 # -----------------------------
     "coremods" )
+        echo ""
+        echo "# Installing/upgrading AMS core modules:"
+        echo "# ------------------------------------------------------------------------------"
         LIST="`site listamods personal 2>&1`"
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
         exec_dpkgdeps || exit 1
         ;;
 # -----------------------------
     "update" )
-        cd $AMS_PERSONAL_BUNDLE || exit 1
-        sudo -u infinity -i ams-bundle sync softrepo || exit 1
+        echo ""
+        echo "# Updating AMS builds:"
+        echo "# ------------------------------------------------------------------------------"
+        LIST="`amsmodule allbuilds 2>&1`"
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
+        exec_dpkgdeps || exit 1
+        ;;
+# -----------------------------
+    "upgrade" )
+        echo ""
+        echo "# Upgrading AMS modules:"
+        echo "# ------------------------------------------------------------------------------"
+        LIST="`amsmodule allmodules 2>&1`"
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
         exec_dpkgdeps || exit 1
         ;;
 # -----------------------------
@@ -200,7 +204,7 @@ case "$ACTION" in
 # -----------------------------
     "amsdpkg" )
         echo ""
-        echo "# Installing/upgrading AMS packages:"
+        echo "# Installing/upgrading AMS core packages:"
         echo "# ------------------------------------------------------------------------------"
         PKGS="ncbr-ams-core-9.0-personal"
         if [ $? -ne 0 ]; then
@@ -230,10 +234,4 @@ case "$ACTION" in
         exit 1
         ;;
 esac
-
-
-
-
-
-
 

@@ -90,7 +90,7 @@ function local_index(){
 
     cd $SOFTREPO
     ams-bundle rebuild
-    ams-bundle index new
+    ams-bundle --personal index new
 }
 
 # --------------------------------------
@@ -106,16 +106,6 @@ function remote_index(){
     ams-bundle sources - | \
                ssh -x $AMS_SRC_HOST ams-index-create --personal builds - $SOFTREPO - \
                     > $SOFTREPO/_ams_bundle/index.old
-}
-
-# --------------------------------------
-
-function sync_softrepo(){
-
-    echo "" | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 5) Syncing builds ..." | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
 
     echo "# Changed builds ..." | tee -a $LOG_FILE
     ams-bundle --silent index diff | tee -a $LOG_FILE
@@ -127,6 +117,18 @@ function sync_softrepo(){
         rm -f "$NEW_INDEX"
         return
     fi
+}
+
+# --------------------------------------
+
+function sync_softrepo(){
+
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 5) Syncing builds ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+
+
 
     ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
 
