@@ -640,6 +640,13 @@ bool CBundleCmd::BundleDirList(void)
          p_mele = p_mele->GetNextSiblingElement("module");
      }
 
+    CFileName root;
+    if( Options.GetOptPersonal() ){
+        root = bundle.GetFullBundleName();
+    } else {
+        root = bundle.GetBundleRootPath();
+    }
+
     if( Options.GetProgArg(1) == "missing" ){
         // print missing records
         dir_tree->PrintMissing(vout,bundle.GetBundleRootPath());
