@@ -58,7 +58,7 @@ function exec_dpkgdeps() {
     echo "# ------------------------------------------------------------------------------"
     echo "# `lsb_release -d`"
     RELEASE=`lsb_release -r | awk '{ print $2; }'`
-    PKGS="`amsmodule dpkg-deps`"
+    PKGS="`amsmodule dpkg-deps 2>&1`"
     if [ $? -ne 0 ]; then
         exit 1
     fi
