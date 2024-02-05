@@ -560,9 +560,9 @@ int CSiteCmd::ListAMods(void)
     ModuleController.MergeBundles();
 
     std::list<CSmallString> modules;
-    HostGroup.GetHostsConfigAutoLoadedModules(modules);
-    HostGroup.GetHostGroupAutoLoadedModules(modules);
-    site.GetAutoLoadedModules(modules);
+    HostGroup.GetHostsConfigAutoLoadedModules(modules,false,true);
+    HostGroup.GetHostGroupAutoLoadedModules(modules,false,true);
+    site.GetAutoLoadedModules(modules,false,true);
 
     for(CSmallString mod : modules){
         cerr << mod << endl;

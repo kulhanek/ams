@@ -102,7 +102,8 @@ public:
     const CSmallString GetRealm(void);
 
     /// get list of autoloaded modules
-    void GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+    void GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,
+                                       bool withorigin=false,bool personal=false);
 
     /// get list of autoloaded modules
     CXMLElement* GetHostGroupAutoLoadedModules(void);
@@ -111,7 +112,8 @@ public:
     CXMLElement* GetHostGroupEnvironment(void);
 
     /// get list of autoloaded modules
-    void GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+    void GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,
+                                         bool withorigin=false,bool personal=false);
 
     /// get list of autoloaded modules
     CXMLElement* GetHostsConfigAutoLoadedModules(void);

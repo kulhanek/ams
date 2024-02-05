@@ -62,7 +62,8 @@ public:
     bool IsSiteActive(void);
 
     /// return short site description, these module are not exported
-    void GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin=false);
+    void GetAutoLoadedModules(std::list<CSmallString>& modules,
+                              bool withorigin=false,bool personal=false);
 
     /// get autoloaded modules
     CXMLElement* GetAutoLoadedModules(void);

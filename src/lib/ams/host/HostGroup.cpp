@@ -345,7 +345,8 @@ const CSmallString CHostGroup::GetRealm(void)
 
 //------------------------------------------------------------------------------
 
-void CHostGroup::GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+void CHostGroup::GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin,
+                                               bool personal)
 {
     CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
@@ -363,9 +364,10 @@ void CHostGroup::GetHostGroupAutoLoadedModules(std::list<CSmallString>& modules,
                 mname << "[hostgroup:" << GetHostGroupName();
                 if( mflavour != NULL ) mname << "@" << mflavour;
                 mname << "]";
+                // we wnat to see it at any setup
                 modules.push_back(mname);
             } else {
-                if( enabled ) modules.push_back(mname);
+                if( enabled || personal ) modules.push_back(mname);
             }
 
         }
@@ -389,7 +391,8 @@ CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
 
 //------------------------------------------------------------------------------
 
-void CHostGroup::GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+void CHostGroup::GetHostsConfigAutoLoadedModules(std::list<CSmallString>& modules,
+                                                 bool withorigin,bool personal)
 {
     CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
@@ -407,9 +410,10 @@ void CHostGroup::GetHostsConfigAutoLoadedModules(std::list<CSmallString>& module
                 mname << "[hostsconfig:" << GetHostGroupName();
                 if( mflavour != NULL ) mname << "@" << mflavour;
                 mname << "]";
+                // we wnat to see it at any setup
                 modules.push_back(mname);
             } else {
-                if( enabled ) modules.push_back(mname);
+                if( enabled || personal ) modules.push_back(mname);
             }
 
         }

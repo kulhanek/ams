@@ -178,7 +178,8 @@ CXMLElement* CSite::GetSiteEnvironment(void)
 
 //------------------------------------------------------------------------------
 
-void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigin)
+void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,
+                                 bool withorigin,bool personal)
 {
      CSmallString flavour = AMSRegistry.GetUserSiteFlavour();
 
@@ -202,7 +203,7 @@ void CSite::GetAutoLoadedModules(std::list<CSmallString>& modules,bool withorigi
                 }
                 modules.push_back(mname);
             } else {
-                if( enabled ) modules.push_back(mname);
+                if( enabled || personal ) modules.push_back(mname);
             }
         }
         p_ele = p_ele->GetNextSiblingElement("module");

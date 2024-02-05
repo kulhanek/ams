@@ -5,10 +5,20 @@
 # (c) 2017 Petr Kulhanek
 # ------------------------------------------------------------------------------
 
-if [ -z "AMS_PERSONAL_ROOT" ]; then
+if [ -z "$AMS_PERSONAL_ROOT" ]; then
     echo "" 1>&2
     echo ">>> ERROR: AMS_PERSONAL_ROOT is not set!" 1>&2
     echo "" 1>&2
+    exit 1
+fi
+
+AMS_PERSONAL_BUNDLE="$SOFTREPO"
+
+if [ -z "$AMS_PERSONAL_BUNDLE" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: AMS_PERSONAL_BUNDLE is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
 fi
 
 # ------------------------------------------------------------------------------
@@ -20,23 +30,24 @@ function print_usage()
     echo ""
     echo "Supported actions for administrator (sudo user):"
     echo "   Management of module builds:"
-    echo "       addmodules <modfilter1> ...         install modules/builds specified by"
-    echo "                                             * module name"
-    echo "                                             * full build name"
-    echo "                                             * build filter"
-    echo "                                              (filter is incomplete buildname with wildcard characters)"
-    echo "                                              and update all local builds"
-    echo "       rmbuilds <bldfilter1> ...           remove builds specified by full build name or build filter"
-    echo "       update                              update all local builds"
-    echo "       upgrade                             upgrade all local modules"
+    echo "       install <modfilter1> ...  install modules/builds specified by"
+    echo "                                   * module name"
+    echo "                                   * full build name"
+    echo "                                   * build filter"
+    echo "                                   (filter is incomplete buildname with wildcard characters)"
+    echo "                                   and update all local builds"
+    echo "       remove <bldfilter1> ...   remove builds specified by full build name or build filter"
+    echo "       update                    update all local builds"
+    echo "       upgrade                   upgrade all local modules"
     echo ""
     echo "   Personal site setup:"
     echo "       gensshkeys         setup sshkeys for the local infinity user"
     echo "       showsshkey         show the public key of the local infinity user"
     echo "       useradd [user]     add 'user' to the infnity group, if not provided the current user is added"
-    echo "       envinit            initialize bash startup files for the current user"
-    echo "       amscore            install and/or upgrade AMS core packages"
-    echo "       debdeps            install dependent system packages (it is part of update/upgrade)"
+    echo "       envinit            initialize bash startup files for the current user"  
+    echo "       amsdpkg            install and/or upgrade AMS core packages"
+    echo "       coremods           install and/or upgrade AMS core modules"
+    echo "       dpkgdeps           install dependent system packages (it is part of update/upgrade)"
     echo ""
     echo "General pre-requisites for a computer:"
     echo "       * ncbr-ams-core-X.Y-personal package must by installed"
@@ -51,17 +62,22 @@ function print_usage()
 
 # ------------------------------------------------------------------------------
 
-function exec_debdeps() {
+function exec_dpkgdeps() {
     echo ""
     echo "# Installing system dependent packages:"
     echo "# ------------------------------------------------------------------------------"
     echo "# `lsb_release -d`"
     RELEASE=`lsb_release -r | awk '{ print $2; }'`
-    PKGS="`ams-cache --release "$RELEASE" debdepsall`"
+    cd $AMS_PERSONAL_BUNDLE || exit 1
+    PKGS="`ams-bundle dpkg-deps`"
     if [ $? -ne 0 ]; then
         exit 1
     fi
-    sudo apt-get install $PKGS  || exit 1
+    if [ -n "$PKGS" ]; then
+        sudo apt-get install $PKGS  || exit 1
+    else
+        echo "  No dependencies ..."
+    fi
     echo ""
 }
 
@@ -161,60 +177,30 @@ fi
 
 case "$ACTION" in
 # -----------------------------
-    "addmodules" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
-        echo ""
-        echo "# AMS modules for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(","); printf("%s",$1); i++;}' `"
-        echo "# ------------------------------------------------------------------------------"
-        CORE_BUILDS=""
-        for SITE in `site listavail 2>&1`; do
-            for MOD in "$@"; do
-                CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
-            done
-        done
-        CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
-        echo $CORE_BUILDS | tr " " "\n"
-
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS || exit 1
-        exec_debdeps || exit 1
+    "install" )
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install "$@" || exit 1
+        exec_dpkgdeps || exit 1
         ;;
 # -----------------------------
-    "addbuilds" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds "$@" || exit 1
-        exec_debdeps || exit 1
-        ;;
-# -----------------------------
-    "addcorebuilds" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib  || exit 1
-        echo ""
-        echo "# AMS core builds for sites: `site listavail 2>&1 | awk '{ if(i>0) printf(","); printf("%s",$1); i++;}' `"
-        echo "# ------------------------------------------------------------------------------"
-        CORE_BUILDS=""
-        for SITE in `site listavail 2>&1`; do
-            for MOD in `site listamods $SITE 2>&1`; do
-                CORE_BUILDS="$CORE_BUILDS `ams-map-manip bestbuild $SITE $MOD`"
-            done
-        done
-        CORE_BUILDS="`echo $CORE_BUILDS | tr " " "\n" | sort -u`"
-        echo $CORE_BUILDS | tr " " "\n"
-
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-addbuilds $CORE_BUILDS || exit 1
-        exec_debdeps || exit 1
+    "coremods" )
+        LIST="`site listamods personal 2>&1`"
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
+        exec_dpkgdeps || exit 1
         ;;
 # -----------------------------
     "update" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal bldlib || exit 1
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/scripts/ams-sync personal softrepo || exit 1
-        exec_debdeps || exit 1
+        cd $AMS_PERSONAL_BUNDLE || exit 1
+        sudo -u infinity -i ams-bundle sync softrepo || exit 1
+        exec_dpkgdeps || exit 1
         ;;
 # -----------------------------
-    "rmbuilds" )
-        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-rmbuilds "$@"
+    "remove" )
+        sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-remove "$@"
         ;;
 # -----------------------------
-    "amscore" )
+    "amsdpkg" )
         echo ""
-        echo "# Installing/upgrading AMS core packages:"
+        echo "# Installing/upgrading AMS packages:"
         echo "# ------------------------------------------------------------------------------"
         PKGS="ncbr-ams-core-9.0-personal"
         if [ $? -ne 0 ]; then
@@ -225,8 +211,8 @@ case "$ACTION" in
         echo ""
         ;;
 # -----------------------------
-    "debdeps" )
-        exec_debdeps || exit 1
+    "dpkgdeps" )
+        exec_dpkgdeps || exit 1
         ;;
 # -----------------------------
     "gensshkeys" )

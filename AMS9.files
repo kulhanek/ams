@@ -18,10 +18,10 @@ share/lynx/CMakeLists.txt
 share/lynx/lynx.lss
 share/personal/CMakeLists.txt
 share/personal/ams-personal
-share/personal/ams-personal-addbuilds
 share/personal/ams-personal-envinit
 share/personal/ams-personal-gensshkeys
-share/personal/ams-personal-rmbuilds
+share/personal/ams-personal-install
+share/personal/ams-personal-remove
 share/personal/ams-personal-showsshkey
 share/personal/ams-personal-useradd
 share/personal/ams-personal.tmp
