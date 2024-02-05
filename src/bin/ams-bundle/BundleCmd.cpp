@@ -177,6 +177,9 @@ void CBundleCmd::Finalize(void)
     if( (! ForcePrintErrors) && (Options.GetArgAction() != "dirname")
             && (Options.GetArgAction() != "rootpath")
             && (Options.GetArgAction() != "sources")
+            && (Options.GetArgAction() != "allmodules")
+            && (Options.GetArgAction() != "allbuilds")
+            && (Options.GetArgAction() != "dpkg-deps")
             && (Options.GetOptSilent() == false) ) vout << endl;
 
     vout << high;
