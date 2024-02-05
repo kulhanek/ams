@@ -216,7 +216,7 @@ case "$ACTION" in
         echo ""
         echo "# Installing/upgrading AMS core packages:"
         echo "# ------------------------------------------------------------------------------"
-        PKGS="ncbr-ams-core-9.0-personal ncbr-env-infinity-8.0-personal"
+        PKGS="ncbr-ams-core-9.0-personal"
         if [ $? -ne 0 ]; then
             exit 1
         fi
