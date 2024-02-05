@@ -1,15 +1,26 @@
-#
+# ==============================================================================
 # MANAGED BY ncbr-ams-core-9.0-personal PACKAGE - DO NOT EDIT
-#
+# ==============================================================================
 
 # extra bash setup called by user's .bashrc script
 
 # this is for non-interactive and interactive modes
 # AMS 9.0
 
+#-------------------------------------------------------------------------------
+# NCBR Personal Bundles
+#-------------------------------------------------------------------------------
+
+export AMS_BUNDLE_NAME=softrepo
+export AMS_BUNDLE_PATH=/software/ncbr
+
+#-------------------------------------------------------------------------------
+# Infinity Activation
+#-------------------------------------------------------------------------------
+
 export AMS_HOST_GROUP=personal
 
-if [ "`id -u`" -ge 1000 ]; then
+if [ "`id -u`" -ge 1000 ] || [ "$USER" == "infinity" ]; then
     if /usr/bin/test -f /software/ncbr/softmods/9.0/etc/boot/bashrc.ncbr
         then source /software/ncbr/softmods/9.0/etc/boot/bashrc.ncbr
     fi

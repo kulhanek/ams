@@ -37,3 +37,5 @@ share/personal
 share/dpkg
 share/dpkg/personal
 share/dpkg/personal/DEBIAN
+share/dpkg/personal/etc
+share/skel

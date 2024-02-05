@@ -14,6 +14,7 @@ share/dpkg/personal/DEBIAN/CMakeLists.txt
 share/dpkg/personal/DEBIAN/PUBLIC
 share/dpkg/personal/DEBIAN/control.tmp
 share/dpkg/personal/DEBIAN/postinst
+share/dpkg/personal/etc/bashrc
 share/lynx/CMakeLists.txt
 share/lynx/lynx.lss
 share/personal/CMakeLists.txt
@@ -29,6 +30,7 @@ share/scripts/CMakeLists.txt
 share/scripts/ams-sync-bundle
 share/scripts/ams-sync-core
 share/scripts/ams-sync-dpkg
+share/skel/CMakeLists.txt
 share/sync/CMakeLists.txt
 share/sync/ams-sync-lib
 share/sync/rsync/CMakeLists.txt

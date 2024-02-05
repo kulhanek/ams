@@ -26,7 +26,7 @@ function show_log_error()
 function print_usage()
 {
     echo ""
-    echo "    Usage: ams-personal addbuilds <[prefix1/]bldfilter1> [...]"
+    echo "    Usage: ams-personal install <modfilter1> [...]"
     echo ""
 }
 
