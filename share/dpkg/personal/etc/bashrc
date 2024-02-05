@@ -9,7 +9,7 @@
 
 export AMS_HOST_GROUP=personal
 
-if [ "`id -u`" -gt 1000 ]; then
+if [ "`id -u`" -ge 1000 ]; then
     if /usr/bin/test -f /software/ncbr/softmods/9.0/etc/boot/bashrc.ncbr
         then source /software/ncbr/softmods/9.0/etc/boot/bashrc.ncbr
     fi
