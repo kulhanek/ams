@@ -129,6 +129,10 @@ bool CBundleCmd::Run(void)
         return( BundleDirName() );
     }
     // ----------------------------------------------
+    else if( Options.GetArgAction() == "rootpath" ) {
+        return( BundleRootPath() );
+    }
+    // ----------------------------------------------
     else if( Options.GetArgAction() == "sources" ) {
         return( BundleSources() );
     }
@@ -653,17 +657,17 @@ bool CBundleCmd::BundleDirList(void)
 
     if( Options.GetProgArg(1) == "missing" ){
         // print missing records
-        dir_tree->PrintMissing(vout,bundle.GetBundleRootPath());
+        dir_tree->PrintMissing(vout,root);
     } else if( Options.GetProgArg(1) == "orphans" ){
         // print missing records
         dir_tree->CountOrphanedChilds();
-        dir_tree->PrintOrphans(vout,bundle.GetBundleRootPath());
+        dir_tree->PrintOrphans(vout,root);
     } else if( Options.GetProgArg(1) == "existing" ){
         // print missing records
-        dir_tree->PrintExisting(vout,bundle.GetBundleRootPath());
+        dir_tree->PrintExisting(vout,root);
     } else if( Options.GetProgArg(1) == "all" ){
         // print all records
-        dir_tree->PrintTree(vout,bundle.GetBundleRootPath(),0);
+        dir_tree->PrintTree(vout,root,0);
     } else {
         CSmallString error;
         error << "unsupported action for dirlist: '" << Options.GetProgArg(1) << "'";
