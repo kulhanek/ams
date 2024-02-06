@@ -58,7 +58,7 @@ function exec_dpkgdeps() {
             echo ""
             echo ">> $PACK"
             # ignore errors; some packages might be unavailable, thus install per partes
-            sudo apt-get --asume-yes install $PACK
+            sudo apt-get --assume-yes install $PACK
         done
     else
         echo "  No dependencies ..."
