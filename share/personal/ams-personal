@@ -54,7 +54,12 @@ function exec_dpkgdeps() {
         exit 1
     fi
     if [ -n "$PKGS" ]; then
-        sudo apt-get install $PKGS  || exit 1
+        for PACK in $PKGS; do
+            echo ""
+            echo ">> $PACK"
+            # ignore errors; some packages might be unavailable, thus install per partes
+            sudo apt-get --asume-yes install $PACK
+        done
     else
         echo "  No dependencies ..."
     fi
