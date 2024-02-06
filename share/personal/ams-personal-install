@@ -1,11 +1,11 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
-# Advanced Module System synchronization utility for personal site
+# Advanced Module System - personal site management utility
+# (c) 2024 Petr Kulhanek
+# (c) 2017 Petr Kulhanek
 # ------------------------------------------------------------------------------
 
 umask 022
-
-AMS_SRC_HOST=personal@softrepo.ncbr.muni.cz
 
 # ------------------------------------------------
 
@@ -33,7 +33,7 @@ function show_log_error()
 function print_usage()
 {
     echo ""
-    echo "    Usage: ams-personal install <modfilter1> [...]"
+    echo "    Usage: ams-personal install module1 [module2 ...]"
     echo ""
 }
 
@@ -42,7 +42,7 @@ function print_usage()
 function get_origins() {
     echo "" | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 1) Getting module origins ..." | tee -a $LOG_FILE
+    echo "# 1) Getting module remote origins ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "" | tee -a $LOG_FILE
 
@@ -60,7 +60,7 @@ function download_origins() {
 
     echo "" | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 2) Downloading origins ..." | tee -a $LOG_FILE
+    echo "# 2) Downloading remote origins ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "" | tee -a $LOG_FILE
     echo "# Number of files : `cat $MODULE_ORIGINS | wc -l`" | tee -a $LOG_FILE
@@ -127,8 +127,6 @@ function sync_softrepo(){
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "# 5) Syncing builds ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-
-
 
     ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
 
@@ -197,9 +195,37 @@ if [ $# -le 0 ]; then
 fi
 
 # check if $AMS_ROOT_V9 is set -----------------------
+
 if [ -z "$AMS_ROOT_V9" ]; then
     echo "" 1>&2
-    echo ">>> ERROR: $AMS_ROOT_V9 variable is not set!" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+if [ -z "$SOFTREPO" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: SOFTREPO variable is not set!" 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+# load personal configuration ------------------------
+
+if ! [ -f $AMS_ROOT_V9/etc/sync/personal.conf ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: $AMS_ROOT_V9/etc/sync/personal.conf file is not found!" 1>&2
+    echo "           Contat support." 1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+source $AMS_ROOT_V9/etc/sync/personal.conf
+
+if [ -z "$AMS_SRC_HOST" ]; then
+    echo "" 1>&2
+    echo ">>> ERROR: Variable AMS_SRC_HOST is not set!" 1>&2
+    echo "           Contat support." 1>&2
     echo "" 1>&2
     exit 1
 fi
@@ -219,13 +245,16 @@ LOG_FILE="$AMS_ROOT_V9/var/personal/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
 
 echo ">>> Log file: $LOG_FILE"
 
-MODULE_ORIGINS="$AMS_ROOT_V9/var/personal/module_origins.$$"
+MODULE_ORIGINS="$AMS_ROOT_V9/var/personal/module.origins"
 
 get_origins "$@"
 download_origins
 local_index
 remote_index
 sync_softrepo
+
+rm -f "$MODULE_ORIGINS"
+
 print_bottom
 
 echo ""

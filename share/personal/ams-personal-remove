@@ -23,7 +23,43 @@ function show_log_error()
     echo "" 1>&2
 }
 
+# --------------------------------------
 
+function get_origins() {
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 1) Getting module local origins ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+
+    rm -rf "$MODULE_ORIGINS"
+
+    for MODULE in "$@"; do
+        echo ">> $MODULE" | tee -a $LOG_FILE
+        amsmodule allorigins "$MODULE" 2>&1 | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
+    done
+}
+
+# --------------------------------------
+
+function remove_origins() {
+
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# 2) Removing module local origins ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+    echo "# Number of files : `cat $MODULE_ORIGINS | wc -l`" | tee -a $LOG_FILE
+    echo ""
+
+    while read FILE; do
+        echo "> Removing: $FILE"
+        rm -f "$FILE"
+    done < <( cat "$MODULE_ORIGINS" )
+
+    cd $SOFTREPO
+    ams-bundle rebuild
+}
 
 # --------------------------------------
 
@@ -46,11 +82,11 @@ if [ "`id -u -n`" != "infinity" ]; then
     exit 1
 fi
 
-# check if AMS_ROOT is set -----------------------
+# check if $AMS_ROOT_V9 is set -----------------------
 
-if [ -z "$AMS_ROOT" ]; then
+if [ -z "$AMS_ROOT_V9" ]; then
     echo "" 1>&2
-    echo ">>> ERROR: AMS_ROOT variable is not set!" 1>&2
+    echo ">>> ERROR: AMS_ROOT_V9 variable is not set!" 1>&2
     echo "" 1>&2
     exit 1
 fi
@@ -65,20 +101,34 @@ fi
 # ------------------------------------------------
 
 umask 027
-mkdir -p "$AMS_ROOT/var/personal/logs"
+mkdir -p "$AMS_ROOT_V9/var/personal/logs"
 if [ $? -ne 0 ]; then
     echo "" 1>&2
-    echo ">>> ERROR: Unable to create $AMS_ROOT/var/personal/logs directory!" 1>&2
+    echo ">>> ERROR: Unable to create $AMS_ROOT_V9/var/personal/logs directory!" 1>&2
     echo "" 1>&2
     exit 1
 fi
 
 # log file
-LOG_FILE="$AMS_ROOT/var/personal/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
+LOG_FILE="$AMS_ROOT_V9/var/personal/logs/`date +%Y-%m-%d#%H:%M:%S`.log"
 
 echo ">>> Log file: $LOG_FILE"
 
-# FIXME
+MODULE_ORIGINS="$AMS_ROOT_V9/var/personal/module.origins"
+
+# remove origins
+get_origins "$@"
+remove_origins
+
+# update
+LIST="`amsmodule allbuilds 2>&1`"
+$AMS_ROOT_V9/share/personal/ams-personal-install $LIST || exit 1
+
+# clean orphaned directories
+
+rm -f "$MODULE_ORIGINS"
+
+print_bottom
 
 echo ""
 echo "END: Log file is in: $LOG_FILE"
