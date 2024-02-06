@@ -556,6 +556,9 @@ int CSiteCmd::ListAMods(void)
         return(SITE_ERROR_CONFIG_PROBLEM);
     }
 
+    ModuleController.LoadBundles(EMBC_SMALL);
+    ModuleController.MergeBundles();
+
     std::list<CSmallString> modules;
     HostGroup.GetHostsConfigAutoLoadedModules(modules,false,true);
     HostGroup.GetHostGroupAutoLoadedModules(modules,false,true);
