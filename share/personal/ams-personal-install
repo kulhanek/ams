@@ -75,7 +75,7 @@ function download_origins() {
     fi
 
     for ITEM in `cat $MODULE_ORIGINS`; do
-        echo "get $ITEM $SOFTREPO/_ams_bundle/blds/"
+        echo "get \"$ITEM\" $SOFTREPO/_ams_bundle/blds/"
     done | sftp $AMS_SRC_HOST
 }
 
