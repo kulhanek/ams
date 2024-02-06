@@ -180,6 +180,7 @@ void CBundleCmd::Finalize(void)
             && (Options.GetArgAction() != "allmodules")
             && (Options.GetArgAction() != "allbuilds")
             && (Options.GetArgAction() != "dpkg-deps")
+            && (Options.GetArgAction() != "dirlist")
             && (Options.GetOptSilent() == false) ) vout << endl;
 
     vout << high;
@@ -613,7 +614,14 @@ bool CBundleCmd::BundleDirList(void)
 
     CDirNodeItemPtr  dir_tree(new CDirNodeItem);
 
-    dir_tree->ScanSoftRepoTree(bundle.GetBundleRootPath(),bundle.GetName(),4);
+    CFileName root;
+    if( Options.GetOptPersonal() ){
+        root = bundle.GetFullBundleName();
+    } else {
+        root = bundle.GetBundleRootPath();
+    }
+
+    dir_tree->ScanSoftRepoTree(root,bundle.GetName(),4);
 
      CXMLElement* p_cele = bundle.GetCacheElement();
      if( p_cele == NULL ){
@@ -642,13 +650,6 @@ bool CBundleCmd::BundleDirList(void)
          }
          p_mele = p_mele->GetNextSiblingElement("module");
      }
-
-    CFileName root;
-    if( Options.GetOptPersonal() ){
-        root = bundle.GetFullBundleName();
-    } else {
-        root = bundle.GetBundleRootPath();
-    }
 
     if( Options.GetProgArg(1) == "missing" ){
         // print missing records

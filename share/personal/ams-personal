@@ -37,7 +37,7 @@ function print_usage()
     echo "    envinit            initialize bash startup files for the current user"
     echo "    amsdpkg            install and/or upgrade AMS core packages"
     echo "    coremods           install and/or upgrade AMS core software modules"
-    echo "    dpkgdeps           install dependent system packages (it is part of install/update/upgrade)"
+    echo "    dpkgdeps           install dependent system packages (called by install/update/upgrade)"
     echo ""
 }
 
@@ -159,7 +159,7 @@ case "$ACTION" in
 # -----------------------------
     "install" )
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install "$@" || exit 1
-        exec_dpkgdeps || exit 1
+        exec_dpkgdeps
         ;;
 # -----------------------------
     "coremods" )
@@ -168,7 +168,7 @@ case "$ACTION" in
         echo "# ------------------------------------------------------------------------------"
         LIST="`site listamods personal 2>&1`"
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
-        exec_dpkgdeps || exit 1
+        exec_dpkgdeps
         ;;
 # -----------------------------
     "update" )
@@ -177,7 +177,7 @@ case "$ACTION" in
         echo "# ------------------------------------------------------------------------------"
         LIST="`amsmodule allbuilds 2>&1`"
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
-        exec_dpkgdeps || exit 1
+        exec_dpkgdeps
         ;;
 # -----------------------------
     "upgrade" )
@@ -186,7 +186,7 @@ case "$ACTION" in
         echo "# ------------------------------------------------------------------------------"
         LIST="`amsmodule allmodules 2>&1`"
         sudo -u infinity -i $AMS_PERSONAL_ROOT/share/personal/ams-personal-install $LIST || exit 1
-        exec_dpkgdeps || exit 1
+        exec_dpkgdeps
         ;;
 # -----------------------------
     "remove" )
