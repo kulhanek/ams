@@ -50,7 +50,8 @@ function get_origins() {
 
     for MODULE in "$@"; do
         echo ">> $MODULE" | tee -a $LOG_FILE
-        ssh -x $AMS_SRC_HOST amsmodule allorigins "$MODULE" 2>&1 | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
+        ssh -o "ControlMaster auto" -o "ControlPath ~/.ssh/controlmasters_%r@%h:%p" -x $AMS_SRC_HOST \
+            amsmodule allorigins "$MODULE" 2>&1 | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
     done
 }
 
@@ -73,9 +74,9 @@ function download_origins() {
         exit 1
     fi
 
-    while read FILE; do
-        scp $AMS_SRC_HOST:$FILE "$SOFTREPO/_ams_bundle/blds/"
-    done < <( cat "$MODULE_ORIGINS" )
+    for ITEM in `cat $MODULE_ORIGINS`; do
+        echo "get $ITEM $SOFTREPO/_ams_bundle/blds/"
+    done | sftp $AMS_SRC_HOST
 }
 
 # --------------------------------------
