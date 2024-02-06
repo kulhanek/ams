@@ -61,6 +61,45 @@ function remove_origins() {
     ams-bundle rebuild
 }
 
+# ------------------------------------------------
+
+function remmove_packages()
+{
+    echo "" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "# X) Removing orphaned build directories ..." | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "" | tee -a $LOG_FILE
+
+    echo "# The following directories will be removed ..." | tee -a $LOG_FILE
+    cd $SOFTREPO
+    ams-bundle --personal dirlist orphans |tee -a $LOG_FILE
+
+    echo ""
+    echo -n "Do you want to continue (YES/NO)? "
+    read ANSW
+    if [ "$ANSW" != "YES" ]; then
+        echo ""
+        echo ">>> No build directories were removed from the disk."
+        echo "    They can be removed later ..."
+        echo ""
+        exit 1
+    fi
+
+    echo ""
+
+    # remove directories
+    for DIR in `ams-bundle --personal dirlist orphans`; do
+        printf ">>> %-80s " "$DIR" | tee -a $LOG_FILE
+        rm -rf "$DIR/" >> $LOG_FILE
+        if [ $? -eq 0 ]; then
+            echo "    [REMOVED]"
+        else
+            echo " [FAILED]"
+        fi
+    done
+}
+
 # --------------------------------------
 
 function print_bottom()
@@ -125,6 +164,7 @@ LIST="`amsmodule allbuilds 2>&1`"
 $AMS_ROOT_V9/share/personal/ams-personal-install $LIST || exit 1
 
 # clean orphaned directories
+remmove_packages
 
 rm -f "$MODULE_ORIGINS"
 
