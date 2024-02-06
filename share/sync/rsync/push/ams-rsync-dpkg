@@ -92,13 +92,14 @@ fi
 
 # ------------------------------------------------------------------------------
 
+rm -rf "$AMS_ROOT_V9/var/sync/dpkg"
+
 # gen new control file
 VERSION="`cat \"$AMS_ROOT_V9/var/sync/dpkgver\" 2>/dev/null`"
 ((VERSION++))
 echo "$VERSION" > "$AMS_ROOT_V9/var/sync/dpkgver"
 
-rm -rf "$AMS_ROOT_V9/var/sync/dpkg/personal"
-cp -r  "$AMS_ROOT_V9/share/dpkg/personal" "$AMS_ROOT_V9/var/sync/dpkg/personal"
+cp -r  "$AMS_ROOT_V9/share/dpkg/personal/*" "$AMS_ROOT_V9/var/sync/dpkg/personal/"
 
 sed -e "s/VERSION/$VERSION/g" < "$AMS_ROOT_V9/var/sync/dpkg/personal/DEBIAN/control.tmp" > "$AMS_ROOT_V9/var/sync/dpkg/personal/DEBIAN/control"
 
