@@ -621,11 +621,11 @@ bool CBundleCmd::BundleDirList(void)
     CFileName root;
     if( Options.GetOptPersonal() ){
         root = bundle.GetFullBundleName();
+        dir_tree->ScanSoftRepoTree(root,4);
     } else {
         root = bundle.GetBundleRootPath();
+        dir_tree->ScanSoftRepoTree(root,bundle.GetName(),4);
     }
-
-    dir_tree->ScanSoftRepoTree(root,bundle.GetName(),4);
 
      CXMLElement* p_cele = bundle.GetCacheElement();
      if( p_cele == NULL ){
