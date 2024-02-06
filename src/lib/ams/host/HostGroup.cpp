@@ -542,7 +542,7 @@ CXMLElement* CHostGroup::FindGroup(const CSmallString& hostname)
 bool CHostGroup::ExecuteStatAction(const CSmallString& action, CStatDatagramSender* p_sender)
 {
     if( p_sender == NULL ){
-        ES_ERROR("no stat sender");
+        ES_WARNING("no stat sender");
         return(false);
     }
 
@@ -578,13 +578,13 @@ bool CHostGroup::ExecuteStatAction(const CSmallString& action, CStatDatagramSend
 
         CSmallString server;
         if( p_cele->GetAttribute("server",server) == false ){
-            ES_ERROR("no server");
+            ES_WARNING("no server");
             return(false);
         }
 
         int port = 0;
         if( p_cele->GetAttribute("port",port) == false ){
-            ES_ERROR("no port");
+            ES_WARNING("no port");
             return(false);
         }
 

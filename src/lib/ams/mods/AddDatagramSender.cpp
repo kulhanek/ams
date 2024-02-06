@@ -55,7 +55,7 @@ bool CAddDatagramSender::SendDataToServer(const CSmallString& servername,int por
         CSmallString error;
         error << "unable to decode server name '" << servername
               << "' (" <<  gai_strerror(nerr) << ")";
-        ES_ERROR(error);
+        ES_WARNING(error);
         return(false);
     }
 
@@ -67,7 +67,7 @@ bool CAddDatagramSender::SendDataToServer(const CSmallString& servername,int por
                             MAX_NET_NAME-1,NULL,0,0)) != 0 ) {
         CSmallString error;
         error << "unable to get server name (" <<  gai_strerror(nerr) << ")";
-        ES_ERROR(error);
+        ES_WARNING(error);
         return(false);
     }
     CSmallString name = s_name;
@@ -77,7 +77,7 @@ bool CAddDatagramSender::SendDataToServer(const CSmallString& servername,int por
                             MAX_NET_NAME-1,NULL,0,NI_NUMERICHOST)) != 0 ) {
         CSmallString error;
         error << "unable to get server IP (" <<  gai_strerror(nerr) << ")";
-        ES_ERROR(error);
+        ES_WARNING(error);
         return(false);
     }
     CSmallString ip = s_name;
@@ -97,7 +97,7 @@ bool CAddDatagramSender::SendDataToServer(const CSmallString& servername,int por
     if( sfd == -1 ) {
         CSmallString error;
         error << "unable to create socket (" << strerror(errno) << ")";
-        ES_ERROR(error);
+        ES_WARNING(error);
         return(false);
     }
 
@@ -107,14 +107,14 @@ bool CAddDatagramSender::SendDataToServer(const CSmallString& servername,int por
         CSmallString error;
         error << "unable to connect to server " << name
               << "[" << ip << "] (" << strerror(errno) << ")";
-        ES_ERROR(error);
+        ES_WARNING(error);
         return(false);
     }
 
     // send module datagram to server
 
     if (send(sfd, &Datagram, sizeof(Datagram), MSG_NOSIGNAL) != sizeof(Datagram)) {
-        ES_ERROR("unable to send datagram");
+        ES_WARNING("unable to send datagram");
         exit(EXIT_FAILURE);
     }
 
