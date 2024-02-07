@@ -4,19 +4,12 @@
 
 # extra bash setup called by user's .bashrc script
 
-# this is for non-interactive and interactive modes
-# AMS 9.0
-
-#-------------------------------------------------------------------------------
-# NCBR Personal Bundles
-#-------------------------------------------------------------------------------
-
-export AMS_BUNDLE_NAME=softrepo
-export AMS_BUNDLE_PATH=/software/ncbr
-
 #-------------------------------------------------------------------------------
 # Infinity Activation
 #-------------------------------------------------------------------------------
+
+# this is for non-interactive and interactive modes
+# AMS 9.0
 
 export AMS_HOST_GROUP=personal
 

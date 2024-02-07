@@ -58,7 +58,7 @@ CAddStatDatagram::CAddStatDatagram(void)
 void CAddStatDatagram::Finish(void)
 {
     // magic header
-    strncpy(Magic,"AMS9",4);
+    memcpy(Magic,"AMS9",4);
 
     // controll sum
     int control_sum = 0;
