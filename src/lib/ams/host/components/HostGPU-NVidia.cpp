@@ -70,6 +70,9 @@ void CHostSubSystemGPUNVidia::Init(void)
         INVALID_ARGUMENT("config element 'cuda' is NULL");
     }
 
+    // unset this variable to get information about all GPUs
+    unsetenv("CUDA_VISIBLE_DEVICES");
+
     CudaDev = "-none-";
     CudaLib = "-none-";
 
