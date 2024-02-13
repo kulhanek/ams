@@ -135,16 +135,17 @@ bool CSetEnv::Run(void)
     }
     nfstr.close();
 
+    CSmallString gpu_visible;
     nfstr.open(gpufile);
     if( nfstr ) {
-        for(int i=0; i < Host.GetNCPUs(); i++){
-            nfstr << Host.GetHostName() << endl;
-        }
         for(int i=0; i < Host.GetNGPUs(); i++){
-            nfstr << Host.GetHostName() << "-gpu" << i << endl;
+            if( i > 0 ) gpu_visible << ",";
+            nfstr << Host.GetHostName() << " gpu=" << i << endl;
+            gpu_visible << i;
         }
     }
     nfstr.close();
+    if( gpu_visible == NULL ) gpu_visible = "-1";
 
     // generate environment
     ShellProcessor.SetVariable("AMS_HOST_CACHE",cachename);
@@ -153,6 +154,7 @@ bool CSetEnv::Run(void)
     ShellProcessor.SetVariable("INF_NNODES",1);
     ShellProcessor.SetVariable("INF_NODEFILE",nodefile);
     ShellProcessor.SetVariable("INF_GPUFILE",gpufile);
+    ShellProcessor.SetVariable("CUDA_VISIBLE_DEVICES",gpu_visible);
 
     return(true);
 }
