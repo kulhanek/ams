@@ -38,8 +38,7 @@ public:
     CSO_PROG_DESC_BEGIN
     "Setup local environment for given number of CPUs and GPUs. "
     "Requested number of resources cannot exceed available resources on the local host. "
-    "It updates AMS_NCPUS, AMS_NGPUS, AMS_NNODES, AMS_NODEFILE and AMS_GPUFILE "
-    "as well as INF_NCPUS, INF_NGPUS, INF_NNODES, INF_NODEFILE and INF_GPUFILE variables "
+    "It updates INF_NCPUS, INF_NGPUS, INF_NNODES, INF_NODEFILE and INF_GPUFILE variables "
     "and generates files for AMS_NODEFILE, AMS_GPUFILE and INF_NODEFILE, INF_GPUFILE."
     CSO_PROG_DESC_END
 

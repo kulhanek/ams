@@ -83,21 +83,21 @@ void CHost::InitHostSubSystems(const CFileName& host_subsystems)
 
     NumOfCPUs = 1;
     CSmallString sNCPU;
-    sNCPU = CShell::GetSystemVariable("AMS_NCPUS");
+    sNCPU = CShell::GetSystemVariable("INF_NCPUS");
     if( sNCPU != NULL ) {
         NumOfCPUs = sNCPU.ToInt();
     }
 
     NumOfGPUs = 0;
     CSmallString sNGPU;
-    sNGPU = CShell::GetSystemVariable("AMS_NGPUS");
+    sNGPU = CShell::GetSystemVariable("INF_NGPUS");
     if( sNGPU != NULL ) {
         NumOfGPUs = sNGPU.ToInt();
     }
 
     NumOfNodes = 1;
     CSmallString sNNodes;
-    sNNodes = CShell::GetSystemVariable("AMS_NNODES");
+    sNNodes = CShell::GetSystemVariable("INF_NNODES");
     if( sNNodes != NULL ) {
         NumOfNodes = sNNodes.ToInt();
     }
