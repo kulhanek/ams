@@ -84,7 +84,7 @@ bool CSetEnv::Run(void)
     // is it Infinity job?
     if( CShell::GetSystemVariable("_INFINITY_JOB_") == "_INFINITY_JOB_" ){
         vout << endl;
-        vout << " <b><red><b>ERROR: amssetenv cannot be used in the Infinity job!</b></red></b>" << endl;
+        vout << "<red>>>> ERROR:</red> amssetenv cannot be used in the Infinity job!" << endl;
         vout << endl;
         return(false);
     }
