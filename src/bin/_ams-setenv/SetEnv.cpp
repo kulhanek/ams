@@ -81,6 +81,15 @@ int CSetEnv::Init(int argc, char* argv[])
 
 bool CSetEnv::Run(void)
 {
+    // is it Infinity job?
+    if( CShell::GetSystemVariable("_INFINITY_JOB_") == "_INFINITY_JOB_" ){
+        vout << endl;
+        vout << " <b><red><b>ERROR: amssetenv cannot be used in the Infinity job!</b></red></b>" << endl;
+        vout << endl;
+        return(false);
+    }
+
+
 // get process parent ID as unique identifier
     pid_t  pid = getppid();
 
