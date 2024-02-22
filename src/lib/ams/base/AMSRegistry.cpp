@@ -239,6 +239,9 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(CVerboseStr& vout)
                         err << "             Remove the error as soon as possible (kinit, afslog, or contact user support)!" << endl;
                         err << "             Note: A new session has to be opened after you fix the problem." << endl;
                         err << "</b></red>" << endl;
+                    } else {
+                        // supress all errors, RT#1255616
+                        ErrorSystem.RemoveAllErrors();
                     }
                     user_config_dir = NULL;
                 }
