@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <ModCache.hpp>
 #include <UserUtils.hpp>
+#include <SiteController.hpp>
+#include <TerminalStr.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -222,18 +224,22 @@ const CFileName CAMSRegistry::GetUserGlobalConfig(CVerboseStr& vout)
             if( CFileSystem::IsDirectory(user_config_dir) == false ) {
                 // create directory
                 if( CFileSystem::CreateDir(user_config_dir) == false ) {
-                    vout << "<red><b>" << endl;
-                    vout << ">>> ERROR:   The non-standard AMS config directory is not accessible!" << endl;
-                    vout << "             Directory: '" << user_config_dir << "'" << endl;
-                    vout << "             Error:     " << ErrorSystem.GetLastError() << endl;
-                    ErrorSystem.RemoveAllErrors();
-                    vout << endl;
-                    vout << ">>> WARNING: Switching into the emergency mode employing the standard configuration directory!" << endl;
-                    vout << "             This is not optimal and can lead to many problems." << endl;
-                    vout << "             Remove the error as soon as possible (kinit, afslog, or contact user support)!" << endl;
-                    vout << "             Note: A new session has to be opened after you fix the problem." << endl;
-                    vout << "</b></red>" << endl;
-
+                    if( SiteController.HasTTY() == true ){
+                        // print this only if in TTY (interactive session), RT#1255616
+                        CTerminalStr        err;
+                        err.Attach(stderr);
+                        err << "<red><b>" << endl;
+                        err << ">>> ERROR:   The non-standard AMS config directory is not accessible!" << endl;
+                        err << "             Directory: '" << user_config_dir << "'" << endl;
+                        err << "             Error:     " << ErrorSystem.GetLastError() << endl;
+                        ErrorSystem.RemoveAllErrors();
+                        err << endl;
+                        err << ">>> WARNING: Switching into the emergency mode employing the standard configuration directory!" << endl;
+                        err << "             This is not optimal and can lead to many problems." << endl;
+                        err << "             Remove the error as soon as possible (kinit, afslog, or contact user support)!" << endl;
+                        err << "             Note: A new session has to be opened after you fix the problem." << endl;
+                        err << "</b></red>" << endl;
+                    }
                     user_config_dir = NULL;
                 }
             }
