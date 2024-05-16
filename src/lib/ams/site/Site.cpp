@@ -277,7 +277,7 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
     if( HostGroup.IsGetHostsConfigEnvironmentEnabled() ){
         CShellProcessor::PrintBuild(vout,HostGroup.GetHostsConfigEnvironment());
     } else {
-        vout << "* Hosts Config Environment disabled." << endl;
+        vout << ">>> Hosts Config Environment disabled." << endl;
     }
 
     vout << endl;
