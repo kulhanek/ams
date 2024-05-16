@@ -118,6 +118,9 @@ public:
     /// get list of autoloaded modules
     CXMLElement* GetHostsConfigAutoLoadedModules(void);
 
+    /// should I ignore hosts config environment?
+    bool IsGetHostsConfigEnvironmentEnabled(void);
+
     /// get host config environment block
     CXMLElement* GetHostsConfigEnvironment(void);
 

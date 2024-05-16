@@ -274,7 +274,11 @@ void CSite::PrintFullSiteInfo(CVerboseStr& vout)
 
     vout << endl;
     vout << "# ~~~ <b>Environment Variables (hosts-config)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-    CShellProcessor::PrintBuild(vout,HostGroup.GetHostsConfigEnvironment());
+    if( HostGroup.IsGetHostsConfigEnvironmentEnabled() ){
+        CShellProcessor::PrintBuild(vout,HostGroup.GetHostsConfigEnvironment());
+    } else {
+        vout << "* Hosts Config Environment disabled." << endl;
+    }
 
     vout << endl;
     vout << "# ~~~ <b>Environment Variables (host-group)</b> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
@@ -375,8 +379,10 @@ bool CSite::ActivateSite(void)
     // boot host environments -----------------------
     CXMLElement* p_env_ele;
 
-    p_env_ele = HostGroup.GetHostsConfigEnvironment();
-    PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);
+    if( HostGroup.IsGetHostsConfigEnvironmentEnabled() ){
+        p_env_ele = HostGroup.GetHostsConfigEnvironment();
+        PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);
+    }
 
     p_env_ele = HostGroup.GetHostGroupEnvironment();
     PrepareSiteEnvironment(p_env_ele,EMA_ADD_MODULE);

@@ -384,6 +384,19 @@ CXMLElement* CHostGroup::GetHostGroupAutoLoadedModules(void)
 
 //------------------------------------------------------------------------------
 
+bool CHostGroup::IsGetHostsConfigEnvironmentEnabled(void)
+{
+    bool enabled = true;
+    CXMLElement* p_ele = GetHostGroupEnvironment();
+    if( p_ele == NULL ) return(enabled);
+    bool skip = false;
+    p_ele->GetAttribute("skip_config_env",skip);
+    enabled = ! skip;
+    return(enabled);
+}
+
+//------------------------------------------------------------------------------
+
 CXMLElement* CHostGroup::GetHostGroupEnvironment(void)
 {
     return(HostGroup.GetChildElementByPath("group/environment"));
