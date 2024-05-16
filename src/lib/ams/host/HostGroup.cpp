@@ -390,7 +390,7 @@ bool CHostGroup::IsGetHostsConfigEnvironmentEnabled(void)
     CXMLElement* p_ele = GetHostGroupEnvironment();
     if( p_ele == NULL ) return(enabled);
     bool skip = false;
-    p_ele->GetAttribute("skip_config_env",skip);
+    p_ele->GetAttribute("skip_host_global_env",skip);
     enabled = ! skip;
     return(enabled);
 }
