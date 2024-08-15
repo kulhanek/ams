@@ -144,9 +144,9 @@ void CCudaRT::GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,s
 
     int ngpus = 0;
     if( cudaGetDeviceCount(&ngpus) != CUDA_SUCCESS ){
-        CSmallString error;
-        error << "unable to call cudaGetDeviceCount (" << cudaGetErrorString(cudaGetLastError()) << ")";
-        ES_ERROR(error);
+        CSmallString warning;
+        warning << "unable to call cudaGetDeviceCount (" << cudaGetErrorString(cudaGetLastError()) << ")";
+        ES_WARNING(warning);
         return;
     }
 
