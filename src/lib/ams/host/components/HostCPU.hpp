@@ -71,6 +71,7 @@ private:
     int                         NumOfHostThreads;
     CSmallString                CPURawModelName;    // only cpu
     CSmallString                CPUModelName;       // cpu and mem
+    CSmallString                CPUVendor;
     std::list<CSmallString>     CPUFlags;
     std::list<CSmallString>     ArchTokens;
 

@@ -122,6 +122,25 @@ void CHostSubSystemCPU::Init(void)
         CPUModelName << str.str();
     }
 
+    // filter CPU vendor
+    bool venable = false;
+    p_ele->GetAttribute("vendors",venable);
+    if( venable ) {
+        CXMLElement* p_vele = p_ele->GetFirstChildElement("vendor");
+        while( p_vele != NULL ){
+            CSmallString pattern;
+            CSmallString token;
+            p_vele->GetAttribute("pattern",pattern);
+            p_vele->GetAttribute("token",token);
+
+            if( fnmatch(pattern,CPUVendor,0) == 0 ){
+                ArchTokens.push_back(token);
+            }
+
+            p_vele = p_vele->GetNextSiblingElement("vendor");
+        }
+    }
+
     // filter CPU tokens
     bool tenable = false;
     p_ele->GetAttribute("tokens",tenable);
@@ -169,11 +188,12 @@ void CHostSubSystemCPU::GetCPUModelAndFlags(void)
     string line;
     bool mod_found = false;
     bool flags_found = false;
+    bool vendor_found = false;
 
     while( getline(cpuinfo,line) ){
 
         // all found
-        if( flags_found && mod_found ) break;
+        if( flags_found && mod_found && vendor_found ) break;
 
         vector<string>  key_and_value;
         split(key_and_value,line,is_any_of(":"));
@@ -196,6 +216,12 @@ void CHostSubSystemCPU::GetCPUModelAndFlags(void)
         if( (key == "flags") && (flags_found == false) ){
             split(CPUFlags,values,is_any_of(" "),token_compress_on);
             flags_found = true;
+            continue;
+        }
+
+        if( (key == "vendor_id") && (vendor_found == false) ){
+            CPUVendor =  values;
+            vendor_found = true;
             continue;
         }
     }
@@ -231,6 +257,7 @@ EHostCacheMode CHostSubSystemCPU::LoadFromCache(CXMLElement* p_ele)
     result &= p_cele->GetAttribute("nthrs",NumOfHostThreads);
     result &= p_cele->GetAttribute("cmodr",CPURawModelName);
     result &= p_cele->GetAttribute("cmod",CPUModelName);
+    result &= p_cele->GetAttribute("cven",CPUVendor);
 
     slist.clear();
     result &= p_cele->GetAttribute("fl",slist);
@@ -257,6 +284,7 @@ void CHostSubSystemCPU::SaveToCache(CXMLElement* p_ele)
     p_cele->SetAttribute("nthrs",NumOfHostThreads);
     p_cele->SetAttribute("cmodr",CPURawModelName);
     p_cele->SetAttribute("cmod",CPUModelName);
+    p_cele->SetAttribute("cven",CPUVendor);
     p_cele->SetAttribute("fl",GetTokenList(CPUFlags,","));
     p_cele->SetAttribute("tks",GetTokenList(ArchTokens,"#"));
 }
@@ -281,6 +309,7 @@ void CHostSubSystemCPU::PrintSubSystemInfo(CVerboseStr& vout)
     }
     vout <<                  "    Threads/Core   : " << tpc << endl;
     vout <<                  "    SMP CPU model  : " << CPUModelName << endl;
+    vout <<                  "    CPU vendor     : " << CPUVendor << endl;
     CUtils::PrintTokens(vout,"    CPU flags      : ",GetTokenList(CPUFlags), 80, ' ');
     CUtils::PrintTokens(vout,"    CPU tokens     : ",GetTokenList(ArchTokens), 80, ' ');
 }
