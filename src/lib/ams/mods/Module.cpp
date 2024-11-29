@@ -548,6 +548,14 @@ bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container,boo
                         break;
                     }
                 }
+                if( lmodver == NULL ){
+                    // is module active, if yes use the activate version
+                    if( ModuleController.IsModuleActive(lmodname) ){
+                        if( ModuleController.GetActiveModuleVersion(lmodname,lmodver) == true ){
+                            lname = lmodname + ":" + lmodver;
+                        }
+                    }
+                }
                 if( GlobalPrintLevel != EAPL_NONE ) {
                     if( Level == 1 ) {
                         vout << "  INFO:    additional module " << lname << " is required, loading ... " << endl;
@@ -614,6 +622,16 @@ bool CModule::SolveModulePostDeps(CVerboseStr& vout,CXMLElement* p_dep_container
                         break;
                     }
                 }
+
+                if( lmodver == NULL ){
+                    // is module active, if yes use the activate version
+                    if( ModuleController.IsModuleActive(lmodname) ){
+                        if( ModuleController.GetActiveModuleVersion(lmodname,lmodver) == true ){
+                            lname = lmodname + ":" + lmodver;
+                        }
+                    }
+                }
+
                 if( GlobalPrintLevel != EAPL_NONE ) {
                     if( Level == 1 ) {
                         vout << "  INFO:    additional module " << lname << " is required, loading ... " << endl;
