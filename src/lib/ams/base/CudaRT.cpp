@@ -42,7 +42,7 @@ CCudaRT::CCudaRT(void)
     cudaGetDeviceProperties = NULL;
     cudaGetErrorString = NULL;
     cudaGetLastError = NULL;
-    cudaRuntimeGetVersion = NULL;
+    cudaDriverGetVersion = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -118,9 +118,9 @@ bool CCudaRT::InitSymbols(void)
         status = false;
     }
 
-    cudaRuntimeGetVersion = (CUDARuntimeGetVersion)CudaRTLib.GetProcAddress("cudaRuntimeGetVersion");
-    if( cudaRuntimeGetVersion == NULL ){
-        ES_ERROR("unable to bind to cudaRuntimeGetVersion");
+    cudaDriverGetVersion = (CUDADriverGetVersion)CudaRTLib.GetProcAddress("cudaDriverGetVersion");
+    if( cudaDriverGetVersion == NULL ){
+        ES_ERROR("unable to bind to cudaDriverGetVersion");
         status = false;
     }
 
@@ -212,11 +212,11 @@ void CCudaRT::GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,
         DecodeCapability(deviceProp,capas);
     }
 
-    int runtimeVersion = 0;
-    if( cudaRuntimeGetVersion != NULL ){
-        cudaRuntimeGetVersion(&runtimeVersion);
+    int driverVersion = 0;
+    if( cudaDriverGetVersion != NULL ){
+        cudaDriverGetVersion(&driverVersion);
     }
-    cudaver = runtimeVersion;
+    cudaver = driverVersion;
 }
 
 //------------------------------------------------------------------------------

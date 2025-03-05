@@ -112,7 +112,7 @@ typedef CUDAresult  (*CUDASetDevice)(int  device);
 typedef CUDAresult  (*CUDAGetDeviceProperties)(cudaDeviceProp* prop, int  device);
 typedef const char* (*CUDAGetErrorString)(CUDAresult error);
 typedef CUDAresult 	(*CUDAGetLastError)(void);
-typedef CUDAresult  (*CUDARuntimeGetVersion)(int*  runtimeVersion);
+typedef CUDAresult  (*CUDADriverGetVersion)(int*  driverVersion);
 
 // -----------------------------------------------------------------------------
 
@@ -148,7 +148,7 @@ private:
     CUDAGetDeviceProperties cudaGetDeviceProperties;
     CUDAGetErrorString      cudaGetErrorString;
     CUDAGetLastError        cudaGetLastError;
-    CUDARuntimeGetVersion   cudaRuntimeGetVersion;
+    CUDADriverGetVersion    cudaDriverGetVersion;
 
     void DecodeCapability(cudaDeviceProp& prop,std::list<CSmallString>& capabilities);
 };

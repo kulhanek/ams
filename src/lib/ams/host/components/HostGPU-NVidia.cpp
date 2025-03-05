@@ -234,7 +234,7 @@ void CHostSubSystemGPUNVidia::PrintSubSystemInfo(CVerboseStr& vout)
 
     vout <<                  "    Configuration  : " << GetConfigFile() <<  endl;
     vout <<                  "    CUDA device    : " << CudaDev << endl;
-    vout <<                  "    CUDA version   : " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%1000)/10) <<  endl;
+    vout <<                  "    CUDA version   : " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%100)/10) <<  endl;
     if( CudaDev != "-none-" ){
     vout <<                  "    CUDA library   : " << CudaLib << endl;
     vout <<                  "    Host GPUs      : " << NumOfHostGPUs << endl;
@@ -290,7 +290,7 @@ void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
     }
     vout << "gpu_vendor " << gpu_vendor << endl;
 
-    vout << "cuda_version " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%1000)/10) << endl;
+    vout << "cuda_version " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%100)/10) << endl;
 }
 
 //------------------------------------------------------------------------------
