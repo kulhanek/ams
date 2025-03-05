@@ -224,7 +224,7 @@ void CCudaRT::GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,
 void CCudaRT::DecodeCapability(cudaDeviceProp& prop,std::list<CSmallString>& capabilities)
 {
     std::stringstream capa;
-    capa << "cuda" << prop.major << prop.minor;
+    capa << "sm_" << prop.major << prop.minor;
 
     // GPU capability
     capabilities.push_back(capa.str());

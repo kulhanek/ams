@@ -59,6 +59,9 @@ public:
     /// print host resources for site
     virtual void PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode);
 
+    /// print node resources (for PBSPro)
+    virtual void PrintNodeResources(CVerboseStr& vout);
+
 // section of private data -----------------------------------------------------
 private:
     bool                    CachedData;
