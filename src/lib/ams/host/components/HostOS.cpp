@@ -223,7 +223,7 @@ void CHostSubSystemOS::PrintHostInfoFor(CVerboseStr& vout,EPrintHostInfo mode)
 void CHostSubSystemOS::PrintNodeResources(CVerboseStr& vout)
 {
     CSmallString os = "generic";
-    CSmallString os_family = "generic";
+    CSmallString osfamily = "generic";
 
     // check for OS
     CXMLElement* p_ele = GetConfig("os");
@@ -239,7 +239,7 @@ void CHostSubSystemOS::PrintNodeResources(CVerboseStr& vout)
             // does host match distribution
             if( success && (fnmatch(name,Distribution,0) == 0) ){
                 p_fele->GetAttribute("os",os);
-                p_fele->GetAttribute("os_family",os_family);
+                p_fele->GetAttribute("osfamily",osfamily);
                 break;
             }
 
@@ -249,7 +249,7 @@ void CHostSubSystemOS::PrintNodeResources(CVerboseStr& vout)
     }
 
     vout << "os " << os << endl;
-    vout << "os_family " << os_family << endl;
+    vout << "osfamily " << osfamily << endl;
 }
 
 //==============================================================================
