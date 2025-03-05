@@ -226,7 +226,7 @@ void CHostSubSystemOS::PrintNodeResources(CVerboseStr& vout)
     CSmallString os_family = "generic";
 
     // check for OS
-    CXMLElement* p_ele = GetConfig("cpu");
+    CXMLElement* p_ele = GetConfig("os");
     if( p_ele != NULL ) {
 
         CXMLElement* p_fele = p_ele->GetFirstChildElement("distro");
@@ -247,11 +247,10 @@ void CHostSubSystemOS::PrintNodeResources(CVerboseStr& vout)
             }
 
             // does host match Hostname
-            if( fnmatch(name,Distribution,0) != 0 ){
-                continue;
-            } else {
+            if( fnmatch(name,Distribution,0) == 0 ){
                 p_fele->GetAttribute("os",os);
                 p_fele->GetAttribute("os_family",os_family);
+                break;
             }
         }
     }

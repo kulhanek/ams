@@ -259,10 +259,6 @@ void CHostSubSystemGPUNVidia::PrintSubSystemInfo(CVerboseStr& vout)
 void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
 {
     vout << "ngpus " << NumOfHostGPUs << endl;
-    vout << "gpu_model " << GPURawModelName << endl;
-
-    // FIXME - maybe here we want also compatible cuda capabilities?
-    vout << "gpu_cap " << GetTokenList(CapaTokens,",") << endl;
 
     // GPU vendor
     CSmallString gpu_vendor;
@@ -288,9 +284,19 @@ void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
             p_vele = p_vele->GetNextSiblingElement("vendor");
         }
     }
-    vout << "gpu_vendor " << gpu_vendor << endl;
 
-    vout << "cuda_version " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%100)/10) << endl;
+    if( NumOfHostGPUs > 0 ){
+        vout << "gpu_model " << GPURawModelName << endl;
+        // FIXME - maybe here we want also compatible cuda capabilities?
+        vout << "gpu_cap " << GetTokenList(CapaTokens,",") << endl;
+        vout << "gpu_vendor " << gpu_vendor << endl;
+        vout << "cuda_version " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%100)/10) << endl;
+    } else {
+        vout << "gpu_model " << endl;
+        vout << "gpu_cap " << endl;
+        vout << "gpu_vendor " << endl;
+        vout << "cuda_version " << endl;
+    }
 }
 
 //------------------------------------------------------------------------------
