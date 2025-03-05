@@ -37,6 +37,12 @@ using namespace std;
 
 CCudaRT::CCudaRT(void)
 {
+    cudaGetDeviceCount = NULL;
+    cudaSetDevice = NULL;
+    cudaGetDeviceProperties = NULL;
+    cudaGetErrorString = NULL;
+    cudaGetLastError = NULL;
+    cudaRuntimeGetVersion = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -112,6 +118,12 @@ bool CCudaRT::InitSymbols(void)
         status = false;
     }
 
+    cudaRuntimeGetVersion = (CUDARuntimeGetVersion)CudaRTLib.GetProcAddress("cudaRuntimeGetVersion");
+    if( cudaRuntimeGetVersion == NULL ){
+        ES_ERROR("unable to bind to cudaRuntimeGetVersion");
+        status = false;
+    }
+
     return(status);
 }
 
@@ -131,7 +143,8 @@ int CCudaRT::GetNumOfGPUs(void)
 
 //------------------------------------------------------------------------------
 
-void CCudaRT::GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,std::list<CSmallString>& capas)
+void CCudaRT::GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,
+                         std::list<CSmallString>& capas,int& cudaver)
 {
     list.clear();
     capas.clear();
@@ -198,6 +211,12 @@ void CCudaRT::GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,s
         // decode capability
         DecodeCapability(deviceProp,capas);
     }
+
+    int runtimeVersion = 0;
+    if( cudaRuntimeGetVersion != NULL ){
+        cudaRuntimeGetVersion(&runtimeVersion);
+    }
+    cudaver = runtimeVersion;
 }
 
 //------------------------------------------------------------------------------

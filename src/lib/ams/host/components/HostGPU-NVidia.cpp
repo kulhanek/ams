@@ -32,9 +32,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <iomanip>
+#include <fnmatch.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/format.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -51,6 +53,7 @@ CHostSubSystemGPUNVidia::CHostSubSystemGPUNVidia(const CFileName& config_file)
 {
     NumOfHostGPUs = 0;
     UseCapaTokens = false;
+    CUDAVer = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +132,7 @@ void CHostSubSystemGPUNVidia::Init(void)
         // get number of GPU devices
         NumOfHostGPUs = cuda.GetNumOfGPUs();
         // get list of GPU devices
-        cuda.GetGPUInfo(GPURawModelName,GPUModels,CapaTokens);
+        cuda.GetGPUInfo(GPURawModelName,GPUModels,CapaTokens,CUDAVer);
 
         if( NumOfHostGPUs > 0 ){
             // add gpu tokens if available and ngpus > 0
@@ -192,6 +195,9 @@ EHostCacheMode CHostSubSystemGPUNVidia::LoadFromCache(CXMLElement* p_ele)
     result &= p_cele->GetAttribute("atk",slist);
     if( result && (! slist.empty()) ) split(ArchTokens,slist,is_any_of("#"));
 
+    // optional
+    p_cele->GetAttribute("cver",CUDAVer);
+
     CachedData = result;
     if( CachedData ){
         return(EHC_LOADED);
@@ -213,6 +219,7 @@ void CHostSubSystemGPUNVidia::SaveToCache(CXMLElement* p_ele)
     p_cele->SetAttribute("mods",GetTokenList(GPUModels,"|"));
     p_cele->SetAttribute("ctk",GetTokenList(CapaTokens,"#"));
     p_cele->SetAttribute("atk",GetTokenList(ArchTokens,"#"));
+    p_cele->SetAttribute("cver",CUDAVer);
 }
 
 //------------------------------------------------------------------------------
@@ -227,6 +234,7 @@ void CHostSubSystemGPUNVidia::PrintSubSystemInfo(CVerboseStr& vout)
 
     vout <<                  "    Configuration  : " << GetConfigFile() <<  endl;
     vout <<                  "    CUDA device    : " << CudaDev << endl;
+    vout <<                  "    CUDA version   : " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%1000)/10) <<  endl;
     if( CudaDev != "-none-" ){
     vout <<                  "    CUDA library   : " << CudaLib << endl;
     vout <<                  "    Host GPUs      : " << NumOfHostGPUs << endl;
@@ -255,6 +263,34 @@ void CHostSubSystemGPUNVidia::PrintNodeResources(CVerboseStr& vout)
 
     // FIXME - maybe here we want also compatible cuda capabilities?
     vout << "gpu_cap " << GetTokenList(CapaTokens,",") << endl;
+
+    // GPU vendor
+    CSmallString gpu_vendor;
+
+    // check for GPU vendor aliases
+    CXMLElement* p_ele = GetConfig("gpu-nvidia");
+    if( p_ele != NULL ) {
+
+        CXMLElement* p_vele = p_ele->GetFirstChildElement("vendor");
+        while( p_vele != NULL ){
+            CSmallString pattern;
+            CSmallString alias;
+            if( p_vele->GetAttribute("pattern",pattern) && p_vele->GetAttribute("alias",alias) ){
+                int flags = 0;
+                bool case_sensitive = true;
+                p_vele->GetAttribute("cs",case_sensitive);
+                if( case_sensitive == false ) flags = FNM_CASEFOLD;
+                if( fnmatch(pattern,GPURawModelName,flags) == 0 ){
+                    gpu_vendor = alias;
+                    break;
+                }
+            }
+            p_vele = p_vele->GetNextSiblingElement("vendor");
+        }
+    }
+    vout << "gpu_vendor " << gpu_vendor << endl;
+
+    vout << "cuda_version " << format("%d.%d")%(CUDAVer/1000)%((CUDAVer%1000)/10) << endl;
 }
 
 //------------------------------------------------------------------------------

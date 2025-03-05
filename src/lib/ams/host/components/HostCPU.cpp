@@ -130,13 +130,11 @@ void CHostSubSystemCPU::Init(void)
         while( p_vele != NULL ){
             CSmallString pattern;
             CSmallString token;
-            p_vele->GetAttribute("pattern",pattern);
-            p_vele->GetAttribute("token",token);
-
-            if( fnmatch(pattern,CPUVendor,0) == 0 ){
-                ArchTokens.push_back(token);
+            if( p_vele->GetAttribute("pattern",pattern) && p_vele->GetAttribute("token",token) ){
+                if( fnmatch(pattern,CPUVendor,0) == 0 ){
+                    ArchTokens.push_back(token);
+                }
             }
-
             p_vele = p_vele->GetNextSiblingElement("vendor");
         }
     }
@@ -323,6 +321,32 @@ void CHostSubSystemCPU::PrintNodeResources(CVerboseStr& vout)
     vout << "cpu_flag " << GetTokenList(CPUFlags,",") << endl;
     bool HTDetected = NumOfHostThreads > NumOfHostCPUs;
     vout << "hyperthreading " << HTDetected << endl;
+
+    // CPU vendor
+    CSmallString cpu_vendor = CPUVendor;
+
+    // check for CPU vendor aliases
+    CXMLElement* p_ele = GetConfig("cpu");
+    if( p_ele != NULL ) {
+
+        CXMLElement* p_vele = p_ele->GetFirstChildElement("vendor");
+        while( p_vele != NULL ){
+            CSmallString pattern;
+            CSmallString alias;
+            if( p_vele->GetAttribute("pattern",pattern) && p_vele->GetAttribute("alias",alias) ){
+                int flags = 0;
+                bool case_sensitive = true;
+                p_vele->GetAttribute("cs",case_sensitive);
+                if( case_sensitive == false ) flags = FNM_CASEFOLD;
+                if( fnmatch(pattern,CPUVendor,flags) == 0 ){
+                    cpu_vendor = alias;
+                    break;
+                }
+            }
+            p_vele = p_vele->GetNextSiblingElement("vendor");
+        }
+    }
+    vout << "cpu_vendor " << cpu_vendor << endl;
 }
 
 //------------------------------------------------------------------------------

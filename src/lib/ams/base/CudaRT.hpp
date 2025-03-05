@@ -112,6 +112,7 @@ typedef CUDAresult  (*CUDASetDevice)(int  device);
 typedef CUDAresult  (*CUDAGetDeviceProperties)(cudaDeviceProp* prop, int  device);
 typedef const char* (*CUDAGetErrorString)(CUDAresult error);
 typedef CUDAresult 	(*CUDAGetLastError)(void);
+typedef CUDAresult  (*CUDARuntimeGetVersion)(int*  runtimeVersion);
 
 // -----------------------------------------------------------------------------
 
@@ -130,7 +131,8 @@ public:
     int GetNumOfGPUs(void);
 
     /// get GPU info
-    void GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,std::list<CSmallString>& capas);
+    void GetGPUInfo(CSmallString& raw_model,std::list<CSmallString>& list,
+                    std::list<CSmallString>& capas,int& cudaver);
 
 // section of private data -----------------------------------------------------
 private:
@@ -146,6 +148,7 @@ private:
     CUDAGetDeviceProperties cudaGetDeviceProperties;
     CUDAGetErrorString      cudaGetErrorString;
     CUDAGetLastError        cudaGetLastError;
+    CUDARuntimeGetVersion   cudaRuntimeGetVersion;
 
     void DecodeCapability(cudaDeviceProp& prop,std::list<CSmallString>& capabilities);
 };

@@ -549,7 +549,7 @@ bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container,boo
                     }
                 }
                 if( lmodver == NULL ){
-                    // is module active, if yes use the activate version
+                    // is module active? if yes use the activated version
                     if( ModuleController.IsModuleActive(lmodname) ){
                         if( ModuleController.GetActiveModuleVersion(lmodname,lmodver) == true ){
                             lname = lmodname + ":" + lmodver;
@@ -624,7 +624,7 @@ bool CModule::SolveModulePostDeps(CVerboseStr& vout,CXMLElement* p_dep_container
                 }
 
                 if( lmodver == NULL ){
-                    // is module active, if yes use the activate version
+                    // is module active? if yes use the activated version
                     if( ModuleController.IsModuleActive(lmodname) ){
                         if( ModuleController.GetActiveModuleVersion(lmodname,lmodver) == true ){
                             lname = lmodname + ":" + lmodver;

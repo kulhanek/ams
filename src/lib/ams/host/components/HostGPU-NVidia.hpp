@@ -72,6 +72,7 @@ private:
     bool                    UseCapaTokens;
     std::list<CSmallString> CapaTokens;         // cuda capability tokens
     std::list<CSmallString> ArchTokens;         // cuda arch tokens
+    int                     CUDAVer;
 
     /// helper
     bool IsGPUModelSMP(void);
