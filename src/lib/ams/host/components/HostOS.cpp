@@ -231,27 +231,20 @@ void CHostSubSystemOS::PrintNodeResources(CVerboseStr& vout)
 
         CXMLElement* p_fele = p_ele->GetFirstChildElement("distro");
         while( p_fele != NULL ){
-            CSmallString name,token;
+            CSmallString name;
 
-            // load config
             bool success = true;
-
             success &= p_fele->GetAttribute("name",name);
-            success &= p_fele->GetAttribute("token",token);
 
-            // move to next record
-            p_fele = p_fele->GetNextSiblingElement("distro");
-
-            if( success == false ){
-                continue;
-            }
-
-            // does host match Hostname
-            if( fnmatch(name,Distribution,0) == 0 ){
+            // does host match distribution
+            if( success && (fnmatch(name,Distribution,0) == 0) ){
                 p_fele->GetAttribute("os",os);
                 p_fele->GetAttribute("os_family",os_family);
                 break;
             }
+
+            // move to next record
+            p_fele = p_fele->GetNextSiblingElement("distro");
         }
     }
 
