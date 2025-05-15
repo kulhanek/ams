@@ -169,6 +169,18 @@ public:
     /// print system package dependencies
     void PrintDPKGDeps(CVerboseStr& vout);
 
+    /// print forward dependencies
+    void PrintDependOnModules(CVerboseStr& vout, const CSmallString& module, bool reqursive);
+
+    void PrintDependOnModules(CVerboseStr& vout, const CSmallString& module,
+                              std::list<CSmallString>& list,
+                              bool reqursive, int level);
+
+    void PrintDependOnModules(CVerboseStr& vout, const CSmallString& module,
+                              const CSmallString& cname, CXMLElement* p_dep_container,
+                              std::list<CSmallString>& list,
+                              bool recursive, int level);
+
     /// get number of modules
     int GetNumberOfModules(void);
 

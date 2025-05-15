@@ -55,6 +55,12 @@ public:
     static bool ParseModuleName(const CSmallString& module,
             CSmallString& name);
 
+    /// compare two module names
+    static bool AreNamesSame(const CSmallString& module1,const CSmallString& module2);
+
+    /// compare two module names, name2 can be partial
+    static bool AreNamesSamePartial(const CSmallString& module1,const CSmallString& module2);
+
 // module name operation -------------------------------------------------------
     /// extract name part from full or incomplete module name
     static const CSmallString GetModuleName(const CSmallString& module);

@@ -30,6 +30,7 @@
 #include <XMLComment.hpp>
 #include <ModUtils.hpp>
 #include <User.hpp>
+#include <iomanip>
 
 //------------------------------------------------------------------------------
 
@@ -676,6 +677,9 @@ void CModCache::GetDPKGDeps(std::list<CSmallString>& list)
         }
         p_mele = p_mele->GetNextSiblingElement("module");
     }
+
+    list.sort();
+    list.unique();
 }
 
 //------------------------------------------------------------------------------
@@ -1063,6 +1067,102 @@ void CModCache::PrintDPKGDeps(CVerboseStr& vout)
     GetDPKGDeps(deps);
     for(CSmallString dep : deps){
         vout << dep << endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& module, bool recursive)
+{
+    std::list<CSmallString> list;
+    PrintDependOnModules(vout,module,list,recursive,0);
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& module,
+                              std::list<CSmallString>& list,
+                              bool recursive, int level)
+{
+    if( level == 0 ){
+        vout << "# Module: " << module << endl;
+    }
+
+    CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
+    if( p_cele == NULL ){
+        ES_WARNING("unable to open cache element, no bundles loaded?");
+        return;
+    }
+
+    CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
+    while( p_mele != NULL ) {
+        CSmallString cname;
+        p_mele->GetAttribute("name",cname);
+        PrintDependOnModules(vout,module,cname,p_mele,list,recursive,level);
+
+        CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
+        while( p_bele != NULL ) {
+            CSmallString bname,ver,arch,mode;
+            p_bele->GetAttribute("ver",ver);
+            p_bele->GetAttribute("arch",arch);
+            p_bele->GetAttribute("mode",mode);
+            bname << cname << ":" << ver << ":" << arch << ":" << mode;
+            PrintDependOnModules(vout,module,bname,p_bele,list,recursive,level);
+            p_bele = p_bele->GetNextSiblingElement("build");
+        }
+
+        p_mele = p_mele->GetNextSiblingElement("module");
+    }
+}
+
+////------------------------------------------------------------------------------
+
+void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& module,
+                              const CSmallString& cname, CXMLElement* p_dep_container,
+                              std::list<CSmallString>& list,
+                              bool recursive, int level)
+{
+    if( p_dep_container == NULL ) return;
+
+    CXMLElement* p_dep = p_dep_container->GetChildElementByPath("deps");
+    if( p_dep == NULL ) return;
+
+    p_dep = p_dep->GetFirstChildElement();
+    while( p_dep != NULL ) {
+        if( p_dep->GetName() == "dep" ){
+            CSmallString name;
+            p_dep->GetAttribute("name",name);
+            CSmallString type;
+            p_dep->GetAttribute("type",type);
+            if( (type == "pre") && (CModUtils::AreNamesSamePartial(name,module) == true) ){
+                // HIT
+                vout << "# ";
+                for(int n=0; n < level; n++) vout << "    ";
+                vout << "|<<- " << setw(8) << left << "dep/pre" << " " << cname << " | ";
+                vout << name << "/" << module << endl;
+                list.push_back(cname);
+                if( recursive ){
+                    PrintDependOnModules(vout,cname,list,recursive,level+1);
+                }
+            }
+        }
+        if( p_dep->GetName() == "sync" ){
+            CSmallString name;
+            p_dep->GetAttribute("name",name);
+            if( CModUtils::AreNamesSamePartial(name,module) == true ){
+                // HIT
+                vout << "# ";
+                for(int n=0; n < level; n++) vout << "    ";
+                vout << "|<<- " << setw(8) << left << "dep/pre" << " " << cname << " | ";
+                vout << name << "/" << module << endl;
+                list.push_back(cname);
+                if( recursive ){
+                    PrintDependOnModules(vout,cname,list,recursive,level+1);
+                }
+            }
+        }
+
+        p_dep = p_dep->GetNextSiblingElement();
     }
 }
 

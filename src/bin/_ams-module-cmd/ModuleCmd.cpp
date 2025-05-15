@@ -333,6 +333,20 @@ bool CModuleCmd::Run(void)
         return(true);
     }
 // ----------------------------------------------
+    else if( Options.GetArgAction() == "dependon" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
+        ModCache.PrintDependOnModules(vout,Options.GetProgArg(1),false);
+        return(true);
+    }
+// ----------------------------------------------
+    else if( Options.GetArgAction() == "dependon-all" ) {
+        ModuleController.LoadBundles(EMBC_SMALL);
+        ModuleController.MergeBundles();
+        ModCache.PrintDependOnModules(vout,Options.GetProgArg(1),true);
+        return(true);
+    }
+// ----------------------------------------------
     else if( Options.GetArgAction() == "avail_no_system" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();

@@ -530,55 +530,52 @@ bool CModule::SolveModuleDeps(CVerboseStr& vout,CXMLElement* p_dep_container,boo
     int count = 0;
 
     while( p_sele != NULL ) {
-        if( p_sele->GetName() == "dep" ) {
-            CSmallString lname,ltype;
-            p_sele->GetAttribute("name",lname);
-            p_sele->GetAttribute("type",ltype);
-            if ( ltype == "pre" ) {
+        CSmallString lname,ltype;
+        p_sele->GetAttribute("name",lname);
+        p_sele->GetAttribute("type",ltype);
+        if ( ltype == "pre" ) {
 
-                CSmallString lmodname;
-                CSmallString lmodver;
+            CSmallString lmodname;
+            CSmallString lmodver;
 
-                CModUtils::ParseModuleName(lname,lmodname,lmodver);
-                // is module already added?
-                bool found = false;
-                for(CSmallString dep_name : DepList){
-                    if( dep_name == lmodname ){
-                        found = true;
-                        break;
+            CModUtils::ParseModuleName(lname,lmodname,lmodver);
+            // is module already added?
+            bool found = false;
+            for(CSmallString dep_name : DepList){
+                if( dep_name == lmodname ){
+                    found = true;
+                    break;
+                }
+            }
+            if( lmodver == NULL ){
+                // is module active? if yes use the activated version
+                if( ModuleController.IsModuleActive(lmodname) ){
+                    if( ModuleController.GetActiveModuleVersion(lmodname,lmodver) == true ){
+                        lname = lmodname + ":" + lmodver;
                     }
                 }
-                if( lmodver == NULL ){
-                    // is module active? if yes use the activated version
-                    if( ModuleController.IsModuleActive(lmodname) ){
-                        if( ModuleController.GetActiveModuleVersion(lmodname,lmodver) == true ){
-                            lname = lmodname + ":" + lmodver;
-                        }
-                    }
+            }
+            if( GlobalPrintLevel != EAPL_NONE ) {
+                if( Level == 1 ) {
+                    vout << "  INFO:    additional module " << lname << " is required, loading ... " << endl;
+                    count++;
                 }
-                if( GlobalPrintLevel != EAPL_NONE ) {
-                    if( Level == 1 ) {
-                        vout << "  INFO:    additional module " << lname << " is required, loading ... " << endl;
-                        count++;
-                    }
-                    if( found == true ) {
-                        vout << "           " << lname << " is skipped due to cyclic dependency" << endl;
-                    }
-                }
-
-                if( found == false) {
-                    result &= AddModule(vout,lname,true,do_not_export) == EAE_STATUS_OK;
-                }
-
-            } else if( ltype == "rm" ) {
-                if( ModuleController.IsModuleActive(lname) == true ) {
-                    if( GlobalPrintLevel != EAPL_NONE ) {
-                        vout << "  WARNING: active module in conflict, unloading ... " << endl;
-                    }
-                    result &= RemoveModule(vout,lname) == EAE_STATUS_OK;
+                if( found == true ) {
+                    vout << "           " << lname << " is skipped due to cyclic dependency" << endl;
                 }
             }
 
+            if( found == false) {
+                result &= AddModule(vout,lname,true,do_not_export) == EAE_STATUS_OK;
+            }
+
+        } else if( ltype == "rm" ) {
+            if( ModuleController.IsModuleActive(lname) == true ) {
+                if( GlobalPrintLevel != EAPL_NONE ) {
+                    vout << "  WARNING: active module in conflict, unloading ... " << endl;
+                }
+                result &= RemoveModule(vout,lname) == EAE_STATUS_OK;
+            }
         }
         p_sele = p_sele->GetNextSiblingElement("dep");
     }

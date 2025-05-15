@@ -78,6 +78,8 @@ public:
     "   <green>allmodules</green>      list all available modules\n"
     "   <green>allbuilds</green>       list all available builds\n"
     "   <green>dpkg-deps</green>       list system package dependencies\n"
+    "   <green>dependon</green>        list modules/builds, which depends on the provided module\n"
+    "   <green>dependon-all</green>    list modules/builds, which depends on the provided module (recursive)\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

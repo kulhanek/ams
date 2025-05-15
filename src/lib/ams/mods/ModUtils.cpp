@@ -114,6 +114,46 @@ bool CModUtils::ParseModuleName(const CSmallString& module,
     return(true);
 }
 
+//------------------------------------------------------------------------------
+
+bool CModUtils::AreNamesSame(const CSmallString& module1,const CSmallString& module2)
+{
+    CSmallString name1,name2;
+    CSmallString ver1,ver2;
+    CSmallString arch1,arch2;
+    CSmallString mode1,mode2;
+
+    ParseModuleName(module1,name1,ver1,arch1,mode1);
+    ParseModuleName(module2,name2,ver2,arch2,mode2);
+
+    if( name1 != name2 ) return(false);
+    if( ver1 != ver2 ) return(false);
+    if( arch1 != arch2 ) return(false);
+    if( mode1 != mode2 ) return(false);
+
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CModUtils::AreNamesSamePartial(const CSmallString& module1,const CSmallString& module2)
+{
+    CSmallString name1,name2;
+    CSmallString ver1,ver2;
+    CSmallString arch1,arch2;
+    CSmallString mode1,mode2;
+
+    ParseModuleName(module1,name1,ver1,arch1,mode1);
+    ParseModuleName(module2,name2,ver2,arch2,mode2);
+
+    if( name1 != name2 ) return(false);
+    if( ver1 != ver2 ) return(false);
+    if( arch1 != arch2 ) return(false);
+    if( mode1 != mode2 ) return(false);
+
+    return(true);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
