@@ -147,9 +147,9 @@ bool CModUtils::AreNamesSamePartial(const CSmallString& module1,const CSmallStri
     ParseModuleName(module2,name2,ver2,arch2,mode2);
 
     if( name1 != name2 ) return(false);
-    if( ver1 != ver2 ) return(false);
-    if( arch1 != arch2 ) return(false);
-    if( mode1 != mode2 ) return(false);
+    if( (ver1 != ver2) && (ver2 != NULL) ) return(false);
+    if( (arch1 != arch2) && (arch2 != NULL) ) return(false);
+    if( (mode1 != mode2) && (mode2 != NULL) ) return(false);
 
     return(true);
 }
