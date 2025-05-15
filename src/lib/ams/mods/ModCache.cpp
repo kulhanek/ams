@@ -1153,7 +1153,7 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
                 // HIT
                 vout << "# ";
                 for(int n=0; n < level; n++) vout << "    ";
-                vout << "|<<- " << setw(8) << left << "dep/pre" << " " << cname << " | ";
+                vout << "|<<- " << setw(8) << left << "sync" << " " << cname << " | ";
                 vout << name << "/" << module << endl;
                 list.push_back(cname);
                 if( recursive ){
