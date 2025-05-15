@@ -1124,36 +1124,19 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
 {
     if( p_dep_container == NULL ) return;
 
-    CXMLElement* p_dep = p_dep_container->GetChildElementByPath("deps");
-    if( p_dep == NULL ) return;
-
-    p_dep = p_dep->GetFirstChildElement();
+    CXMLElement* p_dep = p_dep_container->GetChildElementByPath("deps/dep");
     while( p_dep != NULL ) {
-        if( p_dep->GetName() == "dep" ){
-            CSmallString name;
-            p_dep->GetAttribute("name",name);
-            CSmallString type;
-            p_dep->GetAttribute("type",type);
-            if( (type == "pre") && (CModUtils::AreNamesSamePartial(name,module) == true) ){
-                // HIT
-                vout << "# ";
-                for(int n=0; n < level; n++) vout << "    ";
-                vout << "|<<- " << setw(8) << left << "dep/pre" << " " << cname << " | ";
-                vout << name << "/" << module << endl;
-                list.push_back(cname);
-                if( recursive ){
-                    PrintDependOnModules(vout,cname,list,recursive,level+1);
-                }
-            }
-        }
-        if( p_dep->GetName() == "sync" ){
-            CSmallString name;
-            p_dep->GetAttribute("name",name);
+        CSmallString name;
+        p_dep->GetAttribute("name",name);
+        CSmallString type;
+        p_dep->GetAttribute("type",type);
+
+        if( (type == "pre") || (type == "sync") ){
             if( CModUtils::AreNamesSamePartial(name,module) == true ){
                 // HIT
                 vout << "# ";
                 for(int n=0; n < level; n++) vout << "    ";
-                vout << "|<<- " << setw(8) << left << "sync" << " " << cname << " | ";
+                vout << "|<<- " << setw(8) << left << type << " " << cname << " | ";
                 vout << name << "/" << module << endl;
                 list.push_back(cname);
                 if( recursive ){
@@ -1162,7 +1145,7 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
             }
         }
 
-        p_dep = p_dep->GetNextSiblingElement();
+        p_dep = p_dep->GetNextSiblingElement("dep");
     }
 }
 
