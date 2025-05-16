@@ -133,7 +133,7 @@ int CModuleCmdOptions::CheckArguments(void)
 
         if( (GetProgArg(0) == "getactver") || (GetProgArg(0) == "getactmod") ||
             (GetProgArg(0) == "dependon") || (GetProgArg(0) == "dependon-all") ||
-            (GetProgArg(0) == "deps") || (GetProgArg(0) == "deps-all") ) {
+            (GetProgArg(0) == "deps") ) {
             if( GetNumberOfProgArgs() != 2 ) {
                 if( IsVerbose() ) {
                     if( IsError == false ) fprintf(stderr,"\n");

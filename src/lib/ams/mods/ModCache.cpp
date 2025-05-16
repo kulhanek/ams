@@ -1074,6 +1074,11 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
 {
     std::list<CSmallString> list;
     PrintDependOnModules(vout,module,list,recursive,0);
+    list.sort();
+    list.unique();
+    for(CSmallString dep : list){
+        vout << dep << endl;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -1143,6 +1148,68 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
             }
         }
 
+        p_dep = p_dep->GetNextSiblingElement("dep");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintModuleDependencies(CVerboseStr& vout, const CSmallString& module)
+{
+    vout << "# Module: " << module << endl;
+
+// parse module input --------------------------
+    CSmallString name;
+
+    if( (CModUtils::ParseModuleName(module,name) == false) || (module == NULL) ) {
+        vout << "# No module provided ... " << endl;
+        ES_TRACE_ERROR("module name is empty string");
+        return;
+    }
+
+// get module specification --------------------
+    CXMLElement* p_mele = ModCache.GetModule(name);
+    if( p_mele == NULL ) {
+        vout << "# No such module in the AMS database ... " << endl;
+        CSmallString error;
+        error << "module '" << name << "' does not have any record in AMS software database";
+        ES_TRACE_ERROR(error);
+        return;
+    }
+
+// list dependencies per module --------------------
+    PrintModuleDependencies(vout,p_mele);
+
+// list dependencies per builds --------------------
+    CXMLElement*  p_bele = p_mele->GetChildElementByPath("builds/build");
+    while( p_bele != NULL ) {
+        CSmallString bname,ver,arch,mode;
+        p_bele->GetAttribute("ver",ver);
+        p_bele->GetAttribute("arch",arch);
+        p_bele->GetAttribute("mode",mode);
+        bname << name << ":" << ver << ":" << arch << ":" << mode;
+
+        vout << "# Module build: " << bname << endl;
+
+        PrintModuleDependencies(vout,p_bele);
+        p_bele = p_bele->GetNextSiblingElement("build");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void CModCache::PrintModuleDependencies(CVerboseStr& vout, CXMLElement* p_dep_container)
+{
+// list dependencies
+    CXMLElement* p_dep = p_dep_container->GetChildElementByPath("deps/dep");
+    while( p_dep != NULL ) {
+
+        CSmallString name;
+        p_dep->GetAttribute("name",name);
+        CSmallString type;
+        p_dep->GetAttribute("type",type);
+
+        vout << "|<<- " << setw(8) << left << type << " " << name << endl;
         p_dep = p_dep->GetNextSiblingElement("dep");
     }
 }

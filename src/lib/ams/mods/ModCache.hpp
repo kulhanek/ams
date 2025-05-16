@@ -169,7 +169,7 @@ public:
     /// print system package dependencies
     void PrintDPKGDeps(CVerboseStr& vout);
 
-    /// print forward dependencies
+    /// print backward dependencies
     void PrintDependOnModules(CVerboseStr& vout, const CSmallString& module, bool reqursive);
 
     void PrintDependOnModules(CVerboseStr& vout, const CSmallString& module,
@@ -180,6 +180,11 @@ public:
                               const CSmallString& cname, CXMLElement* p_dep_container,
                               std::list<CSmallString>& list,
                               bool recursive, int level);
+
+    /// print forward dependencies
+    void PrintModuleDependencies(CVerboseStr& vout, const CSmallString& module);
+
+    void PrintModuleDependencies(CVerboseStr& vout, CXMLElement* p_dep_container);
 
     /// get number of modules
     int GetNumberOfModules(void);

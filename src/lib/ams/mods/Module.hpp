@@ -91,7 +91,7 @@ public:
     /// remove module
     EModuleError RemoveModule(CVerboseStr& vout,CSmallString module);
 
-    /// print module origins
+    /// print module origins - with fnmatch filters in module name
     void AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list);
 
     /// print module origins
