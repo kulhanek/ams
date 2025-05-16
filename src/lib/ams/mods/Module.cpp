@@ -448,11 +448,6 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
         return;
     }
 
-    if( std::find(DepList.begin(), DepList.end(), name) != DepList.end() ){
-        vout << "# Already processed ... " << endl;
-        return;
-    }
-
 // add module to dependency list to avoid cyclic dependency problems
     DepList.push_back(name);
 
