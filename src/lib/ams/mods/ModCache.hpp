@@ -80,6 +80,9 @@ public:
                             const CSmallString& arch,
                             const CSmallString& mode);
 
+    /// check if module/build exist
+    bool DoesItExist(const CSmallString& module);
+
     /// return default setup for the module
     static bool GetModuleDefaults(CXMLElement* p_mele,
                            CSmallString& ver, CSmallString& arch, CSmallString& mode);
