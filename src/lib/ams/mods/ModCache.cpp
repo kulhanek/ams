@@ -1209,7 +1209,7 @@ void CModCache::PrintModuleDependencies(CVerboseStr& vout, CXMLElement* p_dep_co
         CSmallString type;
         p_dep->GetAttribute("type",type);
 
-        vout << "  |-> " << setw(8) << left << type << " " << name << endl;
+        vout << "    |-> " << setw(8) << left << type << " " << name << endl;
         p_dep = p_dep->GetNextSiblingElement("dep");
     }
 }
