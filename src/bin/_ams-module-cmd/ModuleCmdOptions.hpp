@@ -80,6 +80,8 @@ public:
     "   <green>dpkg-deps</green>       list system package dependencies\n"
     "   <green>dependon</green>        list modules/builds, which depends on the provided module\n"
     "   <green>dependon-all</green>    list modules/builds, which depends on the provided module (recursive)\n"
+    "   <green>deps</green>            list modules/builds dependencies\n"
+    "   <green>deps-all</green>        list modules/builds dependencies (recursive)\n"
     CSO_PROG_ARGS_LONG_DESC_END
 
     CSO_PROG_VERS_BEGIN

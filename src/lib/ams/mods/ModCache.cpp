@@ -662,8 +662,6 @@ void CModCache::GetDPKGDeps(std::list<CSmallString>& list)
 
     CXMLElement* p_mele = p_cele->GetFirstChildElement("module");
     while( p_mele != NULL ) {
-        CSmallString name;
-        p_mele->GetAttribute("name",name);
         CXMLElement* p_dep = p_mele->GetChildElementByPath("builds/build/deps/dep");
         while( p_dep != NULL ) {
             CSmallString name;
@@ -1131,7 +1129,7 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
         CSmallString type;
         p_dep->GetAttribute("type",type);
 
-        if( (type == "pre") || (type == "sync") ){
+        if( (type == "pre") || (type == "post") || (type == "sync") ){
             if( CModUtils::AreNamesSamePartial(name,module) == true ){
                 // HIT
                 vout << "# ";

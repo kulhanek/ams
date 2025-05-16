@@ -423,19 +423,23 @@ void CModule::AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString mod
     }
 
     for( CSmallString mod : modules ){
-        AddAllOrigins(vout,mod,list,false);
+        DepList.clear();
+        AddAllOrigins(vout,mod,list);
     }
+
+    list.sort();
+    list.unique();
 }
 
 //------------------------------------------------------------------------------
 
-void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list, bool fordep)
+void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list)
 {
     vout << endl;
     vout << "# Module name: " << module << " (all origins)" << endl;
     vout << "# ==============================================================================" << endl;
 
-    // parse module input --------------------------
+// parse module input --------------------------
     CSmallString name,ver,arch,mode;
 
     if( (CModUtils::ParseModuleName(module,name,ver,arch,mode) == false) || (name == NULL) ) {
@@ -444,18 +448,15 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
         return;
     }
 
-    // clear dependency list if this module is not due to dependency roles
-    if( fordep == false ) DepList.clear();
-
     if( std::find(DepList.begin(), DepList.end(), name) != DepList.end() ){
         vout << "# Already processed ... " << endl;
         return;
     }
 
-    // add module to dependency list to avoid cyclic dependency problems
+// add module to dependency list to avoid cyclic dependency problems
     DepList.push_back(name);
 
-    // get module specification --------------------
+// get module specification --------------------
     CXMLElement* p_mele = ModCache.GetModule(name);
     if( p_mele == NULL ) {
         vout << "# No such module in the AMS database ... " << endl;
@@ -465,11 +466,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
         return;
     }
 
-    if( fordep == false ) {
-
-    }
-
-    // complete module specification ---------------
+// complete module specification ---------------
     if( CompleteModule(vout,p_mele,name,ver,arch,mode) == false ) {
         vout << "# Unable to complete module ... " << endl;
         return;
@@ -478,7 +475,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
     CSmallString build_name;
     build_name << name << ":" << ver << ":" << arch << ":" << mode;
 
-    // solve module dependencies -------------------
+// solve module dependencies -------------------
     CXMLElement* p_build = CModCache::GetBuild(p_mele,ver,arch,mode);
     if( p_build == NULL ) {
         vout << "# Unable to get the build: '" << build_name << "'" << endl;
@@ -488,14 +485,13 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
         return;
     }
 
-    // add origins - module
+// add origins - module
     CSmallString msource;
     p_mele->GetAttribute("source",msource);
     if( msource != NULL ) list.push_back(msource);
     vout << "# Module source : " << msource << endl;
 
-
-    // add origins - build
+// add origins - build
     CSmallString bsource;
     p_build->GetAttribute("source",bsource);
     if( bsource != NULL ) list.push_back(bsource);
@@ -510,7 +506,7 @@ void CModule::AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::l
         CSmallString type;
         p_dep->GetAttribute("type",type);
         if( (type == "pre") || (type == "post") || (type == "sync") ){
-            AddAllOrigins(vout,dname,list,true);
+            AddAllOrigins(vout,dname,list);
         }
         p_dep = p_dep->GetNextSiblingElement("dep");
     }

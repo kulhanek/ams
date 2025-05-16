@@ -95,7 +95,7 @@ public:
     void AddAllOriginsWithFilters(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list);
 
     /// print module origins
-    void AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list, bool fordep=false);
+    void AddAllOrigins(CVerboseStr& vout, const CSmallString module, std::list<CFileName>& list);
 
     /// set print level
     void SetPrintLevel(EModulePrintLevel set);
