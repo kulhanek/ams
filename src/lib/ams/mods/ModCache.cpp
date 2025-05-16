@@ -1074,8 +1074,11 @@ void CModCache::PrintDependOnModules(CVerboseStr& vout, const CSmallString& modu
 {
     std::list<CSmallString> list;
     PrintDependOnModules(vout,module,list,recursive,0);
+
     list.sort();
     list.unique();
+
+    vout << endl;
     for(CSmallString dep : list){
         vout << dep << endl;
     }

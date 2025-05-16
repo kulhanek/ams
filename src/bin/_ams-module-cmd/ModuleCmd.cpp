@@ -336,6 +336,7 @@ bool CModuleCmd::Run(void)
     else if( Options.GetArgAction() == "dependon" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
+        vout << endl;
         ModCache.PrintDependOnModules(vout,Options.GetProgArg(1),false);
         return(true);
     }
@@ -343,6 +344,7 @@ bool CModuleCmd::Run(void)
     else if( Options.GetArgAction() == "dependon-all" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
+        vout << endl;
         ModCache.PrintDependOnModules(vout,Options.GetProgArg(1),true);
         return(true);
     }
@@ -350,6 +352,7 @@ bool CModuleCmd::Run(void)
     else if( Options.GetArgAction() == "deps" ) {
         ModuleController.LoadBundles(EMBC_SMALL);
         ModuleController.MergeBundles();
+        vout << endl;
         ModCache.PrintModuleDependencies(vout,Options.GetProgArg(1));
         return(true);
     }
