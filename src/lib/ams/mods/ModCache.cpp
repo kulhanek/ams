@@ -1192,9 +1192,11 @@ void CModCache::PrintModuleDependencies(CVerboseStr& vout, const CSmallString& m
         p_bele->GetAttribute("mode",mode);
         bname << name << ":" << ver << ":" << arch << ":" << mode;
 
-        vout << "# Module build: " << bname << endl;
+        if( CModUtils::AreNamesSamePartial(bname,module) == true ){
+            vout << "# Module build: " << bname << endl;
+            PrintModuleDependencies(vout,p_bele);
+        }
 
-        PrintModuleDependencies(vout,p_bele);
         p_bele = p_bele->GetNextSiblingElement("build");
     }
 }
