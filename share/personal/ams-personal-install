@@ -153,8 +153,9 @@ function sync_softrepo(){
                 "$AMS_SRC_HOST:$SOFTREPO/$AMS_PACKAGE_DIR/" "$SOFTREPO/$AMS_PACKAGE_DIR/" >> $LOG_FILE 2>&1
         if [ $? -ne 0 ]; then
             echo "             [FAILED]"
-            show_log_error
-            exit 1
+# skip error and continue
+#            show_log_error
+#            exit 1
         else
             echo "             [SYNC]"
         fi

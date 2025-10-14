@@ -157,7 +157,8 @@ void CModBundleIndex::Diff(CModBundleIndex& old_index, CVerboseStr& vout,
 
         while( it != ie ){
             CSmallString build = it->first;
-            if( Hashes.count(build) == 0 ){
+            std::string  hash  = it->second;
+            if( (Hashes.count(build) == 0) || (hash == "0000000000000000000000000000000000000000") ){
                 vout << "- " << old_index.Hashes[build] << " " << left << setw(50) << build << " " << old_index.Paths[build] <<  endl;
             }
             it++;
@@ -175,7 +176,7 @@ void CModBundleIndex::Diff(CModBundleIndex& old_index, CVerboseStr& vout,
                 vout << "+ " << Hashes[build] << " " << left << setw(50) << build << " " << Paths[build] <<  endl;
             }
         } else {
-            if( Hashes[build] != old_index.Hashes[build] ){
+            if( (Hashes[build] != old_index.Hashes[build]) && (old_index.Hashes[build] != "0000000000000000000000000000000000000000") ){
                 vout << "M " << Hashes[build] << " " << left << setw(50) << build << " " << Paths[build] <<  endl;
             }
         }

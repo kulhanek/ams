@@ -258,6 +258,6 @@ void SHA1::read(std::istream &is, std::string &s, int max)
     char* sbuf = new char[max];
     is.read(sbuf, max);
     s.assign(sbuf, is.gcount());
-    delete sbuf;
+    delete[] sbuf;
 }
  
