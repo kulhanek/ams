@@ -40,39 +40,44 @@ function print_usage()
 # --------------------------------------
 
 function get_origins() {
-    echo "" | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 1) Getting module remote origins ..." | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "" | tee -a $LOG_FILE
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 1) Getting module remote origins ..."
+    echo "#-------------------------------------------------------------------------------"
+    echo ""
 
     rm -rf "$MODULE_ORIGINS"
 
     set -o pipefail
+    rm -f ${LOG_FILE}.allorigins
 
     for MODULE in "$@"; do
-        echo ">> $MODULE" | tee -a $LOG_FILE
+        echo ">> $MODULE"
         ssh -o "ControlMaster auto" -o "ControlPath ~/.ssh/controlmasters_%r@%h:%p" -x $AMS_SRC_HOST \
-            amsmodule allorigins "$MODULE" 2> ${LOG_FILE}.p | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
-        if [[ $? -ne 0 ]]; then
-            cat ${LOG_FILE}.p | tee -a $LOG_FILE
-            rm -f ${LOG_FILE}.p
-            echo "   >>> ERROR: Unable to determine module '"$MODULE"' origins!"
-            exit 1
-        fi
+            amsmodule allorigins "$MODULE" 2>> ${LOG_FILE}.allorigins | tee -a "$MODULE_ORIGINS"
     done
+
+    if [[ $(cat ${LOG_FILE}.allorigins | wc -l) -gt 1 ]]; then
+        echo ""
+        echo "   >>> ERROR: Some problem with remote origins ..."
+        echo ""
+        cat ${LOG_FILE}.allorigins
+        echo ""
+    fi
+
+    rm -f ${LOG_FILE}.allorigins
 }
 
 # --------------------------------------
 
 function download_origins() {
 
-    echo "" | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 2) Downloading remote origins ..." | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "" | tee -a $LOG_FILE
-    echo "# Number of files : `cat $MODULE_ORIGINS | wc -l`" | tee -a $LOG_FILE
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 2) Downloading remote origins ..."
+    echo "#-------------------------------------------------------------------------------"
+    echo ""
+    echo "# Number of files : `cat $MODULE_ORIGINS | wc -l`"
     echo ""
 
     mkdir -p $SOFTREPO/_ams_bundle/blds
@@ -91,11 +96,11 @@ function download_origins() {
 
 function local_index(){
 
-    echo "" | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 3) Updating local index ..." | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "" | tee -a $LOG_FILE
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 3) Updating local index ..."
+    echo "#-------------------------------------------------------------------------------"
+    echo ""
 
     cd $SOFTREPO
     ams-bundle rebuild
@@ -106,18 +111,18 @@ function local_index(){
 
 function remote_index(){
 
-    echo "" | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "# 4) Getting remote index ..." | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo ""
+    echo "#-------------------------------------------------------------------------------"
+    echo "# 4) Getting remote index ..."
+    echo "#-------------------------------------------------------------------------------"
 
     cd $SOFTREPO
     ams-bundle sources - | \
                ssh -x $AMS_SRC_HOST ams-index-create --personal builds - $SOFTREPO - \
                     > $SOFTREPO/_ams_bundle/index.old
 
-    echo "# Changed builds ..." | tee -a $LOG_FILE
-    ams-bundle --silent index diff | tee -a $LOG_FILE
+    echo "# Changed builds ..."
+    ams-bundle --silent index diff
     if [ $? -ne 0 ]; then exit 1; fi;
 
     NCHANGES="`ams-bundle --silent index diff | wc -l`"
@@ -136,6 +141,8 @@ function sync_softrepo(){
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
     echo "# 5) Syncing builds ..." | tee -a $LOG_FILE
     echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+
+    cd $SOFTREPO || exit 1
 
     ams-bundle --silent --skipremoved index diff | while read STATUS SHA1 BUILD AMS_PACKAGE_DIR; do
 
@@ -181,9 +188,9 @@ function sync_softrepo(){
 function print_bottom()
 {
     echo
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
-    echo "#                      *** End of modules/builds installation ***               " | tee -a $LOG_FILE
-    echo "#-------------------------------------------------------------------------------" | tee -a $LOG_FILE
+    echo "#-------------------------------------------------------------------------------"
+    echo "#                      *** End of modules/builds installation ***               "
+    echo "#-------------------------------------------------------------------------------"
 }
 
 # ------------------------------------------------------------------------------
@@ -257,15 +264,15 @@ echo ">>> Log file: $LOG_FILE"
 
 MODULE_ORIGINS="$AMS_ROOT_V9/var/personal/module.origins"
 
-get_origins "$@"
-download_origins
-local_index
-remote_index
+get_origins "$@"    | tee -a $LOG_FILE
+download_origins    | tee -a $LOG_FILE
+local_index         | tee -a $LOG_FILE
+remote_index        | tee -a $LOG_FILE
 sync_softrepo
 
 rm -f "$MODULE_ORIGINS"
 
-print_bottom
+print_bottom        | tee -a $LOG_FILE
 
 echo ""
 echo "END: Log file is in: $LOG_FILE"
