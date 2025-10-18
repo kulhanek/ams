@@ -36,7 +36,7 @@ function get_origins() {
 
     for MODULE in "$@"; do
         echo ">> $MODULE" | tee -a $LOG_FILE
-        amsmodule allorigins "$MODULE" 2>&1 | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
+        amsmodule allorigins "$MODULE" | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
     done
 }
 

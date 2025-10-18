@@ -48,10 +48,18 @@ function get_origins() {
 
     rm -rf "$MODULE_ORIGINS"
 
+    set -o pipefail
+
     for MODULE in "$@"; do
         echo ">> $MODULE" | tee -a $LOG_FILE
         ssh -o "ControlMaster auto" -o "ControlPath ~/.ssh/controlmasters_%r@%h:%p" -x $AMS_SRC_HOST \
-            amsmodule allorigins "$MODULE" 2>&1 | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
+            amsmodule allorigins "$MODULE" 2> ${LOG_FILE}.p | tee -a "$MODULE_ORIGINS" | tee -a $LOG_FILE
+        if [[ $? -ne 0 ]]; then
+            cat ${LOG_FILE}.p | tee -a $LOG_FILE
+            rm -f ${LOG_FILE}.p
+            echo "   >>> ERROR: Unable to determine module '"$MODULE"' origins!"
+            exit 1
+        fi
     done
 }
 
