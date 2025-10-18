@@ -81,6 +81,9 @@ public:
                                 const CSmallString& value,
                                 const CSmallString& delimiter);
 
+    /// print text
+    void PrintText(const CSmallString& text);
+
     /// set umask
     void SetUMask(const CSmallString& umask);
 

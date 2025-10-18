@@ -241,7 +241,8 @@ bool CModuleCmd::Run(void)
             origins.sort();
             origins.unique();
             for( CFileName origin : origins ){
-                vout << origin << endl;
+                ShellProcessor.PrintText(origin);
+                //vout << origin << endl;
             }
             return(true);
         }

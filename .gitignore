@@ -10,6 +10,9 @@ Makefile
 /include
 /test
 /etc
+/etc_
 AMS-8.creator.user
 /share/scripts/ams-personal
 INIT_ME
+.qtc_clangd/
+*.autosave

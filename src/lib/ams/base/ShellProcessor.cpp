@@ -455,13 +455,26 @@ void CShellProcessor::RemoveValueFromVariable(const CSmallString& name,
         LOGIC_ERROR("p_ele is NULL");
     }
 
-    // and create new variable
 
     CXMLElement* p_sele = p_ele->CreateChildElement("remove");
-
     p_sele->SetAttribute("name",name);
     p_sele->SetAttribute("value",value);
     p_sele->SetAttribute("delimiter",delimiter);
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CShellProcessor::PrintText(const CSmallString& text)
+{
+    CXMLElement* p_ele = ShellActions.GetFirstChildElement("actions");
+    if( p_ele == NULL ){
+        LOGIC_ERROR("p_ele is NULL");
+    }
+
+    CXMLElement* p_sele = p_ele->CreateChildElement("echo");
+    p_sele->SetAttribute("text",text);
 }
 
 //==============================================================================
@@ -784,6 +797,13 @@ void CShellProcessor::BuildEnvironment(void)
             printf("export %s=`$AMS_ROOT_V9/bin/_ams-module-var remove \"$%s\" \"%s\" \"%s\"`;\n",
                    (const char*)name,(const char*)name,
                    (const char*)delimiter,(const char*)value);
+        }
+
+        if( p_sele->GetName() == "echo" ) {
+            CSmallString text;
+            p_sele->GetAttribute("text",text);
+            if( text == NULL ) text = "";
+            printf("echo \"%s\";\n",(const char*)text);
         }
 
         if( p_sele->GetName() == "script" ) {
