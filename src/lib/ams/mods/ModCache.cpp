@@ -31,12 +31,13 @@
 #include <ModUtils.hpp>
 #include <User.hpp>
 #include <iomanip>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 //------------------------------------------------------------------------------
 
 using namespace std;
-//using namespace boost;
-//using namespace boost::algorithm;
+using namespace boost;
 
 //------------------------------------------------------------------------------
 
@@ -275,7 +276,7 @@ CXMLElement* CModCache::GetCacheElement(void)
 
 //------------------------------------------------------------------------------
 
-CXMLElement* CModCache::GetModule(const CSmallString& name,bool create)
+CXMLElement* CModCache::GetModule(const CSmallString& name,bool create,bool aliases)
 {
     CXMLElement* p_cele = Cache.GetFirstChildElement("cache");
     if( p_cele == NULL ){
@@ -289,10 +290,23 @@ CXMLElement* CModCache::GetModule(const CSmallString& name,bool create)
         CSmallString lname;
         p_mele->GetAttribute("name",lname);
         if( lname == modname ) return(p_mele);
+
+        if( aliases ){
+            std::string laliases;
+            p_mele->GetAttribute("aliases",laliases);
+            if( ! laliases.empty() ){
+                std::vector<std::string> list;
+                split(list,laliases,is_any_of(","),boost::token_compress_on);
+                if( std::find(list.begin(), list.end(), std::string(name)) != list.end()) {
+                    return(p_mele);
+                }
+            }
+        }
+
         p_mele = p_mele->GetNextSiblingElement("module");
     }
 
-    if( create ){
+    if( create && (aliases == false) ){
         p_mele = p_cele->CreateChildElement("module");
         p_mele->SetAttribute("name",name);
         return(p_mele);

@@ -69,7 +69,7 @@ public:
     CXMLElement* GetCacheElement(void);
 
     /// get module element
-    CXMLElement* GetModule(const CSmallString& name,bool create=false);
+    CXMLElement* GetModule(const CSmallString& name,bool create=false,bool aliases=false);
 
     /// create module element
     CXMLElement* CreateModule(const CSmallString& name);

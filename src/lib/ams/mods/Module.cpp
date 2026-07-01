@@ -123,7 +123,7 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
     }
 
     // get module specification --------------------
-    CXMLElement* p_module = ModCache.GetModule(name);
+    CXMLElement* p_module = ModCache.GetModule(name,false,true);
 
     if( p_module == NULL ) {
         CSmallString error;
@@ -226,6 +226,11 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
                  << " (" << GetMaintainerEMail(p_module) << ")"
                  << " | Bundle: " << GetBundleName(p_module) << endl;
         }
+        CSmallString laliases;
+        p_module->GetAttribute("aliases",laliases);
+        if( laliases != NULL ){
+            vout << "  Module aliases     : " << laliases <<  endl;
+        }
         vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( (CModCache::CanModuleBeExported(p_module) == true) && (do_not_export == false) ) {
             vout << "  Exported module    : " << exported_module << endl;
@@ -295,7 +300,7 @@ EModuleError CModule::RemoveModule(CVerboseStr& vout,CSmallString module)
     }
 
     // get module specification --------------------
-    CXMLElement* p_module = ModCache.GetModule(name);
+    CXMLElement* p_module = ModCache.GetModule(name,false,true);
 
     if( p_module == NULL ) {
         CSmallString error;
@@ -1541,6 +1546,11 @@ bool CModule::PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name)
         vout << "  Module maintainer  : " << GetMaintainerName(p_module)
              << " (" << GetMaintainerEMail(p_module) << ")"
              << " | Bundle: " << GetBundleName(p_module) << endl;
+    }
+    CSmallString laliases;
+    p_module->GetAttribute("aliases",laliases);
+    if( laliases != NULL ){
+        vout << "  Module aliases     : " << laliases <<  endl;
     }
     vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
