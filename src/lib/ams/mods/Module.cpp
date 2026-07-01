@@ -229,7 +229,9 @@ EModuleError CModule::AddModule(CVerboseStr& vout,CSmallString module,bool forde
         CSmallString laliases;
         p_module->GetAttribute("aliases",laliases);
         if( laliases != NULL ){
-            vout << "  Module aliases     : " << laliases <<  endl;
+            CSmallString lname;
+            p_module->GetAttribute("name",lname);
+            vout << "  Module aliases     : " << laliases << " -> " << lname <<  endl;
         }
         vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
         if( (CModCache::CanModuleBeExported(p_module) == true) && (do_not_export == false) ) {
@@ -1550,7 +1552,9 @@ bool CModule::PrintModuleInfo(CVerboseStr& vout,const CSmallString& mod_name)
     CSmallString laliases;
     p_module->GetAttribute("aliases",laliases);
     if( laliases != NULL ){
-        vout << "  Module aliases     : " << laliases <<  endl;
+        CSmallString lname;
+        p_module->GetAttribute("name",lname);
+        vout << "  Module aliases     : " << laliases << " -> " << lname <<  endl;
     }
     vout <<     "# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
